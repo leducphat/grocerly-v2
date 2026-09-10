@@ -44,12 +44,13 @@ dòng phải khớp với một commit có thật.
 |---|---|---|---|---|---|---|
 | 10/09/2026 | Claude Code (Opus 5) | Đọc rubric KLTN; rà soát repo đối chiếu rubric; dựng khung tài liệu theo Spec Driven Development | "Đọc project + báo cáo TLCN để nắm context"; "đọc rubric mới nhất của KLTN"; "theo Spec Driven Development, tạo CLAUDE.md, AGENTS.md, docs/ chứa PLAN/DECISIONS/PRD + weekly_report" | **Toàn bộ** nội dung `AGENTS.md`, `CLAUDE.md`, `docs/SRS.md`, `docs/PLAN.md`, `docs/DECISIONS.md` (D-001→D-010), `docs/weekly_report/README.md` + `_TEMPLATE.md`, và chính file này. Xóa `.github/copilot-instructions.md`. | SV định hướng và bác bỏ nhiều đề xuất của AI trong phiên (xem §2), chưa tự viết lại nội dung | *(chưa commit)* |
 | 10/09/2026 | Claude Code (Opus 5) | Điều chỉnh backlog `PLAN.md`; hỏi rubric về P-03 (bản cam kết) và P-06 (PR khi làm một mình) | "sửa P-01 là Khung specs; P-03 là gì, ở đâu trong rubric; P-06 làm một mình có cần branch rồi PR không"; "gộp viết AC vào rà soát đặc tả TLCN, tách SRS/SDD ngay từ đầu, khảo sát 2–3 người không chắc nổi"; "ghép P-22 vào P-25" | Sửa `PLAN.md` (P-01, P-03, P-06, thêm P-07, gộp P-20 vào P-23, gộp P-22 vào P-25, bỏ P-27); thêm D-011, D-012, D-013 vào `DECISIONS.md`; sửa ghi chú ranh giới ở đầu `SRS.md`. AI đọc nguyên văn rubric trên Google Drive để trích dẫn; AI đề xuất phương án ghép khảo sát vào thực nghiệm | SV quyết định: vẫn chia nhánh + tự PR; gộp AC vào rà soát; tách SRS/SDD sớm (bác bỏ D-010 của AI); chọn ghép khảo sát vào P-25 | *(chưa commit)* |
+| 10/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Commit, push nhánh docs đầu tiên; đưa `.claude/` ra khỏi repo | "checkout qua branch mới để commit và push rồi tạo PR, branch mới nên tên gì cho chuẩn convention"; "vậy chắc .claude nên nằm trong gitignore" | Đặt tên nhánh `docs/kltn-specs-framework`; tạo 2 commit docs từ `main` qua git worktree; bỏ commit cài ECC chưa push; sửa `.gitignore`; thêm D-014. AI tự sửa lỗi commit message (xem §2 #9) | SV chọn ignore `.claude/` thay vì commit ECC vào repo | `1ad9305`, `43c1a0a` |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **8**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **9**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -61,8 +62,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 6 | 10/09/2026 | AI đặt tên P-01 là "Khung SDD" trong khi chính AI dùng "SDD" cho tài liệu thiết kế `SDD.md` (D-010) | AI dùng một từ viết tắt cho hai nghĩa (Spec Driven Development và Software Design Document) mà không kiểm tra xung đột trong cùng bộ tài liệu | SV | *(chưa commit)* — đổi thành "Khung specs" |
 | 7 | 10/09/2026 | AI chốt hoãn tách SRS/SDD tới sau P-24 (D-010) | AI chỉ cân nhắc công sức tách file, bỏ qua việc tách muộn làm lịch sử Git của phần thiết kế bị cắt ở ngày tách — mất dấu vết quá trình rà soát, vốn là minh chứng rubric chấm | SV | *(chưa commit)* — thay bằng D-011 |
 | 8 | 10/09/2026 | AI tách "viết acceptance criteria" (P-20) và "rà soát đặc tả TLCN" (P-23) thành hai việc riêng | AI chia việc theo loại sản phẩm đầu ra thay vì theo cách làm thực tế: cả hai đều phải đi qua cùng 26 use case, tách ra là rà hai lượt | SV | *(chưa commit)* — gộp vào P-23 |
+| 9 | 10/09/2026 | AI tạo 2 commit mất dòng tiêu đề `docs: ...` trong commit message | AI nối heredoc với `&& \` trong bash, khiến dòng đầu của heredoc bị hiểu thành một lệnh riêng (`docs:: command not found`) thay vì thành nội dung message | AI (tự phát hiện qua output lỗi, làm lại trước khi push) | `1ad9305`, `43c1a0a` (bản đúng) |
 
-**Ghi chú khi bảo vệ:** bảy trong tám mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** bảy trong chín mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 

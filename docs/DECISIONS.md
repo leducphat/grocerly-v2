@@ -439,6 +439,42 @@ vấn ở P-25 đóng vai trò *kiểm chứng lại* KPI đó. Khi bảo vệ, 
 
 ---
 
+## D-014 · Không đưa công cụ agent (`.claude/`) vào repository
+
+- **Ngày:** 10/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Bộ công cụ ECC (everything-claude-code) cho Claude Code được cài vào
+`.claude/` của repo: 818 file, khoảng 165.000 dòng (agent, skill, rule, hook,
+khoảng 200 script). Nó từng được commit ở một nhánh local nhưng chưa push. Đây là
+môi trường làm việc cá nhân của sinh viên, không phải một phần của sản phẩm.
+
+**Phương án đã cân nhắc**
+
+1. *Commit `.claude/` vào repo* — ai clone về cũng có cùng bộ công cụ. Nhưng
+   repo là hồ sơ minh chứng số 4 (rubric Mục 8): linter và phân tích tĩnh (TC2.4)
+   sẽ quét cả khối script bên thứ ba này, làm sai lệch tỉ lệ lỗi lint và tỉ lệ
+   trùng lặp; và hội đồng có thể chọn ngẫu nhiên một file trong đó để hỏi — nội
+   dung không giải thích được bị tính là đạo văn (Mục 6).
+2. *Ignore `.claude/` trong repo* — công cụ vẫn nằm trên máy và vẫn chạy, repo
+   chỉ chứa sản phẩm và tài liệu của đồ án.
+3. *Cài ECC ở cấp người dùng (`~/.claude`)* — sạch nhất, nhưng phải cài lại bộ
+   công cụ và sửa đường dẫn hook; không cần thiết khi (2) đã đạt mục tiêu.
+
+**Quyết định.** Chọn (2). Thêm `.claude/` vào `.gitignore`; bỏ commit cài ECC chưa
+push, giữ nguyên file trên đĩa.
+
+**Lý do.** Mọi thứ nằm trong repo đều là thứ sinh viên phải bảo vệ được. Công cụ
+hỗ trợ làm việc thì cần *kê khai*, không cần *nộp*: việc dùng Claude Code và ECC
+được ghi trong `AI_USAGE_LOG.md`, còn các quy ước thật sự ràng buộc dự án đã nằm
+trong `AGENTS.md`/`CLAUDE.md` — hai file này vẫn được commit.
+
+**Hệ quả.** Các rule trong `.claude/rules/` không được version bằng Git; quy ước
+nào cần ràng buộc dự án thì phải đưa vào `AGENTS.md`/`CLAUDE.md`. Máy khác clone
+repo về sẽ không có bộ công cụ này — chấp nhận được vì đồ án chỉ có một người làm.
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
