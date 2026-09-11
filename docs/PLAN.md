@@ -7,7 +7,7 @@ chờ tới cuối kỳ.
 |---|---|
 | Cập nhật lần cuối | 10/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) |
-| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-012 (nhánh + PR khi làm một mình), D-013 (gộp khảo sát vào thực nghiệm) |
+| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm) |
 
 ---
 
@@ -96,7 +96,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5) |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
 | P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Chưa bắt đầu | Chạy suốt 15 tuần |
-| P-06 | Chuyển sang làm việc theo nhánh + tự tạo Pull Request (làm một mình) | TC2.4 | Chưa bắt đầu | Theo D-012. Mức 5 cần ≥ 90% thay đổi qua PR có review. Cách hiểu "review" cho đồ án một người phải ghi vào bản cam kết P-03 |
+| P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
 | P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | Chưa bắt đầu | Theo D-011 (thay P-27 cũ). Làm trước P-23 và P-24 để mỗi việc chỉ đụng tới một file |
 
 ### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
@@ -143,7 +143,7 @@ Mỗi tuần thêm một dòng. Chi tiết đặt trong [`weekly_report/`](weekl
 
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
-| Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013) |
+| Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016) |
 
 ---
 
