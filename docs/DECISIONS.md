@@ -475,6 +475,43 @@ repo về sẽ không có bộ công cụ này — chấp nhận được vì đ
 
 ---
 
+## D-015 · Grocerly là mô hình một nhà bán, không phải marketplace nhiều người bán
+
+- **Ngày:** 11/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Đặc tả TLCN mô tả tác nhân A3 là "Người bán" vận hành *gian hàng
+riêng* với thống kê riêng, và `README.md` quảng cáo "Multi-Vendor System". Mã
+nguồn không làm như vậy: không có vai trò người bán riêng; mọi tài khoản
+`is_staff` vào `/useradmin/` đều thấy toàn bộ sản phẩm, đơn hàng và doanh thu.
+Model `Vendor` chỉ là hồ sơ nhà cung cấp (tên, ảnh, địa chỉ, liên hệ) gắn vào sản
+phẩm. Khi soạn bản cam kết P-03 phải chốt theo một phía (chỗ lệch L-1).
+
+**Phương án đã cân nhắc**
+
+1. *Làm marketplace đúng như đặc tả TLCN* — thêm vai trò người bán, lọc sản phẩm/
+   đơn hàng/doanh thu theo người bán, đăng ký gian hàng. Đây là tính năng mới đụng
+   tới phân quyền và mọi truy vấn ở `useradmin` — ngoài phạm vi KLTN (D-008).
+2. *Giữ mô hình một nhà bán, sửa đặc tả cho khớp mã nguồn* — một cửa hàng bán hàng
+   của nhiều nhà cung cấp; A3 là nhân viên của cửa hàng đó.
+
+**Quyết định.** Chọn (2).
+
+**Lý do.** Đây là mô hình mã nguồn đang chạy thật, và đúng với bài toán đề tài
+đặt ra (một cửa hàng thực phẩm cần công cụ bán online + trợ lý AI). Sửa đặc tả
+khiến hội đồng đối chiếu thấy khớp; làm marketplace thì tốn công cho một tính năng
+không ai yêu cầu, trong khi các gate G5/G6/G7 vẫn đang chặn điểm.
+
+**Hệ quả.**
+- `SRS.md`: A3 đổi thành *Nhân viên cửa hàng*; các chỗ "người bán / gian hàng" đổi
+  thành "nhân viên / cửa hàng". Mã yêu cầu `FR-V-xx` giữ nguyên để không gãy truy vết.
+- `README.md` bỏ mô tả "Multi-Vendor".
+- "Nhà cung cấp" (`Vendor`) giữ nguyên nghĩa là nguồn hàng, không phải tài khoản.
+  Trường `Vendor.user` là phần sót lại từ template gốc, chưa có vai trò nghiệp vụ.
+- Marketplace đưa vào mục "Các hướng phát triển mở rộng".
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
