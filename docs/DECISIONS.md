@@ -372,7 +372,7 @@ một dòng vào `PLAN.md` §6.
 ## D-012 · Làm một mình vẫn làm việc theo nhánh và tự tạo Pull Request
 
 - **Ngày:** 10/09/2026
-- **Trạng thái:** Đã chốt
+- **Trạng thái:** ~~Đã chốt~~ → **Thay thế bởi D-016** (11/09/2026)
 
 **Bối cảnh.** KLTN do một sinh viên thực hiện. Rubric TC2.4 Mức 5 yêu cầu
 *"≥ 90% thay đổi đi qua Pull Request có review"* (Mức 4: ≥ 60%, Mức 3: ≥ 30%), và
@@ -509,6 +509,52 @@ không ai yêu cầu, trong khi các gate G5/G6/G7 vẫn đang chặn điểm.
 - "Nhà cung cấp" (`Vendor`) giữ nguyên nghĩa là nguồn hàng, không phải tài khoản.
   Trường `Vendor.user` là phần sót lại từ template gốc, chưa có vai trò nghiệp vụ.
 - Marketplace đưa vào mục "Các hướng phát triển mở rộng".
+
+---
+
+## D-016 · Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request
+
+- **Ngày:** 11/09/2026
+- **Trạng thái:** Đã chốt — *thay thế D-012*
+
+**Bối cảnh.** D-012 chọn mỗi việc P-xx một nhánh riêng tách từ `main`. Sau hai PR
+đầu tiên, cách này lộ hai vấn đề. Một: mỗi việc nhỏ đều phải tạo nhánh, PR, merge,
+xóa nhánh — tốn công so với một đồ án một người. Hai: thực tế công việc không chia
+gọn theo P-xx; nhánh `docs/product-commitment` (PR #2) cuối cùng chứa ba việc khác
+nhau là D-015, bản cam kết P-03 và đề cương KLTN, nên tên nhánh không còn đúng với
+nội dung.
+
+**Phương án đã cân nhắc**
+
+1. *Giữ D-012* — mỗi PR gọn một việc, dễ truy vết; nhưng tốn công, và như PR #2
+   cho thấy, nhánh vẫn trôi khỏi phạm vi ban đầu.
+2. *Commit thẳng lên `main`* — nhanh nhất, nhưng mất tỉ lệ thay đổi qua PR mà
+   TC2.4 chấm (Mức 3 trở xuống), và CI không có chỗ chạy trước khi vào `main`.
+3. *Một nhánh `develop` sống lâu dài* — mọi việc commit trên `develop`, định kỳ mở
+   PR `develop` → `main`.
+4. *Git Flow đầy đủ* — nhánh tính năng tách từ `develop` rồi mới lên `main`; còn
+   nhiều bước hơn cả D-012.
+
+**Quyết định.** Chọn (3). Mọi thay đổi commit trên `develop`; `main` chỉ nhận thay
+đổi qua PR từ `develop`, merge bằng *merge commit* (không squash/rebase).
+
+**Lý do.** Mọi commit vào `main` vẫn đi qua PR, nên tỉ lệ thay đổi qua PR mà TC2.4
+đo vẫn là 100%; CI vẫn có chỗ chạy trước khi vào `main`. Đổi lại chỉ còn một nhánh
+phải quản lý. Merge commit giữ nguyên hash của từng commit — cần thiết vì
+`AI_USAGE_LOG.md` đối chiếu từng phiên với hash commit.
+
+Đánh đổi là mỗi PR sẽ to hơn và gồm nhiều việc, khó review hơn. Khắc phục bằng
+cách merge đều đặn (xem Hệ quả) để PR không phình ra.
+
+**Hệ quả.**
+- Nhánh `develop` tạo từ `main` ngày 11/09/2026.
+- Mở PR `develop` → `main` **ít nhất mỗi tuần một lần**; mô tả PR liệt kê các việc
+  P-xx và quyết định có trong đó.
+- Cách hiểu "review" cho đồ án một người giữ nguyên như D-012: CI xanh, checklist
+  tự review, một lượt review bằng AI đăng thành comment — áp dụng cho từng PR
+  `develop` → `main`. Ghi vào bản cam kết P-03.
+- Khi có CI (P-10): bật branch protection cho `main` (bắt buộc qua PR, bắt buộc CI
+  xanh); `develop` không cần khóa.
 
 ---
 

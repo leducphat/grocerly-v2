@@ -152,7 +152,8 @@ Sẽ bổ sung trước khi trình ký. Khung dự kiến:
 - **Metric kỹ thuật** theo rubric Mục 5 — độ phủ test, số chặng CI/CD, số lần
   deploy, tỉ lệ build xanh, lỗi lint, secret lộ, người dùng thực nghiệm, SUS.
   Rubric cho phép điều chỉnh ngưỡng tại bước này.
-- **Cách hiểu "Pull Request có review" cho đồ án một người** (D-012).
+- **Cách hiểu "Pull Request có review" cho đồ án một người** (D-016, giữ nguyên
+  cách hiểu của D-012).
 - **Cách lấy ý kiến bên liên quan** gộp vào thực nghiệm người dùng (D-013).
 
 ---
