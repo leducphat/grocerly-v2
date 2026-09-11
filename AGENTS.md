@@ -118,7 +118,8 @@ Trọng tâm là **làm chắc phần cốt lõi đã có**, không chạy theo 
 - Sửa các chỗ sai/lỗi thời trong đặc tả TLCN.
 
 Các ý tưởng mở rộng (tìm kiếm full-text, live chat thời gian thực, gợi ý bằng
-Machine Learning, mobile app) **không thuộc phạm vi KLTN**; chúng thuộc mục "Các
+Machine Learning, mobile app, mô hình nhiều người bán — D-015) **không thuộc phạm
+vi KLTN**; chúng thuộc mục "Các
 hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt tay làm chúng.
 
 ---
@@ -133,7 +134,7 @@ grocerly-ecom/
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
     ├── core/                 # catalog, giỏ hàng, đơn hàng, checkout, VNPay, đánh giá
     ├── userauths/            # User tùy biến (đăng nhập bằng email), Profile, ContactUs
-    ├── useradmin/            # dashboard người bán/nhân viên (khác Django admin)
+    ├── useradmin/            # dashboard nhân viên cửa hàng (khác Django admin)
     ├── store_api/            # DRF endpoints + chat AI Gemini  (/api/v1/)
     ├── templates/            # core/, userauths/, useradmin/, partials/
     ├── static/, media/, locale/   # assets, file upload, bản dịch vi+en

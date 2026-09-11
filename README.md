@@ -2,7 +2,7 @@
 
 ![Grocerly Logo](https://grocerly-ecom.onrender.com/static/assets/imgs/theme/logo.png)
 
-Grocerly is a fully functional, multi-vendor e-commerce web application designed to provide a seamless shopping experience. Built with Python and Django, this platform supports dynamic product management, user authentication, a comprehensive shopping cart system, secure vendor dashboards, and an AI-powered shopping assistant.
+Grocerly is a single-store grocery e-commerce web application designed to provide a seamless shopping experience. Built with Python and Django, this platform supports dynamic product management, user authentication, a comprehensive shopping cart system, a staff dashboard, and an AI-powered shopping assistant.
 
 ## 🌐 Live Demo
 **Check out the live deployment here:** [https://grocerly-ecom.onrender.com](https://grocerly-ecom.onrender.com/)
@@ -15,7 +15,7 @@ Grocerly is a fully functional, multi-vendor e-commerce web application designed
 *   **VNPay Payment Gateway**: Secure online checkout process with VNPay integration for fast and reliable payments.
 *   **Dynamic AJAX Filtering**: Real-time product filtering by categories, tags, vendors, and price slider without reloading the page.
 *   **Multilingual Support (i18n)**: Fully supports English and Vietnamese, with smart middleware ensuring the preferred default language.
-*   **Multi-Vendor System**: Vendors can register, upload products, manage inventory, and track their sales via a dedicated dashboard.
+*   **Store Staff Dashboard**: Store staff manage products, inventory, orders, and sales in a dedicated dashboard. Grocerly is a single-seller store; "vendors" are the suppliers whose products the store sells, not seller accounts.
 *   **Dynamic Shopping Cart**: Real-time cart updates, session-based cart management, coupon application, and a seamless checkout process.
 *   **Robust Data Safety**: Implements soft-deletion for critical models (like Products) to prevent accidental data loss.
 *   **User Profiles & Authentication**: Secure sign-up/login, wishlists, address management, and order history tracking.

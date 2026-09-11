@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 10/09/2026 |
+| Cập nhật | 11/09/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -76,7 +76,7 @@ thêm giỏ → dẫn tới thanh toán).
    sản phẩm, quản lý giỏ hàng, đặt hàng và thanh toán trực tuyến an toàn.
 3. Nghiên cứu và tích hợp Trợ lý ảo AI (Chatbot) nhằm tự động hóa chăm sóc khách
    hàng, hỗ trợ tìm sản phẩm và tương tác mua sắm qua hội thoại ngôn ngữ tự nhiên.
-4. Cung cấp công cụ quản trị (Dashboard) tập trung cho quản trị viên và người bán:
+4. Cung cấp công cụ quản trị (Dashboard) tập trung cho quản trị viên và nhân viên cửa hàng:
    quản lý kho, xử lý đơn hàng, quản lý người dùng, theo dõi báo cáo doanh thu.
 
 ### 2.2 Phạm vi
@@ -84,14 +84,18 @@ thêm giỏ → dẫn tới thanh toán).
 - Nền tảng TMĐT đặc thù cho ngành hàng nhu yếu phẩm và thực phẩm (Grocery).
 - Tích hợp dịch vụ bên thứ ba: Google Gemini AI, cổng thanh toán VNPay, nền tảng
   triển khai đám mây, dịch vụ cơ sở dữ liệu đám mây, dịch vụ lưu trữ đa phương tiện.
+- Mô hình **một nhà bán** (D-015): một cửa hàng duy nhất bán hàng của nhiều nhà
+  cung cấp. "Nhà cung cấp" chỉ là thông tin nguồn hàng gắn với sản phẩm, không
+  phải tài khoản người bán.
 - Phân quyền cho **4 nhóm tác nhân**: Khách vãng lai (Guest), Khách hàng
-  (Customer), Người bán (Vendor/Staff), Quản trị viên (Admin).
+  (Customer), Nhân viên cửa hàng (Staff), Quản trị viên (Admin).
 
 ### 2.3 Ngoài phạm vi
 
 Các mục dưới đây **không thuộc phạm vi KLTN**; chúng được ghi nhận ở mục "Các
 hướng phát triển mở rộng" cuối báo cáo: tìm kiếm full-text và gợi ý từ khóa; thống
-kê đa chiều nâng cao; live chat thời gian thực giữa khách và người bán; gợi ý sản
+kê đa chiều nâng cao; live chat thời gian thực giữa khách và cửa hàng; mô hình nhiều
+người bán (marketplace); gợi ý sản
 phẩm bằng Machine Learning; ứng dụng di động iOS/Android.
 
 KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN.md) §1.
@@ -104,7 +108,7 @@ KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN
 |---|---|---|
 | A1 | **Khách vãng lai** (Guest) | Chưa đăng nhập; duyệt và tìm sản phẩm, tương tác AI, đăng ký tài khoản |
 | A2 | **Khách hàng** (Customer) | Đã đăng ký; mua hàng, quản lý hồ sơ, yêu thích, đánh giá |
-| A3 | **Người bán** (Vendor / Nhân viên cửa hàng) | Vận hành gian hàng: sản phẩm, đơn hàng, thống kê của riêng gian hàng |
+| A3 | **Nhân viên cửa hàng** (Staff) | Vận hành cửa hàng qua `/useradmin/`: sản phẩm, tồn kho, đơn hàng, thống kê của cửa hàng |
 | A4 | **Quản trị viên** (Admin / Superuser) | Toàn quyền: duyệt sản phẩm, danh mục, người dùng, mã giảm giá, giám sát toàn hệ thống |
 
 ---
@@ -131,25 +135,25 @@ KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN
 | FR-C-05 | Theo dõi tình trạng đơn hàng, xem lịch sử mua sắm và hóa đơn chi tiết trên Dashboard cá nhân |
 | FR-C-06 | Đánh giá, bình luận và cho điểm sản phẩm sau khi đơn hàng giao dịch thành công |
 
-### 4.3 Người bán (A3)
+### 4.3 Nhân viên cửa hàng (A3)
 
 | Mã | Yêu cầu |
 |---|---|
 | FR-V-01 | Đăng nhập vào khu vực quản lý cửa hàng |
 | FR-V-02 | Quản lý sản phẩm: thêm mới, cập nhật giá bán, số lượng tồn kho, đăng tải hình ảnh, xóa hoặc ẩn |
 | FR-V-03 | Quản lý đơn hàng: tiếp nhận đơn, thay đổi trạng thái giao hàng (đã đóng gói, đang giao…) |
-| FR-V-04 | Thống kê cá nhân: biểu đồ doanh thu, số lượng đơn, tình trạng hàng hóa của gian hàng theo thời gian thực |
+| FR-V-04 | Thống kê cá nhân: biểu đồ doanh thu, số lượng đơn, tình trạng hàng hóa của cửa hàng theo thời gian thực |
 
 ### 4.4 Quản trị viên (A4)
 
 | Mã | Yêu cầu |
 |---|---|
 | FR-A-01 | Đăng nhập an toàn vào trang quản trị bằng tài khoản Superuser |
-| FR-A-02 | Duyệt và kiểm soát sản phẩm do Người bán đăng; xóa mềm hoặc vô hiệu hóa sản phẩm vi phạm |
+| FR-A-02 | Duyệt và kiểm soát sản phẩm do nhân viên đăng; xóa mềm hoặc vô hiệu hóa sản phẩm vi phạm |
 | FR-A-03 | Quản lý danh mục: thêm, sửa, xóa danh mục hàng hóa dùng chung toàn hệ thống |
 | FR-A-04 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản vi phạm, xóa vĩnh viễn |
 | FR-A-05 | Quản lý mã giảm giá: khởi tạo, thiết lập phần trăm giảm, phân phối tới khách hàng |
-| FR-A-06 | Giám sát toàn hệ thống: truy xuất, kiểm tra toàn bộ đơn hàng của mọi Người bán |
+| FR-A-06 | Giám sát toàn hệ thống: truy xuất, kiểm tra toàn bộ đơn hàng của cửa hàng |
 
 ---
 
@@ -209,7 +213,7 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lượng hợp lệ.
 - **UC-14:** chỉ đánh giá được sản phẩm đã mua (đơn ở trạng thái `Shipped`); cố
   đánh giá sản phẩm chưa mua → nút bị vô hiệu hóa.
-- **UC-19:** sản phẩm do Người bán tạo lưu ở trạng thái `in_review`, phải được
+- **UC-19:** sản phẩm do nhân viên tạo lưu ở trạng thái `in_review`, phải được
   Admin duyệt sang `published` mới hiển thị cho khách.
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
   lại; đơn đã `Delivered` không đổi được trạng thái.
@@ -269,7 +273,7 @@ toán thành công · Yêu thích · Liên hệ
 cấp · Chi tiết nhà cung cấp
 **Quản trị (18–23):** Đăng nhập QTV · Dashboard Admin · Quản lý Danh mục · Quản lý
 Người dùng · Quản lý Nhà cung cấp · Quản lý Mã giảm giá
-**Người bán (24–27):** Dashboard Người bán · Sản phẩm của Cửa hàng · Thêm/Sửa Sản
+**Nhân viên cửa hàng (24–27):** Dashboard nhân viên · Sản phẩm của Cửa hàng · Thêm/Sửa Sản
 phẩm · Quản lý Đơn hàng
 
 ---
