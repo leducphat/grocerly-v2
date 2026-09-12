@@ -35,8 +35,8 @@ CI/CD) và **G7** (chưa có thực nghiệm người dùng). Gate G3 (thiếu n
 
 | Chỉ số | Giá trị |
 |---|---|
-| Số commit | 10 tính tới 12/09/2026 (không tính 3 merge commit), toàn bộ là tài liệu |
-| Số Pull Request đã merge (có review) | 3 — PR #1, #2, #3. Tự review theo checklist; cách hiểu "review" cho đồ án một người chưa được GVHD xác nhận |
+| Số commit | 12 tính tới 12/09/2026 (không tính 4 merge commit), toàn bộ là tài liệu |
+| Số Pull Request đã merge (có review) | 4 — PR #1, #2, #3, #4. Tự review theo checklist; cách hiểu "review" cho đồ án một người chưa được GVHD xác nhận |
 | Số lần CI chạy / tỉ lệ build xanh | 0 — chưa có CI (P-10) |
 | Số lần deploy | 0 — chưa có hạ tầng KLTN (P-11) |
 | Độ phủ test | 0% — chưa có test tự động nào (P-12) |
@@ -65,20 +65,7 @@ CI/CD) và **G7** (chưa có thực nghiệm người dùng). Gate G3 (thiếu n
 | P-11 | Chọn nhà cung cấp host, database, image storage cho KLTN; bổ sung nhóm `VNPAY_*` vào `.env.example` | Chốt được phương án hạ tầng, ghi thành quyết định trong `DECISIONS.md` |
 | P-05 | Giữ nhịp commit và báo cáo tuần | Có commit trong Tuần 2; nộp `tuan-02.md` |
 
-## 5. Cần GVHD hỗ trợ / quyết định
-
-- Duyệt danh sách **30 chức năng cam kết** ([`COMMITMENT.md`](../COMMITMENT.md) §2)
-  và cho ý kiến về hướng xử lý các chỗ lệch **L-2 → L-7** (§3).
-- Xác nhận cách hiểu **"Pull Request có review"** cho đồ án một người: CI xanh +
-  checklist tự review + một lượt review bằng AI đăng thành comment (D-016). Rubric
-  TC2.4 Mức 5 đòi ≥ 90% thay đổi qua PR có review.
-- Xác nhận việc **gộp khảo sát bên liên quan vào buổi thực nghiệm người dùng**
-  (D-013): mỗi buổi dành ~5 phút đầu phỏng vấn nhu cầu, sau đó mới làm tác vụ và
-  đo SUS.
-- Góp ý **đề cương KLTN** ([`DE_CUONG.md`](../DE_CUONG.md)).
-- Cho biết khoa có **biểu mẫu bản cam kết** riêng không.
-
-## 6. Ghi chú
+## 5. Ghi chú
 
 **Quyết định mới** — ghi tại [`../DECISIONS.md`](../DECISIONS.md), D-001 → D-016.
 Những quyết định chính:
@@ -104,6 +91,124 @@ tách `SDD.md`.
 
 **Điều chỉnh kế hoạch** — gộp P-20 (viết acceptance criteria) vào P-23; gộp P-22
 (khảo sát) vào P-25; bỏ P-27, đưa việc tách SRS/SDD lên Giai đoạn 0 thành P-07.
+
+## 6. Bản tóm tắt nộp portal (ô *Nội dung*)
+
+Portal **không nhận file `.md`** ở ô đính kèm, nên bản đầy đủ chỉ tới được GVHD
+qua link repo. Chép phần **giữa hai đường kẻ** dưới đây vào ô *Nội dung (hỗ trợ
+Markdown)*; nộp sau khi `develop` đã merge vào `main` để link trỏ đúng nội dung.
+
+---
+
+**Báo cáo tuần 1 (07/09 – 13/09/2026) — Grocerly (KLTN)**
+
+**Sinh viên:** Lê Đức Phát — 21139083 · **GVHD:** Hoàng Văn Dũng
+**Repository:** https://github.com/leducphat/grocerly-v2
+**Báo cáo đầy đủ:** https://github.com/leducphat/grocerly-v2/blob/main/docs/weekly_report/tuan-01.md
+
+Tuần đầu làm nền tảng quy trình, chưa đụng tới mã nguồn ứng dụng. Rà soát repo theo
+rubric cho thấy đồ án đang vướng ba gate G5 (chưa có kiểm thử tự động), G6 (chưa có
+CI/CD) và G7 (chưa có thực nghiệm người dùng); gate G3 (thiếu nhật ký dùng AI) đã gỡ
+trong tuần.
+
+**Đã làm**
+
+- **P-01** — dựng bộ tài liệu đặc tả trong `docs/` và hai file hướng dẫn agent; xóa file
+  hướng dẫn Copilot đã lỗi thời (commit `1ad9305`, `43c1a0a`, PR #1).
+- **P-02** — chốt lịch 15 tuần, mốc ký cam kết sản phẩm là 25/10/2026.
+- **P-04** — lập nhật ký sử dụng AI, gỡ gate G3; đã ghi 11 lỗi của AI kèm phân tích
+  nguyên nhân.
+- **P-03 (đang làm)** — nháp bản cam kết: 30 chức năng đối chiếu với mã nguồn, phát hiện
+  7 chỗ lệch giữa đặc tả TLCN và code (commit `f7e3158`, PR #2).
+- **D-015** — chốt mô hình một nhà bán, sửa đặc tả cho khớp mã nguồn (commit `f002519`).
+- **D-016 / P-06** — chuyển sang làm trên nhánh `develop`, vào `main` qua Pull Request.
+- **P-07** — tách đặc tả thành `SRS.md` (yêu cầu) và `SDD.md` (thiết kế) theo D-011
+  (commit `0af7a42`, PR #4).
+- Soạn đề cương KLTN (`DE_CUONG.md`) — chờ GVHD góp ý.
+
+**Chỉ số**
+
+- 12 commit (không tính 4 merge commit), 4 Pull Request đã merge.
+- CI: chưa có · Số lần deploy: 0 · Độ phủ test: 0%.
+- Defect Critical còn tồn: 1 — giá sản phẩm do trình duyệt gửi lên, khách sửa tham số là
+  đặt được hàng với giá tùy ý.
+
+**Vướng mắc**
+
+- Chưa có hạ tầng riêng cho KLTN; cấu hình vẫn trỏ tới production của TLCN nên chưa
+  deploy được.
+- Sáu chỗ lệch giữa đặc tả và mã nguồn chưa chốt hướng xử lý (sửa đặc tả hay sửa code) —
+  việc này quyết định danh sách chức năng đem ký cam kết.
+- Chưa rõ khoa có biểu mẫu bản cam kết riêng hay không.
+
+**Kế hoạch tuần 2 (14/09 – 20/09/2026)**
+
+- Trình GVHD bản cam kết, chốt các chỗ lệch, soạn metric và KPI.
+- Chọn hạ tầng riêng cho KLTN (host, database, lưu trữ ảnh).
+- Giữ nhịp commit và mở PR `develop` → `main` trong tuần.
+
+---
+
+## 7. Khai báo sử dụng AI (điền lên portal)
+
+Ba ô dưới đây tóm tắt từ [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1, chép
+thẳng vào form khai báo công cụ AI trên portal.
+
+**Công cụ AI:** Claude (qua Claude Code) — **Phiên bản / model:** Opus 5
+
+**Prompt đã dùng**
+
+```
+- Đọc repo, báo cáo TLCN và rubric KLTN; dựng CLAUDE.md, AGENTS.md và docs/
+  (SRS, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report) theo Spec Driven Development.
+- Rà soát backlog: đổi P-01 thành Khung specs, tra rubric xem P-03 là gì, xét đồ án
+  một người có cần nhánh + PR, gộp việc viết acceptance criteria vào rà soát đặc tả,
+  tách SRS/SDD ngay từ đầu, gộp khảo sát vào thực nghiệm người dùng.
+- Tạo nhánh đặt tên đúng convention để commit, push rồi mở PR; đưa .claude/ vào
+  .gitignore.
+- Soạn nháp bản cam kết các chức năng của Grocerly, đối chiếu với mã nguồn.
+- Bỏ gợi ý sản phẩm nổi bật khỏi CN-17; giữ mô hình một nhà bán.
+- Giải thích get_bestsellers làm gì và tính thế nào; tạm gỡ công cụ này.
+- Viết đề cương KLTN theo khung đề cương TLCN.
+- Chuyển sang làm trên nhánh develop, merge vào main qua Pull Request.
+- Tách SRS.md thành SRS.md + SDD.md (P-07); viết báo cáo Tuần 1; commit, push,
+  mở PR rồi merge vào main.
+```
+
+**Nội dung AI tạo ra**
+
+```
+Toàn bộ văn bản của bộ tài liệu trong Tuần 1 — không có dòng mã nguồn ứng dụng nào:
+- AGENTS.md và CLAUDE.md (hai bản song sinh).
+- docs/SRS.md, docs/SDD.md, docs/PLAN.md, docs/DECISIONS.md (D-001 đến D-016),
+  docs/COMMITMENT.md, docs/DE_CUONG.md, docs/AI_USAGE_LOG.md,
+  docs/weekly_report/README.md, _TEMPLATE.md và tuan-01.md.
+- Sửa .gitignore để bỏ qua .claude/; xóa .github/copilot-instructions.md đã lỗi thời.
+- Nội dung commit message và mô tả 4 Pull Request.
+Để đối chiếu, AI đọc mã nguồn (urls.py, core/views.py, useradmin/views.py,
+store_api/views.py), báo cáo TLCN và rubric, thay vì tự đặt ra số liệu.
+```
+
+**Phần bạn đã sửa / hoàn thiện**
+
+```
+- Bác bỏ 4 phương án AI đề xuất và thay bằng quyết định khác: CLAUDE.md phải tự đứng
+  vững (D-006 thay D-003), đặc tả là tài liệu sống chứ không đóng băng (D-007 thay
+  D-004), tách SRS/SDD ngay từ đầu (D-011 thay D-010), làm trên nhánh develop thay vì
+  mỗi việc một nhánh (D-016 thay D-012).
+- Chốt mô hình một nhà bán sau khi đối chiếu với mã nguồn (D-015); bỏ "gợi ý sản phẩm
+  nổi bật" khỏi danh sách chức năng cam kết.
+- Quyết định không commit bộ công cụ agent vào repo (D-014).
+- Quyết định giữ lại công cụ get_bestsellers sau khi AI đã gỡ, và hoàn nguyên thay đổi đó.
+- Phát hiện 7 trong 11 lỗi của AI ghi ở AI_USAGE_LOG mục 2 (viết tài liệu sai ngôn ngữ,
+  đặt tên PRD thay vì SRS, dùng "SDD" cho hai nghĩa khác nhau, ghi sai hiện trạng chức
+  năng so với code) và yêu cầu sửa.
+- Bỏ ô "Hình thức trao đổi với GVHD" khỏi mẫu báo cáo tuần; yêu cầu ghi prompt trong
+  nhật ký AI ở dạng câu lệnh ngắn.
+- Đọc và duyệt từng file trước khi commit; tự review rồi merge 4 Pull Request.
+Ghi chú trung thực: Tuần 1 sinh viên chưa tự gõ lại nội dung tài liệu nào; phần đóng góp
+nằm ở việc định hướng, bác bỏ đề xuất sai và kiểm soát đầu ra.
+```
 
 ---
 

@@ -75,7 +75,12 @@ commit** — nghĩa là làm đều, không dồn.
    `docs/SDD.md`.
 3. **Đưa vào kế hoạch.** Chia việc thành các mục theo dõi được trong `docs/PLAN.md`.
 4. **Viết test kèm theo** (xem §8).
-5. **Báo cáo tuần** trong `docs/weekly_report/`.
+5. **Báo cáo tuần** trong `docs/weekly_report/`. Mỗi báo cáo có hai mục dành
+   riêng cho portal nộp bài (portal **không nhận file `.md`** đính kèm):
+   Mục 6 là bản tóm tắt dán vào ô *Nội dung*, **bắt buộc kèm link repository
+   và link tới chính file `tuan-NN.md` trên GitHub**; Mục 7 là khai báo công
+   cụ AI (prompt / nội dung AI tạo ra / phần sinh viên sửa), tóm tắt từ
+   `docs/AI_USAGE_LOG.md` §1. Xem `docs/weekly_report/README.md`.
 
 **`SRS.md` và `SDD.md` là tài liệu sống, không phải văn bản đóng băng.** Đặc tả
 TLCN có thể có chỗ sai hoặc đã lỗi thời so với mã nguồn hiện tại. Khi phát hiện,
