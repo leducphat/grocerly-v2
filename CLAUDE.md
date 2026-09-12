@@ -32,6 +32,7 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 | Câu hỏi | File |
 |---|---|
 | Sản phẩm phải làm được gì? | [`docs/SRS.md`](docs/SRS.md) |
+| Hệ thống được xây thế nào? | [`docs/SDD.md`](docs/SDD.md) |
 | Sắp làm gì, đang tới đâu? | [`docs/PLAN.md`](docs/PLAN.md) |
 | Vì sao lại làm theo cách này? | [`docs/DECISIONS.md`](docs/DECISIONS.md) |
 | Đã báo cáo gì với GVHD? | [`docs/weekly_report/`](docs/weekly_report/) |
@@ -70,14 +71,16 @@ commit** — nghĩa là làm đều, không dồn.
 2. **Ghi lại quyết định.** Bất cứ lựa chọn nào có phương án thay thế hợp lý — thư
    viện, thay đổi schema, kiến trúc — đều phải có một mục trong
    `docs/DECISIONS.md` kèm bối cảnh, các phương án đã cân nhắc và lý do chọn.
+   Thay đổi chạm tới mô hình dữ liệu, giao diện hay kiến trúc thì cập nhật cả
+   `docs/SDD.md`.
 3. **Đưa vào kế hoạch.** Chia việc thành các mục theo dõi được trong `docs/PLAN.md`.
-4. **Viết test kèm theo** (xem §7).
+4. **Viết test kèm theo** (xem §8).
 5. **Báo cáo tuần** trong `docs/weekly_report/`.
 
-**`SRS.md` là tài liệu sống, không phải văn bản đóng băng.** Đặc tả TLCN có thể
-có chỗ sai hoặc đã lỗi thời so với mã nguồn hiện tại. Khi phát hiện, sửa `SRS.md`
-cho đúng thực tế và ghi lại việc sửa đó trong `docs/PLAN.md` §6 — đừng im lặng
-sửa, cũng đừng để đặc tả sai tồn tại vì "báo cáo cũ viết vậy".
+**`SRS.md` và `SDD.md` là tài liệu sống, không phải văn bản đóng băng.** Đặc tả
+TLCN có thể có chỗ sai hoặc đã lỗi thời so với mã nguồn hiện tại. Khi phát hiện,
+sửa file tương ứng cho đúng thực tế và ghi lại việc sửa đó trong `docs/PLAN.md`
+§6 — đừng im lặng sửa, cũng đừng để đặc tả sai tồn tại vì "báo cáo cũ viết vậy".
 
 ---
 
@@ -129,7 +132,7 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 ```
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
-├── docs/                     # SRS, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report
+├── docs/                     # SRS, SDD, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
     ├── core/                 # catalog, giỏ hàng, đơn hàng, checkout, VNPay, đánh giá

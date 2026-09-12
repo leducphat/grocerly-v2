@@ -49,13 +49,14 @@ dòng phải khớp với một commit có thật.
 | 11/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Chỉnh bản cam kết; chốt mô hình một nhà bán | "CN-17 thì bỏ sản phẩm nổi bật đi, và nên nhớ project này đang giữ là mô hình một nhà bán, chứ không phải multi-vendor" | Bỏ "gợi ý sản phẩm nổi bật" khỏi CN-17; thêm D-015; sửa `SRS.md` (A3 → Nhân viên cửa hàng, 9 chỗ), `README.md` (bỏ "Multi-Vendor"), `AGENTS.md`/`CLAUDE.md` (§5, §6); ghi `PLAN.md` §6 dòng 3 | SV quyết định: mô hình một nhà bán; bỏ tính năng gợi ý nổi bật khỏi cam kết | *(chưa commit)* |
 | 11/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Giải thích rồi gỡ công cụ AI `get_bestsellers` | "giải thích get_bestsellers làm gì? nó tính như nào"; "cứ tạm gỡ best_sellers ra đi" | AI đọc code và giải thích: hàm không tính doanh số, chỉ lọc cờ `featured`. AI sinh diff xóa hàm, bỏ khỏi `tools`, xóa nhánh xử lý trong `ai_chat` (`store_api/views.py`, −28 dòng); kiểm bằng `py_compile` + `manage.py check`. Sửa `SRS.md` §9.1 | SV quyết định gỡ, sau đó đổi ý: **tạm giữ lại** trong code. Commit gỡ `7e96044` bị bỏ cùng nhánh local `fix/remove-bestsellers-tool` (chưa từng push); `SRS.md` §9.1 hoàn nguyên về 4 công cụ | — (đã hoàn nguyên) |
 | 11/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Soạn đề cương KLTN theo khung đề cương TLCN | "đọc file PDF đó [báo cáo TLCN], trong đó có mục ĐỀ CƯƠNG BÁO CÁO MÔN HỌC, hãy viết ra 1 file md tương tự trong docs với tiêu đề và nội dung tương tự dành cho KLTN" | `docs/DE_CUONG.md`: giữ 5 mục như đề cương TLCN (tài liệu ban đầu, nhiệm vụ lý thuyết/thực hành, sản phẩm dự kiến, bố cục báo cáo, kế hoạch). Nội dung lấy từ `PLAN.md` (lịch, backlog P-xx), `COMMITMENT.md` (30 chức năng, các chỗ lệch L-x) và D-013, D-015; bố cục báo cáo thêm Chương 5 *Thực nghiệm người dùng* | Chờ SV duyệt trước khi trình GVHD | `876df38` (PR #2) |
-| 11/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Commit, merge PR #2; đổi quy trình nhánh sang `develop` | "ok commit và push, rồi merge vào main"; "xóa nhánh đó đi, sau này có gì chắc cứ checkout qua develop rồi làm"; "ok làm đi" | Chạy checklist review (twin check, quét secret, file cấm) rồi tạo và merge PR #2 bằng merge commit; xóa nhánh `docs/product-commitment`; tạo nhánh `develop`. Thêm D-016 (thay D-012), cập nhật `PLAN.md` (P-06, nhật ký Tuần 1), `COMMITMENT.md` §5 | SV quyết định bỏ nhánh theo từng việc, chuyển sang làm trên `develop`. AI đề xuất ghi thành quyết định mới và giữ việc merge vào `main` qua PR | *(chưa commit)* |
+| 11/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | Commit, merge PR #2; đổi quy trình nhánh sang `develop` | "ok commit và push, rồi merge vào main"; "xóa nhánh đó đi, sau này có gì chắc cứ checkout qua develop rồi làm"; "ok làm đi" | Chạy checklist review (twin check, quét secret, file cấm) rồi tạo và merge PR #2 bằng merge commit; xóa nhánh `docs/product-commitment`; tạo nhánh `develop`. Thêm D-016 (thay D-012), cập nhật `PLAN.md` (P-06, nhật ký Tuần 1), `COMMITMENT.md` §5 | SV quyết định bỏ nhánh theo từng việc, chuyển sang làm trên `develop`. AI đề xuất ghi thành quyết định mới và giữ việc merge vào `main` qua PR | `87c1a2a` (PR #3) |
+| 11–12/09/2026 | Claude Code (Opus 5) + bộ công cụ ECC | P-07 tách `SRS.md` / `SDD.md`; viết báo cáo Tuần 1 | "làm P-07 trước, làm xong rồi hãy qua ghi báo cáo tuan-01.md" | Tạo `docs/SDD.md`: chuyển nguyên văn SRS Mục 7–9 (đánh số lại 1–3), thêm phần đầu, ghi chú "nợ thiết kế", mục lịch sử chỉnh sửa. Sửa `SRS.md`: thay ghi chú "sẽ tách", đánh số lại Mục 10–12 → 7–9. Cập nhật link SDD ở `AGENTS.md`/`CLAUDE.md`, `PLAN.md` (P-05, P-06, P-07, §5, §6 dòng 4), `DECISIONS.md`, `weekly_report/README.md`, `_TEMPLATE.md`. Kiểm tra bằng `diff` rằng khối nội dung chuyển sang không đổi chữ nào. Tạo `weekly_report/tuan-01.md` từ `git log`, `gh pr list` và các file `docs/` | SV bỏ ô *Hình thức trao đổi với GVHD* khỏi `tuan-01.md`. AI tự quyết để Kiểm thử và Hạn chế ở lại SRS (D-011 không nói tới hai mục này) | `0af7a42`, `c5ed01c` |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **10**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **11**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -69,8 +70,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 8 | 10/09/2026 | AI tách "viết acceptance criteria" (P-20) và "rà soát đặc tả TLCN" (P-23) thành hai việc riêng | AI chia việc theo loại sản phẩm đầu ra thay vì theo cách làm thực tế: cả hai đều phải đi qua cùng 26 use case, tách ra là rà hai lượt | SV | *(chưa commit)* — gộp vào P-23 |
 | 9 | 10/09/2026 | AI tạo 2 commit mất dòng tiêu đề `docs: ...` trong commit message | AI nối heredoc với `&& \` trong bash, khiến dòng đầu của heredoc bị hiểu thành một lệnh riêng (`docs:: command not found`) thay vì thành nội dung message | AI (tự phát hiện qua output lỗi, làm lại trước khi push) | `1ad9305`, `43c1a0a` (bản đúng) |
 | 10 | 10/09/2026 | Bản nháp đầu của `COMMITMENT.md` ghi CN-08 "không cho vượt tồn kho" và CN-19 "giỏ trống thì AI nhắc" là `Có` | AI chép hành vi từ đặc tả TLCN sang cột hiện trạng, chỉ kiểm tra route tồn tại chứ chưa đọc view. Đọc code thì thấy server không kiểm tra tồn kho (L-7) và phát hiện luôn lỗi giá do trình duyệt gửi lên (L-6) | AI (tự phát hiện khi kiểm chứng trước lúc ghi file) | *(chưa commit)* |
+| 11 | 11/09/2026 | `AGENTS.md`/`CLAUDE.md` §3 ghi "Viết test kèm theo (xem §7)" trong khi mục Kiểm thử là §8 (§7 là Quy ước code) | AI viết tham chiếu chéo bằng số mục mà không đối chiếu với tiêu đề thật — sai ngay từ bản commit đầu tiên (`43c1a0a`). Tồn tại qua 3 PR vì checklist review chỉ kiểm tra hai file song sinh khớp *nhau*, không kiểm tra tham chiếu nội bộ có trỏ *đúng* hay không | AI (tự phát hiện khi sửa §3 cho P-07) | `0af7a42` |
 
-**Ghi chú khi bảo vệ:** bảy trong mười mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** bảy trong mười một mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
@@ -99,4 +101,5 @@ Mức 5 yêu cầu việc kiểm soát phải **thành hệ thống**, không ph
 - Kế hoạch và backlog: [`PLAN.md`](PLAN.md) — P-04
 - Quyết định quan trọng: [`DECISIONS.md`](DECISIONS.md)
 - Đặc tả yêu cầu: [`SRS.md`](SRS.md)
+- Đặc tả thiết kế: [`SDD.md`](SDD.md)
 - Báo cáo tuần: [`weekly_report/`](weekly_report/)

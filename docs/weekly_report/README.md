@@ -63,4 +63,5 @@ hướng đó — thứ mà vài tháng sau không ai nhớ chính xác nữa.
 - Kế hoạch và backlog: [`../PLAN.md`](../PLAN.md)
 - Quyết định quan trọng: [`../DECISIONS.md`](../DECISIONS.md)
 - Đặc tả yêu cầu: [`../SRS.md`](../SRS.md)
+- Đặc tả thiết kế: [`../SDD.md`](../SDD.md)
 - Nhật ký dùng AI: [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md)
