@@ -5,6 +5,7 @@
 | Sinh viên | Lê Đức Phát — 21139083 |
 | GVHD | Hoàng Văn Dũng |
 | Kỳ báo cáo | **Tuần 1**: 07/09/2026 → 13/09/2026 |
+| Nộp portal | 12/09/2026 — projects-fit.hcmute.edu.vn |
 
 > Tra số tuần và khoảng ngày tương ứng ở [`README.md`](README.md).
 
