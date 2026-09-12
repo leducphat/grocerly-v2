@@ -41,6 +41,18 @@ báo cáo và trong bảng dưới đây, nên không cần lặp lại ở tên
 - **Tần suất:** ≥ 1 lần/tuần, kể cả tuần làm được ít. Tuần bận thì viết báo cáo
   ngắn — bỏ hẳn mới là vấn đề.
 - **Commit ngay trong tuần đó**, đừng viết dồn nhiều tuần vào cuối kỳ.
+- **Mục 6 và Mục 7 của báo cáo là phần dành riêng cho portal.** Portal
+  projects-fit.hcmute.edu.vn **không nhận file `.md` ở ô đính kèm**, nên mọi
+  thứ GVHD đọc được phải nằm trong hai ô nhập của form:
+  - **Mục 6** → ô *Nội dung (hỗ trợ Markdown)*: bản tóm tắt tuần, **luôn kèm
+    link repository và link tới chính file `tuan-NN.md` trên GitHub** để bản
+    đầy đủ vẫn tới được GVHD.
+  - **Mục 7** → khối *Khai báo công cụ AI*: ba ô *Prompt đã dùng*, *Nội dung
+    AI tạo ra*, *Phần bạn đã sửa / hoàn thiện*, tóm tắt từ
+    [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1 các phiên trong tuần — hai
+    nơi không được nói khác nhau.
+- **Nộp sau khi `develop` đã merge vào `main`**, để link trong Mục 6 trỏ đúng
+  nội dung của tuần đó.
 
 ## Vì sao phải làm
 
