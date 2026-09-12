@@ -23,19 +23,19 @@ CI/CD) và **G7** (chưa có thực nghiệm người dùng). Gate G3 (thiếu n
 |---|---|---|---|
 | P-01 | Dựng khung specs: `AGENTS.md`, `CLAUDE.md`, `docs/` (SRS, PLAN, DECISIONS, weekly_report) | **Xong.** Xóa `.github/copilot-instructions.md` vì đã sai nhiều chỗ so với code | commit `1ad9305`, `43c1a0a` · PR #1 |
 | P-02 | Chốt lịch KLTN 15 tuần | **Xong.** Mốc 50% (hạn ký cam kết) là 25/10/2026 | `PLAN.md` §2, `weekly_report/README.md` — commit `1ad9305` |
-| P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên đầu tiên | **Xong.** Gỡ gate G3. Đã ghi 10 lỗi/ảo giác của AI kèm phân tích nguyên nhân (Mức 5 cần ≥ 5) | commit `1ad9305`, `3376284` |
+| P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên đầu tiên | **Xong.** Gỡ gate G3. Đã ghi 11 lỗi/ảo giác của AI kèm phân tích nguyên nhân (Mức 5 cần ≥ 5) | commit `1ad9305`, `3376284` |
 | — | Đưa thư mục công cụ agent `.claude/` ra khỏi repo (D-014) | **Xong** | commit `bbd1595`, `3376284` · PR #1 |
 | — | Chốt mô hình **một nhà bán** (D-015): A3 là nhân viên cửa hàng, không phải người bán có gian hàng riêng | **Xong.** Sửa `SRS.md` và `README.md` cho khớp mã nguồn (chỗ lệch L-1) | commit `f002519` · PR #2 |
 | P-03 | Soạn **bản cam kết sản phẩm + bộ metric** | **Đang làm.** Nháp [`COMMITMENT.md`](../COMMITMENT.md): 30 chức năng (24 `Có`, 6 `Lệch`) đối chiếu với route/view trong code; 7 chỗ lệch L-1 → L-7 giữa đặc tả TLCN và code. Chưa soạn metric/KPI | commit `f7e3158` · PR #2 |
 | — | Soạn đề cương KLTN theo khung đề cương TLCN | **Xong bản nháp** — [`DE_CUONG.md`](../DE_CUONG.md), chờ GVHD góp ý | commit `876df38` · PR #2 |
 | P-06 | Chuyển sang làm trên nhánh `develop`, merge vào `main` qua PR (D-016, thay D-012) | **Đang làm.** Đã tạo `develop`; còn ghi cách hiểu "review" vào P-03 và bật branch protection khi có CI | commit `87c1a2a` · PR #3 |
-| P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu) + `SDD.md` (thiết kế) theo D-011 | **Xong.** Chỉ chuyển chỗ Mục 7–9 sang [`SDD.md`](../SDD.md), nội dung giữ nguyên; bảng đối chiếu số mục cũ → mới ghi ở `PLAN.md` §6 dòng 4 | *(chưa commit)* |
+| P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu) + `SDD.md` (thiết kế) theo D-011 | **Xong.** Chỉ chuyển chỗ Mục 7–9 sang [`SDD.md`](../SDD.md), nội dung giữ nguyên; bảng đối chiếu số mục cũ → mới ghi ở `PLAN.md` §6 dòng 4 | commit `0af7a42` |
 
 ## 2. Chỉ số trong tuần
 
 | Chỉ số | Giá trị |
 |---|---|
-| Số commit | 8 (không tính 3 merge commit), toàn bộ là tài liệu |
+| Số commit | 10 tính tới 12/09/2026 (không tính 3 merge commit), toàn bộ là tài liệu |
 | Số Pull Request đã merge (có review) | 3 — PR #1, #2, #3. Tự review theo checklist; cách hiểu "review" cho đồ án một người chưa được GVHD xác nhận |
 | Số lần CI chạy / tỉ lệ build xanh | 0 — chưa có CI (P-10) |
 | Số lần deploy | 0 — chưa có hạ tầng KLTN (P-11) |
