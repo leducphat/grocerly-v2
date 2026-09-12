@@ -50,8 +50,8 @@ Nêu vấn đề cụ thể và đã thử hướng nào, để GVHD góp ý đ�
 ## 6. Ghi chú
 
 Quyết định mới phát sinh (ghi vào [`../DECISIONS.md`](../DECISIONS.md)), chỉnh sửa
-đặc tả (sửa thẳng [`../SRS.md`](../SRS.md), ghi lần sửa vào [`../PLAN.md`](../PLAN.md)
-§6), hoặc điều chỉnh kế hoạch.
+đặc tả (sửa thẳng [`../SRS.md`](../SRS.md) hoặc [`../SDD.md`](../SDD.md), ghi lần
+sửa vào [`../PLAN.md`](../PLAN.md) §6), hoặc điều chỉnh kế hoạch.
 
 - 
 

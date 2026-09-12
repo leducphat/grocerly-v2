@@ -13,8 +13,8 @@ file này thì có.
 - Trạng thái: `Đề xuất` → `Đã chốt` → (có thể) `Thay thế bởi D-0yy`.
 - Quyết định đã chốt **không sửa nội dung**; muốn đổi thì thêm quyết định mới và
   đánh dấu cái cũ là bị thay thế. Lịch sử sai lầm cũng là bằng chứng.
-- Quyết định ảnh hưởng tới đặc tả thì sửa thẳng [`SRS.md`](SRS.md), và ghi lần
-  sửa đó vào [`PLAN.md`](PLAN.md) §6.
+- Quyết định ảnh hưởng tới đặc tả thì sửa thẳng [`SRS.md`](SRS.md) (yêu cầu) hoặc
+  [`SDD.md`](SDD.md) (thiết kế), và ghi lần sửa đó vào [`PLAN.md`](PLAN.md) §6.
 
 ---
 

@@ -5,8 +5,8 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 10/09/2026 |
-| Đặc tả tham chiếu | [`SRS.md`](SRS.md) |
+| Cập nhật lần cuối | 11/09/2026 |
+| Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
 | Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm) |
 
 ---
@@ -96,8 +96,8 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5) |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
 | P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Chưa bắt đầu | Chạy suốt 15 tuần |
-| P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
-| P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | Chưa bắt đầu | Theo D-011 (thay P-27 cũ). Làm trước P-23 và P-24 để mỗi việc chỉ đụng tới một file |
+| P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2, #3; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
+| P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | **Xong** | 11/09/2026. Theo D-011 (thay P-27 cũ). `SRS.md` giữ Mục 1–6 + kiểm thử, hạn chế (đánh số lại 7–9); `SDD.md` nhận Mục 7–9 cũ (thành Mục 1–3). Chỉ chuyển chỗ, chưa sửa nội dung — việc rà soát để cho P-23, P-24. Bảng đối chiếu số mục: §6 dòng 4 |
 
 ### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
 
@@ -143,14 +143,16 @@ Mỗi tuần thêm một dòng. Chi tiết đặt trong [`weekly_report/`](weekl
 
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
-| Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016) |
+| Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
 
 ---
 
 ## 6. Nhật ký chỉnh sửa đặc tả
 
-[`SRS.md`](SRS.md) là tài liệu sống. Đặc tả TLCN có thể sai hoặc đã lỗi thời so
-với mã nguồn — khi phát hiện thì sửa `SRS.md` và ghi lại tại đây.
+[`SRS.md`](SRS.md) và [`SDD.md`](SDD.md) là tài liệu sống. Đặc tả TLCN có thể sai
+hoặc đã lỗi thời so với mã nguồn — khi phát hiện thì sửa file tương ứng và ghi lại
+tại đây. Các dòng trước dòng 4 dùng số mục của `SRS.md` trước khi tách; tra số mục
+mới ở dòng 4.
 
 Vì sao ghi: hội đồng đối chiếu đặc tả với mã nguồn tại buổi bảo vệ. Một lần sửa có
 ghi lý do là minh chứng sinh viên nắm được hệ thống; một đặc tả sai để nguyên vì
@@ -161,3 +163,4 @@ ghi lý do là minh chứng sinh viên nắm được hệ thống; một đặc
 | 1 | 10/09/2026 | §2.3, §5, §10, §11, §12 | Bỏ cách gọi "baseline đóng băng"; chuyển SRS thành tài liệu sống | Đặc tả TLCN chưa được kiểm chứng lại với mã nguồn hiện tại; giữ nó ở trạng thái bất biến sẽ khóa luôn cả những chỗ sai | *(chưa commit)* |
 | 2 | 10/09/2026 | Toàn file | Đổi tên `PRD.md` → `SRS.md`, thêm ghi chú ranh giới SRS/SDD | Rubric Mục 8 gọi tên hồ sơ là "SRS/SDD"; nội dung file vốn là đặc tả yêu cầu chứ không phải PRD — xem D-009 | *(chưa commit)* |
 | 3 | 11/09/2026 | §2.1, §2.2, §2.3, §3 (A3), §4.3, FR-A-02, FR-A-06, §6.1 (UC-19), §8 | A3 "Người bán vận hành gian hàng riêng" → "Nhân viên cửa hàng"; thêm mô hình một nhà bán vào phạm vi, marketplace vào ngoài phạm vi. Giữ nguyên §11 (trích nguyên văn TLCN) và mã `FR-V-xx` | Mã nguồn không có vai trò người bán riêng — mọi staff thấy toàn bộ cửa hàng (chỗ lệch L-1 trong `COMMITMENT.md`) — xem D-015 | *(chưa commit)* |
+| 4 | 11/09/2026 | Toàn file `SRS.md`; tạo `SDD.md` | Tách đặc tả thiết kế sang `SDD.md`, nội dung giữ nguyên. Số mục: SRS §7 → SDD §1 · SRS §7.1 → SDD §1.1 · SRS §8 → SDD §2 · SRS §9 → SDD §3 · SRS §9.1 → SDD §3.1 · SRS §10 → SRS §7 · SRS §11 → SRS §8 · SRS §12 → SRS §9. Thay ghi chú "sẽ tách" ở đầu `SRS.md` bằng ghi chú ranh giới; thêm ghi chú "nợ thiết kế" ở cuối SDD §3 | P-07, theo D-011: tách trước P-23 và P-24 để mỗi việc chỉ đụng tới một file. Kiểm thử và hạn chế ở lại SRS vì D-011 chỉ chuyển Mục 7–9 | *(chưa commit)* |
