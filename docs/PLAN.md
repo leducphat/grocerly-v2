@@ -5,9 +5,9 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 11/09/2026 |
+| Cập nhật lần cuối | 14/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
-| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm) |
+| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng) |
 
 ---
 
@@ -52,7 +52,8 @@ Lịch đầy đủ từng tuần: [`weekly_report/README.md`](weekly_report/REA
 | Phản biện | — | Dự kiến tháng 12/2026 | |
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, ghi vào
-[`weekly_report/`](weekly_report/). Dưới 0,5 lần/tuần → gate **G2** → TC2.2 và
+[`weekly_report/`](weekly_report/) và nộp lên portal **trước 17:00 Thứ Sáu** của
+chính tuần đó (GVHD chốt, áp dụng từ Tuần 2). Dưới 0,5 lần/tuần → gate **G2** → TC2.2 và
 TC2.4 mỗi tiêu chí bị hạ một mức.
 
 **Ngưỡng commit.** Với 15 tuần, Mức 5 của TC2.4 (≥ 90% số tuần có commit) tương
@@ -95,9 +96,10 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-02 | Chốt lịch KLTN | — | **Xong** | 10/09/2026 — xem §2 |
 | P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5) |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
-| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. Tuần 1: [`tuan-01.md`](weekly_report/tuan-01.md) — đã nộp portal 12/09/2026 |
+| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. **Hạn nộp portal: trước 17:00 Thứ Sáu mỗi tuần** (GVHD chốt, áp dụng từ Tuần 2). Tuần 1: [`tuan-01.md`](weekly_report/tuan-01.md) — đã nộp portal 12/09/2026 |
 | P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2, #3; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
 | P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | **Xong** | 11/09/2026. Theo D-011 (thay P-27 cũ). `SRS.md` giữ Mục 1–6 + kiểm thử, hạn chế (đánh số lại 7–9); `SDD.md` nhận Mục 7–9 cũ (thành Mục 1–3). Chỉ chuyển chỗ, chưa sửa nội dung — việc rà soát để cho P-23, P-24. Bảng đối chiếu số mục: §6 dòng 4 |
+| P-08 | Nộp đề cương KLTN ([`DE_CUONG.md`](DE_CUONG.md)) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp Tuần 1 ([`tuan-01.md`](weekly_report/tuan-01.md), cuối file). Nộp cùng báo cáo Tuần 2, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), chờ SV duyệt. Góp ý nhận được ghi vào `tuan-02.md`, sửa thẳng `DE_CUONG.md` |
 
 ### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
 
@@ -118,7 +120,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-21 | Định lượng hóa NFR (≥ 5 ràng buộc đo được) | TC2.1 | Chưa bắt đầu | VD: thời gian phản hồi, số người dùng đồng thời |
 | P-23 | Rà soát đặc tả TLCN trong `SRS.md`: sửa chỗ sai/lỗi thời + viết acceptance criteria cho 26 use case | TC2.1 | Chưa bắt đầu | Gộp P-20 cũ: rà tới use case nào thì viết AC cho use case đó luôn. Mức 5 cần 100% use case có AC. Ghi từng lần sửa vào §6; mỗi AC nên có test tương ứng ở P-12 |
 | P-24 | Cập nhật sơ đồ thiết kế trong `SDD.md` cho khớp mã nguồn hiện tại | TC2.1 | Chưa bắt đầu | Hội đồng đối chiếu ngẫu nhiên 5 điểm |
-| P-25 | Thực nghiệm với ≥ 10 người dùng thật: phỏng vấn nhu cầu (~5 phút đầu) → làm tác vụ → đo SUS | G7, TC2.7, TC1 | Chưa bắt đầu | Gộp P-22 cũ, theo D-013. Phần phỏng vấn là minh chứng TC1 (≥ 1 người → Mức 3, ≥ 2 → Mức 4, ≥ 3 → Mức 5); phần tác vụ + SUS cho TC2.7. Biên bản ghi tách hai phần. Phải đúng nhóm đối tượng, không chỉ bạn cùng lớp |
+| P-25 | Thực nghiệm với khoảng 3–5 người dùng thật: phỏng vấn nhu cầu (~5 phút đầu) → làm tác vụ → đo SUS | G7, TC2.7, TC1 | Chưa bắt đầu | Gộp P-22 cũ, theo D-013. Số người theo D-017: theo ngưỡng tham chiếu của rubric, 3–4 người là Mức 3, 5 người là Mức 4 của TC2.7; ngưỡng chính thức chốt ở bản cam kết P-03. Phần phỏng vấn là minh chứng TC1 (≥ 1 người → Mức 3, ≥ 2 → Mức 4, ≥ 3 → Mức 5); phần tác vụ + SUS cho TC2.7. Biên bản ghi tách hai phần. Phải đúng nhóm đối tượng, không chỉ bạn cùng lớp |
 | P-26 | Một vòng cải tiến theo phản hồi + đo lại trước–sau | TC2.7 | Chưa bắt đầu | Điều kiện của Mức 5 |
 
 *P-20 (viết AC) đã gộp vào P-23; P-22 (lấy ý kiến bên liên quan) đã gộp vào P-25

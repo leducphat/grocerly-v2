@@ -416,6 +416,10 @@ GitHub Student Developer Pack.
 Mức 5. Đồ án một người, quy mô nhỏ, khó tìm riêng 2–3 người để khảo sát. Trong
 khi đó TC2.7 (P-25) vẫn bắt buộc phải có ≥ 10 người dùng thật thuộc nhóm mục tiêu.
 
+> *Đính chính 15/09/2026:* câu trên chưa chính xác — ≥ 10 người là ngưỡng Mức 5 của
+> TC2.7, không phải điều kiện bắt buộc (≥ 3 người đã là Mức 3). Số người thực
+> nghiệm được chốt lại ở D-017.
+
 **Phương án đã cân nhắc**
 
 1. *Hai đợt riêng: khảo sát sớm (P-22) và thực nghiệm sau (P-25)* — dữ liệu nhu
@@ -555,6 +559,43 @@ cách merge đều đặn (xem Hệ quả) để PR không phình ra.
   `develop` → `main`. Ghi vào bản cam kết P-03.
 - Khi có CI (P-10): bật branch protection cho `main` (bắt buộc qua PR, bắt buộc CI
   xanh); `develop` không cần khóa.
+
+---
+
+## D-017 · Thực nghiệm người dùng với khoảng 3–5 người
+
+- **Ngày:** 15/09/2026
+- **Trạng thái:** Đã chốt — rủi ro chấp nhận (*accepted risk*)
+
+**Bối cảnh.** Đề cương, P-25 và D-013 đặt mục tiêu ≥ 10 người dùng thật cho thực
+nghiệm. Khi soạn đề cương nộp GVHD, SV chốt lại con số khoảng 3–5 người. Đọc lại
+rubric thì ≥ 10 người không phải điều kiện bắt buộc như D-013 viết, mà là ngưỡng
+Mức 5 của TC2.7. Theo ngưỡng tham chiếu ở Mục 5 của rubric: ≥ 3 người là Mức 3,
+≥ 5 người là Mức 4, ≥ 10 người là Mức 5; và SV cùng GVHD được phép điều chỉnh
+ngưỡng khi chốt bản cam kết (Bước 3).
+
+**Phương án đã cân nhắc**
+
+1. *Giữ ≥ 10 người* — mở đường tới Mức 5 của TC2.7, nhưng phải tìm đủ hơn 10 người
+   đúng nhóm đối tượng và tổ chức từng buổi trong Tuần 10–12, một mình.
+2. *Khoảng 3–5 người* — làm được chắc chắn hơn; theo ngưỡng tham chiếu, TC2.7 dừng
+   ở Mức 3 (3–4 người) hoặc Mức 4 (5 người).
+3. *Ghi 3–5 người ở đề cương nhưng giữ ≥ 10 người ở kế hoạch* — tài liệu tự mâu
+   thuẫn, hội đồng đối chiếu là thấy.
+
+**Quyết định.** Chọn (2). Đề cương và P-25 ghi khoảng 3–5 người dùng thật thuộc
+nhóm đối tượng mục tiêu.
+
+**Lý do.** 3–5 người là con số SV dự tính làm được; 10 người là hơi quá. SV chấp
+nhận rủi ro về điểm (*accepted risk*): theo ngưỡng tham chiếu, TC2.7 mất tối đa
+khoảng 0,75 điểm (5 người, Mức 4) đến 1,5 điểm (3–4 người, Mức 3) so với Mức 5. TC1 không bị ảnh hưởng: 3 người phỏng vấn đã đủ ngưỡng
+Mức 5 về số bên liên quan (D-013).
+
+**Hệ quả.**
+- Sửa `DE_CUONG.md` (§1, §2.2, bảng kế hoạch §5) và P-25 trong `PLAN.md`.
+- D-013 giữ nguyên văn, thêm ghi chú đính chính trỏ về đây.
+- Khi soạn bản cam kết P-03, ghi rõ ngưỡng số người dùng thực nghiệm đã thống nhất
+  với GVHD.
 
 ---
 

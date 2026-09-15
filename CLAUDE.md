@@ -57,8 +57,9 @@ Mốc 50% là **điều kiện cứng**: không chốt được bản cam kết 
 *không đủ điều kiện bảo vệ* (xem §4).
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, ghi vào
-`docs/weekly_report/`. Với đồ án 15 tuần, Mức 5 của rubric đòi **≥ 14/15 tuần có
-commit** — nghĩa là làm đều, không dồn.
+`docs/weekly_report/` và **nộp lên portal trước 17:00 Thứ Sáu** của chính tuần đó
+(GVHD chốt, áp dụng từ Tuần 2). Với đồ án 15 tuần, Mức 5 của rubric đòi
+**≥ 14/15 tuần có commit** — nghĩa là làm đều, không dồn.
 
 ---
 
