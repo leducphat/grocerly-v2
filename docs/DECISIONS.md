@@ -599,6 +599,66 @@ Mức 5 về số bên liên quan (D-013).
 
 ---
 
+## D-018 · Kiểm thử tự động chạy trên settings riêng, SQLite trong bộ nhớ, không gọi dịch vụ ngoài
+
+- **Ngày:** 16/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** P-12 dựng bộ test tự động đầu tiên. `AGENTS.md`/`CLAUDE.md` §8 đã
+chọn pytest + pytest-django; còn phải chốt test chạy trên database nào, tách dịch
+vụ ngoài ra sao, và xử lý các lỗi đã biết (L-x) thế nào. Ràng buộc: `settings.py`
+chép **mọi** key của `.env` vào `os.environ`, ghi đè cả biến môi trường đã đặt sẵn,
+mà `.env` hiện vẫn trỏ tới database, Cloudinary và khóa Gemini production của TLCN
+(D-002).
+
+**Phương án đã cân nhắc**
+
+1. *Database cho test*
+   - (a) Dùng `settings.py`, đổi database bằng biến môi trường — không làm được vì
+     `.env` ghi đè; sơ suất một lần là pytest-django tạo database `test_…` ngay trên
+     server production.
+   - (b) File `grocerly/settings_test.py` import `settings.py` rồi ghi đè
+     `DATABASES` sang SQLite trong bộ nhớ — nhanh, không cần cài thêm gì, chạy được
+     cả khi không có `.env` (CI). Đánh đổi: SQLite khác PostgreSQL của production ở
+     vài chỗ (so khớp không phân biệt hoa thường với chữ có dấu, kiểu Decimal), có
+     thể che lỗi chỉ xảy ra trên PostgreSQL.
+   - (c) PostgreSQL riêng cho test (Docker) — giống production nhất, nhưng lần chạy
+     test nào trên máy cá nhân cũng phải bật Docker.
+2. *Lỗi đã biết nhưng chưa sửa*
+   - (a) Chưa viết test cho tới khi sửa — lỗi không được chứng minh bằng test.
+   - (b) Viết test và để đỏ — bộ test đỏ thường trực, không phân biệt được lỗi cũ
+     với lỗi mới phát sinh.
+   - (c) Viết test mô tả hành vi **đúng**, đánh dấu `xfail` kèm mã L-x, bật
+     `xfail_strict` — bộ test vẫn xanh, lỗi được tái hiện; khi sửa xong, test
+     chuyển XPASS làm bộ test đỏ, buộc gỡ dấu `xfail`, test đó thành regression test.
+3. *Dữ liệu test* — fixture pytest viết tay, hoặc thư viện factory_boy /
+   model_bakery. Fixture viết tay không thêm thư viện, đọc là hiểu.
+
+**Quyết định.** Chọn 1(b), 2(c), fixture viết tay. Kèm theo:
+- **Gemini:** `settings_test.py` xóa trắng `GEMINI_API_KEY`; test cần câu trả lời
+  thì thay model bằng `MagicMock` — không test nào gọi được Gemini thật.
+- **VNPay:** merchant và secret giả; test tự ký phản hồi VNPay bằng HMAC-SHA512,
+  viết độc lập với `core/vnpay.py` để không dùng lại chính đoạn code đang kiểm.
+- **File upload:** `InMemoryStorage`, không lên Cloudinary, không ghi `media/`.
+- **Chốt chặn:** `grocerly/conftest.py` dừng pytest nếu database không phải SQLite
+  — chặn trường hợp chạy nhầm `pytest --ds=grocerly.settings`.
+- **Thư viện test** nằm trong `grocerly/requirements-dev.txt` (kế thừa
+  `requirements.txt`), không vào image production.
+
+**Lý do.** Ưu tiên số một là không chạm vào hạ tầng TLCN (D-002) và chạy được trên
+CI không có `.env` (P-10). Hai điều này đã kiểm chứng ngày 16/09/2026: chốt chặn
+dừng đúng khi trỏ settings sang PostgreSQL; bộ test chạy xanh trên bản sao mã nguồn
+không có `.env`. Rủi ro lệch SQLite/PostgreSQL được chấp nhận ở giai đoạn này; xem
+lại khi dựng CI — có thể thêm một job chạy trên PostgreSQL.
+
+**Hệ quả.**
+- Chạy test: `cd grocerly && pytest`; kèm độ phủ: `pytest --cov`.
+- Viết test phát hiện thêm ba chỗ lệch L-8, L-9, L-10 — ghi vào `COMMITMENT.md` §3.
+- Khi sửa một lỗi L-x: gỡ `xfail` của test tương ứng **trong cùng commit sửa**.
+- Cập nhật `AGENTS.md`/`CLAUDE.md` §6, §8, §9.
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
