@@ -208,9 +208,10 @@ ngưỡng. Mỗi test xfail được chạy lại để xác nhận nó hỏng �
 - Hỏi lại quan hệ giữa đề cương và bản cam kết, dẫn tới việc tách rõ hai văn bản
   trong PLAN.
 - Yêu cầu chia phần P-12 thành nhiều commit theo nhóm rồi push lên develop.
-- Lỗi của AI trong tuần (AI_USAGE_LOG mục 2, #14–#18): 3 lỗi trình bày trong công cụ
-  xuất đề cương, D-013 ghi nhầm "bắt buộc ≥ 10 người", và một script sửa tài liệu
-  bị dừng giữa chừng vì giả định dòng cuối file luôn có ký tự xuống dòng.
+- Lỗi của AI trong tuần (AI_USAGE_LOG mục 2, #14–#19): 3 lỗi trình bày trong công cụ
+  xuất đề cương, D-013 ghi nhầm "bắt buộc ≥ 10 người", một script sửa tài liệu bị
+  dừng giữa chừng vì giả định dòng cuối file luôn có ký tự xuống dòng, và dòng nhật
+  ký Tuần 2 bị chèn nhầm vào bảng mốc thời gian của PLAN.
 ```
 
 ---

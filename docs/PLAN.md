@@ -45,7 +45,6 @@ Lịch đầy đủ từng tuần: [`weekly_report/README.md`](weekly_report/REA
 | Mốc | Tuần | Ngày | Ghi chú |
 |---|---|---|---|
 | Bắt đầu | Tuần 1 | 07/09/2026 – 13/09/2026 | |
-| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018) |
 | Hết Giai đoạn 0 | Tuần 4 | 28/09/2026 – 04/10/2026 | |
 | **Chốt cam kết sản phẩm + bộ metric** | **hết Tuần 7** | **25/10/2026** | **Mốc 50%. Gate G1 — trễ là *không đủ điều kiện bảo vệ*.** |
 | Xong thực nghiệm người dùng | Tuần 12 | 23/11/2026 – 29/11/2026 | |
@@ -147,6 +146,7 @@ Mỗi tuần thêm một dòng. Chi tiết đặt trong [`weekly_report/`](weekl
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
 | Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
+| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018) |
 
 ---
 

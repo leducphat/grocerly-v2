@@ -63,7 +63,7 @@ dòng phải khớp với một commit có thật.
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **18**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **19**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -85,8 +85,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 16 | 14/09/2026 | Style "Outline Part" in đậm cả dòng, làm "5. PHỤ LỤC — bản cam kết sản phẩm và metric, …" đậm toàn bộ | AI suy từ bản TLCN (mọi dòng phần đều đậm cả dòng) mà không đối chiếu Markdown, nơi chỉ tên phần được đánh dấu `**…**` | AI (so ảnh bản xuất với trang TLCN) | — như trên |
 | 17 | 15/09/2026 | D-013 (viết 10/09/2026) ghi TC2.7 "bắt buộc phải có ≥ 10 người dùng thật"; con số này lan sang đề cương (§1, §2.2, bảng kế hoạch) và P-25 | AI lấy ngưỡng Mức 5 của TC2.7 làm điều kiện bắt buộc, không phân biệt các mức (rubric Mục 5: ≥ 3 người là Mức 3, ≥ 5 là Mức 4) và không ghi rằng ngưỡng được điều chỉnh khi chốt bản cam kết | AI (đọc lại rubric khi SV đổi số người thành 3–5) | `9e8dd3e` — ghi chú đính chính dưới D-013, thêm D-017 |
 | 18 | 16/09/2026 | Script Python sửa một lượt nhiều tài liệu (`SRS.md`, `PLAN.md`, `AGENTS.md`/`CLAUDE.md`) dừng giữa chừng với `ValueError`, sau khi đã ghi xong `SRS.md` và một phần `PLAN.md` | AI giả định dòng cuối file luôn có ký tự xuống dòng khi tìm chỗ chèn (`s.index("\n", ...)`), trong khi dòng 4 của bảng `PLAN.md` §6 là dòng cuối file và không có. Script lại ghi từng file ngay sau khi sửa, nên lỗi để lại trạng thái sửa dở. AI xem `git diff` để biết phần nào đã ghi rồi làm nốt bằng công cụ Edit; script sau giữ nguyên kiểu xuống dòng và báo rõ chuỗi không khớp | AI (qua output lỗi) | `d045ba7` (`AGENTS.md`/`CLAUDE.md`), `6df5e0f` (`SRS.md`, `PLAN.md`) |
+| 19 | 16/09/2026 | Dòng "Tuần 2" của nhật ký tiến độ bị chèn vào bảng mốc thời gian `PLAN.md` §2 (giữa "Bắt đầu" và "Hết Giai đoạn 0") thay vì bảng Nhật ký tiến độ §5; lỗi nằm trong commit `e056d7c` và đã được push | Script tìm chỗ chèn bằng chuỗi `| Tuần 1 |` và lấy vị trí khớp **đầu tiên** mà không kiểm tra chuỗi có duy nhất hay không — chuỗi này khớp cả dòng `| Bắt đầu | Tuần 1 |` ở §2. Sau khi chèn, AI chỉ xem `git diff --stat` (số dòng đổi) chứ không đọc lại vị trí dòng mới, nên lỗi lọt qua 6 commit | AI (đọc lại `PLAN.md` sau khi push) | commit ngay sau `e3473d6`: *docs: move week 2 log row to PLAN section 5* |
 
-**Ghi chú khi bảo vệ:** chín trong mười tám mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** chín trong mười chín mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
