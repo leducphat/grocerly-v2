@@ -5,7 +5,7 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 14/09/2026 |
+| Cập nhật lần cuối | 16/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
 | Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng) |
 
@@ -45,6 +45,7 @@ Lịch đầy đủ từng tuần: [`weekly_report/README.md`](weekly_report/REA
 | Mốc | Tuần | Ngày | Ghi chú |
 |---|---|---|---|
 | Bắt đầu | Tuần 1 | 07/09/2026 – 13/09/2026 | |
+| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11) |
 | Hết Giai đoạn 0 | Tuần 4 | 28/09/2026 – 04/10/2026 | |
 | **Chốt cam kết sản phẩm + bộ metric** | **hết Tuần 7** | **25/10/2026** | **Mốc 50%. Gate G1 — trễ là *không đủ điều kiện bảo vệ*.** |
 | Xong thực nghiệm người dùng | Tuần 12 | 23/11/2026 – 29/11/2026 | |
@@ -94,12 +95,12 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 |---|---|---|---|---|
 | P-01 | Khung specs: `AGENTS.md`, `CLAUDE.md`, `docs/` | TC2.4 | **Xong** | 10/09/2026 |
 | P-02 | Chốt lịch KLTN | — | **Xong** | 10/09/2026 — xem §2 |
-| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5) |
+| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5). **Khác đề cương P-08:** rubric không nhắc tới đề cương; bản cam kết là văn bản của Bước 3, phải có metric, có chữ ký SV + GVHD và qua rà soát của bộ môn (đọc lại nguyên văn 16/09/2026). Rubric không quy định hình thức → **hỏi GVHD** nên gộp phần cam kết + metric vào đề cương hay làm văn bản riêng để ký |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
 | P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. **Hạn nộp portal: trước 17:00 Thứ Sáu mỗi tuần** (GVHD chốt, áp dụng từ Tuần 2). Tuần 1: [`tuan-01.md`](weekly_report/tuan-01.md) — đã nộp portal 12/09/2026 |
 | P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2, #3; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
 | P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | **Xong** | 11/09/2026. Theo D-011 (thay P-27 cũ). `SRS.md` giữ Mục 1–6 + kiểm thử, hạn chế (đánh số lại 7–9); `SDD.md` nhận Mục 7–9 cũ (thành Mục 1–3). Chỉ chuyển chỗ, chưa sửa nội dung — việc rà soát để cho P-23, P-24. Bảng đối chiếu số mục: §6 dòng 4 |
-| P-08 | Nộp đề cương KLTN ([`DE_CUONG.md`](DE_CUONG.md)) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp Tuần 1 ([`tuan-01.md`](weekly_report/tuan-01.md), cuối file). Nộp cùng báo cáo Tuần 2, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), chờ SV duyệt. Góp ý nhận được ghi vào `tuan-02.md`, sửa thẳng `DE_CUONG.md` |
+| P-08 | Nộp đề cương KLTN ([`DE_CUONG.md`](DE_CUONG.md)) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp Tuần 1 ([`tuan-01.md`](weekly_report/tuan-01.md), cuối file). Nộp cùng báo cáo Tuần 2, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), **SV đã duyệt 16/09/2026**. Góp ý nhận được ghi vào `tuan-02.md`, sửa thẳng `DE_CUONG.md`. Đề cương **không thay** bản cam kết P-03 — xem ghi chú P-03 |
 
 ### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
 
