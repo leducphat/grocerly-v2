@@ -39,7 +39,7 @@ thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
 
 | Chỉ số | Giá trị |
 |---|---|
-| Số commit | 9 tính tới 16/09/2026 — `9e8dd3e`, `560bdf0`, `e056d7c`, 4 commit test của P-12 (`d045ba7`, `f1417de`, `b8203bd`, `1467975`) và 2 commit tài liệu |
+| Số commit | 9 tính tới 16/09/2026 — `9e8dd3e`, `560bdf0`, `e056d7c`, 4 commit test của P-12 (`d045ba7`, `f1417de`, `b8203bd`, `1467975`) và 2 commit tài liệu (`6df5e0f` và commit ghi mã commit vào nhật ký AI) |
 | Số Pull Request đã merge (có review) | 0 tính tới 16/09/2026 — PR `develop` → `main` sẽ mở trước lúc nộp |
 | Số test tự động | 48 — 43 xanh, 5 `xfail` (lỗi đã biết, chưa sửa) |
 | Số lần CI chạy / tỉ lệ build xanh | 0 — chưa có CI (P-10); test mới chạy trên máy cá nhân |
