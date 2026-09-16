@@ -45,7 +45,7 @@ Lịch đầy đủ từng tuần: [`weekly_report/README.md`](weekly_report/REA
 | Mốc | Tuần | Ngày | Ghi chú |
 |---|---|---|---|
 | Bắt đầu | Tuần 1 | 07/09/2026 – 13/09/2026 | |
-| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11) |
+| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018) |
 | Hết Giai đoạn 0 | Tuần 4 | 28/09/2026 – 04/10/2026 | |
 | **Chốt cam kết sản phẩm + bộ metric** | **hết Tuần 7** | **25/10/2026** | **Mốc 50%. Gate G1 — trễ là *không đủ điều kiện bảo vệ*.** |
 | Xong thực nghiệm người dùng | Tuần 12 | 23/11/2026 – 29/11/2026 | |
@@ -108,8 +108,8 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 |---|---|---|---|---|
 | P-10 | Dựng CI: build → lint → test → quét secret → đóng gói → deploy | G6, TC2.6 | Chưa bắt đầu | Mức 5 cần ≥ 6 chặng. Dựng sớm để kịp tích lũy ≥ 10 lần deploy |
 | P-11 | Dựng hạ tầng KLTN riêng (host + DB + image storage), cập nhật `.env` | TC2.2, TC2.6 | Chưa bắt đầu | Theo D-002. Bổ sung nhóm `VNPAY_*` vào `.env.example` |
-| P-12 | Cài pytest + pytest-django, viết test cho luồng cốt lõi | G5, TC2.5 | Chưa bắt đầu | Ưu tiên: auth, giỏ hàng, checkout, tool AI |
-| P-13 | Báo cáo coverage trong CI | TC2.5 | Chưa bắt đầu | Mức 5 cần ≥ 70% ở module cốt lõi |
+| P-12 | Cài pytest + pytest-django, viết test cho luồng cốt lõi | G5, TC2.5 | Đang làm | Ưu tiên: auth, giỏ hàng, checkout, tool AI. **16/09/2026:** dựng hạ tầng test theo D-018 (`settings_test.py`, `pytest.ini`, `conftest.py`, `requirements-dev.txt`); 48 test cho đăng ký/đăng nhập, giỏ hàng, checkout, VNPay, trợ lý AI — 43 xanh, 5 `xfail` tái hiện lỗi L-6 → L-10 (3 lỗi mới L-8, L-9, L-10 phát hiện khi viết test). Còn: `useradmin` (UC-19, UC-20, UC-26), đánh giá (L-3), wishlist, hồ sơ; mỗi AC viết ở P-23 cần test tương ứng |
+| P-13 | Báo cáo coverage trong CI | TC2.5 | Chưa bắt đầu | Mức 5 cần ≥ 70% ở module cốt lõi. Đã cài pytest-cov (D-018). Số đo đầu tiên, chạy tay 16/09/2026: tổng 66%; `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21%. Còn: đưa vào CI (P-10); chốt "module cốt lõi" trong bản cam kết P-03 |
 | P-14 | Cấu hình linter + phân tích tĩnh, đưa vào CI | TC2.4 | Chưa bắt đầu | Mức 5 cần 0 lỗi lint, 0 issue Blocker/Critical, trùng lặp ≤ 3% |
 | P-15 | Quét secret tự động (gitleaks) trong CI | TC2.4 | Chưa bắt đầu | Hiện đang sạch — cần báo cáo làm minh chứng |
 | P-16 | Health check + log tập trung + cảnh báo sau triển khai | TC2.6 | Chưa bắt đầu | Yêu cầu của Mức 5 |
@@ -167,3 +167,4 @@ ghi lý do là minh chứng sinh viên nắm được hệ thống; một đặc
 | 2 | 10/09/2026 | Toàn file | Đổi tên `PRD.md` → `SRS.md`, thêm ghi chú ranh giới SRS/SDD | Rubric Mục 8 gọi tên hồ sơ là "SRS/SDD"; nội dung file vốn là đặc tả yêu cầu chứ không phải PRD — xem D-009 | *(chưa commit)* |
 | 3 | 11/09/2026 | §2.1, §2.2, §2.3, §3 (A3), §4.3, FR-A-02, FR-A-06, §6.1 (UC-19), §8 | A3 "Người bán vận hành gian hàng riêng" → "Nhân viên cửa hàng"; thêm mô hình một nhà bán vào phạm vi, marketplace vào ngoài phạm vi. Giữ nguyên §11 (trích nguyên văn TLCN) và mã `FR-V-xx` | Mã nguồn không có vai trò người bán riêng — mọi staff thấy toàn bộ cửa hàng (chỗ lệch L-1 trong `COMMITMENT.md`) — xem D-015 | *(chưa commit)* |
 | 4 | 11/09/2026 | Toàn file `SRS.md`; tạo `SDD.md` | Tách đặc tả thiết kế sang `SDD.md`, nội dung giữ nguyên. Số mục: SRS §7 → SDD §1 · SRS §7.1 → SDD §1.1 · SRS §8 → SDD §2 · SRS §9 → SDD §3 · SRS §9.1 → SDD §3.1 · SRS §10 → SRS §7 · SRS §11 → SRS §8 · SRS §12 → SRS §9. Thay ghi chú "sẽ tách" ở đầu `SRS.md` bằng ghi chú ranh giới; thêm ghi chú "nợ thiết kế" ở cuối SDD §3 | P-07, theo D-011: tách trước P-23 và P-24 để mỗi việc chỉ đụng tới một file. Kiểm thử và hạn chế ở lại SRS vì D-011 chỉ chuyển Mục 7–9 | *(chưa commit)* |
+| 5 | 16/09/2026 | SRS §7 | Thay ghi chú "chưa có kiểm thử tự động" bằng đối chiếu TC_01 → TC_05 với test tự động; ghi nhận *Kết quả mong đợi* của TC_02, TC_04 không khớp thông báo trong code | Viết test ở P-12 thấy hai câu thông báo mà TLCN ghi PASS không có trong mã nguồn. Chưa sửa cột kết quả vì câu chữ thông báo chốt ở P-23 (acceptance criteria) | *(chưa commit)* |
