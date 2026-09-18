@@ -1,0 +1,81 @@
+# Continuous integration for Grocerly. See docs/DECISIONS.md D-019.
+#
+# Runs on every push to develop/main and on every pull request into main.
+# Nothing here reads grocerly/.env or reaches a real service: Django runs with
+# grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini key).
+# Later stages (lint P-14, secret scan P-15, image build and deploy P-11) are
+# added as new steps or jobs when those items are done.
+
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [main]
+
+# The workflow only reads the code; it never writes to the repository.
+permissions:
+  contents: read
+
+# A newer push to the same branch cancels the run that is still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  twin-files:
+    name: AGENTS.md and CLAUDE.md match
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # D-006: the two files must be identical from line 2 on.
+      - name: Compare the twin agent files
+        run: diff <(tail -n +2 AGENTS.md) <(tail -n +2 CLAUDE.md)
+
+  test:
+    name: Build, check and test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: grocerly
+    env:
+      DJANGO_SETTINGS_MODULE: grocerly.settings_test
+    steps:
+      - uses: actions/checkout@v5
+
+      # Same Python version as the production image (grocerly/Dockerfile).
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: grocerly/requirements*.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Django system check
+        run: python manage.py check
+
+      # Fails when a model was changed without a migration.
+      - name: Check for missing migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      # Coverage scope and exclusions come from grocerly/.coveragerc.
+      - name: Run tests with coverage
+        run: pytest --cov --cov-report=term --cov-report=xml
+
+      - name: Write coverage table to the run summary
+        if: always()
+        run: |
+          echo "## Coverage" >> "$GITHUB_STEP_SUMMARY"
+          coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: grocerly/coverage.xml
+          if-no-files-found: ignore
