@@ -4,6 +4,9 @@
 > môn học"* của TLCN, để trình GVHD. Đề cương là văn bản **đăng ký ban đầu**; tiến
 > độ thực tế theo dõi ở [`PLAN.md`](PLAN.md), danh sách chức năng và ngưỡng metric
 > chính thức nằm ở bản cam kết [`COMMITMENT.md`](COMMITMENT.md) (P-03).
+>
+> Theo ý kiến GVHD cho bản nộp Tuần 1, đề cương được nộp để GVHD **góp ý nội
+> dung** cùng báo cáo Tuần 2 — hạn **17:00 Thứ Sáu 18/09/2026** (P-08).
 
 **Trường ĐH Công nghệ Kỹ thuật TP.HCM — Khoa Công nghệ Thông tin**
 
@@ -27,9 +30,9 @@
 - **Các hạn chế TLCN đã tự ghi nhận:** chưa có kiểm thử tự động, chưa có CI/CD,
   chưa thực nghiệm với người dùng thật, đặc tả chưa có acceptance criteria và
   chưa được đối chiếu lại với mã nguồn.
-- **Rubric chấm điểm KLTN** của Khoa CNTT — ngành Công nghệ Phần mềm.
-- **Người dùng thực tế:** ≥ 10 người thuộc nhóm đối tượng mua thực phẩm trực
-  tuyến, tham gia phỏng vấn nhu cầu và thực nghiệm sản phẩm.
+- **Rubric chấm điểm KLTN** của Khoa CNTT — chuyên ngành Công nghệ Phần mềm.
+- **Người dùng thực tế:** khoảng 3–5 người thuộc nhóm đối tượng mua thực phẩm
+  trực tuyến, tham gia phỏng vấn nhu cầu và thực nghiệm sản phẩm.
 - **Tài liệu chuyên ngành, ưu tiên tài liệu ngoại ngữ:** tài liệu chính thức của
   Django, pytest / pytest-django, coverage.py, GitHub Actions, Google Gemini API
   (function calling); OWASP Top 10; chuẩn chất lượng phần mềm ISO/IEC 25010; thang
@@ -76,8 +79,9 @@
 - **CI/CD và triển khai:** dựng pipeline nhiều chặng, triển khai lên hạ tầng riêng
   của KLTN (host, cơ sở dữ liệu, lưu trữ ảnh tách khỏi TLCN), bổ sung health check
   và log sau triển khai.
-- **Thực nghiệm người dùng:** ≥ 10 người thật; mỗi buổi gồm phỏng vấn nhu cầu, thực
-  hiện tác vụ và chấm SUS; sau đó cải tiến theo phản hồi và đo lại trước–sau.
+- **Thực nghiệm người dùng:** khoảng 3–5 người thật; mỗi buổi gồm phỏng vấn nhu
+  cầu, thực hiện tác vụ và chấm SUS; sau đó cải tiến theo phản hồi và đo lại
+  trước–sau.
 - **Quy trình và minh chứng:** làm việc theo nhánh + Pull Request; commit và báo
   cáo tiến độ với GVHD hằng tuần; ghi nhật ký sử dụng AI (AI Usage Log) ngay sau
   mỗi phiên làm việc.
@@ -178,10 +182,10 @@ tra trong backlog [`PLAN.md`](PLAN.md) §4.
 | 2 | Tuần 3 – Tuần 4 (21/09 – 04/10/2026) | Dựng hạ tầng riêng cho KLTN. Dựng pipeline CI. Cài pytest, viết những test đầu tiên. Cấu hình linter, phân tích tĩnh và quét secret trong CI. | P-10, P-11, P-12, P-14, P-15 |
 | 3 | Tuần 5 – Tuần 7 (05/10 – 25/10/2026) | Viết test cho luồng cốt lõi, đưa báo cáo độ phủ vào CI. Sửa lỗi giá và lỗi tồn kho kèm test tái hiện lỗi. Định lượng NFR. Soạn metric, KPI và **ký bản cam kết**. | P-12, P-13, P-21, P-03. **Hạn 25/10/2026** |
 | 4 | Tuần 8 – Tuần 9 (26/10 – 08/11/2026) | Rà soát đặc tả và viết acceptance criteria cho từng use case. Cập nhật sơ đồ thiết kế cho khớp mã nguồn. Sửa các lỗi nghiệp vụ còn lại. Bổ sung health check và log. | P-23, P-24, P-16 |
-| 5 | Tuần 10 – Tuần 12 (09/11 – 29/11/2026) | Chuẩn bị kịch bản thực nghiệm. Thực nghiệm với ≥ 10 người dùng: phỏng vấn nhu cầu, thực hiện tác vụ, chấm SUS. | P-25. Xong trong Tuần 12 |
+| 5 | Tuần 10 – Tuần 12 (09/11 – 29/11/2026) | Chuẩn bị kịch bản thực nghiệm. Thực nghiệm với khoảng 3–5 người dùng: phỏng vấn nhu cầu, thực hiện tác vụ, chấm SUS. | P-25. Xong trong Tuần 12 |
 | 6 | Tuần 12 – Tuần 13 (23/11 – 06/12/2026) | Cải tiến theo phản hồi, đo lại trước–sau. Bắt đầu viết báo cáo khóa luận. | P-26, P-30 |
 | 7 | Tuần 14 – Tuần 15 (07/12 – 20/12/2026) | Hoàn thiện báo cáo và mục hướng phát triển mở rộng. Kiểm tra trùng lặp. Chuẩn bị slide và demo trực tiếp. Tổng hợp hồ sơ minh chứng. | P-30 → P-34 |
-| — | Suốt 15 tuần | Commit và báo cáo tiến độ với GVHD hằng tuần; ghi AI Usage Log sau mỗi phiên làm việc. | P-05 |
+| — | Suốt 15 tuần | Commit và báo cáo tiến độ với GVHD hằng tuần, nộp portal trước 17:00 Thứ Sáu; ghi AI Usage Log sau mỗi phiên làm việc. | P-05 |
 
 ---
 

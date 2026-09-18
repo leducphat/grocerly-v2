@@ -1,0 +1,13 @@
+[run]
+source =
+    core
+    userauths
+    useradmin
+    store_api
+omit =
+    */migrations/*
+    */tests/*
+
+[report]
+show_missing = true
+skip_empty = true

@@ -213,4 +213,9 @@ nằm ở việc định hướng, bác bỏ đề xuất sai và kiểm soát �
 
 ---
 
-*Ý kiến GVHD:*
+*Ý kiến GVHD* (ghi nhận 14/09/2026):
+
+- Lần nộp sau nộp **đề cương** để GVHD góp ý nội dung → P-08: nộp
+  [`../DE_CUONG.md`](../DE_CUONG.md) cùng báo cáo Tuần 2.
+- Chốt hạn nộp báo cáo tuần: **trước 17:00 Thứ Sáu** hằng tuần, áp dụng từ Tuần 2
+  → [`README.md`](README.md).

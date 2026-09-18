@@ -416,6 +416,10 @@ GitHub Student Developer Pack.
 Mức 5. Đồ án một người, quy mô nhỏ, khó tìm riêng 2–3 người để khảo sát. Trong
 khi đó TC2.7 (P-25) vẫn bắt buộc phải có ≥ 10 người dùng thật thuộc nhóm mục tiêu.
 
+> *Đính chính 15/09/2026:* câu trên chưa chính xác — ≥ 10 người là ngưỡng Mức 5 của
+> TC2.7, không phải điều kiện bắt buộc (≥ 3 người đã là Mức 3). Số người thực
+> nghiệm được chốt lại ở D-017.
+
 **Phương án đã cân nhắc**
 
 1. *Hai đợt riêng: khảo sát sớm (P-22) và thực nghiệm sau (P-25)* — dữ liệu nhu
@@ -555,6 +559,188 @@ cách merge đều đặn (xem Hệ quả) để PR không phình ra.
   `develop` → `main`. Ghi vào bản cam kết P-03.
 - Khi có CI (P-10): bật branch protection cho `main` (bắt buộc qua PR, bắt buộc CI
   xanh); `develop` không cần khóa.
+
+---
+
+## D-017 · Thực nghiệm người dùng với khoảng 3–5 người
+
+- **Ngày:** 15/09/2026
+- **Trạng thái:** Đã chốt — rủi ro chấp nhận (*accepted risk*)
+
+**Bối cảnh.** Đề cương, P-25 và D-013 đặt mục tiêu ≥ 10 người dùng thật cho thực
+nghiệm. Khi soạn đề cương nộp GVHD, SV chốt lại con số khoảng 3–5 người. Đọc lại
+rubric thì ≥ 10 người không phải điều kiện bắt buộc như D-013 viết, mà là ngưỡng
+Mức 5 của TC2.7. Theo ngưỡng tham chiếu ở Mục 5 của rubric: ≥ 3 người là Mức 3,
+≥ 5 người là Mức 4, ≥ 10 người là Mức 5; và SV cùng GVHD được phép điều chỉnh
+ngưỡng khi chốt bản cam kết (Bước 3).
+
+**Phương án đã cân nhắc**
+
+1. *Giữ ≥ 10 người* — mở đường tới Mức 5 của TC2.7, nhưng phải tìm đủ hơn 10 người
+   đúng nhóm đối tượng và tổ chức từng buổi trong Tuần 10–12, một mình.
+2. *Khoảng 3–5 người* — làm được chắc chắn hơn; theo ngưỡng tham chiếu, TC2.7 dừng
+   ở Mức 3 (3–4 người) hoặc Mức 4 (5 người).
+3. *Ghi 3–5 người ở đề cương nhưng giữ ≥ 10 người ở kế hoạch* — tài liệu tự mâu
+   thuẫn, hội đồng đối chiếu là thấy.
+
+**Quyết định.** Chọn (2). Đề cương và P-25 ghi khoảng 3–5 người dùng thật thuộc
+nhóm đối tượng mục tiêu.
+
+**Lý do.** 3–5 người là con số SV dự tính làm được; 10 người là hơi quá. SV chấp
+nhận rủi ro về điểm (*accepted risk*): theo ngưỡng tham chiếu, TC2.7 mất tối đa
+khoảng 0,75 điểm (5 người, Mức 4) đến 1,5 điểm (3–4 người, Mức 3) so với Mức 5. TC1 không bị ảnh hưởng: 3 người phỏng vấn đã đủ ngưỡng
+Mức 5 về số bên liên quan (D-013).
+
+**Hệ quả.**
+- Sửa `DE_CUONG.md` (§1, §2.2, bảng kế hoạch §5) và P-25 trong `PLAN.md`.
+- D-013 giữ nguyên văn, thêm ghi chú đính chính trỏ về đây.
+- Khi soạn bản cam kết P-03, ghi rõ ngưỡng số người dùng thực nghiệm đã thống nhất
+  với GVHD.
+
+---
+
+## D-018 · Kiểm thử tự động chạy trên settings riêng, SQLite trong bộ nhớ, không gọi dịch vụ ngoài
+
+- **Ngày:** 16/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** P-12 dựng bộ test tự động đầu tiên. `AGENTS.md`/`CLAUDE.md` §8 đã
+chọn pytest + pytest-django; còn phải chốt test chạy trên database nào, tách dịch
+vụ ngoài ra sao, và xử lý các lỗi đã biết (L-x) thế nào. Ràng buộc: `settings.py`
+chép **mọi** key của `.env` vào `os.environ`, ghi đè cả biến môi trường đã đặt sẵn,
+mà `.env` hiện vẫn trỏ tới database, Cloudinary và khóa Gemini production của TLCN
+(D-002).
+
+**Phương án đã cân nhắc**
+
+1. *Database cho test*
+   - (a) Dùng `settings.py`, đổi database bằng biến môi trường — không làm được vì
+     `.env` ghi đè; sơ suất một lần là pytest-django tạo database `test_…` ngay trên
+     server production.
+   - (b) File `grocerly/settings_test.py` import `settings.py` rồi ghi đè
+     `DATABASES` sang SQLite trong bộ nhớ — nhanh, không cần cài thêm gì, chạy được
+     cả khi không có `.env` (CI). Đánh đổi: SQLite khác PostgreSQL của production ở
+     vài chỗ (so khớp không phân biệt hoa thường với chữ có dấu, kiểu Decimal), có
+     thể che lỗi chỉ xảy ra trên PostgreSQL.
+   - (c) PostgreSQL riêng cho test (Docker) — giống production nhất, nhưng lần chạy
+     test nào trên máy cá nhân cũng phải bật Docker.
+2. *Lỗi đã biết nhưng chưa sửa*
+   - (a) Chưa viết test cho tới khi sửa — lỗi không được chứng minh bằng test.
+   - (b) Viết test và để đỏ — bộ test đỏ thường trực, không phân biệt được lỗi cũ
+     với lỗi mới phát sinh.
+   - (c) Viết test mô tả hành vi **đúng**, đánh dấu `xfail` kèm mã L-x, bật
+     `xfail_strict` — bộ test vẫn xanh, lỗi được tái hiện; khi sửa xong, test
+     chuyển XPASS làm bộ test đỏ, buộc gỡ dấu `xfail`, test đó thành regression test.
+3. *Dữ liệu test* — fixture pytest viết tay, hoặc thư viện factory_boy /
+   model_bakery. Fixture viết tay không thêm thư viện, đọc là hiểu.
+
+**Quyết định.** Chọn 1(b), 2(c), fixture viết tay. Kèm theo:
+- **Gemini:** `settings_test.py` xóa trắng `GEMINI_API_KEY`; test cần câu trả lời
+  thì thay model bằng `MagicMock` — không test nào gọi được Gemini thật.
+- **VNPay:** merchant và secret giả; test tự ký phản hồi VNPay bằng HMAC-SHA512,
+  viết độc lập với `core/vnpay.py` để không dùng lại chính đoạn code đang kiểm.
+- **File upload:** `InMemoryStorage`, không lên Cloudinary, không ghi `media/`.
+- **Chốt chặn:** `grocerly/conftest.py` dừng pytest nếu database không phải SQLite
+  — chặn trường hợp chạy nhầm `pytest --ds=grocerly.settings`.
+- **Thư viện test** nằm trong `grocerly/requirements-dev.txt` (kế thừa
+  `requirements.txt`), không vào image production.
+
+**Lý do.** Ưu tiên số một là không chạm vào hạ tầng TLCN (D-002) và chạy được trên
+CI không có `.env` (P-10). Hai điều này đã kiểm chứng ngày 16/09/2026: chốt chặn
+dừng đúng khi trỏ settings sang PostgreSQL; bộ test chạy xanh trên bản sao mã nguồn
+không có `.env`. Rủi ro lệch SQLite/PostgreSQL được chấp nhận ở giai đoạn này; xem
+lại khi dựng CI — có thể thêm một job chạy trên PostgreSQL.
+
+**Hệ quả.**
+- Chạy test: `cd grocerly && pytest`; kèm độ phủ: `pytest --cov`.
+- Viết test phát hiện thêm ba chỗ lệch L-8, L-9, L-10 — ghi vào `COMMITMENT.md` §3.
+- Khi sửa một lỗi L-x: gỡ `xfail` của test tương ứng **trong cùng commit sửa**.
+- Cập nhật `AGENTS.md`/`CLAUDE.md` §6, §8, §9.
+
+---
+
+## D-019 · CI chạy trên GitHub Actions, dựng dần từng chặng theo backlog
+
+- **Ngày:** 17/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Gate G6 chặn TC2.6 ở 2,75/5 khi repo không có CI. Mức 5 cần pipeline
+≥ 6 chặng (build → lint → test → quét secret → đóng gói → deploy) và lịch sử chạy
+tích lũy theo thời gian (AGENTS.md §4c). Hiện chỉ có đủ điều kiện cho một phần: bộ
+test đã chạy được không cần `.env` (D-018), nhưng chưa có linter (P-14), chưa cấu
+hình gitleaks (P-15), chưa có hạ tầng KLTN để deploy (P-11, D-002).
+
+**Phương án đã cân nhắc**
+
+1. *Nền tảng CI*
+   - (a) **GitHub Actions** — repo đã ở GitHub, không cần tài khoản thêm; miễn phí
+     cho repo public, repo private có hạn mức phút chạy; kết quả gắn thẳng vào
+     commit và PR, là minh chứng hội đồng xem được ngay.
+   - (b) GitLab CI, CircleCI, Jenkins — phải mirror repo hoặc tự vận hành server;
+     không đem lại gì thêm cho đồ án một người.
+2. *Thời điểm dựng*
+   - (a) Chờ đủ lint, quét secret, hạ tầng rồi dựng một lần đủ 6 chặng — mất vài
+     tuần lịch sử chạy CI không back-fill được.
+   - (b) Dựng ngay với các chặng đã làm được, mỗi việc P-14, P-15, P-11 xong thì
+     thêm chặng tương ứng vào cùng file workflow.
+
+**Quyết định.** Chọn 1(a), 2(b). File `.github/workflows/ci.yml`, chạy khi push lên
+`develop`, `main` và khi mở PR vào `main`. Bản đầu gồm hai job:
+- `twin-files` — so `AGENTS.md` với `CLAUDE.md` từ dòng 2 (thực hiện hệ quả của D-006).
+- `test` — trên Python 3.12 (cùng bản với `Dockerfile`), với `grocerly.settings_test`:
+  cài `requirements-dev.txt` (build) → `manage.py check` → `makemigrations --check
+  --dry-run` (model đổi mà thiếu migration thì đỏ) → `pytest --cov` → ghi bảng độ phủ
+  vào trang tóm tắt của lần chạy và lưu `coverage.xml` làm artifact (P-13).
+
+Workflow chỉ có quyền đọc repo (`permissions: contents: read`) và không dùng secret
+nào của repository.
+
+**Lý do.** Lịch sử CI là minh chứng tích lũy; dựng sớm với 2 job chạy thật có giá
+trị hơn một pipeline đủ chặng dựng muộn. Chưa thêm job PostgreSQL mà D-018 để ngỏ:
+chưa có lỗi nào chỉ xảy ra trên PostgreSQL, thêm vào lúc này là thêm thứ phải giải
+thích mà chưa cần — xem lại khi có hạ tầng KLTN (P-11).
+
+**Hệ quả.**
+- Chạy thử toàn bộ các bước trên bản sao sạch (không `.env`, Python 3.12) ngày
+  17/09/2026: xanh, 43 passed + 5 xfailed, độ phủ 66%.
+- Chặng kiểm tra migration phát hiện ngay model `CartOrder` lệch migration — xem D-020.
+- Thêm chặng khi xong P-14 (lint), P-15 (gitleaks), P-11 (đóng gói image + deploy).
+- Bật branch protection cho `main`, bắt buộc CI xanh (D-016) — SV thao tác trong
+  phần cài đặt repo trên GitHub.
+- Cập nhật `AGENTS.md`/`CLAUDE.md` §6, §8.
+
+---
+
+## D-020 · Thêm migration xóa cột `stripe_payment_intent` cho khớp model
+
+- **Ngày:** 17/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Chặng `makemigrations --check` của CI (D-019) báo model và migration
+lệch nhau. Commit TLCN `51c4b96` (*Add VNPay payment integration*, 15/06/2026) bỏ
+Stripe, xóa trường `stripe_payment_intent` khỏi model `CartOrder` nhưng không sinh
+migration. Mọi database đã `migrate` vẫn còn cột này (kiểu chuỗi, cho phép `NULL`);
+code không còn đọc hay ghi nó nên chưa gây lỗi.
+
+**Phương án đã cân nhắc**
+1. *Sinh migration `0005` xóa cột* — model và schema khớp lại; migration chỉ có tác
+   dụng khi chạy `migrate`, nên không đụng database TLCN đang chạy. Đánh đổi: dữ liệu
+   cũ trong cột (nếu có) mất khi migrate — không đáng kể vì Stripe đã bỏ.
+2. *Thêm lại trường vào model* — giữ cột thừa của một cổng thanh toán không còn dùng.
+3. *Bỏ chặng kiểm tra migration khỏi CI* — mất cơ chế phát hiện đúng loại lỗi này
+   về sau.
+
+**Quyết định.** Chọn 1. File `core/migrations/0005_remove_cartorder_stripe_payment_intent.py`
+do `makemigrations` sinh, chạy với `grocerly.settings_test` (không kết nối database nào).
+
+**Lý do.** Stripe đã được thay bằng VNPay từ TLCN; cột thừa là nợ kỹ thuật, và chặng
+kiểm tra migration chỉ có ý nghĩa nếu nó xanh ngay từ lần chạy đầu.
+
+**Hệ quả.**
+- Chưa `migrate` lên database nào. Migration được áp khi dựng database KLTN (P-11);
+  không chạy lên database TLCN (D-002).
+- Không phải sửa đặc tả: `SRS.md` và `SDD.md` không nhắc tới trường này (đã kiểm
+  17/09/2026).
 
 ---
 

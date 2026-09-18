@@ -63,7 +63,7 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | **Lệch** — L-7 |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
-| CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | **Lệch** — L-6 |
+| CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | **Lệch** — L-6, L-8 |
 | CN-12 | Cập nhật hồ sơ cá nhân, đổi mật khẩu | UC-11 | Có |
 | CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Có |
 | CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn; đặt địa chỉ mặc định | UC-13 | Có |
@@ -74,8 +74,8 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
 | CN-16 | Hỏi đáp, tư vấn bằng ngôn ngữ tự nhiên | UC-15 | Có |
-| CN-17 | AI tìm sản phẩm còn hàng theo nhu cầu | UC-16 | Có |
-| CN-18 | AI đề xuất thêm vào giỏ — chỉ thêm khi người dùng xác nhận | UC-17 | Có |
+| CN-17 | AI tìm sản phẩm còn hàng theo nhu cầu | UC-16 | **Lệch** — L-10 |
+| CN-18 | AI đề xuất thêm vào giỏ — chỉ thêm khi người dùng xác nhận | UC-17 | **Lệch** — L-9 |
 | CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Có |
 
 *Công cụ `get_bestsellers` (gợi ý sản phẩm "nổi bật") vẫn còn trong mã nguồn nhưng
@@ -103,7 +103,7 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng** — 24 `Có`, 6 `Lệch`. Các chức năng CN-03, 07, 23, 29, 30 có
+**Tổng: 30 chức năng** — 22 `Có`, 8 `Lệch`. Các chức năng CN-03, 07, 23, 29, 30 có
 trong mã nguồn nhưng đặc tả TLCN chưa có use case; sẽ bổ sung UC ở P-23.
 
 ---
@@ -122,10 +122,13 @@ tả. Cột "Đề xuất" là ý kiến ban đầu, chờ sinh viên và GVHD q
 | **L-5** | Đơn đã `Delivered` không được đổi trạng thái nữa (UC-20) | `change_order_status` không chặn — đổi được từ bất kỳ trạng thái nào | **Sửa code:** thêm điều kiện chặn, kèm test ca âm |
 | **L-6** 🔴 | *(đặc tả không nói tới — mặc định giá lấy từ hệ thống)* | **Giá do trình duyệt gửi lên.** `add_to_cart` lưu `price` từ tham số GET vào session; `save_checkout_info` tính `order.price` từ giá đó; số tiền gửi sang VNPay là `order.price`. Khách sửa tham số là đặt được hàng với giá tùy ý. Tiền còn tính bằng `float` thay vì `Decimal` | **Sửa code — ưu tiên cao nhất.** Server tự tra giá từ `Product` khi thêm giỏ và khi tạo đơn; dùng `Decimal`. Viết test tái hiện lỗi trước (regression test) rồi mới sửa |
 | **L-7** | Cập nhật số lượng lớn hơn tồn kho → báo lỗi, reset về số hợp lệ (UC-06) | `add_to_cart`, `update_cart` và `save_checkout_info` không kiểm tra tồn kho ở server | **Sửa code:** kiểm tra tồn kho ở server khi thêm giỏ và khi tạo đơn, kèm test ca biên |
+| **L-8** 🔴 | *(đặc tả không nói tới — mặc định đơn thanh toán online chỉ thành "đã thanh toán" khi VNPay xác nhận)* | `payment_completed_view` tự đặt `paid_status = True` cho đơn `online` chưa thanh toán. Khách tạo đơn xong, mở thẳng `/payment-completed/<oid>/` là đơn thành đã thanh toán mà không qua VNPay. *Phát hiện 16/09/2026 khi viết test (P-12)* | **Sửa code — ưu tiên cao như L-6.** Chỉ `vnpay_return` / `vnpay_ipn` (đã kiểm chữ ký) được đổi `paid_status`; trang hoàn tất chỉ hiển thị. Test tái hiện: `test_payment_completed_page_does_not_mark_unpaid_order_as_paid` |
+| **L-9** | AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối (UC-17, SRS §6.1) | `ai_chat` xử lý `request_add_to_cart` bằng `Product.objects.filter(p_id=...)`, không kiểm tra `in_stock` / `stock_count` — AI vẫn đề nghị thêm sản phẩm đã hết hàng. *Phát hiện 16/09/2026 (P-12)* | **Sửa code:** kiểm tra còn hàng trước khi trả `confirm_add_cart`; hết hàng thì báo lại cho Gemini. Test: `test_ai_add_to_cart_refuses_out_of_stock_product` |
+| **L-10** | Sản phẩm bị vô hiệu hóa không hiển thị với khách (FR-A-02, UC-24) | Trang cửa hàng lọc theo `product_status = 'published'`; công cụ AI `search_products`, `get_bestsellers` và API `/api/v1/products/` lại lọc theo cờ khác là `status = True`, bỏ qua `product_status` → sản phẩm đã ẩn khỏi cửa hàng vẫn được AI tìm thấy. *Phát hiện 16/09/2026 (P-12)* | **Sửa code:** AI và API dùng cùng điều kiện hiển thị với cửa hàng; chốt vai trò của cờ `status`. Test: `test_search_tool_does_not_return_product_hidden_from_store` |
 
 Đã chốt: L-1. Nếu các chỗ còn lại chốt theo đề xuất: thêm **2 lần sửa đặc tả**
-(L-2, L-4 — ghi vào `PLAN.md` §6) và **4 lần sửa code** (L-3, L-5, L-6, L-7), mỗi
-lần có test đi kèm.
+(L-2, L-4 — ghi vào `PLAN.md` §6) và **7 lần sửa code** (L-3, L-5 → L-10), mỗi
+lần có test đi kèm. L-6 → L-10 đã có test tái hiện lỗi, đánh dấu `xfail` (D-018).
 
 ---
 

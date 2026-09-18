@@ -5,7 +5,7 @@
 | Sinh viên | Lê Đức Phát — 21139083 |
 | GVHD | Hoàng Văn Dũng |
 | Kỳ báo cáo | **Tuần NN**: DD/MM/YYYY → DD/MM/YYYY |
-| Hình thức trao đổi với GVHD | Gặp trực tiếp / Online / Email — ngày DD/MM/YYYY |
+| Nộp portal | DD/MM/YYYY — hạn **17:00 Thứ Sáu DD/MM/YYYY** |
 
 > Tra số tuần và khoảng ngày tương ứng ở [`README.md`](README.md).
 
@@ -55,7 +55,8 @@ sửa vào [`../PLAN.md`](../PLAN.md) §6), hoặc điều chỉnh kế hoạch.
 
 Portal **không nhận file `.md`** ở ô đính kèm, nên bản đầy đủ chỉ tới được GVHD
 qua link repo. Chép phần **giữa hai đường kẻ** dưới đây vào ô *Nội dung (hỗ trợ
-Markdown)*; nộp sau khi `develop` đã merge vào `main` để link trỏ đúng nội dung.
+Markdown)*; nộp sau khi `develop` đã merge vào `main` để link trỏ đúng nội dung,
+và **trước 17:00 Thứ Sáu** của tuần báo cáo.
 
 ---
 

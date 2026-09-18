@@ -5,9 +5,9 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 11/09/2026 |
+| Cập nhật lần cuối | 17/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
-| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm) |
+| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng) |
 
 ---
 
@@ -52,7 +52,8 @@ Lịch đầy đủ từng tuần: [`weekly_report/README.md`](weekly_report/REA
 | Phản biện | — | Dự kiến tháng 12/2026 | |
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, ghi vào
-[`weekly_report/`](weekly_report/). Dưới 0,5 lần/tuần → gate **G2** → TC2.2 và
+[`weekly_report/`](weekly_report/) và nộp lên portal **trước 17:00 Thứ Sáu** của
+chính tuần đó (GVHD chốt, áp dụng từ Tuần 2). Dưới 0,5 lần/tuần → gate **G2** → TC2.2 và
 TC2.4 mỗi tiêu chí bị hạ một mức.
 
 **Ngưỡng commit.** Với 15 tuần, Mức 5 của TC2.4 (≥ 90% số tuần có commit) tương
@@ -93,20 +94,21 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 |---|---|---|---|---|
 | P-01 | Khung specs: `AGENTS.md`, `CLAUDE.md`, `docs/` | TC2.4 | **Xong** | 10/09/2026 |
 | P-02 | Chốt lịch KLTN | — | **Xong** | 10/09/2026 — xem §2 |
-| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5) |
+| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5). **Khác đề cương P-08:** rubric không nhắc tới đề cương; bản cam kết là văn bản của Bước 3, phải có metric, có chữ ký SV + GVHD và qua rà soát của bộ môn (đọc lại nguyên văn 16/09/2026). Rubric không quy định hình thức → **hỏi GVHD** nên gộp phần cam kết + metric vào đề cương hay làm văn bản riêng để ký |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
-| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. Tuần 1: [`tuan-01.md`](weekly_report/tuan-01.md) — đã nộp portal 12/09/2026 |
-| P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã có PR #1, #2, #3; nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
+| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. **Hạn nộp portal: trước 17:00 Thứ Sáu mỗi tuần** (GVHD chốt, áp dụng từ Tuần 2). Tuần 1: [`tuan-01.md`](weekly_report/tuan-01.md) — đã nộp portal 12/09/2026. Tuần 2: [`tuan-02.md`](weekly_report/tuan-02.md) — chốt 18/09/2026, merge vào `main` qua PR #7 |
+| P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã merge PR #1 → #7 (PR #7 là PR đầu tiên có CI chạy); nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
 | P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | **Xong** | 11/09/2026. Theo D-011 (thay P-27 cũ). `SRS.md` giữ Mục 1–6 + kiểm thử, hạn chế (đánh số lại 7–9); `SDD.md` nhận Mục 7–9 cũ (thành Mục 1–3). Chỉ chuyển chỗ, chưa sửa nội dung — việc rà soát để cho P-23, P-24. Bảng đối chiếu số mục: §6 dòng 4 |
+| P-08 | Nộp đề cương KLTN ([`DE_CUONG.md`](DE_CUONG.md)) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp Tuần 1 ([`tuan-01.md`](weekly_report/tuan-01.md), cuối file). Nộp cùng báo cáo Tuần 2, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), **SV đã duyệt 16/09/2026**. Góp ý nhận được ghi vào `tuan-02.md`, sửa thẳng `DE_CUONG.md`. Đề cương **không thay** bản cam kết P-03 — xem ghi chú P-03 |
 
 ### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
-| P-10 | Dựng CI: build → lint → test → quét secret → đóng gói → deploy | G6, TC2.6 | Chưa bắt đầu | Mức 5 cần ≥ 6 chặng. Dựng sớm để kịp tích lũy ≥ 10 lần deploy |
+| P-10 | Dựng CI: build → lint → test → quét secret → đóng gói → deploy | G6, TC2.6 | Đang làm | Mức 5 cần ≥ 6 chặng. Dựng sớm để kịp tích lũy ≥ 10 lần deploy. **17/09/2026:** theo D-019, tạo `.github/workflows/ci.yml` trên GitHub Actions — job `twin-files` (so `AGENTS.md`/`CLAUDE.md`) và job `test` (cài đặt → `manage.py check` → `makemigrations --check` → `pytest --cov`, Python 3.12). Chặng kiểm tra migration phát hiện model `CartOrder` thiếu migration từ TLCN → thêm migration `0005` (D-020). Còn: thêm chặng lint (P-14), quét secret (P-15), đóng gói image + deploy (P-11); bật branch protection cho `main` |
 | P-11 | Dựng hạ tầng KLTN riêng (host + DB + image storage), cập nhật `.env` | TC2.2, TC2.6 | Chưa bắt đầu | Theo D-002. Bổ sung nhóm `VNPAY_*` vào `.env.example` |
-| P-12 | Cài pytest + pytest-django, viết test cho luồng cốt lõi | G5, TC2.5 | Chưa bắt đầu | Ưu tiên: auth, giỏ hàng, checkout, tool AI |
-| P-13 | Báo cáo coverage trong CI | TC2.5 | Chưa bắt đầu | Mức 5 cần ≥ 70% ở module cốt lõi |
+| P-12 | Cài pytest + pytest-django, viết test cho luồng cốt lõi | G5, TC2.5 | Đang làm | Ưu tiên: auth, giỏ hàng, checkout, tool AI. **16/09/2026:** dựng hạ tầng test theo D-018 (`settings_test.py`, `pytest.ini`, `conftest.py`, `requirements-dev.txt`); 48 test cho đăng ký/đăng nhập, giỏ hàng, checkout, VNPay, trợ lý AI — 43 xanh, 5 `xfail` tái hiện lỗi L-6 → L-10 (3 lỗi mới L-8, L-9, L-10 phát hiện khi viết test). Còn: `useradmin` (UC-19, UC-20, UC-26), đánh giá (L-3), wishlist, hồ sơ; mỗi AC viết ở P-23 cần test tương ứng |
+| P-13 | Báo cáo coverage trong CI | TC2.5 | Đang làm | Mức 5 cần ≥ 70% ở module cốt lõi. Đã cài pytest-cov (D-018). Số đo đầu tiên, chạy tay 16/09/2026: tổng 66%; `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21%. **17/09/2026:** CI in bảng độ phủ vào trang tóm tắt mỗi lần chạy và lưu `coverage.xml` (D-019). Còn: chốt "module cốt lõi" trong bản cam kết P-03; cân nhắc đặt ngưỡng tối thiểu làm CI đỏ khi đã chốt |
 | P-14 | Cấu hình linter + phân tích tĩnh, đưa vào CI | TC2.4 | Chưa bắt đầu | Mức 5 cần 0 lỗi lint, 0 issue Blocker/Critical, trùng lặp ≤ 3% |
 | P-15 | Quét secret tự động (gitleaks) trong CI | TC2.4 | Chưa bắt đầu | Hiện đang sạch — cần báo cáo làm minh chứng |
 | P-16 | Health check + log tập trung + cảnh báo sau triển khai | TC2.6 | Chưa bắt đầu | Yêu cầu của Mức 5 |
@@ -118,7 +120,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-21 | Định lượng hóa NFR (≥ 5 ràng buộc đo được) | TC2.1 | Chưa bắt đầu | VD: thời gian phản hồi, số người dùng đồng thời |
 | P-23 | Rà soát đặc tả TLCN trong `SRS.md`: sửa chỗ sai/lỗi thời + viết acceptance criteria cho 26 use case | TC2.1 | Chưa bắt đầu | Gộp P-20 cũ: rà tới use case nào thì viết AC cho use case đó luôn. Mức 5 cần 100% use case có AC. Ghi từng lần sửa vào §6; mỗi AC nên có test tương ứng ở P-12 |
 | P-24 | Cập nhật sơ đồ thiết kế trong `SDD.md` cho khớp mã nguồn hiện tại | TC2.1 | Chưa bắt đầu | Hội đồng đối chiếu ngẫu nhiên 5 điểm |
-| P-25 | Thực nghiệm với ≥ 10 người dùng thật: phỏng vấn nhu cầu (~5 phút đầu) → làm tác vụ → đo SUS | G7, TC2.7, TC1 | Chưa bắt đầu | Gộp P-22 cũ, theo D-013. Phần phỏng vấn là minh chứng TC1 (≥ 1 người → Mức 3, ≥ 2 → Mức 4, ≥ 3 → Mức 5); phần tác vụ + SUS cho TC2.7. Biên bản ghi tách hai phần. Phải đúng nhóm đối tượng, không chỉ bạn cùng lớp |
+| P-25 | Thực nghiệm với khoảng 3–5 người dùng thật: phỏng vấn nhu cầu (~5 phút đầu) → làm tác vụ → đo SUS | G7, TC2.7, TC1 | Chưa bắt đầu | Gộp P-22 cũ, theo D-013. Số người theo D-017: theo ngưỡng tham chiếu của rubric, 3–4 người là Mức 3, 5 người là Mức 4 của TC2.7; ngưỡng chính thức chốt ở bản cam kết P-03. Phần phỏng vấn là minh chứng TC1 (≥ 1 người → Mức 3, ≥ 2 → Mức 4, ≥ 3 → Mức 5); phần tác vụ + SUS cho TC2.7. Biên bản ghi tách hai phần. Phải đúng nhóm đối tượng, không chỉ bạn cùng lớp |
 | P-26 | Một vòng cải tiến theo phản hồi + đo lại trước–sau | TC2.7 | Chưa bắt đầu | Điều kiện của Mức 5 |
 
 *P-20 (viết AC) đã gộp vào P-23; P-22 (lấy ý kiến bên liên quan) đã gộp vào P-25
@@ -144,6 +146,7 @@ Mỗi tuần thêm một dòng. Chi tiết đặt trong [`weekly_report/`](weekl
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
 | Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
+| Tuần 2 | Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018). 17/09: bắt đầu sớm P-10 — CI trên GitHub Actions (D-019); thêm migration còn thiếu từ TLCN (D-020) |
 
 ---
 
@@ -164,3 +167,4 @@ ghi lý do là minh chứng sinh viên nắm được hệ thống; một đặc
 | 2 | 10/09/2026 | Toàn file | Đổi tên `PRD.md` → `SRS.md`, thêm ghi chú ranh giới SRS/SDD | Rubric Mục 8 gọi tên hồ sơ là "SRS/SDD"; nội dung file vốn là đặc tả yêu cầu chứ không phải PRD — xem D-009 | *(chưa commit)* |
 | 3 | 11/09/2026 | §2.1, §2.2, §2.3, §3 (A3), §4.3, FR-A-02, FR-A-06, §6.1 (UC-19), §8 | A3 "Người bán vận hành gian hàng riêng" → "Nhân viên cửa hàng"; thêm mô hình một nhà bán vào phạm vi, marketplace vào ngoài phạm vi. Giữ nguyên §11 (trích nguyên văn TLCN) và mã `FR-V-xx` | Mã nguồn không có vai trò người bán riêng — mọi staff thấy toàn bộ cửa hàng (chỗ lệch L-1 trong `COMMITMENT.md`) — xem D-015 | *(chưa commit)* |
 | 4 | 11/09/2026 | Toàn file `SRS.md`; tạo `SDD.md` | Tách đặc tả thiết kế sang `SDD.md`, nội dung giữ nguyên. Số mục: SRS §7 → SDD §1 · SRS §7.1 → SDD §1.1 · SRS §8 → SDD §2 · SRS §9 → SDD §3 · SRS §9.1 → SDD §3.1 · SRS §10 → SRS §7 · SRS §11 → SRS §8 · SRS §12 → SRS §9. Thay ghi chú "sẽ tách" ở đầu `SRS.md` bằng ghi chú ranh giới; thêm ghi chú "nợ thiết kế" ở cuối SDD §3 | P-07, theo D-011: tách trước P-23 và P-24 để mỗi việc chỉ đụng tới một file. Kiểm thử và hạn chế ở lại SRS vì D-011 chỉ chuyển Mục 7–9 | *(chưa commit)* |
+| 5 | 16/09/2026 | SRS §7 | Thay ghi chú "chưa có kiểm thử tự động" bằng đối chiếu TC_01 → TC_05 với test tự động; ghi nhận *Kết quả mong đợi* của TC_02, TC_04 không khớp thông báo trong code | Viết test ở P-12 thấy hai câu thông báo mà TLCN ghi PASS không có trong mã nguồn. Chưa sửa cột kết quả vì câu chữ thông báo chốt ở P-23 (acceptance criteria) | `6df5e0f` |

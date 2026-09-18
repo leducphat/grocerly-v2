@@ -57,8 +57,9 @@ Mốc 50% là **điều kiện cứng**: không chốt được bản cam kết 
 *không đủ điều kiện bảo vệ* (xem §4).
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, ghi vào
-`docs/weekly_report/`. Với đồ án 15 tuần, Mức 5 của rubric đòi **≥ 14/15 tuần có
-commit** — nghĩa là làm đều, không dồn.
+`docs/weekly_report/` và **nộp lên portal trước 17:00 Thứ Sáu** của chính tuần đó
+(GVHD chốt, áp dụng từ Tuần 2). Với đồ án 15 tuần, Mức 5 của rubric đòi
+**≥ 14/15 tuần có commit** — nghĩa là làm đều, không dồn.
 
 ---
 
@@ -137,6 +138,7 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 ```
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
+├── .github/workflows/ci.yml  # CI trên GitHub Actions (D-019)
 ├── docs/                     # SRS, SDD, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
@@ -146,7 +148,8 @@ grocerly-ecom/
     ├── store_api/            # DRF endpoints + chat AI Gemini  (/api/v1/)
     ├── templates/            # core/, userauths/, useradmin/, partials/
     ├── static/, media/, locale/   # assets, file upload, bản dịch vi+en
-    └── requirements.txt, .env, .env.example
+    ├── requirements.txt, .env, .env.example
+    └── requirements-dev.txt, pytest.ini, conftest.py   # kiểm thử (D-018)
 ```
 
 **Mọi lệnh `manage.py` chạy từ trong `grocerly/`, không phải từ gốc repo.**
@@ -177,14 +180,26 @@ tiếng Anh. Chuỗi hiển thị cho người dùng đi qua `gettext_lazy` vớ
 
 ## 8. Kiểm thử
 
-Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ; hiện tại **chưa có test nào**
-(cả bốn `tests.py` đều là stub). Khi viết test:
+Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ test có từ P-12
+(16/09/2026); cấu hình và lý do chọn ở `docs/DECISIONS.md` D-018. Khi viết test:
 
-- Framework: **pytest + pytest-django**, đặt trong `tests/` của từng app.
+- Framework: **pytest + pytest-django**, đặt trong `tests/` của từng app. Fixture
+  dùng chung ở `grocerly/conftest.py`, fixture riêng một app ở `<app>/tests/conftest.py`.
+- Test chạy bằng `grocerly/settings_test.py` (SQLite trong bộ nhớ). **Không** chạy
+  test bằng `grocerly.settings` — file đó đọc `.env` (D-002); `conftest.py` sẽ dừng lại.
+- Không test nào gọi dịch vụ thật: Gemini thay bằng mock, VNPay dùng secret giả,
+  file upload lưu trong bộ nhớ.
 - Mỗi test theo cấu trúc Arrange–Act–Assert, tên test nói rõ hành vi được kiểm —
   ví dụ `test_add_to_cart_rejects_quantity_above_stock`.
 - Phủ cả ca âm và ca biên, không chỉ luồng thuận lợi — rubric yêu cầu rõ điều này.
-- Mỗi test nên truy vết được về một acceptance criteria trong `docs/SRS.md`.
+- Mỗi test nên truy vết được về một use case / acceptance criteria trong
+  `docs/SRS.md` — ghi mã UC hoặc TC ở docstring hay comment.
+- Lỗi đã biết mà chưa sửa (L-x trong `docs/COMMITMENT.md`): viết test mô tả hành vi
+  **đúng**, đánh dấu `@pytest.mark.xfail(reason="L-x: ...")`. Sửa xong lỗi thì gỡ
+  `xfail` trong cùng commit — `xfail_strict` làm bộ test đỏ nếu quên.
+- CI (`.github/workflows/ci.yml`, D-019) chạy `manage.py check`,
+  `makemigrations --check` và `pytest --cov` trên mỗi lần push lên `develop`/`main`
+  và mỗi PR vào `main`. Đổi model thì commit migration kèm theo, nếu không CI đỏ.
 
 ---
 
@@ -198,6 +213,10 @@ python manage.py migrate            # áp dụng migration
 python manage.py makemigrations     # sau khi đổi model
 python manage.py createsuperuser    # tạo tài khoản quản trị
 python manage.py collectstatic      # trước khi deploy
+
+pip install -r requirements-dev.txt # thư viện test (pytest, pytest-django, pytest-cov)
+pytest                              # chạy toàn bộ test (settings_test, SQLite)
+pytest --cov                        # kèm báo cáo độ phủ
 
 django-admin makemessages -l vi -l en   # trích chuỗi i18n
 django-admin compilemessages            # biên dịch .po -> .mo

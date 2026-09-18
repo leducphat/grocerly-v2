@@ -240,9 +240,17 @@ Phương pháp: kiểm thử hộp đen (Black-box), dựa trên yêu cầu ch�
 | TC_04 | Đăng ký trùng email | Báo lỗi "Email này đã được sử dụng" | PASS |
 | TC_05 | Thêm giỏ → điền địa chỉ → đặt hàng (COD) | Đơn lưu vào CSDL, chuyển trang thành công, giỏ được làm sạch | PASS |
 
-> ⚠️ **Ghi chú cho KLTN:** toàn bộ 5 test case trên là **thủ công**. Chưa có kiểm
-> thử tự động, chưa có báo cáo độ phủ. Đây là khoảng trống lớn nhất so với rubric
-> — xem [`PLAN.md`](PLAN.md).
+> ⚠️ **Ghi chú cho KLTN:** 5 test case trên là kiểm thử **thủ công** của TLCN. Từ
+> 16/09/2026 cả 5 đã có test tự động tương ứng (P-12, D-018): TC_01 → TC_04 ở
+> `grocerly/userauths/tests/test_auth.py`, TC_05 ở
+> `grocerly/core/tests/test_checkout.py` (mỗi test ghi chú `# TC_0x`).
+>
+> Test tự động chỉ kiểm **hành vi** (đăng nhập được hay không, có tạo tài khoản hay
+> không), không kiểm câu chữ thông báo, vì cột *Kết quả mong đợi* của TC_02 và TC_04
+> không khớp mã nguồn: sai mật khẩu thì code báo `User does not exist. Please try
+> again.` (tiếng Anh, không qua `gettext`); trùng email thì là thông báo mặc định của
+> Django cho trường `email` duy nhất. Câu chữ thông báo chốt khi viết acceptance
+> criteria (P-23). Danh sách test và độ phủ: [`PLAN.md`](PLAN.md) P-12, P-13.
 
 ---
 
