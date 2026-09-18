@@ -5,7 +5,7 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 16/09/2026 |
+| Cập nhật lần cuối | 17/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
 | Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng) |
 
@@ -105,10 +105,10 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
-| P-10 | Dựng CI: build → lint → test → quét secret → đóng gói → deploy | G6, TC2.6 | Chưa bắt đầu | Mức 5 cần ≥ 6 chặng. Dựng sớm để kịp tích lũy ≥ 10 lần deploy |
+| P-10 | Dựng CI: build → lint → test → quét secret → đóng gói → deploy | G6, TC2.6 | Đang làm | Mức 5 cần ≥ 6 chặng. Dựng sớm để kịp tích lũy ≥ 10 lần deploy. **17/09/2026:** theo D-019, tạo `.github/workflows/ci.yml` trên GitHub Actions — job `twin-files` (so `AGENTS.md`/`CLAUDE.md`) và job `test` (cài đặt → `manage.py check` → `makemigrations --check` → `pytest --cov`, Python 3.12). Chặng kiểm tra migration phát hiện model `CartOrder` thiếu migration từ TLCN → thêm migration `0005` (D-020). Còn: thêm chặng lint (P-14), quét secret (P-15), đóng gói image + deploy (P-11); bật branch protection cho `main` |
 | P-11 | Dựng hạ tầng KLTN riêng (host + DB + image storage), cập nhật `.env` | TC2.2, TC2.6 | Chưa bắt đầu | Theo D-002. Bổ sung nhóm `VNPAY_*` vào `.env.example` |
 | P-12 | Cài pytest + pytest-django, viết test cho luồng cốt lõi | G5, TC2.5 | Đang làm | Ưu tiên: auth, giỏ hàng, checkout, tool AI. **16/09/2026:** dựng hạ tầng test theo D-018 (`settings_test.py`, `pytest.ini`, `conftest.py`, `requirements-dev.txt`); 48 test cho đăng ký/đăng nhập, giỏ hàng, checkout, VNPay, trợ lý AI — 43 xanh, 5 `xfail` tái hiện lỗi L-6 → L-10 (3 lỗi mới L-8, L-9, L-10 phát hiện khi viết test). Còn: `useradmin` (UC-19, UC-20, UC-26), đánh giá (L-3), wishlist, hồ sơ; mỗi AC viết ở P-23 cần test tương ứng |
-| P-13 | Báo cáo coverage trong CI | TC2.5 | Chưa bắt đầu | Mức 5 cần ≥ 70% ở module cốt lõi. Đã cài pytest-cov (D-018). Số đo đầu tiên, chạy tay 16/09/2026: tổng 66%; `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21%. Còn: đưa vào CI (P-10); chốt "module cốt lõi" trong bản cam kết P-03 |
+| P-13 | Báo cáo coverage trong CI | TC2.5 | Đang làm | Mức 5 cần ≥ 70% ở module cốt lõi. Đã cài pytest-cov (D-018). Số đo đầu tiên, chạy tay 16/09/2026: tổng 66%; `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21%. **17/09/2026:** CI in bảng độ phủ vào trang tóm tắt mỗi lần chạy và lưu `coverage.xml` (D-019). Còn: chốt "module cốt lõi" trong bản cam kết P-03; cân nhắc đặt ngưỡng tối thiểu làm CI đỏ khi đã chốt |
 | P-14 | Cấu hình linter + phân tích tĩnh, đưa vào CI | TC2.4 | Chưa bắt đầu | Mức 5 cần 0 lỗi lint, 0 issue Blocker/Critical, trùng lặp ≤ 3% |
 | P-15 | Quét secret tự động (gitleaks) trong CI | TC2.4 | Chưa bắt đầu | Hiện đang sạch — cần báo cáo làm minh chứng |
 | P-16 | Health check + log tập trung + cảnh báo sau triển khai | TC2.6 | Chưa bắt đầu | Yêu cầu của Mức 5 |
@@ -146,7 +146,7 @@ Mỗi tuần thêm một dòng. Chi tiết đặt trong [`weekly_report/`](weekl
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
 | Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
-| Tuần 2 | *(đang làm — tính tới 16/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018) |
+| Tuần 2 | *(đang làm — tính tới 17/09/2026)* Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018). 17/09: bắt đầu sớm P-10 — CI trên GitHub Actions (D-019); thêm migration còn thiếu từ TLCN (D-020) |
 
 ---
 

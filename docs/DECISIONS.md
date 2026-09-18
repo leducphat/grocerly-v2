@@ -659,6 +659,91 @@ lại khi dựng CI — có thể thêm một job chạy trên PostgreSQL.
 
 ---
 
+## D-019 · CI chạy trên GitHub Actions, dựng dần từng chặng theo backlog
+
+- **Ngày:** 17/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Gate G6 chặn TC2.6 ở 2,75/5 khi repo không có CI. Mức 5 cần pipeline
+≥ 6 chặng (build → lint → test → quét secret → đóng gói → deploy) và lịch sử chạy
+tích lũy theo thời gian (AGENTS.md §4c). Hiện chỉ có đủ điều kiện cho một phần: bộ
+test đã chạy được không cần `.env` (D-018), nhưng chưa có linter (P-14), chưa cấu
+hình gitleaks (P-15), chưa có hạ tầng KLTN để deploy (P-11, D-002).
+
+**Phương án đã cân nhắc**
+
+1. *Nền tảng CI*
+   - (a) **GitHub Actions** — repo đã ở GitHub, không cần tài khoản thêm; miễn phí
+     cho repo public, repo private có hạn mức phút chạy; kết quả gắn thẳng vào
+     commit và PR, là minh chứng hội đồng xem được ngay.
+   - (b) GitLab CI, CircleCI, Jenkins — phải mirror repo hoặc tự vận hành server;
+     không đem lại gì thêm cho đồ án một người.
+2. *Thời điểm dựng*
+   - (a) Chờ đủ lint, quét secret, hạ tầng rồi dựng một lần đủ 6 chặng — mất vài
+     tuần lịch sử chạy CI không back-fill được.
+   - (b) Dựng ngay với các chặng đã làm được, mỗi việc P-14, P-15, P-11 xong thì
+     thêm chặng tương ứng vào cùng file workflow.
+
+**Quyết định.** Chọn 1(a), 2(b). File `.github/workflows/ci.yml`, chạy khi push lên
+`develop`, `main` và khi mở PR vào `main`. Bản đầu gồm hai job:
+- `twin-files` — so `AGENTS.md` với `CLAUDE.md` từ dòng 2 (thực hiện hệ quả của D-006).
+- `test` — trên Python 3.12 (cùng bản với `Dockerfile`), với `grocerly.settings_test`:
+  cài `requirements-dev.txt` (build) → `manage.py check` → `makemigrations --check
+  --dry-run` (model đổi mà thiếu migration thì đỏ) → `pytest --cov` → ghi bảng độ phủ
+  vào trang tóm tắt của lần chạy và lưu `coverage.xml` làm artifact (P-13).
+
+Workflow chỉ có quyền đọc repo (`permissions: contents: read`) và không dùng secret
+nào của repository.
+
+**Lý do.** Lịch sử CI là minh chứng tích lũy; dựng sớm với 2 job chạy thật có giá
+trị hơn một pipeline đủ chặng dựng muộn. Chưa thêm job PostgreSQL mà D-018 để ngỏ:
+chưa có lỗi nào chỉ xảy ra trên PostgreSQL, thêm vào lúc này là thêm thứ phải giải
+thích mà chưa cần — xem lại khi có hạ tầng KLTN (P-11).
+
+**Hệ quả.**
+- Chạy thử toàn bộ các bước trên bản sao sạch (không `.env`, Python 3.12) ngày
+  17/09/2026: xanh, 43 passed + 5 xfailed, độ phủ 66%.
+- Chặng kiểm tra migration phát hiện ngay model `CartOrder` lệch migration — xem D-020.
+- Thêm chặng khi xong P-14 (lint), P-15 (gitleaks), P-11 (đóng gói image + deploy).
+- Bật branch protection cho `main`, bắt buộc CI xanh (D-016) — SV thao tác trong
+  phần cài đặt repo trên GitHub.
+- Cập nhật `AGENTS.md`/`CLAUDE.md` §6, §8.
+
+---
+
+## D-020 · Thêm migration xóa cột `stripe_payment_intent` cho khớp model
+
+- **Ngày:** 17/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Chặng `makemigrations --check` của CI (D-019) báo model và migration
+lệch nhau. Commit TLCN `51c4b96` (*Add VNPay payment integration*, 15/06/2026) bỏ
+Stripe, xóa trường `stripe_payment_intent` khỏi model `CartOrder` nhưng không sinh
+migration. Mọi database đã `migrate` vẫn còn cột này (kiểu chuỗi, cho phép `NULL`);
+code không còn đọc hay ghi nó nên chưa gây lỗi.
+
+**Phương án đã cân nhắc**
+1. *Sinh migration `0005` xóa cột* — model và schema khớp lại; migration chỉ có tác
+   dụng khi chạy `migrate`, nên không đụng database TLCN đang chạy. Đánh đổi: dữ liệu
+   cũ trong cột (nếu có) mất khi migrate — không đáng kể vì Stripe đã bỏ.
+2. *Thêm lại trường vào model* — giữ cột thừa của một cổng thanh toán không còn dùng.
+3. *Bỏ chặng kiểm tra migration khỏi CI* — mất cơ chế phát hiện đúng loại lỗi này
+   về sau.
+
+**Quyết định.** Chọn 1. File `core/migrations/0005_remove_cartorder_stripe_payment_intent.py`
+do `makemigrations` sinh, chạy với `grocerly.settings_test` (không kết nối database nào).
+
+**Lý do.** Stripe đã được thay bằng VNPay từ TLCN; cột thừa là nợ kỹ thuật, và chặng
+kiểm tra migration chỉ có ý nghĩa nếu nó xanh ngay từ lần chạy đầu.
+
+**Hệ quả.**
+- Chưa `migrate` lên database nào. Migration được áp khi dựng database KLTN (P-11);
+  không chạy lên database TLCN (D-002).
+- Không phải sửa đặc tả: `SRS.md` và `SDD.md` không nhắc tới trường này (đã kiểm
+  17/09/2026).
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

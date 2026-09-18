@@ -138,6 +138,7 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 ```
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
+├── .github/workflows/ci.yml  # CI trên GitHub Actions (D-019)
 ├── docs/                     # SRS, SDD, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
@@ -196,6 +197,9 @@ Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ tes
 - Lỗi đã biết mà chưa sửa (L-x trong `docs/COMMITMENT.md`): viết test mô tả hành vi
   **đúng**, đánh dấu `@pytest.mark.xfail(reason="L-x: ...")`. Sửa xong lỗi thì gỡ
   `xfail` trong cùng commit — `xfail_strict` làm bộ test đỏ nếu quên.
+- CI (`.github/workflows/ci.yml`, D-019) chạy `manage.py check`,
+  `makemigrations --check` và `pytest --cov` trên mỗi lần push lên `develop`/`main`
+  và mỗi PR vào `main`. Đổi model thì commit migration kèm theo, nếu không CI đỏ.
 
 ---
 

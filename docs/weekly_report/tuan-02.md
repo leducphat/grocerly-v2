@@ -9,7 +9,7 @@
 
 > Tra số tuần và khoảng ngày tương ứng ở [`README.md`](README.md).
 
-> **⚠️ BẢN NHÁP — số liệu tính tới 16/09/2026.** Cập nhật Mục 1, 2 và 6 nếu có
+> **⚠️ BẢN NHÁP — số liệu tính tới 17/09/2026.** Cập nhật Mục 1, 2 và 6 nếu có
 > thêm việc trước lúc nộp; điền ngày nộp, số commit và số PR sau khi merge
 > `develop` → `main`.
 
@@ -19,8 +19,9 @@ DOCX/PDF theo mẫu đề cương TLCN, sinh viên đã duyệt để nộp kèm
 rubric cho thấy đề cương **không thay** được bản cam kết sản phẩm + metric (Bước 3,
 gate G1) — bản cam kết vẫn phải ký trước 25/10/2026. Ngoài kế hoạch, tuần này bắt
 đầu sớm **kiểm thử tự động** (P-12, D-018): 48 test cho đăng ký/đăng nhập, giỏ
-hàng, checkout, VNPay và trợ lý AI. Chưa sửa mã nguồn ứng dụng. Viết test phát hiện
-thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
+hàng, checkout, VNPay và trợ lý AI, rồi dựng **CI trên GitHub Actions** (P-10, D-019)
+để bộ test tự chạy mỗi lần push. Viết test phát hiện thêm 3 lỗi, trong đó **L-8** là
+lỗi thanh toán nghiêm trọng; CI phát hiện một migration còn thiếu từ TLCN (D-020).
 
 ---
 
@@ -33,6 +34,8 @@ thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
 | — | Chốt số người dùng thực nghiệm (D-017) | **Xong.** Khoảng 3–5 người — theo ngưỡng tham chiếu của rubric là Mức 3–4 của TC2.7; ngưỡng chính thức chốt ở bản cam kết. Đính chính D-013 (đã ghi nhầm "bắt buộc ≥ 10 người") | commit `9e8dd3e` — [`DECISIONS.md`](../DECISIONS.md) D-017 |
 | P-03 | Làm rõ quan hệ giữa đề cương và bản cam kết sản phẩm | **Xong phần làm rõ.** Rubric không nhắc tới đề cương; bản cam kết là hồ sơ của Mục 2 Bước 3: phải có metric, có chữ ký SV + GVHD, bộ môn rà soát. Phần metric (§5 của bản cam kết) **chưa soạn** | commit `e056d7c` |
 | P-12 | Dựng kiểm thử tự động; viết test cho các luồng cốt lõi | **Đang làm — xong đợt đầu.** Hạ tầng test theo D-018: settings riêng dùng SQLite trong bộ nhớ, không test nào chạm `.env`, Gemini hay VNPay thật (đã kiểm: chạy xanh trên bản sao không có `.env`). 48 test: đăng ký/đăng nhập 12, giỏ hàng 8, checkout 11, VNPay 5, trợ lý AI 12 — 43 xanh, 5 `xfail` tái hiện lỗi đã biết L-6 → L-10. Tự động hóa cả 5 test case thủ công TC_01 → TC_05 của TLCN | commit `d045ba7` (cấu hình), `f1417de`, `b8203bd`, `1467975` (test) |
+| P-10 | Dựng CI trên GitHub Actions (làm sớm, kế hoạch là Tuần 3) | **Đang làm — xong bản đầu.** `.github/workflows/ci.yml` (D-019): job so hai file `AGENTS.md`/`CLAUDE.md`; job cài đặt → `manage.py check` → kiểm tra thiếu migration → chạy 48 test kèm độ phủ, in bảng độ phủ vào trang tóm tắt lần chạy (P-13). Đã chạy thử toàn bộ các bước trên bản sao sạch không có `.env`, Python 3.12: xanh. Còn: lint (P-14), quét secret (P-15), đóng gói + deploy (P-11) | commit `717f4b8` |
+| — | Thêm migration còn thiếu từ TLCN (D-020) | **Xong.** Chặng kiểm tra migration báo model `CartOrder` đã bỏ trường `stripe_payment_intent` (commit TLCN `51c4b96`) mà không có migration. Sinh `core/migrations/0005_…`; chưa `migrate` lên database nào | commit `5198f39` |
 | — | Ghi nhận 3 lỗi mới phát hiện khi viết test | **L-8** 🔴 mở thẳng trang "thanh toán thành công" là đơn online thành *đã thanh toán*, không qua VNPay · **L-9** AI vẫn đề nghị thêm sản phẩm đã hết hàng vào giỏ (trái UC-17) · **L-10** AI tìm thấy cả sản phẩm quản trị viên đã ẩn khỏi cửa hàng. Ghi vào [`COMMITMENT.md`](../COMMITMENT.md) §3, mỗi lỗi có một test `xfail` | test `xfail` trong commit `b8203bd` (L-8), `1467975` (L-9, L-10) |
 
 ## 2. Chỉ số trong tuần
@@ -42,9 +45,9 @@ thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
 | Số commit | 9 tính tới 16/09/2026 — `9e8dd3e`, `560bdf0`, `e056d7c`, 4 commit test của P-12 (`d045ba7`, `f1417de`, `b8203bd`, `1467975`) và 2 commit tài liệu (`6df5e0f` và commit ghi mã commit vào nhật ký AI) |
 | Số Pull Request đã merge (có review) | 0 tính tới 16/09/2026 — PR `develop` → `main` sẽ mở trước lúc nộp |
 | Số test tự động | 48 — 43 xanh, 5 `xfail` (lỗi đã biết, chưa sửa) |
-| Số lần CI chạy / tỉ lệ build xanh | 0 — chưa có CI (P-10); test mới chạy trên máy cá nhân |
+| Số lần CI chạy / tỉ lệ build xanh | CI dựng ngày 17/09/2026 (P-10) — điền số lần chạy và tỉ lệ xanh từ tab *Actions* trước lúc nộp |
 | Số lần deploy | 0 — chưa có hạ tầng KLTN (P-11) |
-| Độ phủ test | 66% toàn bộ mã của 4 app (chạy tay 16/09/2026). Theo file: `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21% |
+| Độ phủ test | 66% toàn bộ mã của 4 app (chạy tay 16/09/2026; từ 17/09 CI đo mỗi lần chạy). Theo file: `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21% |
 | Số defect còn tồn (Critical/Blocker) | 2 Critical — **L-6** (giá sản phẩm do trình duyệt gửi lên) và **L-8** (đơn online thành đã thanh toán khi chưa trả tiền); chưa sửa, đã có test tái hiện. Ngoài ra L-3, L-5, L-7, L-9, L-10 chưa phân mức |
 
 ## 3. Vướng mắc
@@ -71,7 +74,7 @@ thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
 |---|---|---|
 | P-08 | Sửa đề cương theo góp ý của GVHD (nếu có) | Góp ý ghi vào `tuan-03.md`, sửa thẳng `DE_CUONG.md` |
 | P-03 | Hỏi GVHD hình thức bản cam kết; chốt L-2 → L-10; soạn nháp §5 metric kỹ thuật + ≥ 5 KPI nghiệp vụ | Có bản nháp §5; nếu GVHD đồng ý, sửa L-6 và L-8 kèm gỡ `xfail` |
-| P-10 | Dựng CI tối thiểu trên GitHub Actions: cài đặt → kiểm tra → chạy 48 test hiện có, kèm độ phủ (P-13) | Có lần chạy CI đầu tiên trên `develop` |
+| P-10 | Bật branch protection cho `main` (bắt buộc CI xanh); thêm chặng lint vào CI cùng P-14 | CI có ≥ 3 chặng |
 | P-12 | Viết tiếp test cho `useradmin` (UC-19, UC-20, UC-26) và đánh giá sản phẩm (L-3) | Cả 4 app đều có test |
 | P-11 | Chọn host, database, image storage cho KLTN | Ghi thành quyết định trong `DECISIONS.md` |
 | P-05 | Giữ nhịp commit và báo cáo tuần | Nộp `tuan-03.md` trước 17:00 Thứ Sáu 25/09/2026 |
@@ -84,13 +87,15 @@ thêm 3 lỗi, trong đó **L-8** là lỗi thanh toán nghiêm trọng.
 |---|---|
 | D-017 | Thực nghiệm với khoảng 3–5 người dùng thật; chấp nhận rủi ro không đạt Mức 5 của TC2.7 (cần ≥ 10 người). Kèm ghi chú đính chính dưới D-013 |
 | D-018 | Kiểm thử tự động chạy trên settings riêng, SQLite trong bộ nhớ, không gọi dịch vụ ngoài; lỗi đã biết ghi bằng test `xfail` chặt kèm mã L-x |
+| D-019 | CI chạy trên GitHub Actions, dựng ngay với các chặng đã làm được, thêm dần lint, quét secret, deploy |
+| D-020 | Thêm migration xóa cột `stripe_payment_intent` cho khớp model (thiếu từ TLCN) |
 
 **Chỉnh sửa đặc tả** — 1 lần, ghi tại [`../PLAN.md`](../PLAN.md) §6 dòng 5:
 `SRS.md` §7 — đối chiếu TC_01 → TC_05 với test tự động; ghi nhận câu thông báo mong
 đợi của TC_02 và TC_04 (TLCN ghi PASS) không có trong mã nguồn.
 
 **Điều chỉnh kế hoạch** — thêm P-08 (nộp đề cương theo yêu cầu GVHD); ghi rõ ở
-P-03 rằng đề cương không thay bản cam kết; bắt đầu P-12 sớm hơn kế hoạch (Giai đoạn 1
+P-03 rằng đề cương không thay bản cam kết; bắt đầu P-12 và P-10 sớm hơn kế hoạch (Giai đoạn 1
 dự kiến từ Tuần 3); thêm L-8 → L-10 vào bản cam kết; chuyển P-11 và phần chốt các
 chỗ lệch của P-03 sang Tuần 3.
 
@@ -111,8 +116,8 @@ và **trước 17:00 Thứ Sáu** của tuần báo cáo. Đính kèm file đề
 
 Tuần 2 hoàn thiện đề cương KLTN theo yêu cầu của thầy ở bản nộp Tuần 1; đề cương
 được đính kèm để thầy góp ý nội dung. Em cũng bắt đầu sớm kiểm thử tự động: 48 test
-cho các luồng cốt lõi, chưa sửa mã nguồn ứng dụng. Viết test phát hiện thêm 3 lỗi,
-trong đó có một lỗi thanh toán nghiêm trọng.
+cho các luồng cốt lõi, và dựng CI trên GitHub Actions để bộ test tự chạy mỗi lần
+push. Viết test phát hiện thêm 3 lỗi, trong đó có một lỗi thanh toán nghiêm trọng.
 
 **Đã làm**
 
@@ -130,12 +135,15 @@ trong đó có một lỗi thanh toán nghiêm trọng.
 - **Lỗi mới L-8, L-9, L-10** — mở thẳng trang "thanh toán thành công" là đơn online
   thành đã thanh toán; AI đề nghị thêm sản phẩm hết hàng vào giỏ; AI tìm thấy sản phẩm
   đã bị ẩn. Mỗi lỗi có một test tái hiện.
+- **P-10 (đang làm)** — dựng CI trên GitHub Actions (D-019): kiểm tra cấu hình Django,
+  kiểm tra thiếu migration, chạy test kèm độ phủ. CI phát hiện một migration còn thiếu
+  từ TLCN, đã bổ sung (D-020).
 
 **Chỉ số**
 
 - 9 commit, 0 Pull Request đã merge (tính tới 16/09/2026).
 - 48 test tự động: 43 đạt, 5 lỗi đã biết đánh dấu `xfail`. Độ phủ 66% (chạy tay).
-- CI: chưa có · Số lần deploy: 0.
+- CI: dựng ngày 17/09/2026 · Số lần deploy: 0.
 - Defect Critical còn tồn: 2 — giá do trình duyệt gửi lên (L-6); đơn online thành đã
   thanh toán khi chưa trả tiền (L-8).
 
@@ -151,7 +159,7 @@ trong đó có một lỗi thanh toán nghiêm trọng.
 **Kế hoạch tuần 3 (21/09 – 27/09/2026)**
 
 - Sửa đề cương theo góp ý của thầy; soạn nháp phần metric và KPI của bản cam kết.
-- Dựng CI trên GitHub Actions chạy bộ test hiện có; viết tiếp test cho trang quản lý
+- Thêm chặng lint vào CI, bật bảo vệ nhánh `main`; viết tiếp test cho trang quản lý
   của nhân viên.
 - Sửa hai lỗi thanh toán L-6, L-8 nếu thầy đồng ý; chọn hạ tầng riêng cho KLTN.
 
@@ -159,7 +167,7 @@ trong đó có một lỗi thanh toán nghiêm trọng.
 
 ## 7. Khai báo sử dụng AI (điền lên portal)
 
-Tóm tắt từ [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1, các phiên 14/09 → 16/09/2026;
+Tóm tắt từ [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1, các phiên 14/09 → 17/09/2026;
 ba ô dưới đây chép thẳng vào form khai báo công cụ AI trên portal.
 
 **Công cụ AI:** Claude (qua Claude Code) — **Phiên bản / model:** Opus 5
@@ -179,6 +187,7 @@ ba ô dưới đây chép thẳng vào form khai báo công cụ AI trên portal
   báo cáo Tuần 2.
 - Commit; sau đó làm P-12: cài pytest + pytest-django, viết test cho luồng cốt lõi.
 - Chia phần P-12 thành nhiều commit rồi push.
+- Làm P-10: dựng CI.
 ```
 
 **Nội dung AI tạo ra**
@@ -192,6 +201,7 @@ Không sửa mã nguồn ứng dụng. AI tạo tài liệu và mã kiểm thử
 - Mã kiểm thử (P-12): grocerly/grocerly/settings_test.py, pytest.ini, conftest.py,
   requirements-dev.txt, .coveragerc và 48 test trong core/tests, userauths/tests,
   store_api/tests; xóa 4 file tests.py rỗng.
+- CI (P-10): .github/workflows/ci.yml; migration core/0005 do makemigrations sinh.
 - Script xuất đề cương sang DOCX/PDF (pandoc + bộ lọc Lua + LibreOffice); công cụ
   này đang ở thư mục tạm, chưa đưa vào repo.
 AI đọc nguyên văn rubric (Mục 2, Mục 5, Mục 7, TC2.7) để trích dẫn, không tự đặt
@@ -208,10 +218,12 @@ ngưỡng. Mỗi test xfail được chạy lại để xác nhận nó hỏng �
 - Hỏi lại quan hệ giữa đề cương và bản cam kết, dẫn tới việc tách rõ hai văn bản
   trong PLAN.
 - Yêu cầu chia phần P-12 thành nhiều commit theo nhóm rồi push lên develop.
-- Lỗi của AI trong tuần (AI_USAGE_LOG mục 2, #14–#19): 3 lỗi trình bày trong công cụ
+- Chọn sinh migration xóa cột thừa thay vì bỏ chặng kiểm tra migration khỏi CI.
+- Lỗi của AI trong tuần (AI_USAGE_LOG mục 2, #14–#20): 3 lỗi trình bày trong công cụ
   xuất đề cương, D-013 ghi nhầm "bắt buộc ≥ 10 người", một script sửa tài liệu bị
   dừng giữa chừng vì giả định dòng cuối file luôn có ký tự xuống dòng, và dòng nhật
-  ký Tuần 2 bị chèn nhầm vào bảng mốc thời gian của PLAN.
+  ký Tuần 2 bị chèn nhầm vào bảng mốc thời gian của PLAN, và một lần AI đọc lẫn output
+  của hai lệnh nên báo nhầm .coveragerc chưa được commit.
 ```
 
 ---
