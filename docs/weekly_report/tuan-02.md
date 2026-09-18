@@ -5,13 +5,9 @@
 | Sinh viên | Lê Đức Phát — 21139083 |
 | GVHD | Hoàng Văn Dũng |
 | Kỳ báo cáo | **Tuần 2**: 14/09/2026 → 20/09/2026 |
-| Nộp portal | DD/09/2026 — hạn **17:00 Thứ Sáu 18/09/2026** |
+| Nộp portal | 18/09/2026 — hạn **17:00 Thứ Sáu 18/09/2026** |
 
 > Tra số tuần và khoảng ngày tương ứng ở [`README.md`](README.md).
-
-> **⚠️ BẢN NHÁP — số liệu tính tới 17/09/2026.** Cập nhật Mục 1, 2 và 6 nếu có
-> thêm việc trước lúc nộp; điền ngày nộp, số commit và số PR sau khi merge
-> `develop` → `main`.
 
 **Tóm tắt.** Tuần 2 hoàn thiện **đề cương KLTN** theo yêu cầu của GVHD ở bản nộp
 Tuần 1: sửa số người dùng thực nghiệm thành khoảng 3–5 người (D-017), xuất bản
@@ -34,7 +30,8 @@ lỗi thanh toán nghiêm trọng; CI phát hiện một migration còn thiếu 
 | — | Chốt số người dùng thực nghiệm (D-017) | **Xong.** Khoảng 3–5 người — theo ngưỡng tham chiếu của rubric là Mức 3–4 của TC2.7; ngưỡng chính thức chốt ở bản cam kết. Đính chính D-013 (đã ghi nhầm "bắt buộc ≥ 10 người") | commit `9e8dd3e` — [`DECISIONS.md`](../DECISIONS.md) D-017 |
 | P-03 | Làm rõ quan hệ giữa đề cương và bản cam kết sản phẩm | **Xong phần làm rõ.** Rubric không nhắc tới đề cương; bản cam kết là hồ sơ của Mục 2 Bước 3: phải có metric, có chữ ký SV + GVHD, bộ môn rà soát. Phần metric (§5 của bản cam kết) **chưa soạn** | commit `e056d7c` |
 | P-12 | Dựng kiểm thử tự động; viết test cho các luồng cốt lõi | **Đang làm — xong đợt đầu.** Hạ tầng test theo D-018: settings riêng dùng SQLite trong bộ nhớ, không test nào chạm `.env`, Gemini hay VNPay thật (đã kiểm: chạy xanh trên bản sao không có `.env`). 48 test: đăng ký/đăng nhập 12, giỏ hàng 8, checkout 11, VNPay 5, trợ lý AI 12 — 43 xanh, 5 `xfail` tái hiện lỗi đã biết L-6 → L-10. Tự động hóa cả 5 test case thủ công TC_01 → TC_05 của TLCN | commit `d045ba7` (cấu hình), `f1417de`, `b8203bd`, `1467975` (test) |
-| P-10 | Dựng CI trên GitHub Actions (làm sớm, kế hoạch là Tuần 3) | **Đang làm — xong bản đầu.** `.github/workflows/ci.yml` (D-019): job so hai file `AGENTS.md`/`CLAUDE.md`; job cài đặt → `manage.py check` → kiểm tra thiếu migration → chạy 48 test kèm độ phủ, in bảng độ phủ vào trang tóm tắt lần chạy (P-13). Đã chạy thử toàn bộ các bước trên bản sao sạch không có `.env`, Python 3.12: xanh. Còn: lint (P-14), quét secret (P-15), đóng gói + deploy (P-11) | commit `717f4b8` |
+| P-06 | Merge `develop` → `main` qua Pull Request | **Xong.** PR #7 gom toàn bộ việc Tuần 2; CI chạy trên PR xanh; tự review theo checklist D-016 (kiểm hai file song sinh, không có `.env`/`media/`, quét chuỗi giống secret trong diff) | PR #7 |
+| P-10 | Dựng CI trên GitHub Actions (làm sớm, kế hoạch là Tuần 3) | **Đang làm — xong bản đầu.** `.github/workflows/ci.yml` (D-019): job so hai file `AGENTS.md`/`CLAUDE.md`; job cài đặt → `manage.py check` → kiểm tra thiếu migration → chạy 48 test kèm độ phủ, in bảng độ phủ vào trang tóm tắt lần chạy (P-13). Đã chạy thử toàn bộ các bước trên bản sao sạch không có `.env`, Python 3.12: xanh; lần chạy đầu tiên trên GitHub 18/09/2026 cũng xanh. CI không đọc `.env` và không kết nối hạ tầng TLCN. Còn: lint (P-14), quét secret (P-15), đóng gói + deploy (P-11) | commit `717f4b8` |
 | — | Thêm migration còn thiếu từ TLCN (D-020) | **Xong.** Chặng kiểm tra migration báo model `CartOrder` đã bỏ trường `stripe_payment_intent` (commit TLCN `51c4b96`) mà không có migration. Sinh `core/migrations/0005_…`; chưa `migrate` lên database nào | commit `5198f39` |
 | — | Ghi nhận 3 lỗi mới phát hiện khi viết test | **L-8** 🔴 mở thẳng trang "thanh toán thành công" là đơn online thành *đã thanh toán*, không qua VNPay · **L-9** AI vẫn đề nghị thêm sản phẩm đã hết hàng vào giỏ (trái UC-17) · **L-10** AI tìm thấy cả sản phẩm quản trị viên đã ẩn khỏi cửa hàng. Ghi vào [`COMMITMENT.md`](../COMMITMENT.md) §3, mỗi lỗi có một test `xfail` | test `xfail` trong commit `b8203bd` (L-8), `1467975` (L-9, L-10) |
 
@@ -42,12 +39,12 @@ lỗi thanh toán nghiêm trọng; CI phát hiện một migration còn thiếu 
 
 | Chỉ số | Giá trị |
 |---|---|
-| Số commit | 9 tính tới 16/09/2026 — `9e8dd3e`, `560bdf0`, `e056d7c`, 4 commit test của P-12 (`d045ba7`, `f1417de`, `b8203bd`, `1467975`) và 2 commit tài liệu (`6df5e0f` và commit ghi mã commit vào nhật ký AI) |
-| Số Pull Request đã merge (có review) | 0 tính tới 16/09/2026 — PR `develop` → `main` sẽ mở trước lúc nộp |
+| Số commit | 14 (không tính merge commit): 4 commit test của P-12 (`d045ba7`, `f1417de`, `b8203bd`, `1467975`), 1 commit sửa migration (`5198f39`), 1 commit CI (`717f4b8`), 8 commit tài liệu — kể cả commit cập nhật báo cáo này |
+| Số Pull Request đã merge (có review) | 1 — PR #7 (`develop` → `main`). Tự review theo checklist D-016 |
 | Số test tự động | 48 — 43 xanh, 5 `xfail` (lỗi đã biết, chưa sửa) |
-| Số lần CI chạy / tỉ lệ build xanh | CI dựng ngày 17/09/2026 (P-10) — điền số lần chạy và tỉ lệ xanh từ tab *Actions* trước lúc nộp |
-| Số lần deploy | 0 — chưa có hạ tầng KLTN (P-11) |
-| Độ phủ test | 66% toàn bộ mã của 4 app (chạy tay 16/09/2026; từ 17/09 CI đo mỗi lần chạy). Theo file: `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21% |
+| Số lần CI chạy / tỉ lệ build xanh | 2 lần, 100% xanh, tính tới lúc mở PR #7 (một lần do push lên `develop`, một lần trên PR). CI bắt đầu chạy từ 18/09/2026 (P-10) |
+| Số lần deploy | 0 — CI chưa có chặng deploy; chờ hạ tầng riêng của KLTN (P-11) vì `.env` hiện còn trỏ tới production TLCN |
+| Độ phủ test | 66% toàn bộ mã của 4 app (chạy tay 16/09/2026; từ 18/09 CI đo mỗi lần chạy, vẫn 66%). Theo file: `core/views.py` 57%, `store_api/views.py` 73%, `userauths/views.py` 71%, `useradmin/views.py` 21% |
 | Số defect còn tồn (Critical/Blocker) | 2 Critical — **L-6** (giá sản phẩm do trình duyệt gửi lên) và **L-8** (đơn online thành đã thanh toán khi chưa trả tiền); chưa sửa, đã có test tái hiện. Ngoài ra L-3, L-5, L-7, L-9, L-10 chưa phân mức |
 
 ## 3. Vướng mắc
@@ -141,9 +138,10 @@ push. Viết test phát hiện thêm 3 lỗi, trong đó có một lỗi thanh t
 
 **Chỉ số**
 
-- 9 commit, 0 Pull Request đã merge (tính tới 16/09/2026).
+- 14 commit, 1 Pull Request đã merge (PR #7).
 - 48 test tự động: 43 đạt, 5 lỗi đã biết đánh dấu `xfail`. Độ phủ 66% (chạy tay).
-- CI: dựng ngày 17/09/2026 · Số lần deploy: 0.
+- CI: 2 lần chạy, đều xanh (từ 18/09/2026) · Số lần deploy: 0 — chặng deploy chờ hạ
+  tầng riêng của KLTN.
 - Defect Critical còn tồn: 2 — giá do trình duyệt gửi lên (L-6); đơn online thành đã
   thanh toán khi chưa trả tiền (L-8).
 
@@ -167,7 +165,7 @@ push. Viết test phát hiện thêm 3 lỗi, trong đó có một lỗi thanh t
 
 ## 7. Khai báo sử dụng AI (điền lên portal)
 
-Tóm tắt từ [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1, các phiên 14/09 → 17/09/2026;
+Tóm tắt từ [`../AI_USAGE_LOG.md`](../AI_USAGE_LOG.md) §1, các phiên 14/09 → 18/09/2026;
 ba ô dưới đây chép thẳng vào form khai báo công cụ AI trên portal.
 
 **Công cụ AI:** Claude (qua Claude Code) — **Phiên bản / model:** Opus 5
@@ -187,7 +185,7 @@ ba ô dưới đây chép thẳng vào form khai báo công cụ AI trên portal
   báo cáo Tuần 2.
 - Commit; sau đó làm P-12: cài pytest + pytest-django, viết test cho luồng cốt lõi.
 - Chia phần P-12 thành nhiều commit rồi push.
-- Làm P-10: dựng CI.
+- Làm P-10: dựng CI. Commit và push; merge develop vào main; cập nhật báo cáo tuần.
 ```
 
 **Nội dung AI tạo ra**
