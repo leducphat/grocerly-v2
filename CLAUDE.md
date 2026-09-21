@@ -83,7 +83,9 @@ Với đồ án 15 tuần, Mức 5 của rubric đòi **≥ 14/15 tuần có com
 **Cách viết mọi văn bản nộp cho GVHD** (ô *Nội dung* và khối khai báo AI trên
 portal, và các tài liệu đính kèm):
 
-- Dẫn bằng kết quả đã chạy được và số đo được, không dẫn bằng kế hoạch.
+- Dẫn bằng kết quả đã chạy được và số đo được, không dẫn bằng kế hoạch. Kế hoạch
+  tuần sau vẫn nêu, nhưng để một đoạn ngắn ở cuối - để thầy thấy việc đi tiếp
+  chứ không phải để mở đầu.
 - Không dùng mã `P-xx`, `D-xxx`, `L-x`, `UC-xx`, `TC-x`, `G-x` — mã để tra trong
   repo, còn với GVHD thì gọi tên việc. Bỏ luôn `·`, `→`, emoji, in đậm rải khắp.
 - Dấu câu bình thường: dùng `-`, không dùng `—` hay `–`.

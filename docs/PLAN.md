@@ -140,7 +140,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 |---|---|---|---|---|
 | P-21 | Định lượng hóa NFR (≥ 5 ràng buộc đo được) | TC2.1 | Chưa bắt đầu | VD: thời gian phản hồi, số người dùng đồng thời |
 | P-23 | Rà soát đặc tả TLCN trong `SRS.md`: sửa chỗ sai/lỗi thời + viết acceptance criteria cho 26 use case | TC2.1 | Chưa bắt đầu | Gộp P-20 cũ: rà tới use case nào thì viết AC cho use case đó luôn. Mức 5 cần 100% use case có AC. Ghi từng lần sửa vào §6; mỗi AC nên có test tương ứng ở P-12 |
-| P-24 | Cập nhật sơ đồ thiết kế trong `SDD.md` cho khớp mã nguồn hiện tại | TC2.1 | Chưa bắt đầu | Hội đồng đối chiếu ngẫu nhiên 5 điểm |
+| P-24 | Cập nhật sơ đồ thiết kế trong `SDD.md` cho khớp mã nguồn hiện tại | TC2.1 | Chưa bắt đầu | Hội đồng đối chiếu ngẫu nhiên 5 điểm. Rủi ro lịch: sơ đồ tuần tự tốn thời gian hơn dự tính (phải đọc lại luồng thật trong code rồi mới vẽ được), nên bắt đầu sớm trong Giai đoạn 2 và vẽ dần từng luồng, đừng dồn vào lúc viết quyển báo cáo cuối kỳ |
 | P-25 | Thực nghiệm với khoảng 3–5 người dùng thật: phỏng vấn nhu cầu (~5 phút đầu) → làm tác vụ → đo SUS | G7, TC2.7, TC1 | Chưa bắt đầu | Gộp P-22 cũ, theo D-013. Số người theo D-017: theo ngưỡng tham chiếu của rubric, 3–4 người là Mức 3, 5 người là Mức 4 của TC2.7; ngưỡng chính thức chốt ở bản cam kết P-03. Phần phỏng vấn là minh chứng TC1 (≥ 1 người → Mức 3, ≥ 2 → Mức 4, ≥ 3 → Mức 5); phần tác vụ + SUS cho TC2.7. Biên bản ghi tách hai phần. Phải đúng nhóm đối tượng, không chỉ bạn cùng lớp |
 | P-26 | Một vòng cải tiến theo phản hồi + đo lại trước–sau | TC2.7 | Chưa bắt đầu | Điều kiện của Mức 5 |
 
