@@ -11,22 +11,17 @@ from core.models import CartOrder
 @pytest.fixture
 def add_to_cart():
     """Return a function that adds a product to the session cart the way the product
-    page does: GET /add-to-cart/ with the product's id, title, quantity and price."""
+    page does: GET /add-to-cart/ with the product's id and a quantity.
+
+    Passing price= adds a price parameter to the request, the way a customer
+    editing the URL would, so a test can check that the server ignores it (L-6).
+    """
 
     def add(client, product, qty=1, price=None):
-        return client.get(
-            reverse("core:add-to-cart"),
-            {
-                "id": product.id,
-                "pid": product.p_id,
-                "title": product.title,
-                "image": "products.jpg",
-                "qty": qty,
-                # The page sends the price it displays. Passing price= lets a test
-                # send a different one, like a customer editing the request (L-6).
-                "price": product.price if price is None else price,
-            },
-        )
+        data = {"id": product.id, "qty": qty}
+        if price is not None:
+            data["price"] = price
+        return client.get(reverse("core:add-to-cart"), data)
 
     return add
 

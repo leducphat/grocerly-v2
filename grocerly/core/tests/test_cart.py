@@ -25,6 +25,30 @@ def test_add_to_cart_puts_product_in_cart(client, product, add_to_cart):
     assert (line["pid"], line["qty"]) == (product.p_id, 2)
 
 
+def test_cart_line_keeps_product_price_not_price_sent_by_browser(client, product, add_to_cart):
+    # L-6: the price in the request is only the one the product page displayed.
+    add_to_cart(client, product, price="1000")  # real price: 25,000
+
+    assert cart_lines(client)[str(product.id)]["price"] == str(product.price)
+
+
+def test_add_to_cart_ignores_unknown_product(client, db):
+    response = client.get(reverse("core:add-to-cart"), {"id": 999999, "qty": 1})
+
+    assert response.status_code == 404
+    assert cart_lines(client) == {}
+
+
+def test_cart_drops_line_of_product_taken_off_sale(client, product, add_to_cart):
+    add_to_cart(client, product)
+
+    product.soft_delete()
+    response = client.get(reverse("core:cart"))
+
+    assert cart_lines(client) == {}
+    assert response.url == reverse("core:index")  # nothing left to show
+
+
 def test_adding_same_product_again_keeps_one_cart_line(client, product, add_to_cart):
     add_to_cart(client, product, qty=1)
 

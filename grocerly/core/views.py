@@ -12,6 +12,7 @@ from django.core import serializers
 from taggit.models import Tag
 
 import calendar
+from decimal import Decimal
 from core.vnpay import vnpay
 from datetime import datetime
 from django.utils import timezone
@@ -281,29 +282,65 @@ def filter_product(request):
 
 # ======================== Cart (Session-based) ========================
 
-def add_to_cart(request):
-    cart_product = {}
+def _refresh_cart(request):
+    """Rewrite every line of the session cart with the price stored in the
+    database, then return the total of the cart in VND.
 
-    cart_product[str(request.GET['id'])] = {
-        'title': request.GET['title'],
-        'qty': safe_int(request.GET.get('qty')),
-        'price': safe_float(request.GET.get('price')),
-        'image': request.GET['image'],
-        'pid': request.GET['pid'],
+    The browser sends a price when it adds a product to the cart, because that is
+    the price the product page displays - but the customer can edit that request
+    (L-6). So the price kept in the session is only ever a copy of
+    `Product.price`, and every amount the server computes - the cart total here,
+    the order total in `save_checkout_info` - is read from the database. A line
+    whose product no longer exists, or has been soft deleted, is dropped.
+    """
+    cart_data = request.session.get('cart_data_obj')
+    if not cart_data:
+        return Decimal("0")
+
+    current_prices = {
+        str(product.id): product.price
+        for product in Product.objects.filter(
+            id__in=[safe_int(p_id, 0) for p_id in cart_data]
+        )
     }
 
-    if 'cart_data_obj' in request.session:
-        if str(request.GET['id']) in request.session['cart_data_obj']:
-            cart_data = request.session['cart_data_obj']
-            cart_data[str(request.GET['id'])]['qty'] = safe_int(cart_product[str(request.GET['id'])]['qty'])
-            cart_data.update(cart_data)
-            request.session['cart_data_obj'] = cart_data
-        else:
-            cart_data = request.session['cart_data_obj']
-            cart_data.update(cart_product)
-            request.session['cart_data_obj'] = cart_data
+    cart_total_amount = Decimal("0")
+    for p_id in list(cart_data):
+        if p_id not in current_prices:
+            del cart_data[p_id]
+            continue
+
+        item = cart_data[p_id]
+        item['qty'] = safe_int(item.get('qty'))
+        item['price'] = str(current_prices[p_id])
+        cart_total_amount += current_prices[p_id] * item['qty']
+
+    request.session['cart_data_obj'] = cart_data
+    return cart_total_amount
+
+
+def add_to_cart(request):
+    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    if product is None:
+        return JsonResponse({'error': "Product not found"}, status=404)
+
+    # The request only says which product and how many of it; everything the cart
+    # line shows is read from the database.
+    product_id = str(product.id)
+    cart_data = request.session.get('cart_data_obj', {})
+
+    if product_id in cart_data:
+        cart_data[product_id]['qty'] = safe_int(request.GET.get('qty'))
     else:
-        request.session['cart_data_obj'] = cart_product
+        cart_data[product_id] = {
+            'title': product.title,
+            'qty': safe_int(request.GET.get('qty')),
+            'price': str(product.price),
+            'image': product.image.url if product.image else '',
+            'pid': product.p_id,
+        }
+
+    request.session['cart_data_obj'] = cart_data
 
     return JsonResponse({
         'data': request.session['cart_data_obj'],
@@ -312,13 +349,8 @@ def add_to_cart(request):
 
 
 def cart_view(request):
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    if request.session.get('cart_data_obj'):
         return render(request, 'core/cart.html', {
             'cart_data': request.session['cart_data_obj'],
             'totalcartitems': len(request.session['cart_data_obj']),
@@ -331,13 +363,8 @@ def cart_view(request):
 
 @login_required
 def checkout_info_view(request):
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    if request.session.get('cart_data_obj'):
         return render(request, 'core/checkout-info.html', {
             'cart_data': request.session['cart_data_obj'],
             'totalcartitems': len(request.session['cart_data_obj']),
@@ -361,22 +388,17 @@ def delete_item_from_cart(request):
             del request.session['cart_data_obj'][product_id]
             request.session['cart_data_obj'] = cart_data
 
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
 
     context = render_to_string("core/async/cart-list.html", {
-        'cart_data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'cart_data': cart_data,
+        'totalcartitems': len(cart_data),
         'cart_total_amount': cart_total_amount,
     })
     return JsonResponse({
         'data': context,
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'totalcartitems': len(cart_data),
     })
 
 
@@ -390,22 +412,17 @@ def update_cart(request):
             cart_data[str(request.GET['id'])]['qty'] = safe_int(product_qty)
             request.session['cart_data_obj'] = cart_data
 
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
 
     context = render_to_string("core/async/cart-list.html", {
-        'cart_data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'cart_data': cart_data,
+        'totalcartitems': len(cart_data),
         'cart_total_amount': cart_total_amount,
     })
     return JsonResponse({
         'data': context,
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'totalcartitems': len(cart_data),
     })
 
 
@@ -434,8 +451,6 @@ def _get_checkout_order_or_none(request, oid):
 
 @login_required
 def save_checkout_info(request):
-    total_amount = 0
-
     if request.method == "POST":
         full_name = request.POST.get("full_name")
         email = request.POST.get("email")
@@ -449,10 +464,12 @@ def save_checkout_info(request):
             messages.error(request, "Please provide Full Name, Email, and Address to continue.")
             return redirect("core:checkout-info")
 
-        if 'cart_data_obj' in request.session:
-            for p_id, item in request.session['cart_data_obj'].items():
-                total_amount += safe_int(item.get('qty')) * safe_float(item.get('price'))
+        # The order total comes from the database, not from the prices the
+        # browser put in the cart (L-6).
+        total_amount = _refresh_cart(request)
+        cart_data = request.session.get('cart_data_obj')
 
+        if cart_data:
             order = _get_pending_order_from_session(request)
 
             if order:
@@ -481,15 +498,17 @@ def save_checkout_info(request):
                     country=country,
                 )
 
-            for p_id, item in request.session['cart_data_obj'].items():
+            for p_id, item in cart_data.items():
+                price = Decimal(item['price'])
+                quantity = safe_int(item.get('qty'))
                 CartOrderItem.objects.create(
                     order=order,
                     invoice_no="INVOICE_NO-" + str(order.id),
                     item=item['title'],
                     image=item['image'],
-                    quantity=safe_int(item.get('qty')),
-                    price=safe_float(item.get('price')),
-                    total=float(safe_int(item.get('qty'))) * safe_float(item.get('price')),
+                    quantity=quantity,
+                    price=price,
+                    total=price * quantity,
                 )
 
             request.session['pending_order_oid'] = str(order.oid)

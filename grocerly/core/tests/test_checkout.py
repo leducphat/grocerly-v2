@@ -69,7 +69,6 @@ def test_submitting_checkout_twice_keeps_one_order(customer_client, product, add
     assert CartOrderItem.objects.count() == 1
 
 
-@pytest.mark.xfail(reason="L-6: the order total is computed from the price sent by the browser")
 def test_order_total_uses_product_price_not_price_sent_by_browser(
     customer_client, customer, product, add_to_cart
 ):
