@@ -145,9 +145,34 @@ def test_customer_cannot_place_order_of_another_customer(client, order, django_u
     assert order.payment_method == "online"  # unchanged
 
 
-@pytest.mark.xfail(reason="L-8: opening the payment-completed page marks an unpaid online order as paid")
+# ---------- Payment completed page (L-8) ----------
+
+
 def test_payment_completed_page_does_not_mark_unpaid_order_as_paid(customer_client, order):
-    customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
 
     order.refresh_from_db()
+    assert order.paid_status is False
+    assert response.url == reverse("core:checkout", args=[order.oid])  # not the success page
+
+
+def test_payment_completed_page_shows_online_order_confirmed_by_vnpay(customer_client, order):
+    order.paid_status = True  # as vnpay_return leaves it after checking the signature
+    order.save()
+
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+
+    assert response.status_code == 200
+
+
+def test_payment_completed_page_shows_unpaid_cod_order(customer_client, customer, product, add_to_cart):
+    add_to_cart(customer_client, product)
+    submit_shipping_info(customer_client)
+    order = CartOrder.objects.get(user=customer)
+    customer_client.post(reverse("core:place-cod-order", args=[order.oid]))
+
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert response.status_code == 200  # COD is paid on delivery, so unpaid is expected here
     assert order.paid_status is False

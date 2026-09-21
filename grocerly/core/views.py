@@ -707,9 +707,13 @@ def payment_completed_view(request, oid):
         messages.warning(request, "Order not found. Please start checkout again.")
         return redirect("core:checkout-info")
 
-    if order.payment_method == 'online' and order.paid_status == False:
-        order.paid_status = True
-        order.save()
+    # L-8: this page only displays the order. An online order becomes paid in
+    # vnpay_return / vnpay_ipn, which check VNPay's signature first. Opening this
+    # URL by hand must not confirm a payment that never happened - and must not
+    # show "Payment Completed" for an order VNPay has not confirmed.
+    if order.payment_method == 'online' and not order.paid_status:
+        messages.warning(request, "This order has not been paid yet. Please complete the payment.")
+        return redirect("core:checkout", order.oid)
 
     if 'cart_data_obj' in request.session:
         del request.session['cart_data_obj']
