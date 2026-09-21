@@ -66,7 +66,7 @@ dòng phải khớp với một commit có thật.
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **21**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **22**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -91,8 +91,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 19 | 16/09/2026 | Dòng "Tuần 2" của nhật ký tiến độ bị chèn vào bảng mốc thời gian `PLAN.md` §2 (giữa "Bắt đầu" và "Hết Giai đoạn 0") thay vì bảng Nhật ký tiến độ §5; lỗi nằm trong commit `e056d7c` và đã được push | Script tìm chỗ chèn bằng chuỗi `| Tuần 1 |` và lấy vị trí khớp **đầu tiên** mà không kiểm tra chuỗi có duy nhất hay không — chuỗi này khớp cả dòng `| Bắt đầu | Tuần 1 |` ở §2. Sau khi chèn, AI chỉ xem `git diff --stat` (số dòng đổi) chứ không đọc lại vị trí dòng mới, nên lỗi lọt qua 6 commit | AI (đọc lại `PLAN.md` sau khi push) | commit ngay sau `e3473d6`: *docs: move week 2 log row to PLAN section 5* |
 | 20 | 17/09/2026 | Khi dựng CI, AI báo với SV rằng `.coveragerc` "chưa bao giờ được commit vì `.gitignore` chặn nó", nên CI sẽ đo độ phủ sai phạm vi — và định sửa `.gitignore`. Thực tế file đã được commit từ P-12 | AI chạy `cat .gitignore | head -60; ls -a grocerly | grep -i cov` trong **một** lệnh; dòng `.coveragerc` in ra từ lệnh `ls` nối ngay sau nội dung `.gitignore`, AI đọc thành một dòng của `.gitignore` rồi kết luận khi chưa kiểm chứng. Chạy `git check-ignore -v` (không trả gì) và `git ls-files` (có file) mới thấy sai. Bài học: gộp nhiều lệnh thì output phải có dấu phân cách; kết luận về trạng thái Git thì kiểm bằng lệnh Git | AI (tự phát hiện trước khi sửa) | — không có gì phải sửa; đã báo lại SV trong phiên |
 | 21 | 21/09/2026 | AI khuyên không nên gỡ báo cáo tuần khỏi repo, viện lý do "phụ lục quyển báo cáo cần sổ theo dõi tiến độ 15 tuần" như thể đó là yêu cầu của rubric. Rubric không có yêu cầu nào về phụ lục của quyển báo cáo | AI lấy mục PHỤ LỤC trong `DE_CUONG.md` - văn bản do chính đồ án tự soạn - rồi trình bày nó như ràng buộc từ rubric, không đối chiếu lại bản rubric vừa tải về trong cùng phiên. Lẫn giữa nguồn quy định và nguồn tự khai | SV (hỏi lại "rubric có nhắc tới không") | D-021 |
+| 22 | 21/09/2026 | Commit `a18a5ae` có dòng tiêu đề là đúng một ký tự `@`, tiêu đề thật tụt xuống dòng hai | AI soạn commit message bằng cú pháp here-string của PowerShell (`@'...'@`) nhưng chạy lệnh qua Bash. Bash không có here-string kiểu đó: nó đọc `@'` thành ký tự `@` rồi mới mở chuỗi nháy đơn, nên `@` thành dòng đầu của message. Cùng họ với mục #9 — hỏng commit message vì cú pháp shell — lần này do phiên làm việc có cả hai shell và AI lấy mẫu của shell này chạy bằng shell kia. Hai commit sau đó AI đổi sang `git commit -F -` với heredoc `<<'EOF'` thì đúng | SV (hỏi lại "dấu `@` đâu ra") | `401f3d7` — viết lại message bằng `commit --amend` trên HEAD tách rời rồi `rebase --onto`; hai commit nằm trên replay thành `4659aae`, `267c326`. Nội dung file không đổi, kiểm bằng `git diff` |
 
-**Ghi chú khi bảo vệ:** mười trong hai mươi mốt mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười một trong hai mươi hai mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
