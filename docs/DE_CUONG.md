@@ -173,7 +173,7 @@ nghiệm người dùng, sổ theo dõi tiến độ.
 
 ## 5. Kế hoạch thực hiện
 
-Lịch từng tuần: [`weekly_report/README.md`](weekly_report/README.md). Mã `P-xx`
+Lịch từng tuần: [`PLAN.md`](PLAN.md) §2. Mã `P-xx`
 tra trong backlog [`PLAN.md`](PLAN.md) §4.
 
 | STT | Thời gian dự kiến | Nội dung công việc | Ghi chú |

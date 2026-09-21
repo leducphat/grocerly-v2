@@ -35,7 +35,7 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 | Hệ thống được xây thế nào? | [`docs/SDD.md`](docs/SDD.md) |
 | Sắp làm gì, đang tới đâu? | [`docs/PLAN.md`](docs/PLAN.md) |
 | Vì sao lại làm theo cách này? | [`docs/DECISIONS.md`](docs/DECISIONS.md) |
-| Đã báo cáo gì với GVHD? | [`docs/weekly_report/`](docs/weekly_report/) |
+| Đã báo cáo gì với GVHD? | Portal của trường (không lưu trong repo — D-021) |
 | AI đã sinh ra phần nào? | [`docs/AI_USAGE_LOG.md`](docs/AI_USAGE_LOG.md) |
 
 ---
@@ -51,15 +51,16 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 | Kết thúc | Tuần 15 | 14/12/2026 – 20/12/2026 |
 | Phản biện | — | Dự kiến tháng 12/2026 |
 
-Lịch đầy đủ 15 tuần: [`docs/weekly_report/README.md`](docs/weekly_report/README.md).
+Lịch đầy đủ 15 tuần và hạn nộp từng tuần: [`docs/PLAN.md`](docs/PLAN.md) §2.
 
 Mốc 50% là **điều kiện cứng**: không chốt được bản cam kết đúng hạn thì đồ án
 *không đủ điều kiện bảo vệ* (xem §4).
 
-**Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, ghi vào
-`docs/weekly_report/` và **nộp lên portal trước 17:00 Thứ Sáu** của chính tuần đó
-(GVHD chốt, áp dụng từ Tuần 2). Với đồ án 15 tuần, Mức 5 của rubric đòi
-**≥ 14/15 tuần có commit** — nghĩa là làm đều, không dồn.
+**Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, **nộp lên portal trước
+17:00 Thứ Sáu** của chính tuần đó (GVHD chốt, áp dụng từ Tuần 2). Báo cáo tuần
+soạn trong `docs/weekly_report/`, thư mục này **không nằm trong repo** (D-021).
+Với đồ án 15 tuần, Mức 5 của rubric đòi **≥ 14/15 tuần có commit** — nghĩa là làm
+đều, không dồn.
 
 ---
 
@@ -76,12 +77,22 @@ Mốc 50% là **điều kiện cứng**: không chốt được bản cam kết 
    `docs/SDD.md`.
 3. **Đưa vào kế hoạch.** Chia việc thành các mục theo dõi được trong `docs/PLAN.md`.
 4. **Viết test kèm theo** (xem §8).
-5. **Báo cáo tuần** trong `docs/weekly_report/`. Mỗi báo cáo có hai mục dành
-   riêng cho portal nộp bài (portal **không nhận file `.md`** đính kèm):
-   Mục 6 là bản tóm tắt dán vào ô *Nội dung*, **bắt buộc kèm link repository
-   và link tới chính file `tuan-NN.md` trên GitHub**; Mục 7 là khai báo công
-   cụ AI (prompt / nội dung AI tạo ra / phần sinh viên sửa), tóm tắt từ
-   `docs/AI_USAGE_LOG.md` §1. Xem `docs/weekly_report/README.md`.
+5. **Báo cáo tuần** nộp lên portal của trường, soạn trong `docs/weekly_report/`
+   — thư mục này đã gitignore (D-021), bản chính thức nằm trên portal.
+
+**Cách viết mọi văn bản nộp cho GVHD** (ô *Nội dung* và khối khai báo AI trên
+portal, và các tài liệu đính kèm):
+
+- Dẫn bằng kết quả đã chạy được và số đo được, không dẫn bằng kế hoạch.
+- Không dùng mã `P-xx`, `D-xxx`, `L-x`, `UC-xx`, `TC-x`, `G-x` — mã để tra trong
+  repo, còn với GVHD thì gọi tên việc. Bỏ luôn `·`, `→`, emoji, in đậm rải khắp.
+- Dấu câu bình thường: dùng `-`, không dùng `—` hay `–`.
+- Ngắn, ngôi thứ nhất, khoảng 200 chữ cho bản tóm tắt tuần. Kể việc, ít gạch đầu
+  dòng, không bảng. Các mục không cần dài đều nhau.
+- Có ít nhất một câu chỉ người tự làm mới viết được: chỗ làm sai lúc đầu, chỗ bất
+  ngờ, lý do phải đổi cách làm.
+- Khai báo AI trung thực nhưng gọn — rubric bắt buộc có nhật ký AI (gate G3),
+  nhưng mỗi ô chỉ vài dòng, không liệt kê dàn trải từng file.
 
 **`SRS.md` và `SDD.md` là tài liệu sống, không phải văn bản đóng băng.** Đặc tả
 TLCN có thể có chỗ sai hoặc đã lỗi thời so với mã nguồn hiện tại. Khi phát hiện,
@@ -139,7 +150,7 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
 ├── .github/workflows/ci.yml  # CI trên GitHub Actions (D-019)
-├── docs/                     # SRS, SDD, PLAN, DECISIONS, AI_USAGE_LOG, weekly_report
+├── docs/                     # SRS, SDD, PLAN, DECISIONS, COMMITMENT, AI_USAGE_LOG
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
     ├── core/                 # catalog, giỏ hàng, đơn hàng, checkout, VNPay, đánh giá

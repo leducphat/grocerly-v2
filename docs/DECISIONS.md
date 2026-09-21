@@ -744,6 +744,41 @@ kiểm tra migration chỉ có ý nghĩa nếu nó xanh ngay từ lần chạy �
 
 ---
 
+## D-021 · Không lưu báo cáo tuần trong repo
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Mỗi tuần có hai bản báo cáo cùng nội dung: thư mục
+`docs/weekly_report/` trong repo và bản đã nộp trên portal projects-fit.hcmute.edu.vn.
+Bản trên portal mới là bản chính thức — có dấu thời gian nộp và có ý kiến GVHD ghi
+ngay dưới đó. Rubric cũng đo tần suất báo cáo theo sổ theo dõi của GVHD, và chỉ đòi
+repository có **đầy đủ lịch sử commit**, không đòi file báo cáo.
+
+**Phương án đã cân nhắc**
+
+1. *Giữ nguyên* — hai nguồn sự thật cho cùng một nội dung, phải đồng bộ tay mỗi tuần.
+2. *Rút gọn từng file, vẫn commit* — ngắn hơn nhưng vẫn còn hai bản.
+3. *Gitignore cả thư mục* — portal là bản duy nhất.
+
+**Quyết định.** Chọn (3). Thêm `docs/weekly_report/` vào `.gitignore` và gỡ thư mục
+khỏi vùng theo dõi. Thư mục vẫn dùng để soạn thảo trên máy, chỉ không commit; nội
+dung cũ vẫn còn trong lịch sử Git.
+
+**Lý do.** Rút gọn và làm sạch repo. Báo cáo đã nộp trên portal của trường rồi nên
+giữ thêm một bản trong repo không thêm minh chứng nào, chỉ thêm việc đồng bộ.
+
+**Hệ quả.**
+- Lịch 15 tuần và hạn nộp từng tuần chuyển sang [`PLAN.md`](PLAN.md) §2.
+- Quy ước viết văn bản nộp cho GVHD chuyển sang `AGENTS.md`/`CLAUDE.md` §3.
+- Phần tóm tắt dán lên portal bỏ link "Báo cáo đầy đủ trên GitHub" — không còn
+  file để trỏ tới, nên ô *Nội dung* phải tự đứng vững một mình.
+- Tuần nào chỉ có mỗi việc viết báo cáo thì tuần đó không có commit. Rubric đòi
+  ≥ 90% số tuần có commit cho Mức 5, nên vẫn phải có việc thật mỗi tuần.
+- Không ảnh hưởng D-001: đặc tả, kế hoạch và quyết định vẫn nằm trong repo.
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
