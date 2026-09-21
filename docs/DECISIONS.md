@@ -844,6 +844,52 @@ nằm trong session nên template và JavaScript không phải sửa.
 
 ---
 
+## D-023 · Chỉ VNPay mới xác nhận được đơn đã thanh toán
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-8 trong [`COMMITMENT.md`](COMMITMENT.md): `payment_completed_view`
+tự đặt `paid_status = True` cho mọi đơn `online` còn chưa thanh toán. Đây là trang
+mà `vnpay_return` chuyển tới sau khi thanh toán xong, nhưng nó không kiểm tra gì
+cả — khách đặt hàng xong rồi mở thẳng `/payment-completed/<oid>/` là đơn thành đã
+thanh toán mà chưa trả đồng nào. Cùng kiểu lỗi với L-6: tin vào thứ trình duyệt
+gửi lên thay vì tin vào nguồn dữ liệu của hệ thống.
+
+Hai chỗ đổi `paid_status` một cách hợp lệ là `vnpay_return` và `vnpay_ipn`, cả hai
+đều gọi `validate_response` để kiểm chữ ký HMAC trước.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ bỏ hai dòng gán `paid_status`* — đúng phần lỗ hổng, nhưng template
+   `payment-completed.html` vẫn in "Payment Completed" cho mọi đơn không phải COD,
+   nên đơn chưa trả tiền vẫn được báo là thanh toán xong.
+2. *Bỏ hai dòng gán, rồi sửa template hiển thị theo `paid_status`* — thành ba trạng
+   thái phải viết chữ cho cả hai bản dịch, trong khi đơn chưa thanh toán thì việc
+   cần làm là quay lại trả tiền chứ không phải đọc thông báo.
+3. *Bỏ hai dòng gán, và đưa đơn online chưa thanh toán về trang thanh toán.*
+
+**Quyết định.** Chọn (3). `payment_completed_view` không còn ghi vào `paid_status`;
+đơn `online` mà `paid_status` còn `False` thì view đẩy về `core:checkout` kèm
+`messages.warning` nhắc thanh toán. Đơn COD vẫn vào được trang hoàn tất với
+`paid_status = False`, vì COD trả tiền khi nhận hàng.
+
+**Lý do.** Cách này để việc xác nhận thanh toán nằm đúng ở hai view đã kiểm chữ ký,
+đúng như mô tả luồng VNPay trong [`SDD.md`](SDD.md). Nó cũng không đẻ thêm màn hình
+mới: `core:checkout` sẵn có nút thanh toán lại, và bản thân view đó đã tự đẩy đơn
+đã thanh toán ngược về trang hoàn tất nên không có vòng lặp chuyển hướng.
+
+**Hệ quả.**
+- Đơn online chưa thanh toán không còn bị xóa giỏ hàng trong session, vì view thoát
+  ra trước đoạn dọn session. Khách bỏ dở lần thanh toán vẫn giữ nguyên giỏ.
+- Test `test_payment_completed_page_does_not_mark_unpaid_order_as_paid` đã gỡ
+  `xfail`; thêm hai test cho hai lối vào hợp lệ của trang này — đơn online đã được
+  VNPay xác nhận, và đơn COD chưa thanh toán.
+- `vnpay_ipn` vẫn trả `RspCode 00` cho giao dịch thất bại. Đây là chỗ đáng xem lại
+  nhưng không thuộc L-8, chưa sửa trong lần này.
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

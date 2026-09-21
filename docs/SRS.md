@@ -215,6 +215,10 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   tra từ sản phẩm, không lấy theo con số trình duyệt gửi lên (D-022).
 - **UC-06:** sản phẩm bị gỡ bán khi đang nằm trong giỏ của khách → dòng đó bị bỏ
   khỏi giỏ ở lần khách mở giỏ kế tiếp.
+- **UC-09:** đơn chọn thanh toán online chỉ chuyển sang *đã thanh toán* khi VNPay
+  xác nhận và chữ ký hợp lệ; trang hoàn tất chỉ hiển thị, không tự xác nhận (D-023).
+- **UC-09:** đơn online chưa được VNPay xác nhận mà mở trang hoàn tất → quay về
+  trang thanh toán kèm nhắc thanh toán, không hiện màn hình thanh toán thành công.
 - **UC-14:** chỉ đánh giá được sản phẩm đã mua (đơn ở trạng thái `Shipped`); cố
   đánh giá sản phẩm chưa mua → nút bị vô hiệu hóa.
 - **UC-19:** sản phẩm do nhân viên tạo lưu ở trạng thái `in_review`, phải được
