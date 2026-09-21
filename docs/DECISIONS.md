@@ -775,6 +775,11 @@ giữ thêm một bản trong repo không thêm minh chứng nào, chỉ thêm v
   file để trỏ tới, nên ô *Nội dung* phải tự đứng vững một mình.
 - Tuần nào chỉ có mỗi việc viết báo cáo thì tuần đó không có commit. Rubric đòi
   ≥ 90% số tuần có commit cho Mức 5, nên vẫn phải có việc thật mỗi tuần.
+- Đề cương KLTN (`DE_CUONG.md`) chuyển vào chính thư mục này cùng ngày, vì cùng một
+  lý do: bản GVHD đọc là bản DOCX/PDF đã nộp trên portal, giữ thêm bản Markdown trong
+  repo chỉ tạo ra nguồn thứ hai phải đồng bộ. [`COMMITMENT.md`](COMMITMENT.md) thì
+  **ở lại** repo — §3 của nó định nghĩa các mã L-x mà test (`xfail`), `pytest.ini` và
+  §8 của `AGENTS.md`/`CLAUDE.md` đang trỏ tới.
 - Không ảnh hưởng D-001: đặc tả, kế hoạch và quyết định vẫn nằm trong repo.
 
 ---
