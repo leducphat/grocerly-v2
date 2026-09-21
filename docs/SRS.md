@@ -211,6 +211,10 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 
 - **UC-06:** cập nhật số lượng lớn hơn tồn kho thực tế → báo lỗi và reset về số
   lượng hợp lệ.
+- **UC-06, UC-09:** giá của mỗi dòng giỏ hàng và tổng tiền của đơn đều do hệ thống
+  tra từ sản phẩm, không lấy theo con số trình duyệt gửi lên (D-022).
+- **UC-06:** sản phẩm bị gỡ bán khi đang nằm trong giỏ của khách → dòng đó bị bỏ
+  khỏi giỏ ở lần khách mở giỏ kế tiếp.
 - **UC-14:** chỉ đánh giá được sản phẩm đã mua (đơn ở trạng thái `Shipped`); cố
   đánh giá sản phẩm chưa mua → nút bị vô hiệu hóa.
 - **UC-19:** sản phẩm do nhân viên tạo lưu ở trạng thái `in_review`, phải được

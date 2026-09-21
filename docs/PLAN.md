@@ -5,9 +5,9 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 17/09/2026 |
+| Cập nhật lần cuối | 21/09/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
-| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng) |
+| Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng), D-022 (giá giỏ hàng đọc từ database — sửa L-6) |
 
 ---
 
@@ -133,6 +133,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-14 | Cấu hình linter + phân tích tĩnh, đưa vào CI | TC2.4 | Chưa bắt đầu | Mức 5 cần 0 lỗi lint, 0 issue Blocker/Critical, trùng lặp ≤ 3% |
 | P-15 | Quét secret tự động (gitleaks) trong CI | TC2.4 | Chưa bắt đầu | Hiện đang sạch — cần báo cáo làm minh chứng |
 | P-16 | Health check + log tập trung + cảnh báo sau triển khai | TC2.6 | Chưa bắt đầu | Yêu cầu của Mức 5 |
+| P-17 | Sửa các lỗi nghiệp vụ và bảo mật đã phát hiện (L-3, L-5 → L-10 trong [`COMMITMENT.md`](COMMITMENT.md) §3) | TC2.2, TC2.5 | Đang làm | Mỗi lỗi có sẵn test tái hiện đánh dấu `xfail` từ P-12; sửa xong thì gỡ `xfail` trong cùng commit. **21/09/2026:** xong L-6 — giá giỏ hàng và tổng đơn đọc từ `Product` thay vì từ tham số trình duyệt, tiền tính bằng `Decimal` (D-022); thêm 3 test cho hành vi mới. Còn L-8 (ưu tiên cao như L-6), L-7, L-9, L-10, L-5, L-3 |
 
 ### Giai đoạn 2 — Đặc tả và thực nghiệm (Tuần 6–13)
 
@@ -168,6 +169,7 @@ Mỗi tuần thêm một dòng. Bản đầy đủ nằm trên portal (D-021).
 |---|---|---|
 | Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
 | Tuần 2 | Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018). 17/09: bắt đầu sớm P-10 — CI trên GitHub Actions (D-019); thêm migration còn thiếu từ TLCN (D-020) |
+| Tuần 3 | Bắt đầu P-17 — sửa L-6: giá giỏ hàng và tổng đơn hàng đọc từ database thay vì từ tham số trình duyệt (D-022) | Gộp bốn vòng lặp cộng tiền trong `core/views.py` thành `_refresh_cart`; tiền tính bằng `Decimal`; test `xfail` của L-6 chuyển xanh và thêm 3 test cho hành vi mới — bộ test còn 47 xanh + 4 `xfail`. `/add-to-cart/` rút còn hai tham số `id` và `qty`; gỡ phần JavaScript gửi giá và bốn `<input type="hidden">` chỉ tồn tại để nuôi nó trong 5 template. Ghi hai ràng buộc nghiệp vụ mới vào `SRS.md` §6.1 (§6 dòng 6) |
 
 ---
 
@@ -189,3 +191,4 @@ ghi lý do là minh chứng sinh viên nắm được hệ thống; một đặc
 | 3 | 11/09/2026 | §2.1, §2.2, §2.3, §3 (A3), §4.3, FR-A-02, FR-A-06, §6.1 (UC-19), §8 | A3 "Người bán vận hành gian hàng riêng" → "Nhân viên cửa hàng"; thêm mô hình một nhà bán vào phạm vi, marketplace vào ngoài phạm vi. Giữ nguyên §11 (trích nguyên văn TLCN) và mã `FR-V-xx` | Mã nguồn không có vai trò người bán riêng — mọi staff thấy toàn bộ cửa hàng (chỗ lệch L-1 trong `COMMITMENT.md`) — xem D-015 | *(chưa commit)* |
 | 4 | 11/09/2026 | Toàn file `SRS.md`; tạo `SDD.md` | Tách đặc tả thiết kế sang `SDD.md`, nội dung giữ nguyên. Số mục: SRS §7 → SDD §1 · SRS §7.1 → SDD §1.1 · SRS §8 → SDD §2 · SRS §9 → SDD §3 · SRS §9.1 → SDD §3.1 · SRS §10 → SRS §7 · SRS §11 → SRS §8 · SRS §12 → SRS §9. Thay ghi chú "sẽ tách" ở đầu `SRS.md` bằng ghi chú ranh giới; thêm ghi chú "nợ thiết kế" ở cuối SDD §3 | P-07, theo D-011: tách trước P-23 và P-24 để mỗi việc chỉ đụng tới một file. Kiểm thử và hạn chế ở lại SRS vì D-011 chỉ chuyển Mục 7–9 | *(chưa commit)* |
 | 5 | 16/09/2026 | SRS §7 | Thay ghi chú "chưa có kiểm thử tự động" bằng đối chiếu TC_01 → TC_05 với test tự động; ghi nhận *Kết quả mong đợi* của TC_02, TC_04 không khớp thông báo trong code | Viết test ở P-12 thấy hai câu thông báo mà TLCN ghi PASS không có trong mã nguồn. Chưa sửa cột kết quả vì câu chữ thông báo chốt ở P-23 (acceptance criteria) | `6df5e0f` |
+| 6 | 21/09/2026 | SRS §6.1 | Thêm hai ràng buộc nghiệp vụ: giá của dòng giỏ và tổng tiền của đơn do hệ thống tra từ sản phẩm; sản phẩm bị gỡ bán thì dòng đó rời khỏi giỏ | Sửa L-6 (D-022). Ràng buộc thứ nhất trước nay chỉ là ngầm định nên không ai viết ra, và đúng chỗ ngầm định đó thành lỗ hổng. Ràng buộc thứ hai là hành vi mới do cách sửa sinh ra, người dùng nhìn thấy được nên phải có trong đặc tả | *(chưa commit)* |

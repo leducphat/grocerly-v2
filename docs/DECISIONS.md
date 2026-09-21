@@ -779,6 +779,66 @@ giữ thêm một bản trong repo không thêm minh chứng nào, chỉ thêm v
 
 ---
 
+## D-022 · Giá của giỏ hàng luôn đọc lại từ database, không tin giá trình duyệt gửi
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-6 trong [`COMMITMENT.md`](COMMITMENT.md): trang sản phẩm gọi
+`/add-to-cart/` kèm tham số `price`, và server lưu thẳng con số đó vào session.
+`save_checkout_info` cộng tổng đơn hàng từ chính con số đó rồi gửi sang VNPay.
+Khách sửa tham số trên URL là đặt được hàng với giá bất kỳ. Tiền lại tính bằng
+`float`, trái với quy ước dùng `Decimal` của đồ án.
+
+Không bỏ được tham số `price` khỏi request, vì cả trang sản phẩm lẫn trợ lý AI đều
+đang gửi nó; giỏ hàng lại nằm trong session nên còn những session cũ đang mang giá
+kiểu `float`.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ kiểm tra lúc tạo đơn* — so giá trong session với `Product.price`, lệch thì
+   báo lỗi. Ít chạm code, nhưng giỏ hàng vẫn hiện giá sai cho tới lúc thanh toán,
+   và phải nghĩ ra thông báo lỗi cho tình huống người dùng thật không bao giờ gặp.
+2. *Bỏ hẳn giá khỏi session, cần thì truy vấn lại* — sạch nhất, nhưng template giỏ
+   hàng và mini-cart đang đọc `item.price` từ session, nên phải sửa cả bốn view lẫn
+   ba template.
+3. *Giữ giá trong session nhưng coi nó là bản sao của database* — mỗi lần đụng tới
+   giỏ thì ghi đè lại bằng giá hiện tại trong `Product`.
+
+**Quyết định.** Chọn (3). Thêm `_refresh_cart(request)` trong `core/views.py`: hàm
+này ghi đè giá của từng dòng giỏ bằng `Product.price`, bỏ dòng nào không còn sản
+phẩm, và trả về tổng tiền kiểu `Decimal`. Bốn view giỏ hàng cùng
+`save_checkout_info` đều gọi nó. `add_to_cart` tra sản phẩm theo `id`, không thấy
+thì trả 404, và dựng dòng giỏ hoàn toàn từ bản ghi `Product` — tên, giá lẫn ảnh.
+Sau đó `/add-to-cart/` chỉ còn nhận hai tham số: `id` và `qty`.
+
+**Lý do.** Cách này bịt lỗ hổng ở đúng một chỗ thay vì rải kiểm tra khắp nơi: sau
+khi `_refresh_cart` chạy thì mọi con số phía sau nó đã là giá của hệ thống, nên
+`save_checkout_info` không cần biết gì về chuyện chống giả mạo. Nó cũng gộp luôn
+bốn vòng lặp cộng tổng giống hệt nhau đang nằm rải trong `core/views.py`. Giá vẫn
+nằm trong session nên template và JavaScript không phải sửa.
+
+**Hệ quả.**
+- Giá trong session đổi từ số `float` sang chuỗi thập phân, ví dụ `"25000.00"` —
+  session lưu bằng JSON nên không chứa được `Decimal`. Bộ lọc `vnd`, `mul` và hàm
+  `formatVnd` đều đã nhận chuỗi, nên giao diện không đổi; session cũ tự chuẩn hóa
+  ở lần đụng tới giỏ kế tiếp.
+- Sản phẩm bị xóa mềm hoặc gỡ bán trong lúc khách còn để trong giỏ thì dòng đó biến
+  mất khỏi giỏ. Đây là hành vi mới với người dùng — đã ghi vào [`SRS.md`](SRS.md) §6.1.
+- Hai đoạn JavaScript gọi `/add-to-cart/` trong `partials/base.html` (nút Thêm vào
+  giỏ và nút xác nhận của trợ lý AI) bỏ gửi `price`, `title`, `pid`, `image` — server
+  không đọc tới nữa. Kéo theo đó, bốn `<input type="hidden">` chỉ tồn tại để nuôi
+  đoạn JS này được xóa khỏi 5 template (`index.html`, `product-detail.html`,
+  `wishlist.html`, `async/product-list.html`, `async/wishlist-list.html`); hai input
+  còn lại là `product-id-` và `product-quantity-`. Xóa luôn đoạn chuẩn hóa chuỗi giá
+  kiểu `120.000` và mấy dòng `console.log` trong handler, vì không còn giá để gửi.
+- `safe_float` giờ chỉ còn `safe_int` gọi tới. Giữ nguyên vì nó vẫn là chỗ xử lý
+  chuỗi số kiểu `120.000` gửi lên từ trình duyệt.
+- L-7 (không kiểm tồn kho) sẽ sửa ngay trong `_refresh_cart` — cùng một chỗ đã nắm
+  sẵn cả dòng giỏ lẫn bản ghi `Product`.
+
+---
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
