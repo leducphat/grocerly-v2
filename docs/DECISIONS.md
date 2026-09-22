@@ -890,6 +890,53 @@ mới: `core:checkout` sẵn có nút thanh toán lại, và bản thân view đ
 
 ---
 
+## D-024 · Giỏ hàng hạ số lượng xuống bằng tồn kho thay vì từ chối
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-7 trong [`COMMITMENT.md`](COMMITMENT.md): `add_to_cart`,
+`update_cart` và `save_checkout_info` đều nhận số lượng từ tham số của request mà
+không đối chiếu với `Product.stock_count`. Trang sản phẩm chỉ đặt `min="1"` cho ô
+nhập, không có chặn trên, nên khách gõ hay sửa URL là đặt được 999 hộp sữa trong
+khi kho còn 10. `SRS.md` §6.1 đã ghi ràng buộc này từ thời TLCN, code chưa làm.
+
+Sau D-022, `_refresh_cart` là chỗ duy nhất viết lại từng dòng giỏ theo dữ liệu
+trong database, nên việc kiểm tra tồn kho đặt ở đó là gọn nhất.
+
+**Phương án đã cân nhắc**
+
+1. *Trả lỗi và giữ nguyên giỏ* — đúng nghĩa "báo lỗi" mà đặc tả TLCN viết, nhưng
+   `add_to_cart` và `update_cart` trả JSON cho AJAX, JavaScript hiện chỉ đọc
+   `totalcartitems` và phần HTML kèm theo, nên muốn khách thấy lỗi thì phải sửa
+   cả ba chỗ JavaScript trong `base.html`.
+2. *Chặn trên ở ô nhập số lượng (`max`)* — dễ, nhưng đó chỉ là ràng buộc phía
+   trình duyệt, đúng loại ràng buộc mà L-6 vừa cho thấy là vô nghĩa.
+3. *Giữ chỗ tồn kho khi khách bỏ vào giỏ* — đúng nhất về nghiệp vụ, nhưng phải có
+   thời hạn giữ chỗ, có việc chạy nền trả hàng về kho; quá tầm một lỗi cần sửa.
+4. *Hạ số lượng xuống đúng bằng tồn kho ở `_refresh_cart` và báo cho khách.*
+
+**Quyết định.** Chọn (4). `_refresh_cart` đọc luôn `stock_count` cùng với giá: dòng
+nào xin nhiều hơn tồn kho thì bị hạ xuống bằng tồn kho kèm `messages.warning`; sản
+phẩm hết sạch hàng thì dòng đó rời khỏi giỏ, giống cách xử lý sản phẩm bị gỡ bán.
+`add_to_cart` gọi `_refresh_cart` trước khi trả JSON nên số lượng gửi về cho trang
+là số đã hạ.
+
+**Lý do.** Một chỗ kiểm tra duy nhất phủ cả ba lối vào — thêm vào giỏ, sửa số
+lượng, tạo đơn — nên không có lối nào sót, và cũng không phải sửa JavaScript.
+Với khách, hạ số lượng dễ hiểu hơn là báo lỗi rồi bắt tự nhập lại: giỏ hiện ra
+con số mua được thật. Chỗ lệch với chữ "báo lỗi" trong đặc tả TLCN đã sửa lại ở
+`SRS.md` §6.1 cho khớp hành vi này.
+
+**Hệ quả.**
+- Việc kiểm tra chạy lại mỗi lần mở giỏ hay trang thanh toán, nên tồn kho tụt sau
+  lúc khách bỏ vào giỏ thì đơn tạo ra vẫn không vượt kho.
+- Hệ thống *không* giữ chỗ tồn kho: hai khách cùng mua nốt món cuối thì người bấm
+  thanh toán sau bị hạ số lượng. Chấp nhận, ghi lại ở đây để nói được khi bảo vệ.
+- Test `test_add_to_cart_does_not_keep_quantity_above_stock` đã gỡ `xfail`; thêm
+  bốn test ca biên (số lượng đúng bằng tồn kho, sửa số lượng vượt kho, tổng tiền
+  của giỏ, dòng hết hàng bị bỏ) và một test cho lúc tạo đơn.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

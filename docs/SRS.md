@@ -209,8 +209,11 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 
 ### 6.1 Ràng buộc nghiệp vụ đáng chú ý
 
-- **UC-06:** cập nhật số lượng lớn hơn tồn kho thực tế → báo lỗi và reset về số
-  lượng hợp lệ.
+- **UC-06, UC-09:** số lượng của một dòng giỏ không vượt quá tồn kho. Máy chủ
+  kiểm tra mỗi lần khách thêm vào giỏ, sửa số lượng và lúc tạo đơn; vượt thì hạ
+  xuống đúng bằng tồn kho và báo cho khách biết đã hạ (D-024).
+- **UC-06:** sản phẩm hết hàng khi đang nằm trong giỏ → dòng đó bị bỏ khỏi giỏ
+  kèm thông báo, giống như sản phẩm bị gỡ bán.
 - **UC-06, UC-09:** giá của mỗi dòng giỏ hàng và tổng tiền của đơn đều do hệ thống
   tra từ sản phẩm, không lấy theo con số trình duyệt gửi lên (D-022).
 - **UC-06:** sản phẩm bị gỡ bán khi đang nằm trong giỏ của khách → dòng đó bị bỏ
