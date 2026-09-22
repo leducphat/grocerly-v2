@@ -8,7 +8,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from core.models import CartOrder, CartOrderItem, Coupon
+from core.models import CartOrder, CartOrderItem, Coupon, Product
 
 pytestmark = pytest.mark.django_db
 
@@ -78,6 +78,19 @@ def test_order_total_uses_product_price_not_price_sent_by_browser(
 
     order = CartOrder.objects.get(user=customer)
     assert order.price == product.price * 2
+
+
+def test_order_quantity_does_not_go_above_stock(customer_client, customer, product, add_to_cart):
+    # L-7: the cart is checked again when the order is created, not only when the
+    # product is added - the stock may have run down in between.
+    add_to_cart(customer_client, product, qty=product.stock_count)
+    Product.objects.filter(id=product.id).update(stock_count=3)
+
+    submit_shipping_info(customer_client)
+
+    order = CartOrder.objects.get(user=customer)
+    item = CartOrderItem.objects.get(order=order)
+    assert (item.quantity, order.price) == (3, product.price * 3)
 
 
 # ---------- Coupons ----------

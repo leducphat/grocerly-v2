@@ -283,22 +283,30 @@ def filter_product(request):
 # ======================== Cart (Session-based) ========================
 
 def _refresh_cart(request):
-    """Rewrite every line of the session cart with the price stored in the
-    database, then return the total of the cart in VND.
+    """Rewrite every line of the session cart with the price and the stock kept
+    in the database, then return the total of the cart in VND.
 
     The browser sends a price when it adds a product to the cart, because that is
     the price the product page displays - but the customer can edit that request
     (L-6). So the price kept in the session is only ever a copy of
     `Product.price`, and every amount the server computes - the cart total here,
-    the order total in `save_checkout_info` - is read from the database. A line
-    whose product no longer exists, or has been soft deleted, is dropped.
+    the order total in `save_checkout_info` - is read from the database.
+
+    The quantity is the customer's to choose, but the shop cannot sell more than
+    it has: a line asking for more than `Product.stock_count` is brought back
+    down to the stock and the customer is told (L-7). The quantity box on the
+    page only has a lower bound, and an upper bound there would not help either:
+    it would travel in a request the customer can edit.
+
+    A line whose product no longer exists, has been soft deleted, or has nothing
+    left in stock is dropped.
     """
     cart_data = request.session.get('cart_data_obj')
     if not cart_data:
         return Decimal("0")
 
-    current_prices = {
-        str(product.id): product.price
+    products_in_cart = {
+        str(product.id): product
         for product in Product.objects.filter(
             id__in=[safe_int(p_id, 0) for p_id in cart_data]
         )
@@ -306,14 +314,33 @@ def _refresh_cart(request):
 
     cart_total_amount = Decimal("0")
     for p_id in list(cart_data):
-        if p_id not in current_prices:
+        product = products_in_cart.get(p_id)
+        if product is None:
+            del cart_data[p_id]
+            continue
+
+        stock = product.stock_count or 0
+        if stock <= 0:
+            messages.warning(
+                request,
+                f"{product.title} is out of stock and has been removed from your cart."
+            )
             del cart_data[p_id]
             continue
 
         item = cart_data[p_id]
-        item['qty'] = safe_int(item.get('qty'))
-        item['price'] = str(current_prices[p_id])
-        cart_total_amount += current_prices[p_id] * item['qty']
+        qty = safe_int(item.get('qty'))
+        if qty > stock:
+            messages.warning(
+                request,
+                f"Only {stock} of {product.title} left in stock, "
+                f"so your cart now holds {stock}."
+            )
+            qty = stock
+
+        item['qty'] = qty
+        item['price'] = str(product.price)
+        cart_total_amount += product.price * qty
 
     request.session['cart_data_obj'] = cart_data
     return cart_total_amount
@@ -342,9 +369,15 @@ def add_to_cart(request):
 
     request.session['cart_data_obj'] = cart_data
 
+    # The quantity asked for can be more than the shop has left, so the cart is
+    # refreshed before answering: the line sent back to the page holds what can
+    # actually be sold (L-7).
+    _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
+
     return JsonResponse({
-        'data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'data': cart_data,
+        'totalcartitems': len(cart_data),
     })
 
 
