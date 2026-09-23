@@ -231,7 +231,11 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
-- **UC-17:** AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối.
+- **UC-16, UC-17:** trợ lý AI và API công khai `/api/v1/products/` chỉ thấy đúng
+  những sản phẩm mà khách thấy ở cửa hàng — sản phẩm chưa duyệt hoặc đã bị gỡ bán
+  thì AI không tìm ra và cũng không đề xuất thêm vào giỏ (D-025).
+- **UC-17:** AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối và
+  nói rõ là hết hàng, thay vì im lặng hoặc đề nghị thêm.
 - **UC-18:** giỏ trống → AI nhắc thêm hàng trước khi thanh toán.
 
 > **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được.

@@ -937,6 +937,82 @@ con số mua được thật. Chỗ lệch với chữ "báo lỗi" trong đặc
   bốn test ca biên (số lượng đúng bằng tồn kho, sửa số lượng vượt kho, tổng tiền
   của giỏ, dòng hết hàng bị bỏ) và một test cho lúc tạo đơn.
 
+## D-025 · Trợ lý AI và API dùng đúng điều kiện hiển thị của cửa hàng
+
+- **Ngày:** 22/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-9 và L-10 trong [`COMMITMENT.md`](COMMITMENT.md). Model `Product`
+mang tới ba cột nghe như nhau: `product_status` (`in_review` / `published` /
+`disabled`), và hai cờ boolean `status`, `in_stock`. Các trang cửa hàng trong
+`core/views.py` lọc theo đúng một điều kiện `product_status='published'`. Trong
+khi đó `store_api/views.py` — công cụ `search_products`, `get_bestsellers` và API
+`/api/v1/products/` — lọc theo `status=True, in_stock=True` và không đụng tới
+`product_status`. Hệ quả: sản phẩm quản trị viên đã gỡ bán biến mất khỏi cửa hàng
+nhưng trợ lý AI vẫn tìm thấy, vẫn báo giá và vẫn đề nghị thêm vào giỏ (L-10).
+
+Đọc kỹ thì hai cờ đó **không có chỗ nào ghi**: form thêm/sửa sản phẩm của nhân
+viên (`useradmin/forms.py`) không liệt kê chúng, không view nào gán, `ProductAdmin`
+cũng không đưa vào `list_display`. Chúng luôn giữ giá trị mặc định `True` trên mọi
+sản phẩm, nên điều kiện lọc kia thực chất không lọc gì cả. Cái cửa hàng thật sự
+cập nhật là `product_status` và `stock_count`.
+
+Cùng chỗ này còn L-9: nhánh `request_add_to_cart` trong `ai_chat` tìm sản phẩm
+bằng `Product.objects.filter(p_id=...)` trần, không hỏi tồn kho, nên AI đề nghị
+thêm cả món đã hết hàng — trái với ràng buộc UC-17 đã viết trong `SRS.md` §6.1 từ
+thời TLCN.
+
+**Phương án đã cân nhắc**
+
+1. *Thêm `product_status='published'` vào ba câu truy vấn, giữ nguyên hai cờ cũ* —
+   sửa nhanh nhất, nhưng để lại hai cột trông như cờ hiển thị mà không ai ghi:
+   người đọc sau vẫn có thể tin vào chúng và đặt lại đúng cái bẫy này.
+2. *Xóa hẳn hai cột khỏi model* — sạch nhất, nhưng là thay đổi schema kèm
+   migration, và `in_stock` đang nằm trong `ProductSerializer` trả ra cho API.
+   Quá tầm một lỗi cần sửa.
+3. *Cho cửa hàng đọc thêm `status` để hai bên bằng nhau* — làm hai bên giống nhau
+   bằng cách hạ cửa hàng xuống, thêm một điều kiện vô nghĩa vào mười câu truy vấn.
+4. *Đặt điều kiện hiển thị vào một chỗ dùng chung trong `store_api`, dựa trên
+   `product_status` và `stock_count`; ghi chú hai cờ cũ là không dùng.*
+
+**Quyết định.** Chọn (4). `store_api/views.py` có hai hàm nhỏ:
+`published_products()` trả về `product_status='published'` — đúng câu hỏi mà các
+trang cửa hàng hỏi — và `buyable_products()` lọc thêm `stock_count__gt=0`. Công cụ
+tìm kiếm, công cụ hàng bán chạy và API sản phẩm dùng `buyable_products()`. Nhánh
+`request_add_to_cart` dùng `published_products()`, rồi tách hai trường hợp: không
+tìm thấy thì trả `Product not found` cho Gemini như cũ, tồn kho bằng 0 thì trả
+`Product is out of stock` để AI nói đúng lý do thay vì bịa (L-9). Hai cờ `status`
+và `in_stock` giữ nguyên trong database nhưng không còn chỗ nào đọc; đã ghi chú
+ngay tại `core/models.py` rằng chúng là di sản TLCN không ai ghi.
+
+**Lý do.** Cùng một câu hỏi — *khách có được thấy sản phẩm này không* — thì phải
+hỏi bằng cùng một cột, nếu không sẽ lại lệch ở lần sửa sau. Đặt tên hàm theo nghĩa
+nghiệp vụ (`published_products`, `buyable_products`) khiến ba chỗ gọi đọc được
+thành câu tiếng Anh và không còn ai phải nhớ cờ nào là cờ thật. Không xóa cột vì
+việc đó không cần thiết để bịt lỗ hổng, còn ghi chú tại model thì đủ để người đọc
+sau không rơi vào bẫy cũ.
+
+**Hệ quả.**
+- Sản phẩm ở trạng thái `in_review` từ nay không lọt ra API công khai nữa — trước
+  đây lọt, vì `status` mặc định `True`. Đây là thay đổi hành vi thấy được, đã ghi
+  vào `SRS.md` §6.1.
+- Công cụ tìm kiếm của AI cũng bỏ qua sản phẩm hết hàng, giữ nguyên ý định của
+  điều kiện `in_stock=True` cũ nhưng đọc `stock_count` là cột được cập nhật thật.
+  Đổi lại, AI không trả lời được câu "món này còn hàng không" cho món đã hết —
+  nó báo không tìm thấy. Chấp nhận, ghi lại ở đây để nói được khi bảo vệ.
+- AI không kiểm tra số lượng khách xin so với tồn kho, chỉ kiểm tra còn hàng hay
+  không. Giỏ hàng đã hạ số lượng xuống bằng tồn kho lúc khách bấm xác nhận
+  (D-024), nên thêm một chỗ kiểm tra nữa ở đây là thừa.
+- Hai test `test_search_tool_does_not_return_product_hidden_from_store` và
+  `test_ai_add_to_cart_refuses_out_of_stock_product` đã gỡ `xfail` — bộ test không
+  còn `xfail` nào. Thêm sáu test: hàng bán chạy và thêm vào giỏ với sản phẩm đã gỡ
+  bán, lý do trả về cho Gemini, và bốn test cho `/api/v1/products/` trong file mới
+  `store_api/tests/test_product_api.py`.
+- Hai test cũ phải sửa dữ liệu đầu vào: chúng tạo sản phẩm mà không đặt
+  `product_status`, tức để mặc định `in_review`, nên trước đây vẫn tìm thấy được.
+  Chính chỗ đó cho thấy điều kiện lọc cũ hở tới mức nào.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
