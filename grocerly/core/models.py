@@ -212,6 +212,10 @@ class Product(SoftDeleteModel):
 
     product_status = models.CharField(max_length=10, choices=STATUS, default='in_review')
 
+    # Two flags inherited from the TLCN template that no form on the site ever
+    # writes, so they are True on every product. Visibility is decided by
+    # `product_status` and stock by `stock_count`; reading these instead is what
+    # let hidden products reach the assistant and the API (L-10, D-025).
     status = models.BooleanField(default=True)
     in_stock = models.BooleanField(default=True)
     featured = models.BooleanField(default=False)

@@ -47,7 +47,9 @@ def ask(client, message):
 
 
 def test_search_tool_returns_only_products_in_stock(product):
-    Product.objects.create(title="Cà rốt baby", price=Decimal("40000.00"), in_stock=False, stock_count=0)
+    Product.objects.create(
+        title="Cà rốt baby", price=Decimal("40000.00"), stock_count=0, product_status="published"
+    )
 
     results = views.search_products("cà rốt")
 
@@ -62,12 +64,13 @@ def test_search_tool_needs_every_word_of_the_query(product):
 
 def test_search_tool_returns_at_most_five_products(db):
     for i in range(6):
-        Product.objects.create(title=f"Táo Fuji {i}", price=Decimal("50000.00"), stock_count=5)
+        Product.objects.create(
+            title=f"Táo Fuji {i}", price=Decimal("50000.00"), stock_count=5, product_status="published"
+        )
 
     assert len(views.search_products("táo")) == 5
 
 
-@pytest.mark.xfail(reason="L-10: the AI search filters on `status`, not on `product_status` like the store")
 def test_search_tool_does_not_return_product_hidden_from_store(product):
     product.product_status = "disabled"  # hidden from every store page (FR-A-02)
     product.save()
@@ -75,6 +78,15 @@ def test_search_tool_does_not_return_product_hidden_from_store(product):
     results = views.search_products("cà rốt")
 
     assert results == [{"message": "No matching products found."}]
+
+
+def test_bestsellers_tool_does_not_return_product_hidden_from_store(product):
+    # L-10: the same visibility question as the store, in every AI tool.
+    product.featured = True
+    product.product_status = "disabled"
+    product.save()
+
+    assert views.get_bestsellers() == []
 
 
 # ---------- chat endpoint (UC-15, UC-17, UC-18) ----------
@@ -146,9 +158,7 @@ def test_chat_over_gemini_quota_asks_user_to_retry_later(client, gemini_chat):
     assert response.json()["retry_after"] == 12
 
 
-@pytest.mark.xfail(reason="L-9: request_add_to_cart does not check stock (SRS 6.1, UC-17)")
 def test_ai_add_to_cart_refuses_out_of_stock_product(client, product, gemini_chat):
-    product.in_stock = False
     product.stock_count = 0
     product.save()
     gemini_chat.send_message.side_effect = [
@@ -159,3 +169,22 @@ def test_ai_add_to_cart_refuses_out_of_stock_product(client, product, gemini_cha
     response = ask(client, "Thêm cà rốt vào giỏ")
 
     assert response.json().get("action") != "confirm_add_cart"
+    # Gemini is told why, so it can say so instead of inventing an answer.
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {"error": "Product is out of stock"}
+
+
+def test_ai_add_to_cart_refuses_product_hidden_from_store(client, product, gemini_chat):
+    # L-10: a product the shop has hidden does not exist for the assistant either.
+    product.product_status = "disabled"
+    product.save()
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=1),
+        gemini_reply("Xin lỗi, mình không tìm thấy sản phẩm này."),
+    ]
+
+    response = ask(client, "Thêm cà rốt vào giỏ")
+
+    assert response.json().get("action") != "confirm_add_cart"
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {"error": "Product not found"}
