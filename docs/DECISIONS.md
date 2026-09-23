@@ -1013,6 +1013,160 @@ sau không rơi vào bẫy cũ.
   Chính chỗ đó cho thấy điều kiện lọc cũ hở tới mức nào.
 
 
+## D-026 · Đơn đã giao là điểm dừng của luồng trạng thái
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-5 trong [`COMMITMENT.md`](COMMITMENT.md): `change_order_status`
+trong `useradmin/views.py` ghi thẳng giá trị nhân viên gửi lên vào
+`order.product_status`, không hỏi trạng thái hiện tại là gì. `SRS.md` §6.1 đã ghi
+từ thời TLCN rằng đơn đã `Delivered` không đổi được trạng thái nữa; code chưa làm.
+
+Hậu quả nặng hơn một dòng lịch sử bị viết lại: nhánh trừ tồn kho chạy mỗi lần
+trạng thái chuyển sang `shipped` từ một trạng thái khác, nên đưa đơn từ `delivered`
+về `shipped` là trừ tiếp số lượng đó lần nữa. Lặp lại vài lần là tồn kho về 0 trong
+khi hàng vẫn nằm trong kho.
+
+Viết test cho chỗ này thì lộ thêm một đường vào nữa: ô chọn trạng thái trong
+`templates/useradmin/order_detail.html` có dòng nhắc đầu tiên là
+`<option value="pending">`, mà `pending` không nằm trong `STATUS_CHOICES`. Nhân
+viên bấm Save khi chưa chọn gì là đơn rơi vào trạng thái không có trong hệ thống:
+trang đơn hàng không lọc ra nữa, khách cũng không tra được.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ bỏ `disabled` cho ô chọn phía giao diện* — giấu được nút, nhưng view vẫn
+   nhận mọi POST. Đúng loại ràng buộc chỉ-ở-trình-duyệt mà L-6 vừa cho thấy là vô
+   nghĩa.
+2. *Viết một bảng chuyển trạng thái đầy đủ* (processing → shipped → delivered,
+   cấm mọi chiều ngược) — chặt chẽ nhất, nhưng nghiệp vụ thật có lúc phải lùi
+   `shipped` về `processing` vì giao hụt, và chưa ai chốt những lối lùi nào được
+   phép. Cấm hết bây giờ là quyết thay người dùng.
+3. *Chặn đúng hai điều kiện ở máy chủ: trạng thái gửi lên phải thuộc
+   `STATUS_CHOICES`, và đơn đã `delivered` thì không đổi nữa.*
+
+**Quyết định.** Chọn (3). `change_order_status` kiểm tra hai điều kiện đó trước
+mọi việc khác, sai thì báo `messages.error` và quay về trang chi tiết đơn mà không
+ghi gì. Dòng nhắc trong ô chọn đổi sang `value=""` để nó không còn là một trạng
+thái gửi được.
+
+**Lý do.** Hai điều kiện này là phần ai cũng đồng ý, không cần hỏi thêm: `delivered`
+là điểm dừng thì đặc tả đã viết sẵn, còn trạng thái ngoài `STATUS_CHOICES` thì không
+ai muốn có trong database. Những lối lùi còn lại để nguyên vì chưa có căn cứ nghiệp
+vụ để cấm. Chặn ở view chứ không ở template vì view là chỗ duy nhất mọi đường đi
+đều phải qua.
+
+**Hệ quả.**
+- Nhân viên lỡ đánh dấu giao xong một đơn thì không tự sửa được nữa, phải nhờ
+  quản trị viên đổi trong Django admin. Đúng ý định của đặc tả, nhưng là một ràng
+  buộc mới với người dùng nên ghi lại ở đây.
+- Đơn COD chuyển sang `delivered` vẫn được đánh dấu đã thanh toán như cũ; chỉ lần
+  đầu tiên, vì sau đó không đổi trạng thái được nữa.
+- Thư mục test đầu tiên cho `useradmin` (`useradmin/tests/`) với sáu test, trong đó
+  ba ca âm. Đây là module có độ phủ thấp nhất (21% ở lần đo 16/09/2026).
+- Chưa đụng tới một chỗ yếu khác của chính hàm này: nó tìm sản phẩm để trừ kho
+  bằng `Product.objects.filter(title=item.item)`, tức so theo tên. Đổi tên sản phẩm
+  là đơn cũ không tìm ra nữa. Ghi lại để không quên, chưa sửa vì đó là thay đổi
+  mô hình dữ liệu chứ không phải một chỗ chặn thiếu.
+
+## D-027 · Chỉ khách đã nhận sản phẩm mới đánh giá được
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-3 trong [`COMMITMENT.md`](COMMITMENT.md): `ajax_add_review` tạo
+`ProductReview` từ `request.user` và `request.POST` mà không kiểm tra gì cả — không
+hỏi đã đăng nhập chưa, không hỏi đã mua hàng chưa, cũng không hỏi đã đánh giá lần
+nào chưa. Toàn bộ phần chặn nằm ở template: `product-detail.html` chỉ hiện biểu
+mẫu khi `make_review` đúng, mà `make_review` lại chỉ đếm xem người này đã đánh giá
+sản phẩm ấy chưa. Bất kỳ ai gửi thẳng POST tới `/ajax-add-review/<id>/` đều ghi
+được đánh giá, bao nhiêu lần cũng được. `SRS.md` §6.1 (UC-14) ghi rõ chỉ đánh giá
+được sản phẩm đã mua.
+
+`request.user` với khách vãng lai là `AnonymousUser`, không lưu vào `ForeignKey`
+được, nên trước đây lỗi này hiện ra thành lỗi 500 chứ không phải một lời từ chối.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ thêm `@login_required`* — bịt được lỗi 500, nhưng ai có tài khoản vẫn đánh
+   giá được mọi sản phẩm, đúng phần đặc tả muốn cấm.
+2. *Lưu cờ `đã mua` lên chính `ProductReview`* — nhanh khi hiển thị, nhưng thêm một
+   cột phải tự giữ đồng bộ, đúng loại dữ liệu trùng mà L-10 vừa cho thấy hậu quả.
+3. *Hỏi thẳng `CartOrderItem` mỗi lần: khách này có đơn nào chứa sản phẩm này đã
+   rời kho chưa.*
+
+**Quyết định.** Chọn (3). `core/views.py` có thêm hàm `has_received_product(user,
+product)` trả về đúng câu hỏi đó. `ajax_add_review` có `@login_required`, rồi lần
+lượt từ chối ba trường hợp: chưa nhận hàng (403), đã đánh giá rồi (403), dữ liệu
+không hợp lệ (400, qua `ProductReviewForm` thay cho `request.POST['review']` đọc
+trực tiếp). `product_detail_view` dùng chính hàm đó cho `make_review`, nên giao
+diện và máy chủ nói cùng một điều kiện.
+
+**Lý do.** Đơn hàng là nguồn sự thật sẵn có, không cần dựng thêm dữ liệu để trả lời
+câu hỏi này. Để giao diện và view dùng chung một hàm thì không xảy ra cảnh nút bị
+giấu nhưng POST vẫn qua, hoặc ngược lại. Dùng `ProductReviewForm` để kiểm tra dữ
+liệu vì form ấy đã có sẵn và đang được dùng để vẽ chính biểu mẫu đó.
+
+**Hệ quả.**
+- Đặc tả TLCN viết điều kiện là đơn ở trạng thái `Shipped`. Làm đúng như vậy thì
+  khách nhận được hàng rồi (đơn sang `Delivered`) lại mất quyền đánh giá — vô lý.
+  Nhận cả hai trạng thái và sửa lại câu đặc tả (`SRS.md` §6.1, ghi ở `PLAN.md` §6).
+- Những đánh giá cũ do người chưa mua viết vẫn nằm trong database; quyết định này
+  chỉ chặn từ nay. Dữ liệu KLTN sẽ dựng lại trên hạ tầng riêng (D-002) nên không
+  viết migration dọn dẹp.
+- Việc đối chiếu dòng đơn theo `item` (tên sản phẩm) kế thừa cách `CartOrderItem`
+  lưu dữ liệu: nó không có khóa ngoại tới `Product`. Đổi tên sản phẩm thì khách mua
+  trước đó không đánh giá được nữa — cùng một điểm yếu đã ghi ở D-026.
+- Thêm `core/tests/test_reviews.py` với chín test, sáu trong đó là ca âm.
+
+
+## D-028 · Bỏ bước duyệt sản phẩm và bỏ CRUD đánh giá khỏi đặc tả
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Hai chỗ lệch cuối cùng trong [`COMMITMENT.md`](COMMITMENT.md) §3, cả
+hai đều là đặc tả mô tả một sản phẩm rộng hơn cái đã làm, chứ không phải code thiếu
+chỗ chặn:
+
+- **L-2:** đặc tả viết sản phẩm do người bán tạo nằm ở `in_review` cho tới khi Admin
+  duyệt. `add_product` trong `useradmin/views.py` gán thẳng `published`.
+- **L-4:** đặc tả gọi UC-14 là đánh giá *CRUD*. Khách chỉ tạo được; sửa và xóa chỉ
+  làm được trong Django admin.
+
+Cả hai câu đều là dấu vết của mô hình nhiều người bán mà D-015 đã bỏ: bước duyệt
+sinh ra để cửa hàng kiểm soát hàng của người bán bên ngoài.
+
+**Phương án đã cân nhắc**
+
+1. *Sửa code cho khớp đặc tả* — thêm luồng duyệt sản phẩm và màn hình sửa/xóa đánh
+   giá cho khách. Đây là làm tính năng mới, trái D-008, và bước duyệt thì chính
+   nhân viên cửa hàng duyệt hàng của chính mình — không có nghĩa nghiệp vụ.
+2. *Để nguyên, ghi là hạn chế* — nhưng khi bảo vệ thì hội đồng đọc đặc tả rồi đối
+   chiếu mã nguồn, hai chỗ này sẽ hiện ra thành chức năng cam kết mà không chạy.
+3. *Sửa đặc tả cho khớp mô hình một nhà bán.*
+
+**Quyết định.** Chọn (3) cho cả hai. `SRS.md` §6.1 viết lại UC-19/UC-24: sản phẩm
+nhân viên tạo hiển thị ngay, Admin vẫn ẩn hoặc gỡ bán được; FR-A-02 bỏ chữ
+"Duyệt". UC-14 bỏ chữ "(CRUD)" ở bảng use case và thêm một ràng buộc: khách tạo đánh
+giá, quản trị viên kiểm duyệt.
+
+**Lý do.** Hai câu đặc tả này mô tả một sản phẩm khác với sản phẩm đã chốt ở D-015,
+không phải mô tả một lỗ hổng. Giữ chúng là tự đặt thêm hai chức năng vào mẫu số của
+TC2.2 mà không định làm. Khác với L-3 và L-5 vừa sửa bằng code: hai lỗi ấy là quy
+tắc nghiệp vụ đúng mà code bỏ qua, còn hai chỗ này là quy tắc không còn áp dụng.
+
+**Hệ quả.**
+- §3 của `COMMITMENT.md` không còn dòng nào ở trạng thái chờ chốt; bản cam kết sẵn
+  sàng cho phần metric (P-03).
+- Không có test mới đi kèm: không có hành vi nào đổi. Ghi hai lần sửa đặc tả vào
+  `PLAN.md` §6 như mọi lần sửa khác.
+- Trạng thái `in_review` vẫn còn trong `STATUS` của `Product` và vẫn đặt tay được
+  trong Django admin; đặc tả chỉ bỏ chỗ nói rằng đó là trạng thái **mặc định bắt
+  buộc** của sản phẩm mới.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

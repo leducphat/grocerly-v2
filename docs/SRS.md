@@ -149,7 +149,7 @@ KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN
 | Mã | Yêu cầu |
 |---|---|
 | FR-A-01 | Đăng nhập an toàn vào trang quản trị bằng tài khoản Superuser |
-| FR-A-02 | Duyệt và kiểm soát sản phẩm do nhân viên đăng; xóa mềm hoặc vô hiệu hóa sản phẩm vi phạm |
+| FR-A-02 | Kiểm soát sản phẩm do nhân viên đăng; xóa mềm hoặc vô hiệu hóa sản phẩm vi phạm |
 | FR-A-03 | Quản lý danh mục: thêm, sửa, xóa danh mục hàng hóa dùng chung toàn hệ thống |
 | FR-A-04 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản vi phạm, xóa vĩnh viễn |
 | FR-A-05 | Quản lý mã giảm giá: khởi tạo, thiết lập phần trăm giảm, phân phối tới khách hàng |
@@ -193,7 +193,7 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 | UC-11 | Cập nhật Hồ sơ (xem/sửa/đổi mật khẩu) | A2 |
 | UC-12 | Quản lý Yêu thích | A2 |
 | UC-13 | Lịch sử Đơn mua | A2 |
-| UC-14 | Đánh giá Sản phẩm (CRUD) | A2 |
+| UC-14 | Đánh giá Sản phẩm | A2 |
 | UC-15 | Tương tác Trợ lý AI | A1, A2 |
 | UC-16 | Nhờ AI Tìm sản phẩm | A1, A2 |
 | UC-17 | Nhờ AI Thêm vào Giỏ | A1, A2 |
@@ -222,12 +222,21 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   xác nhận và chữ ký hợp lệ; trang hoàn tất chỉ hiển thị, không tự xác nhận (D-023).
 - **UC-09:** đơn online chưa được VNPay xác nhận mà mở trang hoàn tất → quay về
   trang thanh toán kèm nhắc thanh toán, không hiện màn hình thanh toán thành công.
-- **UC-14:** chỉ đánh giá được sản phẩm đã mua (đơn ở trạng thái `Shipped`); cố
-  đánh giá sản phẩm chưa mua → nút bị vô hiệu hóa.
-- **UC-19:** sản phẩm do nhân viên tạo lưu ở trạng thái `in_review`, phải được
-  Admin duyệt sang `published` mới hiển thị cho khách.
+- **UC-14:** chỉ đánh giá được sản phẩm đã nhận — khách có đơn chứa sản phẩm ấy ở
+  trạng thái `Shipped` hoặc `Delivered` — và mỗi khách chỉ đánh giá một lần cho
+  một sản phẩm. Chưa đủ điều kiện thì biểu mẫu không hiện, và máy chủ từ chối cả
+  những yêu cầu gửi thẳng không qua biểu mẫu (D-027).
+- **UC-14:** khách chỉ **tạo** đánh giá; sửa và xóa là việc của quản trị viên trong
+  Django admin, theo nghĩa kiểm duyệt nội dung chứ không phải CRUD đầy đủ cho
+  người viết (D-028).
+- **UC-19, UC-24:** sản phẩm do nhân viên tạo hiển thị ngay ở trạng thái `published`
+  — không có bước Admin duyệt, vì nhân viên là người của chính cửa hàng chứ không
+  phải người bán bên ngoài (D-015, D-028). Admin vẫn ẩn hoặc gỡ bán được bất kỳ sản
+  phẩm nào.
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
-  lại; đơn đã `Delivered` không đổi được trạng thái.
+  lại; đơn đã `Delivered` không đổi được trạng thái. Máy chủ chỉ nhận đúng ba
+  trạng thái `Processing`, `Shipped`, `Delivered`; giá trị khác bị từ chối và đơn
+  giữ nguyên trạng thái cũ (D-026).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
