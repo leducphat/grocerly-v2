@@ -167,12 +167,13 @@ def product_detail_view(request, p_id):
     # Product Review form
     review_form = ProductReviewForm()
 
-    make_review = True
+    # Biểu mẫu đánh giá chỉ hiện với khách đã nhận sản phẩm và chưa đánh giá lần nào
+    # (UC-14). ajax_add_review kiểm tra lại đúng hai điều kiện này ở phía máy chủ.
+    make_review = False
 
     if request.user.is_authenticated:
-        user_review_count = ProductReview.objects.filter(user=request.user, product=product).count()
-        if user_review_count > 0:
-            make_review = False
+        already_reviewed = ProductReview.objects.filter(user=request.user, product=product).exists()
+        make_review = has_received_product(request.user, product) and not already_reviewed
 
     context = {
         'p': product,
@@ -208,21 +209,53 @@ def tag_list(request, tag_slug=None):
     return render(request, 'core/tag.html', context)
 
 
+def has_received_product(user, product):
+    """True if `user` has an order holding `product` that already left the store.
+
+    `CartOrderItem` keeps the product's title instead of a foreign key, so the
+    order lines are matched by title - the same way change_order_status finds
+    the product whose stock it has to lower.
+    """
+    return CartOrderItem.objects.filter(
+        order__user=user,
+        order__product_status__in=('shipped', 'delivered'),
+        item=product.title,
+    ).exists()
+
+
+@login_required
 def ajax_add_review(request, p_id):
-    product = Product.objects.get(pk=p_id)
+    product = get_object_or_404(Product, pk=p_id)
     user = request.user
 
-    review = ProductReview.objects.create(
-        user=user,
-        product=product,
-        review=request.POST['review'],
-        rating=request.POST['rating'],
-    )
+    # UC-14: chỉ khách đã nhận sản phẩm mới đánh giá được, và mỗi người một lần.
+    # Trang chi tiết đã giấu sẵn biểu mẫu, nhưng đó chỉ là giao diện -
+    # ai cũng gửi thẳng POST tới đây được nên máy chủ phải tự kiểm tra lại.
+    if not has_received_product(user, product):
+        return JsonResponse(
+            {'bool': False, 'message': "You can only review a product you have received"},
+            status=403,
+        )
+
+    if ProductReview.objects.filter(user=user, product=product).exists():
+        return JsonResponse(
+            {'bool': False, 'message': "You have already reviewed this product"},
+            status=403,
+        )
+
+    form = ProductReviewForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({'bool': False, 'errors': form.errors}, status=400)
+
+    review = form.save(commit=False)
+    review.user = user
+    review.product = product
+    review.save()
 
     context = {
         'user': user.username,
-        'review': request.POST['review'],
-        'rating': request.POST['rating'],
+        'review': review.review,
+        'rating': review.rating,
     }
 
     average_reviews = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))

@@ -5,7 +5,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from core.models import CartOrder
+from core.models import CartOrder, CartOrderItem
 
 
 @pytest.fixture
@@ -36,3 +36,33 @@ def order(customer):
         email=customer.email,
         address="1 Võ Văn Ngân, Thủ Đức",
     )
+
+
+@pytest.fixture
+def shipped_order(customer, product):
+    """An order of `customer` holding `product`, already handed to the courier.
+
+    `CartOrderItem` stores the product's title instead of a foreign key - that is
+    how checkout writes it, so this is also how the code finds the buyer again.
+    """
+
+    def make(status="shipped", user=None, item=None):
+        order = CartOrder.objects.create(
+            user=user or customer,
+            price=product.price,
+            full_name="Nguyễn Văn A",
+            email=(user or customer).email,
+            address="1 Võ Văn Ngân, Thủ Đức",
+            product_status=status,
+        )
+        CartOrderItem.objects.create(
+            order=order,
+            invoice_no=f"INVOICE_NO-{order.id}",
+            item=item or product.title,
+            quantity=1,
+            price=product.price,
+            total=product.price,
+        )
+        return order
+
+    return make
