@@ -3,9 +3,9 @@
 # Runs on every push to develop/main and on every pull request into main.
 # Nothing here reads grocerly/.env or reaches a real service: Django runs with
 # grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini key).
-# Lint and static analysis (ruff, D-029) and the secret scan (D-030) run as
-# their own jobs. Image build and deploy (P-11) are added when the KLTN hosting
-# exists.
+# Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
+# (D-030) run as their own jobs. Image build and deploy (P-11) are added when
+# the KLTN hosting exists.
 
 name: CI
 
@@ -48,17 +48,24 @@ jobs:
         with:
           python-version: "3.12"
 
-      # Ruff does not need Django, so only Ruff is installed. The version is
-      # read from requirements-dev.txt so that CI and local runs use the same one.
-      - name: Install ruff
-        run: pip install "$(grep '^ruff==' requirements-dev.txt)"
+      # Neither tool needs Django, so only these two are installed. The versions
+      # are read from requirements-dev.txt so that CI and local runs match.
+      - name: Install ruff and jscpd
+        run: |
+          pip install "$(grep '^ruff==' requirements-dev.txt)" \
+                      "$(grep '^jscpd==' requirements-dev.txt)"
 
       # Rules come from grocerly/ruff.toml. The github format puts each error
       # next to the line it is about in the commit and pull request views.
       - name: Run ruff
         run: ruff check --output-format=github .
 
-      - name: Write lint result to the run summary
+      # Duplicated lines in the Python code. Scope and the 3% limit come from
+      # grocerly/.jscpd.json (D-031).
+      - name: Check code duplication
+        run: jscpd . --no-colors
+
+      - name: Write results to the run summary
         if: always()
         run: |
           echo "## Lint and static analysis" >> "$GITHUB_STEP_SUMMARY"
@@ -70,6 +77,10 @@ jobs:
             ruff check --statistics . >> "$GITHUB_STEP_SUMMARY" || true
             echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
+          echo "jscpd (duplication):" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          jscpd . --no-colors >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
   secret-scan:
     name: Secret scan (gitleaks)

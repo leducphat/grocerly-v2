@@ -1,0 +1,6 @@
+{
+  "format": ["python"],
+  "ignore": ["**/migrations/**", "**/tests/**", "**/conftest.py"],
+  "threshold": 3,
+  "failOnEmpty": true
+}
