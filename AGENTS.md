@@ -162,7 +162,8 @@ grocerly-ecom/
     ├── templates/            # core/, userauths/, useradmin/, partials/
     ├── static/, media/, locale/   # assets, file upload, bản dịch vi+en
     ├── requirements.txt, .env, .env.example
-    └── requirements-dev.txt, pytest.ini, conftest.py   # kiểm thử (D-018)
+    ├── requirements-dev.txt, pytest.ini, conftest.py   # kiểm thử (D-018)
+    └── ruff.toml, .jscpd.json   # lint, đo trùng lặp (D-029, D-031)
 ```
 
 **Mọi lệnh `manage.py` chạy từ trong `grocerly/`, không phải từ gốc repo.**
@@ -213,6 +214,10 @@ Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ tes
 - CI (`.github/workflows/ci.yml`, D-019) chạy `manage.py check`,
   `makemigrations --check` và `pytest --cov` trên mỗi lần push lên `develop`/`main`
   và mỗi PR vào `main`. Đổi model thì commit migration kèm theo, nếu không CI đỏ.
+- Cùng lần chạy đó còn hai job: `lint` chạy `ruff check` theo `grocerly/ruff.toml`
+  (D-029) và jscpd đo trùng lặp theo `grocerly/.jscpd.json` (D-031); `secret-scan`
+  chạy gitleaks trên toàn bộ lịch sử Git (D-030). Chạy `ruff check .` và `jscpd .`
+  trước khi đẩy lên; còn một lỗi lint, hoặc trùng lặp quá 3%, là CI đỏ.
 
 ---
 
@@ -227,9 +232,11 @@ python manage.py makemigrations     # sau khi đổi model
 python manage.py createsuperuser    # tạo tài khoản quản trị
 python manage.py collectstatic      # trước khi deploy
 
-pip install -r requirements-dev.txt # thư viện test (pytest, pytest-django, pytest-cov)
+pip install -r requirements-dev.txt # test và kiểm tra mã (pytest, ruff, jscpd)
 pytest                              # chạy toàn bộ test (settings_test, SQLite)
 pytest --cov                        # kèm báo cáo độ phủ
+ruff check .                        # lint theo ruff.toml; --fix sửa được phần tự động
+jscpd .                             # tỉ lệ trùng lặp mã Python theo .jscpd.json
 
 django-admin makemessages -l vi -l en   # trích chuỗi i18n
 django-admin compilemessages            # biên dịch .po -> .mo

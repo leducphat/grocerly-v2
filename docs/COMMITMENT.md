@@ -1,7 +1,8 @@
 # BẢN CAM KẾT SẢN PHẨM — Grocerly (KLTN)
 
 > **⚠️ BẢN NHÁP — chưa ký.** Soạn ngày 10/09/2026 để trao đổi với GVHD. Phần
-> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) chưa soạn.
+> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) mới có mục
+> chất lượng mã nguồn (§5.1, soạn ngày 24/09/2026).
 
 | | |
 |---|---|
@@ -151,7 +152,50 @@ Không làm trong KLTN, đưa vào mục *"Các hướng phát triển mở rộ
 
 ---
 
-## 5. Metric và KPI — *chưa soạn*
+## 5. Metric và KPI — *đang soạn*
+
+### 5.1 Chất lượng mã nguồn (TC2.4)
+
+Ba con số của TC2.4 đều đo bằng công cụ chạy trong CI ở mỗi lần đẩy mã nguồn, nên
+có số đo cho từng commit chứ không chỉ một lần cuối kỳ. Ngưỡng đề xuất giữ đúng Mức
+5 của rubric, vì số đo hiện tại đã đạt.
+
+| Metric | Công cụ và cách đo | Ngưỡng | Số đo 24/09/2026 |
+|---|---|---|---|
+| Lỗi lint | Ruff, bộ luật ghi trong `grocerly/ruff.toml` | 0 | 0 (30 trước khi sửa) |
+| Issue Blocker/Critical | Ruff, quy đổi theo danh sách dưới đây | 0 | 0 (5 trước khi sửa) |
+| Tỉ lệ dòng trùng lặp | jscpd, trên mã Python của ứng dụng | ≤ 3% | 1,09% |
+
+**Quy đổi Blocker/Critical.** Ruff không chia mức nghiêm trọng, mọi vi phạm đều là
+một lỗi như nhau. Rubric cũng không định nghĩa hai mức này, nên đồ án quy đổi theo
+định nghĩa của SonarQube: Blocker là lỗi nhiều khả năng làm ứng dụng hỏng khi chạy,
+Critical là lỗi ít khả năng hơn hoặc là lỗ hổng bảo mật.
+
+- Blocker: code không chạy được. Gồm lỗi cú pháp (`E9`), dùng tên chưa định nghĩa
+  hoặc biến chưa gán (`F821`, `F822`, `F823`), câu lệnh đặt sai chỗ như `return`
+  ngoài hàm (`F7`).
+- Critical: lỗ hổng bảo mật theo bộ luật bandit (`S`), và `except:` trần bắt mọi
+  lỗi rồi nuốt đi (`E722`).
+- Các luật còn lại trong `ruff.toml`, như import thừa, quy ước Django và các mẫu dễ
+  gây lỗi của bugbear, chỉ tính là lỗi lint.
+
+CI đòi 0 lỗi trên mọi luật đã bật, nên lần chạy nào xanh cũng là 0 Blocker/Critical.
+Năm issue trước khi sửa gồm bốn chỗ in ảnh trong trang quản trị bằng `mark_safe`
+(`S308`) và một `except:` trần ở trang đăng nhập.
+
+**Phạm vi đo trùng lặp.** Tính mã Python của ứng dụng, không tính migration vì do
+Django sinh ra, và không tính test vì test lặp lại cấu trúc chuẩn bị - thực hiện -
+kiểm tra một cách có chủ ý. Template HTML không tính vào con số trên, vì các công cụ
+rubric nêu tên đều đo mã của ngôn ngữ lập trình, còn template ở đây phần lớn là HTML
+chép từ bộ giao diện mẫu dùng từ thời TLCN. Để không che con số đó đi, số đo của
+template ghi luôn ở đây: 49 file, 7.704 dòng, trùng 26,6%. Con số này đo sau khi xóa
+13 trang mẫu của bộ giao diện, khoảng 22.400 dòng, mà không trang nào của cửa hàng
+dùng tới; tính cả chúng thì là 78,6%. Phần trùng trong template ghi là hạn chế,
+không cam kết ngưỡng.
+
+Kiểm tra lại được bằng hai lệnh chạy trong `grocerly/`: `ruff check .` và `jscpd .`.
+
+### 5.2 Các phần còn lại
 
 Sẽ bổ sung trước khi trình ký. Khung dự kiến:
 

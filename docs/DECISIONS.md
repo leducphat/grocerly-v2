@@ -1167,6 +1167,191 @@ tắc nghiệp vụ đúng mà code bỏ qua, còn hai chỗ này là quy tắc 
   buộc** của sản phẩm mới.
 
 
+## D-029 · Ruff làm cả linter lẫn công cụ phân tích tĩnh, bộ luật ghi rõ trong `ruff.toml`
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 Mức 5 đòi "0 lỗi lint còn tồn" theo một coding convention đã
+công bố, và phân tích tĩnh "(SonarQube/SpotBugs/ESLint/Pylint…)" báo 0 issue
+Blocker/Critical, trùng lặp ≤ 3%. TC2.6 Mức 5 đòi pipeline có chặng lint/phân tích
+tĩnh. Repo chưa có công cụ nào (P-14).
+
+**Phương án đã cân nhắc**
+
+1. *Linter*
+   - (a) Pylint kèm pylint-django - rubric có nêu tên, nhưng chậm, nhiều cảnh báo
+     về kiểu dáng khi gặp code Django, và phải cài cả Django thì plugin mới chạy.
+   - (b) Flake8 cộng các plugin bugbear, bandit, django - mỗi nhóm luật là một gói
+     phải ghim phiên bản riêng.
+   - (c) Ruff - một gói duy nhất, có sẵn luật của pyflakes, pycodestyle, bugbear,
+     bandit, flake8-django và một phần luật của Pylint; chạy toàn repo chưa tới một
+     giây, không cần Django.
+2. *Bộ luật*
+   - (a) Để mặc định. Bản 0.16 đã nới mặc định ra thêm RUF, UP, SIM, PERF... chạy
+     ra 93 lỗi, phần lớn là kiểu dáng; và mặc định đổi theo phiên bản, nên nâng
+     Ruff là kết quả CI tự đổi.
+   - (b) Ghi rõ từng nhóm trong file cấu hình.
+3. *Nguồn của con số Blocker/Critical*
+   - (a) SonarCloud - ra đúng hai con số rubric gọi tên, nhưng thêm một dịch vụ
+     ngoài, cần tài khoản và token.
+   - (b) Pylint chỉ bật loại E và F, coi đó là Blocker/Critical - thêm một công cụ
+     nữa, và phải nạp Django qua pylint-django thì mới không báo lỗi giả hàng loạt.
+   - (c) Để AI rà code rồi tự xếp mức - hai lần rà có thể ra hai kết quả khác nhau,
+     còn mức do AI tự đặt nên hội đồng hỏi thì không có căn cứ để trả lời.
+   - (d) Dùng luôn Ruff, quy định nhóm luật nào tính là Blocker/Critical.
+
+**Quyết định.** Chọn 1(c), 2(b), 3(d). `grocerly/ruff.toml` bật bốn nhóm: lỗi thật
+của pyflakes/pycodestyle (`E4`, `E7`, `E9`, `F`), bugbear (`B`), flake8-django
+(`DJ`) và bandit (`S`). Bỏ `DJ001`. Test được dùng `assert` và mật khẩu giả,
+`settings_test.py` được giữ khóa giả. Ruff ghim `0.16.8` trong `requirements-dev.txt`;
+CI có job `lint` riêng, đọc phiên bản từ đúng file đó.
+
+Ruff không có mức nghiêm trọng: kiểm trên bản 0.16.8, mọi issue đều mang
+`severity: error`, kể cả khi bật toàn bộ luật. Vì vậy nhóm luật nào tính là
+Blocker/Critical do đồ án tự quy định, theo định nghĩa severity của SonarQube:
+Blocker là lỗi nhiều khả năng làm hỏng ứng dụng khi chạy thật, Critical là lỗi ít
+khả năng hơn hoặc là lỗ hổng bảo mật. Danh sách luật cụ thể ghi ở bản cam kết
+(`COMMITMENT.md` §5, P-03) và chỉ được lấy trong các nhóm đã bật ở trên.
+
+**Lý do.** Chỉ chọn nhóm bắt được lỗi thật hoặc lỗ hổng. Nhóm thuần kiểu dáng thì
+chưa bật: độ dài dòng (`E501`) ra 192 lỗi, thứ tự import (`I`) ra 29 - sửa chúng là
+một diff lớn trên code TLCN mà không đổi hành vi nào. `DJ001` (`CharField` có
+`null=True`, 24 chỗ) bỏ qua vì sửa nó là đổi schema và dữ liệu đang lưu, không còn
+là việc của lint. Nhóm `PLE` (phần luật loại E của Pylint mà Ruff có) cũng chưa bật:
+chạy thử ra 0 lỗi, còn lỗi làm code hỏng khi chạy thì `F` và `E9` đã bắt.
+
+Con số Blocker/Critical cũng lấy từ Ruff vì rubric không định nghĩa hai mức này, và
+chính các công cụ nó nêu tên cũng không có thang đó: ESLint chỉ có error và warn,
+Pylint có C/R/W/E/F. Chọn công cụ nào trong danh sách thì cũng phải tự quy đổi. Bản
+cam kết ở Bước 3 là chỗ ghi cách quy đổi, cũng là nơi Mục 5 cho sinh viên và GVHD
+điều chỉnh ngưỡng. Ruff đã chạy sẵn trong CI, thêm một công cụ chỉ để ra con số này
+là thừa.
+
+**Hệ quả.**
+- Lần chạy đầu 24/09/2026: 30 lỗi trên khoảng 4.200 dòng Python không tính
+  migration, tức khoảng 7 lỗi trên 1000 dòng - ngang Mức 3 của TC2.4. 13 lỗi Ruff tự
+  sửa được bằng `--fix` (import thừa), 17 lỗi phải sửa tay. Job `lint` đỏ cho tới
+  khi sửa hết, nên phải sửa xong rồi mới đẩy lên.
+- Sửa hết 30 lỗi cùng ngày; ruff giờ báo 0. Hai chỗ đổi hành vi. `order_image`, ảnh
+  của dòng đơn trong trang admin, chuyển sang `format_html` nên chuỗi lưu trong đơn
+  được escape - trước D-022 chuỗi này do trình duyệt gửi lên - và bỏ tiền tố
+  `/media/` thừa: chuỗi vốn đã là URL đầy đủ, nên ảnh đã hỏng từ thời TLCN. Trang
+  đăng nhập chỉ bắt `User.DoesNotExist`, lỗi khác không còn bị báo thành "email
+  không tồn tại". Thêm `core/tests/test_admin_display.py`, hai test đỏ trên code cũ.
+- `settings.py` bỏ ba dòng import `cloudinary`: gói này đã được nạp qua
+  `INSTALLED_APPS`, và storage tự import `cloudinary.uploader`. Chạy thử chế độ
+  Cloudinary với khóa giả, trên bản clone không có `.env`, vẫn dựng được URL ảnh.
+- Job `lint` đòi 0 lỗi trên mọi luật đã bật, nên CI xanh cũng là 0 issue
+  Blocker/Critical theo cách quy định trên.
+- Ruff không có các luật Pylint cần suy luận kiểu, ví dụ `no-member`. Hội đồng hỏi
+  Ruff có thay được Pylint không thì đây là phần không thay được.
+- Ruff không đo tỉ lệ mã trùng lặp; phần này dùng jscpd (D-031).
+- Ruff không bắt `@csrf_exempt`: hai view của nhân viên, `update_stock` và
+  `change_order_status`, đang được miễn kiểm tra CSRF. Ghi lại để xử lý riêng.
+
+
+## D-030 · Quét secret bằng gitleaks trên toàn bộ lịch sử Git ở mỗi lần CI chạy
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 Mức 5 đòi "0 secret lộ trong repository (kiểm chứng bằng công
+cụ quét)", hồ sơ số 7 ở Mục 8 cần báo cáo quét secret, TC2.6 Mức 5 cần chặng quét
+bảo mật. Rà soát ngày 10/09/2026 thấy repo sạch, nhưng đó là rà bằng tay, chưa có
+báo cáo của công cụ nào (P-15).
+
+**Phương án đã cân nhắc**
+
+1. *Công cụ*
+   - (a) gitleaks - một file chạy, quét được cả lịch sử Git, có chế độ che giá trị
+     secret trong log.
+   - (b) TruffleHog - điểm mạnh là thử key có còn sống không bằng cách gọi thẳng
+     dịch vụ, tức là gửi key ra ngoài; nặng hơn mức một repo nhỏ cần.
+   - (c) Secret scanning có sẵn của GitHub - bật trong cài đặt repo, nhưng không để
+     lại báo cáo gắn với từng lần chạy CI.
+2. *Cách đưa vào CI*
+   - (a) `gitleaks-action` - gọn, nhưng khi push hay mở PR thì chỉ quét các commit
+     mới của lần đó.
+   - (b) Tải bản phát hành đã ghim, so SHA-256, rồi gọi thẳng `gitleaks git`.
+
+**Quyết định.** Chọn 1(a), 2(b). Job `secret-scan` checkout toàn bộ lịch sử
+(`fetch-depth: 0`), tải gitleaks 8.30.1, so checksum, chạy `gitleaks git --redact`,
+lưu `gitleaks-report.json` làm artifact và ghi số phát hiện vào trang tóm tắt. Có
+phát hiện là job đỏ.
+
+**Lý do.** Quét lại cả lịch sử ở mỗi lần chạy vì minh chứng cần là "cả repository
+sạch", không phải "commit tuần này sạch", mà repo này quét hết chỉ mất khoảng một
+giây. So checksum để job không chạy một file đã bị tráo trên đường tải.
+
+**Hệ quả.**
+- Chạy thử 24/09/2026 trên bản clone mới từ `origin`: 169 commit, 0 phát hiện, báo
+  cáo là `[]`.
+- Chạy trên repo ở máy thì ra 2 phát hiện: hằng `PASSWORD` dùng để tạo user giả
+  trong hai file test cũ, thuộc tag `kltn-archive-2026-09-10`. Tag này chỉ có ở
+  remote `tlcn`, không có trên `origin`, nên CI không thấy. Đó không phải secret
+  thật, và vì CI không gặp nên không thêm `.gitleaksignore`.
+- Nâng gitleaks thì đổi cả `GITLEAKS_VERSION` lẫn `GITLEAKS_SHA256` trong `ci.yml`.
+- Chặng "quét bảo mật/phụ thuộc" của TC2.6 mới có nửa secret; nửa kiểm tra thư
+  viện có lỗ hổng đã biết thì chưa làm.
+
+
+## D-031 · Đo tỉ lệ trùng lặp bằng jscpd, trên mã Python của ứng dụng
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 cần tỉ lệ mã trùng lặp: Mức 5 ≤ 3%, Mức 4 ≤ 5%, Mức 3 ≤ 10%.
+Ruff không đo con số này (D-029), nên cần thêm một công cụ và phải chốt đo trên
+phần nào của repo.
+
+**Phương án đã cân nhắc**
+
+1. *Công cụ*
+   - (a) `symilar` đi kèm Pylint - cài bằng pip, có in phần trăm. Nhưng nó chỉ so
+     các file với nhau: chạy thử một file chứa một khối chép y hệt, symilar báo 0%.
+     Trên repo này nó cũng báo 0%, trong khi cả ba khối trùng thật đều nằm trong
+     cùng một file.
+   - (b) SonarCloud - cần tài khoản và token, đã loại ở D-029.
+   - (c) jscpd - so theo token, bắt cả trùng trong một file lẫn giữa các file. Bản 5
+     là file chạy viết bằng Rust, phát hành cả trên PyPI nên cài bằng pip như Ruff,
+     không cần Node.
+2. *Phạm vi*
+   - (a) Toàn bộ `grocerly/`. Template HTML chiếm 30.085 dòng và trùng 78,6%, nên
+     con số chung thực chất là con số của template.
+   - (b) Mã Python của ứng dụng, không tính migration và test; số của template ghi
+     riêng.
+
+**Quyết định.** Chọn 1(c), 2(b). jscpd ghim `5.2.1` trong `requirements-dev.txt`.
+`grocerly/.jscpd.json` giữ phạm vi (`format: python`, bỏ `migrations`, `tests`,
+`conftest.py`), ngưỡng 3% và `failOnEmpty`. Job `lint` chạy `jscpd .`; trùng quá 3%,
+hoặc không quét được file nào vì gõ sai đường dẫn, là job đỏ. Kích thước khối tối
+thiểu giữ mặc định của jscpd.
+
+**Lý do.** Ghim 5.2.1 chứ không lấy bản mới nhất 5.3.2 (ra ngày 23/09): 5.2.1 là bản
+sớm nhất vừa có gói PyPI vừa có `--fail-on-empty`, đã phát hành được hơn một tuần,
+còn các bản 5.3.x chỉ thêm tính năng không dùng tới. Migration do Django sinh ra.
+Test lặp lại cấu trúc chuẩn bị - thực hiện - kiểm tra một cách có chủ ý. Template
+không tính vào con số chấm điểm vì các công cụ rubric nêu tên (SpotBugs, ESLint,
+Pylint) đều đo mã của ngôn ngữ lập trình, còn template ở đây phần lớn là HTML chép
+từ bộ giao diện mẫu. Nhưng bỏ template ra khỏi phép đo thì phải nói ra, nên số của
+template được ghi thẳng vào bản cam kết (§5.1) để GVHD thấy trước khi ký.
+
+**Hệ quả.**
+- Số đo ngày 24/09/2026: 28 file Python, 3.023 dòng, 3 khối trùng, 33 dòng, tức
+  1,09%. Cả ba khối nằm trong cùng một file: hai trong `core/views.py`, một trong
+  `useradmin/views.py`.
+- Template: 62 file, trùng 78,6%. 13 file, khoảng 22.400 dòng, là trang mẫu của theme
+  Nest nhập cùng lúc ở commit `b4a1600`. Chưa commit nào có file Python gọi tới
+  chúng, nội dung vẫn là dữ liệu mẫu, và 12 file đã có template thật làm cùng việc
+  (`about_us.html`, `dashboard.html`, `sign-in.html`...). File còn lại là
+  `invoice.html`, hóa đơn in được: tính năng mới, ngoài phạm vi, còn xem chi tiết đơn
+  (CN-14) đã chạy bằng `order-detail.html`. SV quyết xóa cả 13 file ngày 24/09/2026;
+  cần lại thì lấy từ `b4a1600`. Sau khi xóa: 49 template, 7.704 dòng, trùng 26,6%.
+- Wheel Linux của jscpd 5.2.1 cần glibc từ 2.34; `ubuntu-latest` hiện là Ubuntu
+  24.04 với glibc 2.39.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
