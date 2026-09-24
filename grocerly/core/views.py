@@ -14,16 +14,15 @@ from taggit.models import Tag
 import calendar
 from decimal import Decimal
 from core.vnpay import vnpay
-from datetime import datetime
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 
 from core.models import (
-    Category, Vendor, Product, ProductReview, ProductImage,
+    Category, Vendor, Product, ProductReview,
     CartOrder, CartOrderItem, Wishlist, Address, Coupon,
 )
 from core.forms import ProductReviewForm
-from userauths.models import Profile
+from userauths.models import ContactUs, Profile
 
 
 import re
@@ -564,7 +563,7 @@ def save_checkout_info(request):
                     country=country,
                 )
 
-            for p_id, item in cart_data.items():
+            for item in cart_data.values():
                 price = Decimal(item['price'])
                 quantity = safe_int(item.get('qty'))
                 CartOrderItem.objects.create(
@@ -925,7 +924,6 @@ def remove_wishlist(request):
     return JsonResponse({'data': t, 'w': wishlist_json, 'total_wishlist_items': total_wishlist})
 
 # ======================== Static Pages & Contact ========================
-from userauths.models import ContactUs
 
 def contact(request):
     return render(request, "core/contact.html")

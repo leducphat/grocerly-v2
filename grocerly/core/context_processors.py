@@ -1,4 +1,4 @@
-from core.models import Category, Vendor, Product, Wishlist, Address
+from core.models import Category, Wishlist, Address
 
 def default(request):
     categories = Category.objects.all()

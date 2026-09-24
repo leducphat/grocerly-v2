@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
@@ -25,7 +26,6 @@ def dashboard(request):
 
     from django.db.models.functions import ExtractMonth
     import calendar
-    from django.db.models import Count
 
     revenue_data = CartOrder.objects.filter(paid_status=True).annotate(
         month=ExtractMonth("order_date")
@@ -61,8 +61,6 @@ def products(request):
         "all_categories": all_categories,
     }
     return render(request, "useradmin/products.html", context)
-
-from django.http import JsonResponse
 
 @csrf_exempt
 @admin_required
@@ -242,7 +240,7 @@ def settings(request):
         address = request.POST.get("address")
         country = request.POST.get("country")
         
-        if image != None:
+        if image is not None:
             profile.image = image
         profile.full_name = full_name
         profile.phone = phone

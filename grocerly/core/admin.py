@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from urllib.parse import urlencode
 
-from core.models import Category, Tag, Vendor, Product, ProductReview, ProductImage, CartOrder, CartOrderItem, Wishlist, Address, Coupon
+from core.models import Category, Vendor, Product, ProductReview, ProductImage, CartOrder, CartOrderItem, Wishlist, Address, Coupon
 
 
 # ======================== Soft Delete Admin Mixin ========================

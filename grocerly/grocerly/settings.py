@@ -204,9 +204,6 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 USE_CLOUDINARY = os.environ.get('USE_CLOUDINARY', 'False').lower() == 'true'
 
 if USE_CLOUDINARY:
-    import cloudinary
-    import cloudinary.uploader
-    import cloudinary.api
     
     STORAGES = {
         "default": {"BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage"},

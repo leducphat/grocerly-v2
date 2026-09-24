@@ -234,7 +234,8 @@ def ai_chat(request):
             "reply": response.text
         })
     except Exception as e:
-        import traceback, re
+        import traceback
+        import re
         traceback.print_exc()
         error_msg = str(e)
         if "429" in error_msg or "Quota" in error_msg or "ResourceExhausted" in error_msg:

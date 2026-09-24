@@ -1,6 +1,6 @@
 from django.db import models
 from shortuuid.django_fields import ShortUUIDField
-from django.utils.html import mark_safe
+from django.utils.html import format_html
 from userauths.models import User
 from taggit.managers import TaggableManager
 from django.utils import timezone
@@ -126,18 +126,19 @@ class Category(SoftDeleteModel):
     class Meta:
         verbose_name_plural = "Categories"
 
+    def __str__(self):
+        return self.title
+
     def category_image(self):
-        return mark_safe(f'<img src="{self.image.url}" width="50" height="50" />')
-    
+        return format_html('<img src="{}" width="50" height="50" />', self.image.url)
+
     def product_count(self):
         return Product.objects.filter(category=self).count()
 
-    def __str__(self):
-        return self.title
-    
 
 class Tag(models.Model):
-    pass
+    def __str__(self):
+        return f"Tag #{self.pk}"
 
 class Vendor(SoftDeleteModel):
     v_id = ShortUUIDField(unique=True, length=10, max_length=20, prefix="ven", alphabet="abcdefgh12345")
@@ -162,11 +163,11 @@ class Vendor(SoftDeleteModel):
     class Meta:
         verbose_name_plural = "Vendors"
 
-    def vendor_image(self):
-        return mark_safe(f'<img src="{self.image.url}" width="50" height="50" />')
-    
     def __str__(self):
         return self.name
+
+    def vendor_image(self):
+        return format_html('<img src="{}" width="50" height="50" />', self.image.url)
 
     def soft_delete(self):
         """Soft-delete this vendor and all their products."""
@@ -229,12 +230,12 @@ class Product(SoftDeleteModel):
     class Meta:
         verbose_name_plural = "Products"
 
-    def product_image(self):
-        return mark_safe(f'<img src="{self.image.url}" width="50" height="50" />')
-    
     def __str__(self):
         return self.title
-    
+
+    def product_image(self):
+        return format_html('<img src="{}" width="50" height="50" />', self.image.url)
+
     def get_percentage(self):
         if self.old_price > 0:
             discount = ((self.old_price - self.price) / self.old_price) * 100
@@ -246,6 +247,9 @@ class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='p_image')
     image = models.ImageField(upload_to="product-images", default="product.jpg")
     date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.product.title
 
 
 
@@ -287,6 +291,11 @@ class CartOrder(models.Model):
     class Meta:
         verbose_name_plural = "Cart Orders"
 
+    def __str__(self):
+        # oid is nullable, so fall back to the primary key.
+        return f"Order #{self.oid or self.pk}"
+
+
 class CartOrderItem(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)
     invoice_no = models.CharField(max_length=200)
@@ -300,8 +309,14 @@ class CartOrderItem(models.Model):
     class Meta:
         verbose_name_plural = "Cart Order Items"
 
+    def __str__(self):
+        return self.item
+
     def order_image(self):
-        return mark_safe(f'<img src="/media/{self.image}" width="50" height="50" />')
+        # `image` already holds a full URL (product.image.url), so no /media/
+        # prefix. format_html escapes it: orders placed before D-022 stored a
+        # value that the browser sent.
+        return format_html('<img src="{}" width="50" height="50" />', self.image)
     
 
 
@@ -352,6 +367,11 @@ class Address(models.Model):
 
     class Meta:
         verbose_name_plural = "Addresses"
+
+    def __str__(self):
+        if self.address:
+            return self.address
+        return f"Address #{self.pk}"
 
 
 class Coupon(SoftDeleteModel):
