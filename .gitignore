@@ -215,3 +215,7 @@ og_template/
 # AI agent tooling (Claude Code / ECC profile) — personal dev environment,
 # not part of the product. See docs/DECISIONS.md D-014.
 .claude/
+
+# Báo cáo tuần: đã nộp trên portal của trường nên không giữ thêm bản trong repo.
+# Thư mục vẫn dùng để soạn thảo, chỉ không commit. Xem docs/DECISIONS.md D-021.
+docs/weekly_report/

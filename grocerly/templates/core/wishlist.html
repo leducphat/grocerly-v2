@@ -51,11 +51,7 @@
                                     </td>
                                     <td class="text-right" data-title="Cart">
                                         <input type="hidden" value="1" class="product-quantity-{{ item.product.id }}">
-                                        <input type="hidden" class="product-pid-{{ item.product.id }}" value="{{ item.product.p_id }}">
-                                        <input type="hidden" class="product-image-{{ item.product.id }}" value="{{ item.product.image.url }}">
                                         <input type="hidden" class="product-id-{{ item.product.id }}" value="{{ item.product.id }}">
-                                        <input type="hidden" class="product-price-{{ item.product.id }}" value="{{ item.product.price }}">
-                                        <input type="hidden" class="product-title-{{ item.product.id }}" value="{{ item.product.title }}">
                                         <button class="btn btn-sm add-to-cart-btn" data-index="{{ item.product.id }}">Add to cart</button>
                                     </td>
                                     <td class="action text-center" data-title="Remove">

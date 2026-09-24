@@ -797,34 +797,15 @@
             let index = this_val.attr("data-index");
 
             let quantity = $(".product-quantity-" + index).val();
-            let product_title = $(".product-title-" + index).val();
             let product_id = $(".product-id-" + index).val();
-            let product_price = $(".product-price-" + index).val() || $(".current-product-price-" + index).text();
-            product_price = String(product_price || "").replace("₫", "").trim();
 
-            // Convert vi-VN grouped numbers like 120.000 to raw numeric 120000 for backend parsing.
-            if (/^\d{1,3}(\.\d{3})+$/.test(product_price)) {
-                product_price = product_price.replace(/\./g, "");
-            }
-            let product_pid = $(".product-pid-" + index).val();
-            let product_image = $(".product-image-" + index).val();
-
-            console.log("Quantity:", quantity);
-            console.log("Title:", product_title);
-            console.log("Price:", product_price);
-            console.log("ID:", product_id);
-            console.log("PID:", product_pid);
-            console.log("Image:", product_image);
-
+            // The server reads the title, the price and the image from the
+            // database, so the request only carries the product and the quantity.
             $.ajax({
                 url: '/add-to-cart/',
                 data: {
                     'id': product_id,
-                    'pid': product_pid,
-                    'image': product_image,
                     'qty': quantity,
-                    'title': product_title,
-                    'price': product_price,
                 },
                 dataType: 'json',
                 beforeSend: function(){
@@ -1075,7 +1056,7 @@
 
                     if (data.action === "confirm_add_cart") {
                         const p = data.product;
-                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="aiConfirmCartAdd('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${p.qty}', '${p.price}', '${p.image}', '${p.pid}')">Yes, Add to Cart</button>`;
+                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="aiConfirmCartAdd('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${p.qty}')">Yes, Add to Cart</button>`;
                         appendMessage('bot', btnHtml);
                     } else if (data.action === "confirm_checkout") {
                         const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="window.location.href='/cart/'">Proceed to Checkout</button>`;
@@ -1108,19 +1089,17 @@
             return cookieValue;
         }
 
-        function aiConfirmCartAdd(id, title, qty, price, image, pid) {
+        // `title` is only used to write the reply; the cart line is built from
+        // the database on the server side.
+        function aiConfirmCartAdd(id, title, qty) {
             appendMessage('user', "Yes, please add it.");
             chatHistory.push({role: 'user', content: "Yes, please add it."});
-            
+
             $.ajax({
                 url: '/add-to-cart/',
                 data: {
                     'id': id,
-                    'pid': pid,
-                    'image': image,
                     'qty': qty,
-                    'title': title,
-                    'price': price,
                 },
                 dataType: 'json',
                 success: function(response){

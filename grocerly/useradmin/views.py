@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 
-from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, Vendor
+from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, Vendor, STATUS_CHOICES
 from userauths.models import Profile, User
 from useradmin.forms import AddProductForm
 from useradmin.decorators import admin_required
@@ -25,7 +26,6 @@ def dashboard(request):
 
     from django.db.models.functions import ExtractMonth
     import calendar
-    from django.db.models import Count
 
     revenue_data = CartOrder.objects.filter(paid_status=True).annotate(
         month=ExtractMonth("order_date")
@@ -61,8 +61,6 @@ def products(request):
         "all_categories": all_categories,
     }
     return render(request, "useradmin/products.html", context)
-
-from django.http import JsonResponse
 
 @csrf_exempt
 @admin_required
@@ -175,7 +173,19 @@ def change_order_status(request, oid):
     order = CartOrder.objects.get(oid=oid)
     if request.method == "POST":
         status = request.POST.get("status")
-        
+
+        # Chỉ nhận ba trạng thái của STATUS_CHOICES. Ô chọn có sẵn một dòng nhắc
+        # không phải trạng thái, bấm Save mà chưa chọn gì thì không đổi gì cả.
+        if status not in dict(STATUS_CHOICES):
+            messages.error(request, "Please choose an order status")
+            return redirect("useradmin:order_detail", order.id)
+
+        # Đơn đã giao là điểm dừng (SRS §6.1, UC-20): cho đổi tiếp thì vừa viết lại
+        # lịch sử giao dịch, vừa trừ tồn kho thêm một lần mỗi lần đi qua 'shipped'.
+        if order.product_status == 'delivered':
+            messages.error(request, "A delivered order cannot change status any more")
+            return redirect("useradmin:order_detail", order.id)
+
         # Nếu chuyển sang trạng thái shipped và trạng thái cũ chưa phải là shipped
         if status == 'shipped' and order.product_status != 'shipped':
             order_items = CartOrderItem.objects.filter(order=order)
@@ -230,7 +240,7 @@ def settings(request):
         address = request.POST.get("address")
         country = request.POST.get("country")
         
-        if image != None:
+        if image is not None:
             profile.image = image
         profile.full_name = full_name
         profile.phone = phone

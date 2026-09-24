@@ -3,8 +3,9 @@
 # Runs on every push to develop/main and on every pull request into main.
 # Nothing here reads grocerly/.env or reaches a real service: Django runs with
 # grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini key).
-# Later stages (lint P-14, secret scan P-15, image build and deploy P-11) are
-# added as new steps or jobs when those items are done.
+# Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
+# (D-030) run as their own jobs. Image build and deploy (P-11) are added when
+# the KLTN hosting exists.
 
 name: CI
 
@@ -33,6 +34,97 @@ jobs:
       # D-006: the two files must be identical from line 2 on.
       - name: Compare the twin agent files
         run: diff <(tail -n +2 AGENTS.md) <(tail -n +2 CLAUDE.md)
+
+  lint:
+    name: Lint and static analysis (ruff)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: grocerly
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # Neither tool needs Django, so only these two are installed. The versions
+      # are read from requirements-dev.txt so that CI and local runs match.
+      - name: Install ruff and jscpd
+        run: |
+          pip install "$(grep '^ruff==' requirements-dev.txt)" \
+                      "$(grep '^jscpd==' requirements-dev.txt)"
+
+      # Rules come from grocerly/ruff.toml. The github format puts each error
+      # next to the line it is about in the commit and pull request views.
+      - name: Run ruff
+        run: ruff check --output-format=github .
+
+      # Duplicated lines in the Python code. Scope and the 3% limit come from
+      # grocerly/.jscpd.json (D-031).
+      - name: Check code duplication
+        run: jscpd . --no-colors
+
+      - name: Write results to the run summary
+        if: always()
+        run: |
+          echo "## Lint and static analysis" >> "$GITHUB_STEP_SUMMARY"
+          if ruff check . > /dev/null; then
+            echo "ruff: no errors" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ruff: errors per rule" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            ruff check --statistics . >> "$GITHUB_STEP_SUMMARY" || true
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "jscpd (duplication):" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          jscpd . --no-colors >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: "8.30.1"
+      # From gitleaks_8.30.1_checksums.txt on the GitHub release page.
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      # The whole history, not only the last commit: a key that was committed
+      # once and deleted later is still readable from the history.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      # Stop if the downloaded file is not exactly the published release.
+      - name: Install gitleaks
+        run: |
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum --check
+          tar -xzf gitleaks.tar.gz gitleaks
+
+      # Fails when anything is found. --redact keeps the secret itself out of
+      # the log and the report.
+      - name: Scan the git history
+        run: |
+          "$RUNNER_TEMP/gitleaks" git . --redact --verbose \
+            --report-format json --report-path gitleaks-report.json
+
+      - name: Write scan result to the run summary
+        if: always()
+        run: |
+          echo "## Secret scan" >> "$GITHUB_STEP_SUMMARY"
+          echo "gitleaks ${GITLEAKS_VERSION}, full git history: $(jq length gitleaks-report.json) finding(s)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload scan report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          if-no-files-found: ignore
 
   test:
     name: Build, check and test

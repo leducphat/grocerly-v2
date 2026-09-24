@@ -12,17 +12,17 @@ from django.core import serializers
 from taggit.models import Tag
 
 import calendar
+from decimal import Decimal
 from core.vnpay import vnpay
-from datetime import datetime
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 
 from core.models import (
-    Category, Vendor, Product, ProductReview, ProductImage,
+    Category, Vendor, Product, ProductReview,
     CartOrder, CartOrderItem, Wishlist, Address, Coupon,
 )
 from core.forms import ProductReviewForm
-from userauths.models import Profile
+from userauths.models import ContactUs, Profile
 
 
 import re
@@ -166,12 +166,13 @@ def product_detail_view(request, p_id):
     # Product Review form
     review_form = ProductReviewForm()
 
-    make_review = True
+    # Biểu mẫu đánh giá chỉ hiện với khách đã nhận sản phẩm và chưa đánh giá lần nào
+    # (UC-14). ajax_add_review kiểm tra lại đúng hai điều kiện này ở phía máy chủ.
+    make_review = False
 
     if request.user.is_authenticated:
-        user_review_count = ProductReview.objects.filter(user=request.user, product=product).count()
-        if user_review_count > 0:
-            make_review = False
+        already_reviewed = ProductReview.objects.filter(user=request.user, product=product).exists()
+        make_review = has_received_product(request.user, product) and not already_reviewed
 
     context = {
         'p': product,
@@ -207,21 +208,53 @@ def tag_list(request, tag_slug=None):
     return render(request, 'core/tag.html', context)
 
 
+def has_received_product(user, product):
+    """True if `user` has an order holding `product` that already left the store.
+
+    `CartOrderItem` keeps the product's title instead of a foreign key, so the
+    order lines are matched by title - the same way change_order_status finds
+    the product whose stock it has to lower.
+    """
+    return CartOrderItem.objects.filter(
+        order__user=user,
+        order__product_status__in=('shipped', 'delivered'),
+        item=product.title,
+    ).exists()
+
+
+@login_required
 def ajax_add_review(request, p_id):
-    product = Product.objects.get(pk=p_id)
+    product = get_object_or_404(Product, pk=p_id)
     user = request.user
 
-    review = ProductReview.objects.create(
-        user=user,
-        product=product,
-        review=request.POST['review'],
-        rating=request.POST['rating'],
-    )
+    # UC-14: chỉ khách đã nhận sản phẩm mới đánh giá được, và mỗi người một lần.
+    # Trang chi tiết đã giấu sẵn biểu mẫu, nhưng đó chỉ là giao diện -
+    # ai cũng gửi thẳng POST tới đây được nên máy chủ phải tự kiểm tra lại.
+    if not has_received_product(user, product):
+        return JsonResponse(
+            {'bool': False, 'message': "You can only review a product you have received"},
+            status=403,
+        )
+
+    if ProductReview.objects.filter(user=user, product=product).exists():
+        return JsonResponse(
+            {'bool': False, 'message': "You have already reviewed this product"},
+            status=403,
+        )
+
+    form = ProductReviewForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({'bool': False, 'errors': form.errors}, status=400)
+
+    review = form.save(commit=False)
+    review.user = user
+    review.product = product
+    review.save()
 
     context = {
         'user': user.username,
-        'review': request.POST['review'],
-        'rating': request.POST['rating'],
+        'review': review.review,
+        'rating': review.rating,
     }
 
     average_reviews = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
@@ -281,44 +314,108 @@ def filter_product(request):
 
 # ======================== Cart (Session-based) ========================
 
-def add_to_cart(request):
-    cart_product = {}
+def _refresh_cart(request):
+    """Rewrite every line of the session cart with the price and the stock kept
+    in the database, then return the total of the cart in VND.
 
-    cart_product[str(request.GET['id'])] = {
-        'title': request.GET['title'],
-        'qty': safe_int(request.GET.get('qty')),
-        'price': safe_float(request.GET.get('price')),
-        'image': request.GET['image'],
-        'pid': request.GET['pid'],
+    The browser sends a price when it adds a product to the cart, because that is
+    the price the product page displays - but the customer can edit that request
+    (L-6). So the price kept in the session is only ever a copy of
+    `Product.price`, and every amount the server computes - the cart total here,
+    the order total in `save_checkout_info` - is read from the database.
+
+    The quantity is the customer's to choose, but the shop cannot sell more than
+    it has: a line asking for more than `Product.stock_count` is brought back
+    down to the stock and the customer is told (L-7). The quantity box on the
+    page only has a lower bound, and an upper bound there would not help either:
+    it would travel in a request the customer can edit.
+
+    A line whose product no longer exists, has been soft deleted, or has nothing
+    left in stock is dropped.
+    """
+    cart_data = request.session.get('cart_data_obj')
+    if not cart_data:
+        return Decimal("0")
+
+    products_in_cart = {
+        str(product.id): product
+        for product in Product.objects.filter(
+            id__in=[safe_int(p_id, 0) for p_id in cart_data]
+        )
     }
 
-    if 'cart_data_obj' in request.session:
-        if str(request.GET['id']) in request.session['cart_data_obj']:
-            cart_data = request.session['cart_data_obj']
-            cart_data[str(request.GET['id'])]['qty'] = safe_int(cart_product[str(request.GET['id'])]['qty'])
-            cart_data.update(cart_data)
-            request.session['cart_data_obj'] = cart_data
-        else:
-            cart_data = request.session['cart_data_obj']
-            cart_data.update(cart_product)
-            request.session['cart_data_obj'] = cart_data
+    cart_total_amount = Decimal("0")
+    for p_id in list(cart_data):
+        product = products_in_cart.get(p_id)
+        if product is None:
+            del cart_data[p_id]
+            continue
+
+        stock = product.stock_count or 0
+        if stock <= 0:
+            messages.warning(
+                request,
+                f"{product.title} is out of stock and has been removed from your cart."
+            )
+            del cart_data[p_id]
+            continue
+
+        item = cart_data[p_id]
+        qty = safe_int(item.get('qty'))
+        if qty > stock:
+            messages.warning(
+                request,
+                f"Only {stock} of {product.title} left in stock, "
+                f"so your cart now holds {stock}."
+            )
+            qty = stock
+
+        item['qty'] = qty
+        item['price'] = str(product.price)
+        cart_total_amount += product.price * qty
+
+    request.session['cart_data_obj'] = cart_data
+    return cart_total_amount
+
+
+def add_to_cart(request):
+    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    if product is None:
+        return JsonResponse({'error': "Product not found"}, status=404)
+
+    # The request only says which product and how many of it; everything the cart
+    # line shows is read from the database.
+    product_id = str(product.id)
+    cart_data = request.session.get('cart_data_obj', {})
+
+    if product_id in cart_data:
+        cart_data[product_id]['qty'] = safe_int(request.GET.get('qty'))
     else:
-        request.session['cart_data_obj'] = cart_product
+        cart_data[product_id] = {
+            'title': product.title,
+            'qty': safe_int(request.GET.get('qty')),
+            'price': str(product.price),
+            'image': product.image.url if product.image else '',
+            'pid': product.p_id,
+        }
+
+    request.session['cart_data_obj'] = cart_data
+
+    # The quantity asked for can be more than the shop has left, so the cart is
+    # refreshed before answering: the line sent back to the page holds what can
+    # actually be sold (L-7).
+    _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
 
     return JsonResponse({
-        'data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'data': cart_data,
+        'totalcartitems': len(cart_data),
     })
 
 
 def cart_view(request):
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    if request.session.get('cart_data_obj'):
         return render(request, 'core/cart.html', {
             'cart_data': request.session['cart_data_obj'],
             'totalcartitems': len(request.session['cart_data_obj']),
@@ -331,13 +428,8 @@ def cart_view(request):
 
 @login_required
 def checkout_info_view(request):
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    if request.session.get('cart_data_obj'):
         return render(request, 'core/checkout-info.html', {
             'cart_data': request.session['cart_data_obj'],
             'totalcartitems': len(request.session['cart_data_obj']),
@@ -361,22 +453,17 @@ def delete_item_from_cart(request):
             del request.session['cart_data_obj'][product_id]
             request.session['cart_data_obj'] = cart_data
 
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
 
     context = render_to_string("core/async/cart-list.html", {
-        'cart_data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'cart_data': cart_data,
+        'totalcartitems': len(cart_data),
         'cart_total_amount': cart_total_amount,
     })
     return JsonResponse({
         'data': context,
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'totalcartitems': len(cart_data),
     })
 
 
@@ -390,22 +477,17 @@ def update_cart(request):
             cart_data[str(request.GET['id'])]['qty'] = safe_int(product_qty)
             request.session['cart_data_obj'] = cart_data
 
-    cart_total_amount = 0
-    if 'cart_data_obj' in request.session:
-        for p_id, item in request.session['cart_data_obj'].items():
-            item['qty'] = safe_int(item.get('qty'))
-            item['price'] = safe_float(item.get('price'))
-            cart_total_amount += item['qty'] * item['price']
-        request.session.modified = True
+    cart_total_amount = _refresh_cart(request)
+    cart_data = request.session.get('cart_data_obj', {})
 
     context = render_to_string("core/async/cart-list.html", {
-        'cart_data': request.session['cart_data_obj'],
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'cart_data': cart_data,
+        'totalcartitems': len(cart_data),
         'cart_total_amount': cart_total_amount,
     })
     return JsonResponse({
         'data': context,
-        'totalcartitems': len(request.session['cart_data_obj']),
+        'totalcartitems': len(cart_data),
     })
 
 
@@ -434,8 +516,6 @@ def _get_checkout_order_or_none(request, oid):
 
 @login_required
 def save_checkout_info(request):
-    total_amount = 0
-
     if request.method == "POST":
         full_name = request.POST.get("full_name")
         email = request.POST.get("email")
@@ -449,10 +529,12 @@ def save_checkout_info(request):
             messages.error(request, "Please provide Full Name, Email, and Address to continue.")
             return redirect("core:checkout-info")
 
-        if 'cart_data_obj' in request.session:
-            for p_id, item in request.session['cart_data_obj'].items():
-                total_amount += safe_int(item.get('qty')) * safe_float(item.get('price'))
+        # The order total comes from the database, not from the prices the
+        # browser put in the cart (L-6).
+        total_amount = _refresh_cart(request)
+        cart_data = request.session.get('cart_data_obj')
 
+        if cart_data:
             order = _get_pending_order_from_session(request)
 
             if order:
@@ -481,15 +563,17 @@ def save_checkout_info(request):
                     country=country,
                 )
 
-            for p_id, item in request.session['cart_data_obj'].items():
+            for item in cart_data.values():
+                price = Decimal(item['price'])
+                quantity = safe_int(item.get('qty'))
                 CartOrderItem.objects.create(
                     order=order,
                     invoice_no="INVOICE_NO-" + str(order.id),
                     item=item['title'],
                     image=item['image'],
-                    quantity=safe_int(item.get('qty')),
-                    price=safe_float(item.get('price')),
-                    total=float(safe_int(item.get('qty'))) * safe_float(item.get('price')),
+                    quantity=quantity,
+                    price=price,
+                    total=price * quantity,
                 )
 
             request.session['pending_order_oid'] = str(order.oid)
@@ -688,9 +772,13 @@ def payment_completed_view(request, oid):
         messages.warning(request, "Order not found. Please start checkout again.")
         return redirect("core:checkout-info")
 
-    if order.payment_method == 'online' and order.paid_status == False:
-        order.paid_status = True
-        order.save()
+    # L-8: this page only displays the order. An online order becomes paid in
+    # vnpay_return / vnpay_ipn, which check VNPay's signature first. Opening this
+    # URL by hand must not confirm a payment that never happened - and must not
+    # show "Payment Completed" for an order VNPay has not confirmed.
+    if order.payment_method == 'online' and not order.paid_status:
+        messages.warning(request, "This order has not been paid yet. Please complete the payment.")
+        return redirect("core:checkout", order.oid)
 
     if 'cart_data_obj' in request.session:
         del request.session['cart_data_obj']
@@ -836,7 +924,6 @@ def remove_wishlist(request):
     return JsonResponse({'data': t, 'w': wishlist_json, 'total_wishlist_items': total_wishlist})
 
 # ======================== Static Pages & Contact ========================
-from userauths.models import ContactUs
 
 def contact(request):
     return render(request, "core/contact.html")

@@ -744,6 +744,614 @@ kiểm tra migration chỉ có ý nghĩa nếu nó xanh ngay từ lần chạy �
 
 ---
 
+## D-021 · Không lưu báo cáo tuần trong repo
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Mỗi tuần có hai bản báo cáo cùng nội dung: thư mục
+`docs/weekly_report/` trong repo và bản đã nộp trên portal projects-fit.hcmute.edu.vn.
+Bản trên portal mới là bản chính thức — có dấu thời gian nộp và có ý kiến GVHD ghi
+ngay dưới đó. Rubric cũng đo tần suất báo cáo theo sổ theo dõi của GVHD, và chỉ đòi
+repository có **đầy đủ lịch sử commit**, không đòi file báo cáo.
+
+**Phương án đã cân nhắc**
+
+1. *Giữ nguyên* — hai nguồn sự thật cho cùng một nội dung, phải đồng bộ tay mỗi tuần.
+2. *Rút gọn từng file, vẫn commit* — ngắn hơn nhưng vẫn còn hai bản.
+3. *Gitignore cả thư mục* — portal là bản duy nhất.
+
+**Quyết định.** Chọn (3). Thêm `docs/weekly_report/` vào `.gitignore` và gỡ thư mục
+khỏi vùng theo dõi. Thư mục vẫn dùng để soạn thảo trên máy, chỉ không commit; nội
+dung cũ vẫn còn trong lịch sử Git.
+
+**Lý do.** Rút gọn và làm sạch repo. Báo cáo đã nộp trên portal của trường rồi nên
+giữ thêm một bản trong repo không thêm minh chứng nào, chỉ thêm việc đồng bộ.
+
+**Hệ quả.**
+- Lịch 15 tuần và hạn nộp từng tuần chuyển sang [`PLAN.md`](PLAN.md) §2.
+- Quy ước viết văn bản nộp cho GVHD chuyển sang `AGENTS.md`/`CLAUDE.md` §3.
+- Phần tóm tắt dán lên portal bỏ link "Báo cáo đầy đủ trên GitHub" — không còn
+  file để trỏ tới, nên ô *Nội dung* phải tự đứng vững một mình.
+- Tuần nào chỉ có mỗi việc viết báo cáo thì tuần đó không có commit. Rubric đòi
+  ≥ 90% số tuần có commit cho Mức 5, nên vẫn phải có việc thật mỗi tuần.
+- Đề cương KLTN (`DE_CUONG.md`) chuyển vào chính thư mục này cùng ngày, vì cùng một
+  lý do: bản GVHD đọc là bản DOCX/PDF đã nộp trên portal, giữ thêm bản Markdown trong
+  repo chỉ tạo ra nguồn thứ hai phải đồng bộ. [`COMMITMENT.md`](COMMITMENT.md) thì
+  **ở lại** repo — §3 của nó định nghĩa các mã L-x mà test (`xfail`), `pytest.ini` và
+  §8 của `AGENTS.md`/`CLAUDE.md` đang trỏ tới.
+- Không ảnh hưởng D-001: đặc tả, kế hoạch và quyết định vẫn nằm trong repo.
+
+---
+
+## D-022 · Giá của giỏ hàng luôn đọc lại từ database, không tin giá trình duyệt gửi
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-6 trong [`COMMITMENT.md`](COMMITMENT.md): trang sản phẩm gọi
+`/add-to-cart/` kèm tham số `price`, và server lưu thẳng con số đó vào session.
+`save_checkout_info` cộng tổng đơn hàng từ chính con số đó rồi gửi sang VNPay.
+Khách sửa tham số trên URL là đặt được hàng với giá bất kỳ. Tiền lại tính bằng
+`float`, trái với quy ước dùng `Decimal` của đồ án.
+
+Không bỏ được tham số `price` khỏi request, vì cả trang sản phẩm lẫn trợ lý AI đều
+đang gửi nó; giỏ hàng lại nằm trong session nên còn những session cũ đang mang giá
+kiểu `float`.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ kiểm tra lúc tạo đơn* — so giá trong session với `Product.price`, lệch thì
+   báo lỗi. Ít chạm code, nhưng giỏ hàng vẫn hiện giá sai cho tới lúc thanh toán,
+   và phải nghĩ ra thông báo lỗi cho tình huống người dùng thật không bao giờ gặp.
+2. *Bỏ hẳn giá khỏi session, cần thì truy vấn lại* — sạch nhất, nhưng template giỏ
+   hàng và mini-cart đang đọc `item.price` từ session, nên phải sửa cả bốn view lẫn
+   ba template.
+3. *Giữ giá trong session nhưng coi nó là bản sao của database* — mỗi lần đụng tới
+   giỏ thì ghi đè lại bằng giá hiện tại trong `Product`.
+
+**Quyết định.** Chọn (3). Thêm `_refresh_cart(request)` trong `core/views.py`: hàm
+này ghi đè giá của từng dòng giỏ bằng `Product.price`, bỏ dòng nào không còn sản
+phẩm, và trả về tổng tiền kiểu `Decimal`. Bốn view giỏ hàng cùng
+`save_checkout_info` đều gọi nó. `add_to_cart` tra sản phẩm theo `id`, không thấy
+thì trả 404, và dựng dòng giỏ hoàn toàn từ bản ghi `Product` — tên, giá lẫn ảnh.
+Sau đó `/add-to-cart/` chỉ còn nhận hai tham số: `id` và `qty`.
+
+**Lý do.** Cách này bịt lỗ hổng ở đúng một chỗ thay vì rải kiểm tra khắp nơi: sau
+khi `_refresh_cart` chạy thì mọi con số phía sau nó đã là giá của hệ thống, nên
+`save_checkout_info` không cần biết gì về chuyện chống giả mạo. Nó cũng gộp luôn
+bốn vòng lặp cộng tổng giống hệt nhau đang nằm rải trong `core/views.py`. Giá vẫn
+nằm trong session nên template và JavaScript không phải sửa.
+
+**Hệ quả.**
+- Giá trong session đổi từ số `float` sang chuỗi thập phân, ví dụ `"25000.00"` —
+  session lưu bằng JSON nên không chứa được `Decimal`. Bộ lọc `vnd`, `mul` và hàm
+  `formatVnd` đều đã nhận chuỗi, nên giao diện không đổi; session cũ tự chuẩn hóa
+  ở lần đụng tới giỏ kế tiếp.
+- Sản phẩm bị xóa mềm hoặc gỡ bán trong lúc khách còn để trong giỏ thì dòng đó biến
+  mất khỏi giỏ. Đây là hành vi mới với người dùng — đã ghi vào [`SRS.md`](SRS.md) §6.1.
+- Hai đoạn JavaScript gọi `/add-to-cart/` trong `partials/base.html` (nút Thêm vào
+  giỏ và nút xác nhận của trợ lý AI) bỏ gửi `price`, `title`, `pid`, `image` — server
+  không đọc tới nữa. Kéo theo đó, bốn `<input type="hidden">` chỉ tồn tại để nuôi
+  đoạn JS này được xóa khỏi 5 template (`index.html`, `product-detail.html`,
+  `wishlist.html`, `async/product-list.html`, `async/wishlist-list.html`); hai input
+  còn lại là `product-id-` và `product-quantity-`. Xóa luôn đoạn chuẩn hóa chuỗi giá
+  kiểu `120.000` và mấy dòng `console.log` trong handler, vì không còn giá để gửi.
+- `safe_float` giờ chỉ còn `safe_int` gọi tới. Giữ nguyên vì nó vẫn là chỗ xử lý
+  chuỗi số kiểu `120.000` gửi lên từ trình duyệt.
+- L-7 (không kiểm tồn kho) sẽ sửa ngay trong `_refresh_cart` — cùng một chỗ đã nắm
+  sẵn cả dòng giỏ lẫn bản ghi `Product`.
+
+---
+
+## D-023 · Chỉ VNPay mới xác nhận được đơn đã thanh toán
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-8 trong [`COMMITMENT.md`](COMMITMENT.md): `payment_completed_view`
+tự đặt `paid_status = True` cho mọi đơn `online` còn chưa thanh toán. Đây là trang
+mà `vnpay_return` chuyển tới sau khi thanh toán xong, nhưng nó không kiểm tra gì
+cả — khách đặt hàng xong rồi mở thẳng `/payment-completed/<oid>/` là đơn thành đã
+thanh toán mà chưa trả đồng nào. Cùng kiểu lỗi với L-6: tin vào thứ trình duyệt
+gửi lên thay vì tin vào nguồn dữ liệu của hệ thống.
+
+Hai chỗ đổi `paid_status` một cách hợp lệ là `vnpay_return` và `vnpay_ipn`, cả hai
+đều gọi `validate_response` để kiểm chữ ký HMAC trước.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ bỏ hai dòng gán `paid_status`* — đúng phần lỗ hổng, nhưng template
+   `payment-completed.html` vẫn in "Payment Completed" cho mọi đơn không phải COD,
+   nên đơn chưa trả tiền vẫn được báo là thanh toán xong.
+2. *Bỏ hai dòng gán, rồi sửa template hiển thị theo `paid_status`* — thành ba trạng
+   thái phải viết chữ cho cả hai bản dịch, trong khi đơn chưa thanh toán thì việc
+   cần làm là quay lại trả tiền chứ không phải đọc thông báo.
+3. *Bỏ hai dòng gán, và đưa đơn online chưa thanh toán về trang thanh toán.*
+
+**Quyết định.** Chọn (3). `payment_completed_view` không còn ghi vào `paid_status`;
+đơn `online` mà `paid_status` còn `False` thì view đẩy về `core:checkout` kèm
+`messages.warning` nhắc thanh toán. Đơn COD vẫn vào được trang hoàn tất với
+`paid_status = False`, vì COD trả tiền khi nhận hàng.
+
+**Lý do.** Cách này để việc xác nhận thanh toán nằm đúng ở hai view đã kiểm chữ ký,
+đúng như mô tả luồng VNPay trong [`SDD.md`](SDD.md). Nó cũng không đẻ thêm màn hình
+mới: `core:checkout` sẵn có nút thanh toán lại, và bản thân view đó đã tự đẩy đơn
+đã thanh toán ngược về trang hoàn tất nên không có vòng lặp chuyển hướng.
+
+**Hệ quả.**
+- Đơn online chưa thanh toán không còn bị xóa giỏ hàng trong session, vì view thoát
+  ra trước đoạn dọn session. Khách bỏ dở lần thanh toán vẫn giữ nguyên giỏ.
+- Test `test_payment_completed_page_does_not_mark_unpaid_order_as_paid` đã gỡ
+  `xfail`; thêm hai test cho hai lối vào hợp lệ của trang này — đơn online đã được
+  VNPay xác nhận, và đơn COD chưa thanh toán.
+- `vnpay_ipn` vẫn trả `RspCode 00` cho giao dịch thất bại. Đây là chỗ đáng xem lại
+  nhưng không thuộc L-8, chưa sửa trong lần này.
+
+---
+
+## D-024 · Giỏ hàng hạ số lượng xuống bằng tồn kho thay vì từ chối
+
+- **Ngày:** 21/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-7 trong [`COMMITMENT.md`](COMMITMENT.md): `add_to_cart`,
+`update_cart` và `save_checkout_info` đều nhận số lượng từ tham số của request mà
+không đối chiếu với `Product.stock_count`. Trang sản phẩm chỉ đặt `min="1"` cho ô
+nhập, không có chặn trên, nên khách gõ hay sửa URL là đặt được 999 hộp sữa trong
+khi kho còn 10. `SRS.md` §6.1 đã ghi ràng buộc này từ thời TLCN, code chưa làm.
+
+Sau D-022, `_refresh_cart` là chỗ duy nhất viết lại từng dòng giỏ theo dữ liệu
+trong database, nên việc kiểm tra tồn kho đặt ở đó là gọn nhất.
+
+**Phương án đã cân nhắc**
+
+1. *Trả lỗi và giữ nguyên giỏ* — đúng nghĩa "báo lỗi" mà đặc tả TLCN viết, nhưng
+   `add_to_cart` và `update_cart` trả JSON cho AJAX, JavaScript hiện chỉ đọc
+   `totalcartitems` và phần HTML kèm theo, nên muốn khách thấy lỗi thì phải sửa
+   cả ba chỗ JavaScript trong `base.html`.
+2. *Chặn trên ở ô nhập số lượng (`max`)* — dễ, nhưng đó chỉ là ràng buộc phía
+   trình duyệt, đúng loại ràng buộc mà L-6 vừa cho thấy là vô nghĩa.
+3. *Giữ chỗ tồn kho khi khách bỏ vào giỏ* — đúng nhất về nghiệp vụ, nhưng phải có
+   thời hạn giữ chỗ, có việc chạy nền trả hàng về kho; quá tầm một lỗi cần sửa.
+4. *Hạ số lượng xuống đúng bằng tồn kho ở `_refresh_cart` và báo cho khách.*
+
+**Quyết định.** Chọn (4). `_refresh_cart` đọc luôn `stock_count` cùng với giá: dòng
+nào xin nhiều hơn tồn kho thì bị hạ xuống bằng tồn kho kèm `messages.warning`; sản
+phẩm hết sạch hàng thì dòng đó rời khỏi giỏ, giống cách xử lý sản phẩm bị gỡ bán.
+`add_to_cart` gọi `_refresh_cart` trước khi trả JSON nên số lượng gửi về cho trang
+là số đã hạ.
+
+**Lý do.** Một chỗ kiểm tra duy nhất phủ cả ba lối vào — thêm vào giỏ, sửa số
+lượng, tạo đơn — nên không có lối nào sót, và cũng không phải sửa JavaScript.
+Với khách, hạ số lượng dễ hiểu hơn là báo lỗi rồi bắt tự nhập lại: giỏ hiện ra
+con số mua được thật. Chỗ lệch với chữ "báo lỗi" trong đặc tả TLCN đã sửa lại ở
+`SRS.md` §6.1 cho khớp hành vi này.
+
+**Hệ quả.**
+- Việc kiểm tra chạy lại mỗi lần mở giỏ hay trang thanh toán, nên tồn kho tụt sau
+  lúc khách bỏ vào giỏ thì đơn tạo ra vẫn không vượt kho.
+- Hệ thống *không* giữ chỗ tồn kho: hai khách cùng mua nốt món cuối thì người bấm
+  thanh toán sau bị hạ số lượng. Chấp nhận, ghi lại ở đây để nói được khi bảo vệ.
+- Test `test_add_to_cart_does_not_keep_quantity_above_stock` đã gỡ `xfail`; thêm
+  bốn test ca biên (số lượng đúng bằng tồn kho, sửa số lượng vượt kho, tổng tiền
+  của giỏ, dòng hết hàng bị bỏ) và một test cho lúc tạo đơn.
+
+## D-025 · Trợ lý AI và API dùng đúng điều kiện hiển thị của cửa hàng
+
+- **Ngày:** 22/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-9 và L-10 trong [`COMMITMENT.md`](COMMITMENT.md). Model `Product`
+mang tới ba cột nghe như nhau: `product_status` (`in_review` / `published` /
+`disabled`), và hai cờ boolean `status`, `in_stock`. Các trang cửa hàng trong
+`core/views.py` lọc theo đúng một điều kiện `product_status='published'`. Trong
+khi đó `store_api/views.py` — công cụ `search_products`, `get_bestsellers` và API
+`/api/v1/products/` — lọc theo `status=True, in_stock=True` và không đụng tới
+`product_status`. Hệ quả: sản phẩm quản trị viên đã gỡ bán biến mất khỏi cửa hàng
+nhưng trợ lý AI vẫn tìm thấy, vẫn báo giá và vẫn đề nghị thêm vào giỏ (L-10).
+
+Đọc kỹ thì hai cờ đó **không có chỗ nào ghi**: form thêm/sửa sản phẩm của nhân
+viên (`useradmin/forms.py`) không liệt kê chúng, không view nào gán, `ProductAdmin`
+cũng không đưa vào `list_display`. Chúng luôn giữ giá trị mặc định `True` trên mọi
+sản phẩm, nên điều kiện lọc kia thực chất không lọc gì cả. Cái cửa hàng thật sự
+cập nhật là `product_status` và `stock_count`.
+
+Cùng chỗ này còn L-9: nhánh `request_add_to_cart` trong `ai_chat` tìm sản phẩm
+bằng `Product.objects.filter(p_id=...)` trần, không hỏi tồn kho, nên AI đề nghị
+thêm cả món đã hết hàng — trái với ràng buộc UC-17 đã viết trong `SRS.md` §6.1 từ
+thời TLCN.
+
+**Phương án đã cân nhắc**
+
+1. *Thêm `product_status='published'` vào ba câu truy vấn, giữ nguyên hai cờ cũ* —
+   sửa nhanh nhất, nhưng để lại hai cột trông như cờ hiển thị mà không ai ghi:
+   người đọc sau vẫn có thể tin vào chúng và đặt lại đúng cái bẫy này.
+2. *Xóa hẳn hai cột khỏi model* — sạch nhất, nhưng là thay đổi schema kèm
+   migration, và `in_stock` đang nằm trong `ProductSerializer` trả ra cho API.
+   Quá tầm một lỗi cần sửa.
+3. *Cho cửa hàng đọc thêm `status` để hai bên bằng nhau* — làm hai bên giống nhau
+   bằng cách hạ cửa hàng xuống, thêm một điều kiện vô nghĩa vào mười câu truy vấn.
+4. *Đặt điều kiện hiển thị vào một chỗ dùng chung trong `store_api`, dựa trên
+   `product_status` và `stock_count`; ghi chú hai cờ cũ là không dùng.*
+
+**Quyết định.** Chọn (4). `store_api/views.py` có hai hàm nhỏ:
+`published_products()` trả về `product_status='published'` — đúng câu hỏi mà các
+trang cửa hàng hỏi — và `buyable_products()` lọc thêm `stock_count__gt=0`. Công cụ
+tìm kiếm, công cụ hàng bán chạy và API sản phẩm dùng `buyable_products()`. Nhánh
+`request_add_to_cart` dùng `published_products()`, rồi tách hai trường hợp: không
+tìm thấy thì trả `Product not found` cho Gemini như cũ, tồn kho bằng 0 thì trả
+`Product is out of stock` để AI nói đúng lý do thay vì bịa (L-9). Hai cờ `status`
+và `in_stock` giữ nguyên trong database nhưng không còn chỗ nào đọc; đã ghi chú
+ngay tại `core/models.py` rằng chúng là di sản TLCN không ai ghi.
+
+**Lý do.** Cùng một câu hỏi — *khách có được thấy sản phẩm này không* — thì phải
+hỏi bằng cùng một cột, nếu không sẽ lại lệch ở lần sửa sau. Đặt tên hàm theo nghĩa
+nghiệp vụ (`published_products`, `buyable_products`) khiến ba chỗ gọi đọc được
+thành câu tiếng Anh và không còn ai phải nhớ cờ nào là cờ thật. Không xóa cột vì
+việc đó không cần thiết để bịt lỗ hổng, còn ghi chú tại model thì đủ để người đọc
+sau không rơi vào bẫy cũ.
+
+**Hệ quả.**
+- Sản phẩm ở trạng thái `in_review` từ nay không lọt ra API công khai nữa — trước
+  đây lọt, vì `status` mặc định `True`. Đây là thay đổi hành vi thấy được, đã ghi
+  vào `SRS.md` §6.1.
+- Công cụ tìm kiếm của AI cũng bỏ qua sản phẩm hết hàng, giữ nguyên ý định của
+  điều kiện `in_stock=True` cũ nhưng đọc `stock_count` là cột được cập nhật thật.
+  Đổi lại, AI không trả lời được câu "món này còn hàng không" cho món đã hết —
+  nó báo không tìm thấy. Chấp nhận, ghi lại ở đây để nói được khi bảo vệ.
+- AI không kiểm tra số lượng khách xin so với tồn kho, chỉ kiểm tra còn hàng hay
+  không. Giỏ hàng đã hạ số lượng xuống bằng tồn kho lúc khách bấm xác nhận
+  (D-024), nên thêm một chỗ kiểm tra nữa ở đây là thừa.
+- Hai test `test_search_tool_does_not_return_product_hidden_from_store` và
+  `test_ai_add_to_cart_refuses_out_of_stock_product` đã gỡ `xfail` — bộ test không
+  còn `xfail` nào. Thêm sáu test: hàng bán chạy và thêm vào giỏ với sản phẩm đã gỡ
+  bán, lý do trả về cho Gemini, và bốn test cho `/api/v1/products/` trong file mới
+  `store_api/tests/test_product_api.py`.
+- Hai test cũ phải sửa dữ liệu đầu vào: chúng tạo sản phẩm mà không đặt
+  `product_status`, tức để mặc định `in_review`, nên trước đây vẫn tìm thấy được.
+  Chính chỗ đó cho thấy điều kiện lọc cũ hở tới mức nào.
+
+
+## D-026 · Đơn đã giao là điểm dừng của luồng trạng thái
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-5 trong [`COMMITMENT.md`](COMMITMENT.md): `change_order_status`
+trong `useradmin/views.py` ghi thẳng giá trị nhân viên gửi lên vào
+`order.product_status`, không hỏi trạng thái hiện tại là gì. `SRS.md` §6.1 đã ghi
+từ thời TLCN rằng đơn đã `Delivered` không đổi được trạng thái nữa; code chưa làm.
+
+Hậu quả nặng hơn một dòng lịch sử bị viết lại: nhánh trừ tồn kho chạy mỗi lần
+trạng thái chuyển sang `shipped` từ một trạng thái khác, nên đưa đơn từ `delivered`
+về `shipped` là trừ tiếp số lượng đó lần nữa. Lặp lại vài lần là tồn kho về 0 trong
+khi hàng vẫn nằm trong kho.
+
+Viết test cho chỗ này thì lộ thêm một đường vào nữa: ô chọn trạng thái trong
+`templates/useradmin/order_detail.html` có dòng nhắc đầu tiên là
+`<option value="pending">`, mà `pending` không nằm trong `STATUS_CHOICES`. Nhân
+viên bấm Save khi chưa chọn gì là đơn rơi vào trạng thái không có trong hệ thống:
+trang đơn hàng không lọc ra nữa, khách cũng không tra được.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ bỏ `disabled` cho ô chọn phía giao diện* — giấu được nút, nhưng view vẫn
+   nhận mọi POST. Đúng loại ràng buộc chỉ-ở-trình-duyệt mà L-6 vừa cho thấy là vô
+   nghĩa.
+2. *Viết một bảng chuyển trạng thái đầy đủ* (processing → shipped → delivered,
+   cấm mọi chiều ngược) — chặt chẽ nhất, nhưng nghiệp vụ thật có lúc phải lùi
+   `shipped` về `processing` vì giao hụt, và chưa ai chốt những lối lùi nào được
+   phép. Cấm hết bây giờ là quyết thay người dùng.
+3. *Chặn đúng hai điều kiện ở máy chủ: trạng thái gửi lên phải thuộc
+   `STATUS_CHOICES`, và đơn đã `delivered` thì không đổi nữa.*
+
+**Quyết định.** Chọn (3). `change_order_status` kiểm tra hai điều kiện đó trước
+mọi việc khác, sai thì báo `messages.error` và quay về trang chi tiết đơn mà không
+ghi gì. Dòng nhắc trong ô chọn đổi sang `value=""` để nó không còn là một trạng
+thái gửi được.
+
+**Lý do.** Hai điều kiện này là phần ai cũng đồng ý, không cần hỏi thêm: `delivered`
+là điểm dừng thì đặc tả đã viết sẵn, còn trạng thái ngoài `STATUS_CHOICES` thì không
+ai muốn có trong database. Những lối lùi còn lại để nguyên vì chưa có căn cứ nghiệp
+vụ để cấm. Chặn ở view chứ không ở template vì view là chỗ duy nhất mọi đường đi
+đều phải qua.
+
+**Hệ quả.**
+- Nhân viên lỡ đánh dấu giao xong một đơn thì không tự sửa được nữa, phải nhờ
+  quản trị viên đổi trong Django admin. Đúng ý định của đặc tả, nhưng là một ràng
+  buộc mới với người dùng nên ghi lại ở đây.
+- Đơn COD chuyển sang `delivered` vẫn được đánh dấu đã thanh toán như cũ; chỉ lần
+  đầu tiên, vì sau đó không đổi trạng thái được nữa.
+- Thư mục test đầu tiên cho `useradmin` (`useradmin/tests/`) với sáu test, trong đó
+  ba ca âm. Đây là module có độ phủ thấp nhất (21% ở lần đo 16/09/2026).
+- Chưa đụng tới một chỗ yếu khác của chính hàm này: nó tìm sản phẩm để trừ kho
+  bằng `Product.objects.filter(title=item.item)`, tức so theo tên. Đổi tên sản phẩm
+  là đơn cũ không tìm ra nữa. Ghi lại để không quên, chưa sửa vì đó là thay đổi
+  mô hình dữ liệu chứ không phải một chỗ chặn thiếu.
+
+## D-027 · Chỉ khách đã nhận sản phẩm mới đánh giá được
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-3 trong [`COMMITMENT.md`](COMMITMENT.md): `ajax_add_review` tạo
+`ProductReview` từ `request.user` và `request.POST` mà không kiểm tra gì cả — không
+hỏi đã đăng nhập chưa, không hỏi đã mua hàng chưa, cũng không hỏi đã đánh giá lần
+nào chưa. Toàn bộ phần chặn nằm ở template: `product-detail.html` chỉ hiện biểu
+mẫu khi `make_review` đúng, mà `make_review` lại chỉ đếm xem người này đã đánh giá
+sản phẩm ấy chưa. Bất kỳ ai gửi thẳng POST tới `/ajax-add-review/<id>/` đều ghi
+được đánh giá, bao nhiêu lần cũng được. `SRS.md` §6.1 (UC-14) ghi rõ chỉ đánh giá
+được sản phẩm đã mua.
+
+`request.user` với khách vãng lai là `AnonymousUser`, không lưu vào `ForeignKey`
+được, nên trước đây lỗi này hiện ra thành lỗi 500 chứ không phải một lời từ chối.
+
+**Phương án đã cân nhắc**
+
+1. *Chỉ thêm `@login_required`* — bịt được lỗi 500, nhưng ai có tài khoản vẫn đánh
+   giá được mọi sản phẩm, đúng phần đặc tả muốn cấm.
+2. *Lưu cờ `đã mua` lên chính `ProductReview`* — nhanh khi hiển thị, nhưng thêm một
+   cột phải tự giữ đồng bộ, đúng loại dữ liệu trùng mà L-10 vừa cho thấy hậu quả.
+3. *Hỏi thẳng `CartOrderItem` mỗi lần: khách này có đơn nào chứa sản phẩm này đã
+   rời kho chưa.*
+
+**Quyết định.** Chọn (3). `core/views.py` có thêm hàm `has_received_product(user,
+product)` trả về đúng câu hỏi đó. `ajax_add_review` có `@login_required`, rồi lần
+lượt từ chối ba trường hợp: chưa nhận hàng (403), đã đánh giá rồi (403), dữ liệu
+không hợp lệ (400, qua `ProductReviewForm` thay cho `request.POST['review']` đọc
+trực tiếp). `product_detail_view` dùng chính hàm đó cho `make_review`, nên giao
+diện và máy chủ nói cùng một điều kiện.
+
+**Lý do.** Đơn hàng là nguồn sự thật sẵn có, không cần dựng thêm dữ liệu để trả lời
+câu hỏi này. Để giao diện và view dùng chung một hàm thì không xảy ra cảnh nút bị
+giấu nhưng POST vẫn qua, hoặc ngược lại. Dùng `ProductReviewForm` để kiểm tra dữ
+liệu vì form ấy đã có sẵn và đang được dùng để vẽ chính biểu mẫu đó.
+
+**Hệ quả.**
+- Đặc tả TLCN viết điều kiện là đơn ở trạng thái `Shipped`. Làm đúng như vậy thì
+  khách nhận được hàng rồi (đơn sang `Delivered`) lại mất quyền đánh giá — vô lý.
+  Nhận cả hai trạng thái và sửa lại câu đặc tả (`SRS.md` §6.1, ghi ở `PLAN.md` §6).
+- Những đánh giá cũ do người chưa mua viết vẫn nằm trong database; quyết định này
+  chỉ chặn từ nay. Dữ liệu KLTN sẽ dựng lại trên hạ tầng riêng (D-002) nên không
+  viết migration dọn dẹp.
+- Việc đối chiếu dòng đơn theo `item` (tên sản phẩm) kế thừa cách `CartOrderItem`
+  lưu dữ liệu: nó không có khóa ngoại tới `Product`. Đổi tên sản phẩm thì khách mua
+  trước đó không đánh giá được nữa — cùng một điểm yếu đã ghi ở D-026.
+- Thêm `core/tests/test_reviews.py` với chín test, sáu trong đó là ca âm.
+
+
+## D-028 · Bỏ bước duyệt sản phẩm và bỏ CRUD đánh giá khỏi đặc tả
+
+- **Ngày:** 23/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Hai chỗ lệch cuối cùng trong [`COMMITMENT.md`](COMMITMENT.md) §3, cả
+hai đều là đặc tả mô tả một sản phẩm rộng hơn cái đã làm, chứ không phải code thiếu
+chỗ chặn:
+
+- **L-2:** đặc tả viết sản phẩm do người bán tạo nằm ở `in_review` cho tới khi Admin
+  duyệt. `add_product` trong `useradmin/views.py` gán thẳng `published`.
+- **L-4:** đặc tả gọi UC-14 là đánh giá *CRUD*. Khách chỉ tạo được; sửa và xóa chỉ
+  làm được trong Django admin.
+
+Cả hai câu đều là dấu vết của mô hình nhiều người bán mà D-015 đã bỏ: bước duyệt
+sinh ra để cửa hàng kiểm soát hàng của người bán bên ngoài.
+
+**Phương án đã cân nhắc**
+
+1. *Sửa code cho khớp đặc tả* — thêm luồng duyệt sản phẩm và màn hình sửa/xóa đánh
+   giá cho khách. Đây là làm tính năng mới, trái D-008, và bước duyệt thì chính
+   nhân viên cửa hàng duyệt hàng của chính mình — không có nghĩa nghiệp vụ.
+2. *Để nguyên, ghi là hạn chế* — nhưng khi bảo vệ thì hội đồng đọc đặc tả rồi đối
+   chiếu mã nguồn, hai chỗ này sẽ hiện ra thành chức năng cam kết mà không chạy.
+3. *Sửa đặc tả cho khớp mô hình một nhà bán.*
+
+**Quyết định.** Chọn (3) cho cả hai. `SRS.md` §6.1 viết lại UC-19/UC-24: sản phẩm
+nhân viên tạo hiển thị ngay, Admin vẫn ẩn hoặc gỡ bán được; FR-A-02 bỏ chữ
+"Duyệt". UC-14 bỏ chữ "(CRUD)" ở bảng use case và thêm một ràng buộc: khách tạo đánh
+giá, quản trị viên kiểm duyệt.
+
+**Lý do.** Hai câu đặc tả này mô tả một sản phẩm khác với sản phẩm đã chốt ở D-015,
+không phải mô tả một lỗ hổng. Giữ chúng là tự đặt thêm hai chức năng vào mẫu số của
+TC2.2 mà không định làm. Khác với L-3 và L-5 vừa sửa bằng code: hai lỗi ấy là quy
+tắc nghiệp vụ đúng mà code bỏ qua, còn hai chỗ này là quy tắc không còn áp dụng.
+
+**Hệ quả.**
+- §3 của `COMMITMENT.md` không còn dòng nào ở trạng thái chờ chốt; bản cam kết sẵn
+  sàng cho phần metric (P-03).
+- Không có test mới đi kèm: không có hành vi nào đổi. Ghi hai lần sửa đặc tả vào
+  `PLAN.md` §6 như mọi lần sửa khác.
+- Trạng thái `in_review` vẫn còn trong `STATUS` của `Product` và vẫn đặt tay được
+  trong Django admin; đặc tả chỉ bỏ chỗ nói rằng đó là trạng thái **mặc định bắt
+  buộc** của sản phẩm mới.
+
+
+## D-029 · Ruff làm cả linter lẫn công cụ phân tích tĩnh, bộ luật ghi rõ trong `ruff.toml`
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 Mức 5 đòi "0 lỗi lint còn tồn" theo một coding convention đã
+công bố, và phân tích tĩnh "(SonarQube/SpotBugs/ESLint/Pylint…)" báo 0 issue
+Blocker/Critical, trùng lặp ≤ 3%. TC2.6 Mức 5 đòi pipeline có chặng lint/phân tích
+tĩnh. Repo chưa có công cụ nào (P-14).
+
+**Phương án đã cân nhắc**
+
+1. *Linter*
+   - (a) Pylint kèm pylint-django - rubric có nêu tên, nhưng chậm, nhiều cảnh báo
+     về kiểu dáng khi gặp code Django, và phải cài cả Django thì plugin mới chạy.
+   - (b) Flake8 cộng các plugin bugbear, bandit, django - mỗi nhóm luật là một gói
+     phải ghim phiên bản riêng.
+   - (c) Ruff - một gói duy nhất, có sẵn luật của pyflakes, pycodestyle, bugbear,
+     bandit, flake8-django và một phần luật của Pylint; chạy toàn repo chưa tới một
+     giây, không cần Django.
+2. *Bộ luật*
+   - (a) Để mặc định. Bản 0.16 đã nới mặc định ra thêm RUF, UP, SIM, PERF... chạy
+     ra 93 lỗi, phần lớn là kiểu dáng; và mặc định đổi theo phiên bản, nên nâng
+     Ruff là kết quả CI tự đổi.
+   - (b) Ghi rõ từng nhóm trong file cấu hình.
+3. *Nguồn của con số Blocker/Critical*
+   - (a) SonarCloud - ra đúng hai con số rubric gọi tên, nhưng thêm một dịch vụ
+     ngoài, cần tài khoản và token.
+   - (b) Pylint chỉ bật loại E và F, coi đó là Blocker/Critical - thêm một công cụ
+     nữa, và phải nạp Django qua pylint-django thì mới không báo lỗi giả hàng loạt.
+   - (c) Để AI rà code rồi tự xếp mức - hai lần rà có thể ra hai kết quả khác nhau,
+     còn mức do AI tự đặt nên hội đồng hỏi thì không có căn cứ để trả lời.
+   - (d) Dùng luôn Ruff, quy định nhóm luật nào tính là Blocker/Critical.
+
+**Quyết định.** Chọn 1(c), 2(b), 3(d). `grocerly/ruff.toml` bật bốn nhóm: lỗi thật
+của pyflakes/pycodestyle (`E4`, `E7`, `E9`, `F`), bugbear (`B`), flake8-django
+(`DJ`) và bandit (`S`). Bỏ `DJ001`. Test được dùng `assert` và mật khẩu giả,
+`settings_test.py` được giữ khóa giả. Ruff ghim `0.16.8` trong `requirements-dev.txt`;
+CI có job `lint` riêng, đọc phiên bản từ đúng file đó.
+
+Ruff không có mức nghiêm trọng: kiểm trên bản 0.16.8, mọi issue đều mang
+`severity: error`, kể cả khi bật toàn bộ luật. Vì vậy nhóm luật nào tính là
+Blocker/Critical do đồ án tự quy định, theo định nghĩa severity của SonarQube:
+Blocker là lỗi nhiều khả năng làm hỏng ứng dụng khi chạy thật, Critical là lỗi ít
+khả năng hơn hoặc là lỗ hổng bảo mật. Danh sách luật cụ thể ghi ở bản cam kết
+(`COMMITMENT.md` §5, P-03) và chỉ được lấy trong các nhóm đã bật ở trên.
+
+**Lý do.** Chỉ chọn nhóm bắt được lỗi thật hoặc lỗ hổng. Nhóm thuần kiểu dáng thì
+chưa bật: độ dài dòng (`E501`) ra 192 lỗi, thứ tự import (`I`) ra 29 - sửa chúng là
+một diff lớn trên code TLCN mà không đổi hành vi nào. `DJ001` (`CharField` có
+`null=True`, 24 chỗ) bỏ qua vì sửa nó là đổi schema và dữ liệu đang lưu, không còn
+là việc của lint. Nhóm `PLE` (phần luật loại E của Pylint mà Ruff có) cũng chưa bật:
+chạy thử ra 0 lỗi, còn lỗi làm code hỏng khi chạy thì `F` và `E9` đã bắt.
+
+Con số Blocker/Critical cũng lấy từ Ruff vì rubric không định nghĩa hai mức này, và
+chính các công cụ nó nêu tên cũng không có thang đó: ESLint chỉ có error và warn,
+Pylint có C/R/W/E/F. Chọn công cụ nào trong danh sách thì cũng phải tự quy đổi. Bản
+cam kết ở Bước 3 là chỗ ghi cách quy đổi, cũng là nơi Mục 5 cho sinh viên và GVHD
+điều chỉnh ngưỡng. Ruff đã chạy sẵn trong CI, thêm một công cụ chỉ để ra con số này
+là thừa.
+
+**Hệ quả.**
+- Lần chạy đầu 24/09/2026: 30 lỗi trên khoảng 4.200 dòng Python không tính
+  migration, tức khoảng 7 lỗi trên 1000 dòng - ngang Mức 3 của TC2.4. 13 lỗi Ruff tự
+  sửa được bằng `--fix` (import thừa), 17 lỗi phải sửa tay. Job `lint` đỏ cho tới
+  khi sửa hết, nên phải sửa xong rồi mới đẩy lên.
+- Sửa hết 30 lỗi cùng ngày; ruff giờ báo 0. Hai chỗ đổi hành vi. `order_image`, ảnh
+  của dòng đơn trong trang admin, chuyển sang `format_html` nên chuỗi lưu trong đơn
+  được escape - trước D-022 chuỗi này do trình duyệt gửi lên - và bỏ tiền tố
+  `/media/` thừa: chuỗi vốn đã là URL đầy đủ, nên ảnh đã hỏng từ thời TLCN. Trang
+  đăng nhập chỉ bắt `User.DoesNotExist`, lỗi khác không còn bị báo thành "email
+  không tồn tại". Thêm `core/tests/test_admin_display.py`, hai test đỏ trên code cũ.
+- `settings.py` bỏ ba dòng import `cloudinary`: gói này đã được nạp qua
+  `INSTALLED_APPS`, và storage tự import `cloudinary.uploader`. Chạy thử chế độ
+  Cloudinary với khóa giả, trên bản clone không có `.env`, vẫn dựng được URL ảnh.
+- Job `lint` đòi 0 lỗi trên mọi luật đã bật, nên CI xanh cũng là 0 issue
+  Blocker/Critical theo cách quy định trên.
+- Ruff không có các luật Pylint cần suy luận kiểu, ví dụ `no-member`. Hội đồng hỏi
+  Ruff có thay được Pylint không thì đây là phần không thay được.
+- Ruff không đo tỉ lệ mã trùng lặp; phần này dùng jscpd (D-031).
+- Ruff không bắt `@csrf_exempt`: hai view của nhân viên, `update_stock` và
+  `change_order_status`, đang được miễn kiểm tra CSRF. Ghi lại để xử lý riêng.
+
+
+## D-030 · Quét secret bằng gitleaks trên toàn bộ lịch sử Git ở mỗi lần CI chạy
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 Mức 5 đòi "0 secret lộ trong repository (kiểm chứng bằng công
+cụ quét)", hồ sơ số 7 ở Mục 8 cần báo cáo quét secret, TC2.6 Mức 5 cần chặng quét
+bảo mật. Rà soát ngày 10/09/2026 thấy repo sạch, nhưng đó là rà bằng tay, chưa có
+báo cáo của công cụ nào (P-15).
+
+**Phương án đã cân nhắc**
+
+1. *Công cụ*
+   - (a) gitleaks - một file chạy, quét được cả lịch sử Git, có chế độ che giá trị
+     secret trong log.
+   - (b) TruffleHog - điểm mạnh là thử key có còn sống không bằng cách gọi thẳng
+     dịch vụ, tức là gửi key ra ngoài; nặng hơn mức một repo nhỏ cần.
+   - (c) Secret scanning có sẵn của GitHub - bật trong cài đặt repo, nhưng không để
+     lại báo cáo gắn với từng lần chạy CI.
+2. *Cách đưa vào CI*
+   - (a) `gitleaks-action` - gọn, nhưng khi push hay mở PR thì chỉ quét các commit
+     mới của lần đó.
+   - (b) Tải bản phát hành đã ghim, so SHA-256, rồi gọi thẳng `gitleaks git`.
+
+**Quyết định.** Chọn 1(a), 2(b). Job `secret-scan` checkout toàn bộ lịch sử
+(`fetch-depth: 0`), tải gitleaks 8.30.1, so checksum, chạy `gitleaks git --redact`,
+lưu `gitleaks-report.json` làm artifact và ghi số phát hiện vào trang tóm tắt. Có
+phát hiện là job đỏ.
+
+**Lý do.** Quét lại cả lịch sử ở mỗi lần chạy vì minh chứng cần là "cả repository
+sạch", không phải "commit tuần này sạch", mà repo này quét hết chỉ mất khoảng một
+giây. So checksum để job không chạy một file đã bị tráo trên đường tải.
+
+**Hệ quả.**
+- Chạy thử 24/09/2026 trên bản clone mới từ `origin`: 169 commit, 0 phát hiện, báo
+  cáo là `[]`.
+- Chạy trên repo ở máy thì ra 2 phát hiện: hằng `PASSWORD` dùng để tạo user giả
+  trong hai file test cũ, thuộc tag `kltn-archive-2026-09-10`. Tag này chỉ có ở
+  remote `tlcn`, không có trên `origin`, nên CI không thấy. Đó không phải secret
+  thật, và vì CI không gặp nên không thêm `.gitleaksignore`.
+- Nâng gitleaks thì đổi cả `GITLEAKS_VERSION` lẫn `GITLEAKS_SHA256` trong `ci.yml`.
+- Chặng "quét bảo mật/phụ thuộc" của TC2.6 mới có nửa secret; nửa kiểm tra thư
+  viện có lỗ hổng đã biết thì chưa làm.
+
+
+## D-031 · Đo tỉ lệ trùng lặp bằng jscpd, trên mã Python của ứng dụng
+
+- **Ngày:** 24/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** TC2.4 cần tỉ lệ mã trùng lặp: Mức 5 ≤ 3%, Mức 4 ≤ 5%, Mức 3 ≤ 10%.
+Ruff không đo con số này (D-029), nên cần thêm một công cụ và phải chốt đo trên
+phần nào của repo.
+
+**Phương án đã cân nhắc**
+
+1. *Công cụ*
+   - (a) `symilar` đi kèm Pylint - cài bằng pip, có in phần trăm. Nhưng nó chỉ so
+     các file với nhau: chạy thử một file chứa một khối chép y hệt, symilar báo 0%.
+     Trên repo này nó cũng báo 0%, trong khi cả ba khối trùng thật đều nằm trong
+     cùng một file.
+   - (b) SonarCloud - cần tài khoản và token, đã loại ở D-029.
+   - (c) jscpd - so theo token, bắt cả trùng trong một file lẫn giữa các file. Bản 5
+     là file chạy viết bằng Rust, phát hành cả trên PyPI nên cài bằng pip như Ruff,
+     không cần Node.
+2. *Phạm vi*
+   - (a) Toàn bộ `grocerly/`. Template HTML chiếm 30.085 dòng và trùng 78,6%, nên
+     con số chung thực chất là con số của template.
+   - (b) Mã Python của ứng dụng, không tính migration và test; số của template ghi
+     riêng.
+
+**Quyết định.** Chọn 1(c), 2(b). jscpd ghim `5.2.1` trong `requirements-dev.txt`.
+`grocerly/.jscpd.json` giữ phạm vi (`format: python`, bỏ `migrations`, `tests`,
+`conftest.py`), ngưỡng 3% và `failOnEmpty`. Job `lint` chạy `jscpd .`; trùng quá 3%,
+hoặc không quét được file nào vì gõ sai đường dẫn, là job đỏ. Kích thước khối tối
+thiểu giữ mặc định của jscpd.
+
+**Lý do.** Ghim 5.2.1 chứ không lấy bản mới nhất 5.3.2 (ra ngày 23/09): 5.2.1 là bản
+sớm nhất vừa có gói PyPI vừa có `--fail-on-empty`, đã phát hành được hơn một tuần,
+còn các bản 5.3.x chỉ thêm tính năng không dùng tới. Migration do Django sinh ra.
+Test lặp lại cấu trúc chuẩn bị - thực hiện - kiểm tra một cách có chủ ý. Template
+không tính vào con số chấm điểm vì các công cụ rubric nêu tên (SpotBugs, ESLint,
+Pylint) đều đo mã của ngôn ngữ lập trình, còn template ở đây phần lớn là HTML chép
+từ bộ giao diện mẫu. Nhưng bỏ template ra khỏi phép đo thì phải nói ra, nên số của
+template được ghi thẳng vào bản cam kết (§5.1) để GVHD thấy trước khi ký.
+
+**Hệ quả.**
+- Số đo ngày 24/09/2026: 28 file Python, 3.023 dòng, 3 khối trùng, 33 dòng, tức
+  1,09%. Cả ba khối nằm trong cùng một file: hai trong `core/views.py`, một trong
+  `useradmin/views.py`.
+- Template: 62 file, trùng 78,6%. 13 file, khoảng 22.400 dòng, là trang mẫu của theme
+  Nest nhập cùng lúc ở commit `b4a1600`. Chưa commit nào có file Python gọi tới
+  chúng, nội dung vẫn là dữ liệu mẫu, và 12 file đã có template thật làm cùng việc
+  (`about_us.html`, `dashboard.html`, `sign-in.html`...). File còn lại là
+  `invoice.html`, hóa đơn in được: tính năng mới, ngoài phạm vi, còn xem chi tiết đơn
+  (CN-14) đã chạy bằng `order-detail.html`. SV quyết xóa cả 13 file ngày 24/09/2026;
+  cần lại thì lấy từ `b4a1600`. Sau khi xóa: 49 template, 7.704 dòng, trùng 26,6%.
+- Wheel Linux của jscpd 5.2.1 cần glibc từ 2.34; `ubuntu-latest` hiện là Ubuntu
+  24.04 với glibc 2.39.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

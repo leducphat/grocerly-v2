@@ -8,7 +8,7 @@ from decimal import Decimal
 import pytest
 from django.urls import reverse
 
-from core.models import CartOrder, CartOrderItem, Coupon
+from core.models import CartOrder, CartOrderItem, Coupon, Product
 
 pytestmark = pytest.mark.django_db
 
@@ -69,7 +69,6 @@ def test_submitting_checkout_twice_keeps_one_order(customer_client, product, add
     assert CartOrderItem.objects.count() == 1
 
 
-@pytest.mark.xfail(reason="L-6: the order total is computed from the price sent by the browser")
 def test_order_total_uses_product_price_not_price_sent_by_browser(
     customer_client, customer, product, add_to_cart
 ):
@@ -79,6 +78,19 @@ def test_order_total_uses_product_price_not_price_sent_by_browser(
 
     order = CartOrder.objects.get(user=customer)
     assert order.price == product.price * 2
+
+
+def test_order_quantity_does_not_go_above_stock(customer_client, customer, product, add_to_cart):
+    # L-7: the cart is checked again when the order is created, not only when the
+    # product is added - the stock may have run down in between.
+    add_to_cart(customer_client, product, qty=product.stock_count)
+    Product.objects.filter(id=product.id).update(stock_count=3)
+
+    submit_shipping_info(customer_client)
+
+    order = CartOrder.objects.get(user=customer)
+    item = CartOrderItem.objects.get(order=order)
+    assert (item.quantity, order.price) == (3, product.price * 3)
 
 
 # ---------- Coupons ----------
@@ -146,9 +158,34 @@ def test_customer_cannot_place_order_of_another_customer(client, order, django_u
     assert order.payment_method == "online"  # unchanged
 
 
-@pytest.mark.xfail(reason="L-8: opening the payment-completed page marks an unpaid online order as paid")
+# ---------- Payment completed page (L-8) ----------
+
+
 def test_payment_completed_page_does_not_mark_unpaid_order_as_paid(customer_client, order):
-    customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
 
     order.refresh_from_db()
+    assert order.paid_status is False
+    assert response.url == reverse("core:checkout", args=[order.oid])  # not the success page
+
+
+def test_payment_completed_page_shows_online_order_confirmed_by_vnpay(customer_client, order):
+    order.paid_status = True  # as vnpay_return leaves it after checking the signature
+    order.save()
+
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+
+    assert response.status_code == 200
+
+
+def test_payment_completed_page_shows_unpaid_cod_order(customer_client, customer, product, add_to_cart):
+    add_to_cart(customer_client, product)
+    submit_shipping_info(customer_client)
+    order = CartOrder.objects.get(user=customer)
+    customer_client.post(reverse("core:place-cod-order", args=[order.oid]))
+
+    response = customer_client.get(reverse("core:payment-completed", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert response.status_code == 200  # COD is paid on delivery, so unpaid is expected here
     assert order.paid_status is False

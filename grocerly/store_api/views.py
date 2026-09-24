@@ -8,8 +8,27 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Product, Category
 from store_api.serializers import ProductSerializer, CategorySerializer
 
+# The store pages decide what a customer may see with one condition:
+# `product_status='published'` (core/views.py). The assistant and the API used
+# to ask a different question - `status=True, in_stock=True` - so a product the
+# shop had hidden was still found here (L-10). Those two booleans look like they
+# answer it, but no form on the site ever writes them, so they stay True on
+# every product; what the shop really keeps up to date is `stock_count`, which
+# is also what the cart trusts (D-024).
+
+
+def published_products():
+    """Products a customer is allowed to see, as the store pages define it."""
+    return Product.objects.filter(product_status='published')
+
+
+def buyable_products():
+    """Published products with something left in stock."""
+    return published_products().filter(stock_count__gt=0)
+
+
 class ProductListAPI(generics.ListAPIView):
-    queryset = Product.objects.filter(status=True, in_stock=True)
+    queryset = buyable_products()
     serializer_class = ProductSerializer
 
 class CategoryListAPI(generics.ListAPIView):
@@ -23,7 +42,7 @@ def search_products(query: str) -> list[dict]:
     Call this whenever the user asks about product availability, price, details, or stock.
     Returns a list of matching products.
     """
-    products = Product.objects.filter(status=True, in_stock=True)
+    products = buyable_products()
     for word in query.split():
         products = products.filter(title__icontains=word)
     products = products[:5]
@@ -56,7 +75,7 @@ def get_bestsellers() -> list[dict]:
     """Get the bestselling and featured products of the store.
     Call this when the user asks what is popular or what to buy.
     """
-    products = Product.objects.filter(featured=True, status=True, in_stock=True)[:5]
+    products = buyable_products().filter(featured=True)[:5]
     results = []
     for p in products:
         results.append({
@@ -141,8 +160,18 @@ def ai_chat(request):
                 except Exception:
                     qty = 1
 
-                p = Product.objects.filter(p_id=p_id).first()
-                if p:
+                # The assistant may only offer what the customer could buy on
+                # the site itself: a product the shop has hidden is "not found"
+                # here too, and one with nothing left in stock is refused
+                # instead of proposed (L-9). The quantity is not checked here -
+                # the cart brings a line back down to the stock when the
+                # customer confirms (D-024).
+                p = published_products().filter(p_id=p_id).first()
+                if p is None:
+                    tool_error = "Product not found"
+                elif (p.stock_count or 0) <= 0:
+                    tool_error = "Product is out of stock"
+                else:
                     # Interrupt conversation to ask for UI confirmation
                     return Response({
                         "reply": f"Would you like to add **{qty}x {p.title}** to your cart?",
@@ -156,14 +185,14 @@ def ai_chat(request):
                             "image": p.image.url if p.image else ""
                         }
                     })
-                else:
-                    response = chat.send_message([{
-                        "function_response": {
-                            "name": name,
-                            "response": {"error": "Product not found"}
-                        }
-                    }])
-                    continue
+
+                response = chat.send_message([{
+                    "function_response": {
+                        "name": name,
+                        "response": {"error": tool_error}
+                    }
+                }])
+                continue
 
             elif name == "request_checkout":
                 return Response({
@@ -205,7 +234,8 @@ def ai_chat(request):
             "reply": response.text
         })
     except Exception as e:
-        import traceback, re
+        import traceback
+        import re
         traceback.print_exc()
         error_msg = str(e)
         if "429" in error_msg or "Quota" in error_msg or "ResourceExhausted" in error_msg:
