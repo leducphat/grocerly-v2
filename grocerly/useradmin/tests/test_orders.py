@@ -80,3 +80,18 @@ def test_customer_cannot_change_the_status_of_an_order(customer_client, order_wi
     order_with_item.refresh_from_db()
     assert order_with_item.product_status == "processing"
     assert order_with_item.paid_status is False
+
+
+@pytest.mark.xfail(reason="L-11: every trip back into shipped deducts the stock again")
+def test_order_shipped_again_after_processing_deducts_stock_only_once(
+    staff_client, order_with_item, product
+):
+    """L-11: a failed delivery goes back to processing and ships again later. The
+    goods leave the store once, so the stock drops by the ordered quantity once."""
+    change_status(staff_client, order_with_item, "shipped")
+    change_status(staff_client, order_with_item, "processing")
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    product.refresh_from_db()
+    assert product.stock_count == 7  # 10 in stock, 3 ordered, shipped once for real
