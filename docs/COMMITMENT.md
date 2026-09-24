@@ -128,14 +128,18 @@ bảo vệ.
 | **L-8** 🔴 | *(đặc tả không nói tới — mặc định đơn thanh toán online chỉ thành "đã thanh toán" khi VNPay xác nhận)* | `payment_completed_view` tự đặt `paid_status = True` cho đơn `online` chưa thanh toán. Khách tạo đơn xong, mở thẳng `/payment-completed/<oid>/` là đơn thành đã thanh toán mà không qua VNPay. *Phát hiện 16/09/2026 khi viết test (P-12)* | ✅ **Đã sửa 21/09/2026** (D-023). `payment_completed_view` không còn ghi `paid_status`; chỉ `vnpay_return` / `vnpay_ipn` (đã kiểm chữ ký) đổi được trạng thái này. Đơn online chưa được VNPay xác nhận mà mở trang hoàn tất thì bị đưa về `core:checkout` kèm nhắc thanh toán, thay vì thấy màn hình thanh toán thành công. Test `test_payment_completed_page_does_not_mark_unpaid_order_as_paid` đã gỡ `xfail` |
 | **L-9** | AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối (UC-17, SRS §6.1) | `ai_chat` xử lý `request_add_to_cart` bằng `Product.objects.filter(p_id=...)`, không kiểm tra `in_stock` / `stock_count` — AI vẫn đề nghị thêm sản phẩm đã hết hàng. *Phát hiện 16/09/2026 (P-12)* | ✅ **Đã sửa 22/09/2026** (D-025). Nhánh `request_add_to_cart` tìm sản phẩm qua `published_products()` rồi tách hai trường hợp: không tìm thấy trả `Product not found`, tồn kho bằng 0 trả `Product is out of stock` để Gemini nói đúng lý do. Test `test_ai_add_to_cart_refuses_out_of_stock_product` đã gỡ `xfail`, có thêm khẳng định về lý do gửi cho Gemini |
 | **L-10** | Sản phẩm bị vô hiệu hóa không hiển thị với khách (FR-A-02, UC-24) | Trang cửa hàng lọc theo `product_status = 'published'`; công cụ AI `search_products`, `get_bestsellers` và API `/api/v1/products/` lại lọc theo cờ khác là `status = True`, bỏ qua `product_status` → sản phẩm đã ẩn khỏi cửa hàng vẫn được AI tìm thấy. *Phát hiện 16/09/2026 (P-12)* | ✅ **Đã sửa 22/09/2026** (D-025). `store_api/views.py` có `published_products()` (`product_status='published'`, đúng điều kiện các trang cửa hàng dùng) và `buyable_products()` (lọc thêm `stock_count > 0`); công cụ tìm kiếm, hàng bán chạy và `/api/v1/products/` đều gọi hàm này. Vai trò cờ `status`: **không còn chỗ nào đọc** — cùng với `in_stock`, đây là hai cột không form nào ghi nên luôn bằng `True`; đã ghi chú tại `core/models.py`, không xóa cột. Test `test_search_tool_does_not_return_product_hidden_from_store` đã gỡ `xfail`; thêm file `store_api/tests/test_product_api.py` cho API |
+| **L-11** | *(đặc tả không nói tới - mặc định mỗi đơn chỉ làm giảm tồn kho một lần)* | `change_order_status` trừ tồn kho mỗi lần đơn vào `shipped` từ một trạng thái khác, và không hoàn lại khi đơn rời `shipped`. Đơn đi shipped, processing rồi shipped lại bị trừ kho hai lần: tồn 10, mua 3, còn 4 thay vì 7 | ⏳ **Chưa sửa.** Phát hiện 24/09/2026 khi review PR #8. Test tái hiện đánh dấu `xfail`. Cần chốt quy tắc trước: hoàn kho khi đơn rời `shipped`, hay mỗi đơn chỉ trừ kho một lần (thêm trường cho `CartOrder`, cần migration) |
 
 **Mười chỗ lệch đều đã chốt.** Ba chỗ chốt bằng cách sửa đặc tả — L-1 (11/09/2026,
 D-015), L-2 và L-4 (23/09/2026, D-028) — vì chúng mô tả mô hình nhiều người bán
 không còn áp dụng. Bảy chỗ còn lại chốt bằng cách sửa code: L-6, L-7, L-8
 (21/09/2026), L-9, L-10 (22/09/2026), L-3 và L-5 (23/09/2026). Mỗi lần sửa đặc tả
-ghi vào `PLAN.md` §6; mỗi lần sửa code có test đi kèm, và bộ test không còn `xfail`
+ghi vào `PLAN.md` §6; mỗi lần sửa code có test đi kèm, và tới 23/09/2026 bộ test không còn `xfail`
 nào. L-3 và L-5 không có test tái hiện sẵn từ P-12 nên được viết test trước, chạy cho
 đỏ, rồi mới sửa.
+
+L-11 phát hiện sau, ngày 24/09/2026, khi review PR #8, và chưa sửa. Test tái hiện
+của nó là `xfail` duy nhất trong bộ test.
 
 ---
 
