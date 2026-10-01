@@ -167,6 +167,10 @@ def order_detail(request, id):
     }
     return render(request, "useradmin/order_detail.html", context)
 
+# Bước kế tiếp được phép của từng trạng thái đơn. 'delivered' không có trong bảng
+# vì đó là điểm dừng.
+NEXT_STATUS = {"processing": "shipped", "shipped": "delivered"}
+
 @csrf_exempt
 @admin_required
 def change_order_status(request, oid):
@@ -180,14 +184,16 @@ def change_order_status(request, oid):
             messages.error(request, "Please choose an order status")
             return redirect("useradmin:order_detail", order.id)
 
-        # Đơn đã giao là điểm dừng (SRS §6.1, UC-20): cho đổi tiếp thì vừa viết lại
-        # lịch sử giao dịch, vừa trừ tồn kho thêm một lần mỗi lần đi qua 'shipped'.
-        if order.product_status == 'delivered':
-            messages.error(request, "A delivered order cannot change status any more")
+        # Đơn chỉ đi tới, mỗi lần một bước (SRS §6.1, UC-20; D-032). Lùi, nhảy cóc
+        # hay gửi lại trạng thái đang có đều bị từ chối. Đơn đã giao không có bước
+        # kế tiếp nên cũng dừng ở đây.
+        if NEXT_STATUS.get(order.product_status) != status:
+            messages.error(request, f"An order that is {order.product_status} cannot change to {status}")
             return redirect("useradmin:order_detail", order.id)
 
-        # Nếu chuyển sang trạng thái shipped và trạng thái cũ chưa phải là shipped
-        if status == 'shipped' and order.product_status != 'shipped':
+        # Hàng rời kho thì trừ tồn kho. Qua được điều kiện trên nghĩa là đơn đang ở
+        # 'processing'; đơn đã 'shipped' thì không quay lại nhánh này được nữa.
+        if status == 'shipped':
             order_items = CartOrderItem.objects.filter(order=order)
             for item in order_items:
                 product = Product.objects.filter(title=item.item).first()

@@ -2,8 +2,10 @@
 Order management tests (UC-20, CN-22): who may change the status of an order,
 which values the server accepts, and what a status change does to the stock.
 
-The rule under test is the one SRS.md §6.1 states for UC-20: an order already
-`delivered` cannot change status any more (L-5 in docs/COMMITMENT.md).
+The rules under test are the ones SRS.md §6.1 states for UC-20: an order only
+moves forward, one step at a time (processing, shipped, delivered), and an order
+already `delivered` cannot change status any more (L-5 and L-11 in
+docs/COMMITMENT.md).
 """
 
 import pytest
@@ -31,6 +33,9 @@ def test_marking_order_shipped_deducts_ordered_quantity_from_stock(
 
 
 def test_marking_cod_order_delivered_marks_it_paid(staff_client, order_with_item):
+    order_with_item.product_status = "shipped"
+    order_with_item.save()
+
     change_status(staff_client, order_with_item, "delivered")
 
     order_with_item.refresh_from_db()
@@ -74,24 +79,42 @@ def test_status_outside_the_three_defined_values_is_rejected(
     assert order_with_item.product_status == "processing"  # as checkout left it
 
 
-def test_customer_cannot_change_the_status_of_an_order(customer_client, order_with_item):
-    change_status(customer_client, order_with_item, "delivered")
+def test_customer_cannot_change_the_status_of_an_order(
+    customer_client, order_with_item, product
+):
+    # `shipped` is the one step the staff may take from here, so only the missing
+    # permission can be what stops this request.
+    change_status(customer_client, order_with_item, "shipped")
 
     order_with_item.refresh_from_db()
+    product.refresh_from_db()
     assert order_with_item.product_status == "processing"
-    assert order_with_item.paid_status is False
+    assert product.stock_count == 10
 
 
-@pytest.mark.xfail(reason="L-11: every trip back into shipped deducts the stock again")
-def test_order_shipped_again_after_processing_deducts_stock_only_once(
+def test_shipped_order_cannot_be_moved_back_to_processing(
     staff_client, order_with_item, product
 ):
-    """L-11: a failed delivery goes back to processing and ships again later. The
-    goods leave the store once, so the stock drops by the ordered quantity once."""
+    """L-11: an order only moves forward. A step back would let it enter `shipped`
+    a second time, and every entry deducts the stock."""
     change_status(staff_client, order_with_item, "shipped")
+
     change_status(staff_client, order_with_item, "processing")
 
-    change_status(staff_client, order_with_item, "shipped")
-
+    order_with_item.refresh_from_db()
     product.refresh_from_db()
-    assert product.stock_count == 7  # 10 in stock, 3 ordered, shipped once for real
+    assert order_with_item.product_status == "shipped"
+    assert product.stock_count == 7  # 10 in stock, 3 ordered, deducted once
+
+
+def test_processing_order_cannot_skip_straight_to_delivered(
+    staff_client, order_with_item, product
+):
+    """Skipping `shipped` would hand over the goods without ever deducting the stock."""
+    change_status(staff_client, order_with_item, "delivered")
+
+    order_with_item.refresh_from_db()
+    product.refresh_from_db()
+    assert order_with_item.product_status == "processing"
+    assert product.stock_count == 10  # nothing left the store
+    assert order_with_item.paid_status is False  # so no cash was collected either
