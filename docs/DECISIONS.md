@@ -1043,6 +1043,9 @@ trang đơn hàng không lọc ra nữa, khách cũng không tra được.
    cấm mọi chiều ngược) — chặt chẽ nhất, nhưng nghiệp vụ thật có lúc phải lùi
    `shipped` về `processing` vì giao hụt, và chưa ai chốt những lối lùi nào được
    phép. Cấm hết bây giờ là quyết thay người dùng.
+
+   > *Ghi chú 30/09/2026:* lối lùi để ngỏ ở đây làm tồn kho bị trừ hai lần (L-11).
+   > SV đã chốt cấm mọi chiều ngược, tức chính phương án này - xem D-032.
 3. *Chặn đúng hai điều kiện ở máy chủ: trạng thái gửi lên phải thuộc
    `STATUS_CHOICES`, và đơn đã `delivered` thì không đổi nữa.*
 
@@ -1350,6 +1353,78 @@ template được ghi thẳng vào bản cam kết (§5.1) để GVHD thấy tr�
   cần lại thì lấy từ `b4a1600`. Sau khi xóa: 49 template, 7.704 dòng, trùng 26,6%.
 - Wheel Linux của jscpd 5.2.1 cần glibc từ 2.34; `ubuntu-latest` hiện là Ubuntu
   24.04 với glibc 2.39.
+
+
+## D-032 · Đơn hàng chỉ đi tới, mỗi lần một bước
+
+- **Ngày:** 30/09/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-11 trong [`COMMITMENT.md`](COMMITMENT.md): `change_order_status`
+trừ tồn kho mỗi lần đơn vào `shipped` từ một trạng thái khác, và không cộng lại khi
+đơn rời `shipped`. D-026 chỉ chặn đơn đã `delivered`, nên một đơn đi `shipped`, lùi
+về `processing` rồi `shipped` lần nữa vẫn bị trừ kho hai lần: tồn 10, mua 3, còn 4
+thay vì 7. Lỗi lộ ra ngày 24/09/2026 khi review PR #8.
+
+D-026 để ngỏ lối lùi đó với lý do "nghiệp vụ thật có lúc phải lùi `shipped` về
+`processing` vì giao hụt". Đọc lại thì câu này không có căn cứ: không use case nào
+trong `SRS.md` và không chức năng nào trong `COMMITMENT.md` mô tả một đơn đi lùi.
+Đó là suy đoán lúc viết D-026, chưa ai chốt.
+
+**Phương án đã cân nhắc**
+
+1. *Cộng lại tồn kho khi đơn rời `shipped`* - giữ được lối lùi. Nhưng tự cộng hàng
+   về kho là sai với đồ tươi: rau, thịt đi giao một vòng rồi quay về chưa chắc còn
+   bán được, việc đó phải do người quyết. Còn một lỗi số học nữa: nhánh trừ kho
+   kẹp tồn kho về 0, nên tồn 2 mà đơn 3 thì trừ còn 0, cộng lại 3 là kho tự có thêm
+   một món.
+2. *Thêm cờ `stock_deducted` cho `CartOrder`*, mỗi đơn chỉ trừ kho một lần dù vào
+   `shipped` bao nhiêu lần. WooCommerce làm kiểu này với meta `_reduced_stock`. Cần
+   một migration, kèm data migration bật cờ cho các đơn cũ đang `shipped` hoặc
+   `delivered`.
+3. *Cấm lối lùi: đơn chỉ đi tới theo một bảng chuyển trạng thái*, `processing` sang
+   `shipped` rồi `shipped` sang `delivered`. Đây chính là phương án 2 của D-026.
+
+**Quyết định.** Chọn (3), SV chốt ngày 30/09/2026. `useradmin/views.py` có bảng
+`NEXT_STATUS = {"processing": "shipped", "shipped": "delivered"}`, và
+`change_order_status` chỉ nhận trạng thái gửi lên khi nó đúng là bước kế tiếp của
+trạng thái đơn đang có. Lùi, nhảy cóc, gửi lại trạng thái cũ đều bị từ chối bằng
+`messages.error` và không ghi gì. Điều kiện chặn đơn `delivered` của D-026 gộp vào
+bảng này, vì `delivered` không có bước kế tiếp. Điều kiện `STATUS_CHOICES` của
+D-026 giữ nguyên, để bấm Save khi chưa chọn gì vẫn nhận đúng câu nhắc chọn trạng
+thái. Không đổi model, không có migration.
+
+**Lý do.** Đơn đã `shipped` nghĩa là hàng đã rời kho, trên web không có lý do gì
+đưa nó về `processing`. Giao hụt hay khách trả lại là việc của kho, và kho làm được
+vì nhân viên chỉnh được tồn kho ở trang sản phẩm: ô tồn kho trong danh sách sản
+phẩm (`update_stock`) và form sửa sản phẩm. Phương án (1) và (2) đều giải một luồng
+lùi mà đặc tả không có. Đơn chỉ vào `shipped` được một lần thì tồn kho chỉ bị trừ
+một lần, không cần thêm cột nào để nhớ.
+
+**Hệ quả.**
+- Đóng luôn một lỗ chưa có mã L: trước đây đơn đi thẳng từ `processing` sang
+  `delivered` thì không qua nhánh trừ kho lần nào, hàng giao xong mà tồn kho vẫn
+  nguyên. Giờ bước nhảy đó bị từ chối.
+- Bấm nhầm sang `shipped` thì nhân viên không tự lùi được, phải nhờ quản trị viên
+  sửa trong Django admin. Django admin ghi thẳng vào database chứ không qua view
+  này, nên tồn kho không đổi theo và phải chỉnh tay. Ô chọn trên trang chi tiết đơn
+  vẫn hiện đủ ba trạng thái và chưa hỏi xác nhận; việc chặn nằm ở máy chủ.
+- Hai chỗ yếu của nhánh trừ kho để nguyên. Đoạn kẹp tồn kho về 0 còn đó vì gốc của
+  nó là hệ thống không giữ hàng lúc khách đặt, tới lúc giao tồn kho có thể đã ít
+  hơn số đặt. Việc tìm sản phẩm theo `title` đã ghi ở D-026.
+- Chưa xử lý trường hợp hai yêu cầu tới cùng lúc, ví dụ bấm Save hai lần liền hoặc
+  hai nhân viên cùng bấm: cả hai đều đọc thấy đơn đang `processing`, cùng qua điều
+  kiện và cùng trừ kho. Chỗ này có từ trước, lượt review ngày 01/10/2026 chỉ ra;
+  muốn chặn thì phải khóa dòng đơn trong một transaction, và test hiện tại chạy
+  từng yêu cầu một nên không tái hiện được.
+- `useradmin/tests/test_orders.py`: test `xfail` của L-11 viết lại thành ca đơn
+  `shipped` không về được `processing`, thêm ca `processing` không nhảy thẳng sang
+  `delivered`. Hai test cũ phải sửa vì chúng đi đúng đường nhảy cóc vừa cấm. Trong
+  đó test "khách không đổi được trạng thái đơn" gửi `delivered`; để nguyên thì nó
+  vẫn xanh, nhưng vì luật mới chứ không còn vì phân quyền, nên đổi sang gửi
+  `shipped`.
+- Khách gọi điện hủy đơn là việc riêng, làm ở P-19 (D-033); lúc đó bảng chuyển
+  trạng thái có thêm nhánh `cancelled`.
 
 
 <!--
