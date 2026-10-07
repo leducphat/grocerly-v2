@@ -43,22 +43,25 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 ## 2. Lịch KLTN
 
 Đồ án chạy **15 tuần**, đánh số **Tuần 1 → Tuần 15**; mỗi tuần bắt đầu Thứ Hai.
+**Tuần 1 tính từ 14/09/2026** — khoa thông báo ngày 02/10/2026. Tuần 07/09 –
+13/09/2026 đã có commit nhưng nằm trước Tuần 1, gọi là *tuần chuẩn bị*.
 
 | Mốc | Tuần | Ngày |
 |---|---|---|
-| Bắt đầu | Tuần 1 | 07/09/2026 – 13/09/2026 |
-| **Hạn chốt cam kết sản phẩm + bộ metric** | **hết Tuần 7** | **25/10/2026** — mốc 50% thời gian |
-| Kết thúc | Tuần 15 | 14/12/2026 – 20/12/2026 |
+| Bắt đầu | Tuần 1 | 14/09/2026 – 20/09/2026 |
+| **Hạn chốt cam kết sản phẩm + bộ metric** | **Tuần 7 → hết Tuần 10** | 26/10/2026 – **22/11/2026**; nộp lên portal khi khoa thông báo |
+| Kết thúc | Tuần 15 | 21/12/2026 – 27/12/2026 |
 | Phản biện | — | Dự kiến tháng 12/2026 |
 
 Lịch đầy đủ 15 tuần và hạn nộp từng tuần: [`docs/PLAN.md`](docs/PLAN.md) §2.
 
-Mốc 50% là **điều kiện cứng**: không chốt được bản cam kết đúng hạn thì đồ án
-*không đủ điều kiện bảo vệ* (xem §4).
+Hạn chốt cam kết là **điều kiện cứng**: phải thống nhất với GVHD trước Tuần 11,
+trễ thì đồ án *không đủ điều kiện bảo vệ* (xem §4).
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, **nộp lên portal trước
-17:00 Thứ Sáu** của chính tuần đó (GVHD chốt, áp dụng từ Tuần 2). Báo cáo tuần
-soạn trong `docs/weekly_report/`, thư mục này **không nằm trong repo** (D-021).
+17:00 Thứ Sáu** của chính tuần đó (GVHD chốt ngày 14/09/2026); GVHD duyệt báo cáo
+hai tuần một lần. Báo cáo tuần soạn trong `docs/weekly_report/`, thư mục này
+**không nằm trong repo** (D-021).
 Với đồ án 15 tuần, Mức 5 của rubric đòi **≥ 14/15 tuần có commit** — nghĩa là làm
 đều, không dồn.
 
@@ -105,7 +108,7 @@ sửa file tương ứng cho đúng thực tế và ghi lại việc sửa đó 
 
 ## 4. Ràng buộc chấm điểm chi phối cách làm
 
-Rubric KLTN (link trong `docs/DECISIONS.md` D-001) chấm theo **minh chứng**. Ba hệ
+Rubric KLTN (link trong `docs/PLAN.md` §2) chấm theo **minh chứng**. Ba hệ
 quả ràng buộc mọi agent làm việc trên repo này:
 
 **(a) Mọi thứ phải giải thích được.** Theo rubric, bất kỳ nội dung nào — code, sơ

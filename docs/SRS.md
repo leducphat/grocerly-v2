@@ -237,6 +237,12 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lại; đơn đã `Delivered` không đổi được trạng thái. Máy chủ chỉ nhận đúng ba
   trạng thái `Processing`, `Shipped`, `Delivered`; giá trị khác bị từ chối và đơn
   giữ nguyên trạng thái cũ (D-026).
+- **UC-20:** đơn chỉ đi tới, mỗi lần một bước: `Processing` sang `Shipped`, rồi
+  `Shipped` sang `Delivered`. Lùi lại, nhảy thẳng từ `Processing` sang `Delivered`,
+  hay gửi lại đúng trạng thái đơn đang có đều bị máy chủ từ chối và đơn giữ nguyên
+  trạng thái cũ. Tồn kho bị trừ đúng một lần, lúc đơn sang `Shipped`. Hàng đã rời
+  kho mà có sự cố (giao hụt, khách trả lại) thì nhân viên chỉnh tồn kho ở trang
+  sản phẩm, không lùi trạng thái đơn (D-032).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
