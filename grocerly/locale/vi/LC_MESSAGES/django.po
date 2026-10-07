@@ -887,3 +887,25 @@ msgstr "Nhà cung cấp"
 
 msgid "Customer questions &amp; answers"
 msgstr "Câu hỏi & trả lời của khách hàng"
+
+# --- Order status (D-033) ---
+# The context keeps these apart from "Shipping" above, which is the shipping fee.
+
+msgctxt "order status"
+msgid "Processing"
+msgstr "Đang xử lý"
+
+msgctxt "order status"
+msgid "Shipping"
+msgstr "Đang giao hàng"
+
+msgctxt "order status"
+msgid "Delivered"
+msgstr "Đã giao"
+
+msgctxt "order status"
+msgid "Cancelled"
+msgstr "Đã hủy"
+
+msgid "This order has been cancelled."
+msgstr "Đơn hàng này đã bị hủy."

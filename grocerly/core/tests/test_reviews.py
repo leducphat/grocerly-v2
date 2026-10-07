@@ -71,6 +71,18 @@ def test_order_still_on_its_way_does_not_allow_a_review_yet(
     assert ProductReview.objects.count() == 0
 
 
+def test_cancelled_order_does_not_allow_a_review(
+    customer_client, product, shipped_order
+):
+    """An order cancelled on its way was never received (D-033)."""
+    shipped_order(status="cancelled")
+
+    response = post_review(customer_client, product)
+
+    assert response.status_code == 403
+    assert ProductReview.objects.count() == 0
+
+
 def test_order_of_another_customer_does_not_allow_a_review(
     customer_client, product, shipped_order, django_user_model, password
 ):
