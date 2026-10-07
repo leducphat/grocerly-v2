@@ -9,7 +9,7 @@
 | Đề tài | Xây dựng website bán thực phẩm tích hợp trợ lý AI tự động đặt hàng |
 | Sinh viên | Lê Đức Phát — 21139083 |
 | GVHD | Hoàng Văn Dũng |
-| Hạn chốt | **25/10/2026** — hết Tuần 7, mốc 50% thời gian (rubric Mục 2 Bước 3, gate G1) |
+| Hạn chốt | **22/11/2026** — hết Tuần 10 (rubric Mục 2 Bước 3: từ Tuần 7 đến Tuần 10; gate G1). Nộp lên portal khi khoa thông báo |
 | Theo dõi | [`PLAN.md`](PLAN.md) P-03 |
 
 **Vì sao văn bản này quan trọng.** Rubric TC2.2 chấm theo *"tỉ lệ chức năng đã cam

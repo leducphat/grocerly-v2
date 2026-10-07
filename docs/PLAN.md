@@ -5,7 +5,7 @@ chờ tới cuối kỳ.
 
 | | |
 |---|---|
-| Cập nhật lần cuối | 01/10/2026 |
+| Cập nhật lần cuối | 02/10/2026 |
 | Đặc tả tham chiếu | [`SRS.md`](SRS.md) (yêu cầu), [`SDD.md`](SDD.md) (thiết kế) |
 | Quyết định liên quan | [`DECISIONS.md`](DECISIONS.md) — D-005 (thứ tự ưu tiên), D-008 (phạm vi), D-011 (tách SRS/SDD ngay từ đầu), D-016 (làm trên `develop`, merge vào `main` qua PR — thay D-012), D-013 (gộp khảo sát vào thực nghiệm), D-017 (thực nghiệm với khoảng 3–5 người dùng), D-022 (giá giỏ hàng đọc từ database — sửa L-6), D-023 (chỉ VNPay xác nhận đơn đã thanh toán — sửa L-8), D-024 (giỏ hàng hạ số lượng xuống bằng tồn kho — sửa L-7), D-025 (trợ lý AI và API dùng đúng điều kiện hiển thị của cửa hàng — sửa L-9, L-10), D-026 (đơn đã giao là điểm dừng của luồng trạng thái — sửa L-5), D-027 (chỉ khách đã nhận sản phẩm mới đánh giá được — sửa L-3), D-029 (Ruff làm linter và công cụ phân tích tĩnh), D-030 (quét secret bằng gitleaks), D-031 (đo trùng lặp bằng jscpd), D-032 (đơn hàng chỉ đi tới từng bước, sửa L-11) |
 
@@ -41,17 +41,33 @@ không làm trong KLTN. Xem D-008, D-015.
 
 Đồ án chạy **15 tuần**, đánh số **Tuần 1 → Tuần 15**; mỗi tuần bắt đầu Thứ Hai.
 
+**Đổi mốc Tuần 1 (02/10/2026).** Khoa thông báo Tuần 1 tính từ 14/09/2026, muộn
+hơn một tuần so với lịch chốt ở P-02. Từ ngày này file dùng số tuần của khoa.
+Tuần 07/09 – 13/09/2026 gọi là *tuần chuẩn bị*: đã có commit và một báo cáo trên
+portal, nhưng không tính vào kỳ. Ngày của các mốc nội bộ giữ nguyên, chỉ đổi số
+tuần; riêng kỳ đồ án kết thúc muộn hơn một tuần. [`DECISIONS.md`](DECISIONS.md)
+và [`AI_USAGE_LOG.md`](AI_USAGE_LOG.md) là nhật ký nên không sửa lại: số tuần ghi
+ở đó trước 02/10/2026 lớn hơn số của khoa một đơn vị.
+
+Cùng thông báo đó, khoa gửi lại rubric
+([bản V2-1](https://docs.google.com/document/d/1pm4i8QKyQGpcG0xYNuwMi21oZoUkc2Jk)).
+Đọc đối chiếu với bản ở D-001 thì không thấy khác ở tiêu chí, ngưỡng metric và
+quy tắc chặn điểm. Bước 3 thêm hai ý: GVHD duyệt báo cáo tiến độ hai tuần một
+lần, và bản cam kết chốt "từ tuần 7 đến tuần 10".
+
 | Mốc | Tuần | Ngày | Ghi chú |
 |---|---|---|---|
-| Bắt đầu | Tuần 1 | 07/09/2026 – 13/09/2026 | |
-| Hết Giai đoạn 0 | Tuần 4 | 28/09/2026 – 04/10/2026 | |
-| **Chốt cam kết sản phẩm + bộ metric** | **hết Tuần 7** | **25/10/2026** | **Mốc 50%. Gate G1 — trễ là *không đủ điều kiện bảo vệ*.** |
-| Xong thực nghiệm người dùng | Tuần 12 | 23/11/2026 – 29/11/2026 | |
-| Hoàn tất báo cáo | Tuần 15 | 14/12/2026 – 20/12/2026 | |
-| Phản biện | — | Dự kiến tháng 12/2026 | |
+| Bắt đầu | Tuần 1 | 14/09/2026 – 20/09/2026 | Mốc của khoa. Commit đầu tiên của KLTN là 10/09/2026, trong tuần chuẩn bị |
+| Hết Giai đoạn 0 | Tuần 3 | 28/09/2026 – 04/10/2026 | |
+| **Chốt cam kết sản phẩm + bộ metric** | **Tuần 7 → hết Tuần 10** | 26/10/2026 – **22/11/2026** | **Gate G1 — trễ là *không đủ điều kiện bảo vệ*.** Rubric ghi "từ tuần 7 đến tuần 10", mail của khoa ghi "trước tuần thứ 11"; nộp lên portal khi khoa thông báo. Hạn cũ 25/10/2026 giữ làm mốc nội bộ để trình GVHD bản đủ metric |
+| Xong thực nghiệm người dùng | Tuần 11 | 23/11/2026 – 29/11/2026 | |
+| Hoàn tất báo cáo | Tuần 14 | 14/12/2026 – 20/12/2026 | Tuần 15 để dự phòng |
+| Kết thúc | Tuần 15 | 21/12/2026 – 27/12/2026 | Tính 15 tuần từ mốc mới; khoa chưa thông báo ngày kết thúc |
+| Phản biện | — | Dự kiến tháng 12/2026 | Chưa có lịch |
 
 **Nhịp bắt buộc:** báo cáo tiến độ với GVHD ≥ 1 lần/tuần, nộp lên portal **trước
-17:00 Thứ Sáu** của chính tuần đó (GVHD chốt, áp dụng từ Tuần 2). Dưới 0,5
+17:00 Thứ Sáu** của chính tuần đó (GVHD chốt ngày 14/09/2026). GVHD duyệt báo cáo
+hai tuần một lần (khoa thông báo 02/10/2026); sinh viên vẫn nộp mỗi tuần. Dưới 0,5
 lần/tuần → gate **G2** → TC2.2 và TC2.4 mỗi tiêu chí bị hạ một mức. Báo cáo tuần
 **không nằm trong repo** — xem [`DECISIONS.md`](DECISIONS.md) D-021.
 
@@ -59,21 +75,22 @@ lần/tuần → gate **G2** → TC2.2 và TC2.4 mỗi tiêu chí bị hạ mộ
 
 | Tuần | Từ | Đến | Hạn nộp portal (trước 17:00) |
 |---|---|---|---|
-| 1 | 07/09/2026 | 13/09/2026 | — *(đã nộp 12/09, trước khi có hạn)* |
-| 2 | 14/09/2026 | 20/09/2026 | Thứ Sáu 18/09/2026 |
-| 3 | 21/09/2026 | 27/09/2026 | Thứ Sáu 25/09/2026 |
-| 4 | 28/09/2026 | 04/10/2026 | Thứ Sáu 02/10/2026 |
-| 5 | 05/10/2026 | 11/10/2026 | Thứ Sáu 09/10/2026 |
-| 6 | 12/10/2026 | 18/10/2026 | Thứ Sáu 16/10/2026 |
-| **7** | **19/10/2026** | **25/10/2026** | Thứ Sáu 23/10/2026 — **hạn chốt cam kết sản phẩm + metric** |
-| 8 | 26/10/2026 | 01/11/2026 | Thứ Sáu 30/10/2026 |
-| 9 | 02/11/2026 | 08/11/2026 | Thứ Sáu 06/11/2026 |
-| 10 | 09/11/2026 | 15/11/2026 | Thứ Sáu 13/11/2026 |
-| 11 | 16/11/2026 | 22/11/2026 | Thứ Sáu 20/11/2026 |
-| 12 | 23/11/2026 | 29/11/2026 | Thứ Sáu 27/11/2026 |
-| 13 | 30/11/2026 | 06/12/2026 | Thứ Sáu 04/12/2026 |
-| 14 | 07/12/2026 | 13/12/2026 | Thứ Sáu 11/12/2026 |
-| 15 | 14/12/2026 | 20/12/2026 | Thứ Sáu 18/12/2026 |
+| chuẩn bị | 07/09/2026 | 13/09/2026 | — *(đã nộp 12/09, trước khi có hạn)* |
+| 1 | 14/09/2026 | 20/09/2026 | Thứ Sáu 18/09/2026 |
+| 2 | 21/09/2026 | 27/09/2026 | Thứ Sáu 25/09/2026 |
+| 3 | 28/09/2026 | 04/10/2026 | Thứ Sáu 02/10/2026 |
+| 4 | 05/10/2026 | 11/10/2026 | Thứ Sáu 09/10/2026 |
+| 5 | 12/10/2026 | 18/10/2026 | Thứ Sáu 16/10/2026 |
+| 6 | 19/10/2026 | 25/10/2026 | Thứ Sáu 23/10/2026 — mốc nội bộ: bản cam kết đủ metric tới tay GVHD |
+| 7 | 26/10/2026 | 01/11/2026 | Thứ Sáu 30/10/2026 — bắt đầu khoảng chốt cam kết |
+| 8 | 02/11/2026 | 08/11/2026 | Thứ Sáu 06/11/2026 |
+| 9 | 09/11/2026 | 15/11/2026 | Thứ Sáu 13/11/2026 |
+| **10** | **16/11/2026** | **22/11/2026** | Thứ Sáu 20/11/2026 — **hạn chốt cam kết sản phẩm + metric** |
+| 11 | 23/11/2026 | 29/11/2026 | Thứ Sáu 27/11/2026 |
+| 12 | 30/11/2026 | 06/12/2026 | Thứ Sáu 04/12/2026 |
+| 13 | 07/12/2026 | 13/12/2026 | Thứ Sáu 11/12/2026 |
+| 14 | 14/12/2026 | 20/12/2026 | Thứ Sáu 18/12/2026 |
+| 15 | 21/12/2026 | 27/12/2026 | Thứ Sáu 25/12/2026 |
 
 Việc làm sau lúc nộp (tối Thứ Sáu → Chủ Nhật) tính vào báo cáo tuần kế tiếp.
 
@@ -107,22 +124,22 @@ trước khi hội đồng đánh giá chất lượng code. (G3 đã gỡ ngày
 
 Trạng thái: `Chưa bắt đầu` · `Đang làm` · `Xong` · `Hoãn`
 
-### Giai đoạn 0 — Nền tảng quy trình (Tuần 1–4)
+### Giai đoạn 0 — Nền tảng quy trình (tuần chuẩn bị – Tuần 3)
 
 Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không back-fill được.
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
 | P-01 | Khung specs: `AGENTS.md`, `CLAUDE.md`, `docs/` | TC2.4 | **Xong** | 10/09/2026 |
-| P-02 | Chốt lịch KLTN | — | **Xong** | 10/09/2026 — xem §2 |
-| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 7 — 25/10/2026.** Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5). **Khác đề cương P-08:** rubric không nhắc tới đề cương; bản cam kết là văn bản của Bước 3, phải có metric, có chữ ký SV + GVHD và qua rà soát của bộ môn (đọc lại nguyên văn 16/09/2026). Rubric không quy định hình thức → **hỏi GVHD** nên gộp phần cam kết + metric vào đề cương hay làm văn bản riêng để ký. **24/09/2026:** soạn §5.1, chất lượng mã nguồn: ngưỡng lint, cách quy đổi Blocker/Critical cho Ruff, phạm vi đo trùng lặp (D-029, D-031) |
+| P-02 | Chốt lịch KLTN | — | **Xong** | 10/09/2026 — xem §2. **02/10/2026:** khoa thông báo Tuần 1 tính từ 14/09/2026, đánh số lại theo đó |
+| P-03 | Soạn **bản cam kết sản phẩm + bộ metric**, ký với GVHD | G1, TC1, TC2.2 | Đang làm | Bản nháp: [`COMMITMENT.md`](COMMITMENT.md) (đã có danh sách chức năng, chưa có metric). **Hạn: hết Tuần 10 — 22/11/2026**, nộp lên portal khi khoa thông báo (khoa đổi ngày 02/10/2026; hạn cũ 25/10/2026 giữ làm mốc nội bộ để trình GVHD bản đủ metric). Nguồn: rubric Mục 2 Bước 3, Mục 7 G1, Mục 8 hồ sơ số 3. Gồm danh sách chức năng cam kết (mẫu số của TC2.2) + ngưỡng metric (Mục 5 cho phép điều chỉnh tại đây) + ≥ 5 KPI nghiệp vụ (TC1 Mức 5). **Khác đề cương P-08:** rubric không nhắc tới đề cương; bản cam kết là văn bản của Bước 3, phải có metric, có chữ ký SV + GVHD và qua rà soát của bộ môn (đọc lại nguyên văn 16/09/2026). Rubric không quy định hình thức → **hỏi GVHD** nên gộp phần cam kết + metric vào đề cương hay làm văn bản riêng để ký. **24/09/2026:** soạn §5.1, chất lượng mã nguồn: ngưỡng lint, cách quy đổi Blocker/Critical cho Ruff, phạm vi đo trùng lặp (D-029, D-031) |
 | P-04 | Tạo `AI_USAGE_LOG.md`, ghi từ phiên làm việc đầu tiên | G3, TC2.3 | **Xong** | 10/09/2026 — duy trì ghi mỗi phiên có dùng AI |
-| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. **Hạn nộp portal: trước 17:00 Thứ Sáu mỗi tuần** (GVHD chốt, áp dụng từ Tuần 2). Tuần 1 đã nộp portal 12/09/2026; Tuần 2 nộp 18/09/2026. Báo cáo tuần không nằm trong repo (D-021) |
+| P-05 | Duy trì nhịp commit + báo cáo hằng tuần | G2, TC2.4 | Đang làm | Chạy suốt 15 tuần. **Hạn nộp portal: trước 17:00 Thứ Sáu mỗi tuần** (GVHD chốt ngày 14/09/2026). Đã nộp portal 12/09/2026 (tuần chuẩn bị) và 18/09/2026 (Tuần 1). GVHD duyệt hai tuần một lần, sinh viên vẫn nộp mỗi tuần (khoa thông báo 02/10/2026). Báo cáo tuần không nằm trong repo (D-021) |
 | P-06 | Làm việc trên nhánh `develop`, merge vào `main` qua Pull Request (làm một mình) | TC2.4 | Đang làm | Theo D-016 (thay D-012). Đã merge từ PR #1 tới #8 (PR #7 là PR đầu tiên có CI chạy; PR #8, 24/09/2026, là PR đầu tiên có lượt review của AI đăng thành review comment); nhánh `develop` tạo 11/09/2026. Mức 5 cần ≥ 90% thay đổi qua PR có review. Còn lại: ghi cách hiểu "review" vào bản cam kết P-03; bật branch protection cho `main` khi có CI (P-10) |
 | P-07 | Tách `SRS.md` thành `SRS.md` (yêu cầu, Mục 1–6) + `SDD.md` (thiết kế, Mục 7–9) | TC2.1 | **Xong** | 11/09/2026. Theo D-011 (thay P-27 cũ). `SRS.md` giữ Mục 1–6 + kiểm thử, hạn chế (đánh số lại 7–9); `SDD.md` nhận Mục 7–9 cũ (thành Mục 1–3). Chỉ chuyển chỗ, chưa sửa nội dung — việc rà soát để cho P-23, P-24. Bảng đối chiếu số mục: §6 dòng 4 |
-| P-08 | Nộp đề cương KLTN (`DE_CUONG.md`) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp Tuần 1. Nộp cùng báo cáo Tuần 2, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), **SV đã duyệt 16/09/2026**. Góp ý nhận được sửa thẳng vào `DE_CUONG.md`. Đề cương **không thay** bản cam kết P-03 — xem ghi chú P-03. **21/09/2026:** file chuyển sang `docs/weekly_report/`, không còn trong repo — cùng lý do với báo cáo tuần (D-021) |
+| P-08 | Nộp đề cương KLTN (`DE_CUONG.md`) để GVHD góp ý nội dung; sửa theo góp ý | — | Đang làm | Theo ý kiến GVHD cho bản nộp 12/09/2026. Nộp cùng báo cáo Tuần 1, **hạn 17:00 Thứ Sáu 18/09/2026**. Portal không nhận `.md` ở ô đính kèm → đã xuất DOCX + PDF theo mẫu đề cương TLCN (14/09/2026), **SV đã duyệt 16/09/2026**. Góp ý nhận được sửa thẳng vào `DE_CUONG.md`. Đề cương **không thay** bản cam kết P-03 — xem ghi chú P-03. **21/09/2026:** file chuyển sang `docs/weekly_report/`, không còn trong repo — cùng lý do với báo cáo tuần (D-021) |
 
-### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 3–9)
+### Giai đoạn 1 — Gỡ gate kỹ thuật (Tuần 2–8)
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
@@ -137,7 +154,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 | P-18 | Sửa L-11: đơn quay lại `shipped` bị trừ tồn kho lần nữa | TC2.2, TC2.5 | **Xong** 01/10/2026 | Phát hiện 24/09/2026 khi review PR #8. Test tái hiện đã có trong `useradmin/tests/test_orders.py`, đánh dấu `xfail`. **30/09/2026:** chốt hướng sửa là đơn chỉ đi tới, `processing` sang `shipped` rồi `shipped` sang `delivered`, không lùi và không nhảy cóc. Đặc tả không có luồng nào cho đơn lùi từ `shipped`; D-026 để ngỏ lối lùi chỉ vì lúc đó chưa ai chốt. Sự cố sau khi hàng đã rời kho thì kho tự xử lý và chỉnh tồn kho ở trang sản phẩm. Cấm nhảy thẳng từ `processing` sang `delivered` đóng luôn một lỗ nữa: đi đường đó thì kho không bị trừ lần nào. Không đổi model, không có migration. Sửa SRS §6.1 (UC-20) và ghi quyết định D-032 trước khi viết code; sửa xong thì gỡ `xfail` trong cùng commit. **01/10/2026:** xong. `change_order_status` tra bảng `NEXT_STATUS`, từ chối bước lùi, bước nhảy cóc và việc gửi lại trạng thái đang có (D-032); SRS §6.1 thêm ràng buộc cho UC-20 (§6 dòng 14). Test `xfail` viết lại và gỡ `xfail`, thêm một test cho bước nhảy cóc, sửa hai test cũ đang đi đường nhảy cóc. Bộ test 83 xanh, không còn `xfail`, độ phủ 70%. Lượt review cùng ngày chỉ ra hai chỗ có từ trước, chưa xử lý: hai yêu cầu `shipped` tới cùng lúc vẫn trừ kho hai lần (ghi ở D-032), và view này còn `@csrf_exempt` dù form đã gửi `csrf_token`. Còn thiếu test cho ca gửi lại đúng trạng thái đang có |
 | P-19 | Thêm trạng thái `cancelled` cho đơn hàng | TC2.2, TC2.5 | Chưa bắt đầu | Làm sau P-18. Đây là chức năng mới, mở rộng UC-20 và CN-22, nên phải thêm vào `SRS.md` và `COMMITMENT.md` trước khi viết code; quyết định ghi ở D-033. Chốt 30/09/2026: chỉ nhân viên hủy, khi khách gọi điện báo; hủy được từ `processing` hoặc `shipped`, không hủy được đơn `delivered`; `cancelled` là điểm dừng. Hủy không tự hoàn kho, hàng về được kho thì nhân viên cộng tay ở trang sản phẩm. Đơn VNPay đã thanh toán giữ nguyên `paid_status`, tiền hoàn cho khách ngoài hệ thống. **Doanh thu trên dashboard phải loại đơn `cancelled` ra:** hiện `dashboard` và `shop_page` trong `useradmin/views.py` cộng mọi đơn có `paid_status=True`, tổng cộng năm câu truy vấn; cần test cho chỗ này và một ràng buộc ở UC-26. Đổi `STATUS_CHOICES` nên có migration. **01/10/2026:** gộp thêm việc sửa chữ hiển thị trạng thái đơn. Khách ở `/vi/` đang thấy chữ "Shipped" tiếng Anh, vì template in thẳng giá trị thô bằng `product_status\|title`, mà "shipped" lại dễ đọc thành đã giao xong. Giữ nguyên giá trị `shipped` trong database và code; nhãn trong `STATUS_CHOICES` đi qua `gettext_lazy` với đủ hai bản dịch: Đang xử lý / Processing, Đang giao hàng / Shipping, Đã giao / Delivered, Đã hủy / Cancelled. Ba chỗ in trạng thái đơn (`core/dashboard.html`, `useradmin/orders.html`, `useradmin/order_detail.html`) đổi sang `get_product_status_display`, ô chọn trạng thái của nhân viên cũng lấy nhãn từ đó. Làm chung với `cancelled` để chỉ có một migration |
 
-### Giai đoạn 2 — Đặc tả và thực nghiệm (Tuần 6–13)
+### Giai đoạn 2 — Đặc tả và thực nghiệm (Tuần 5–12)
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
@@ -151,7 +168,7 @@ Làm sớm vì đây là loại minh chứng tích lũy theo thời gian, không
 — xem D-013; P-27 (tách SRS/SDD) đã chuyển lên Giai đoạn 0 thành P-07 — xem
 D-011. Ba mã này không cấp lại cho việc khác.*
 
-### Giai đoạn 3 — Báo cáo và bảo vệ (Tuần 12–15)
+### Giai đoạn 3 — Báo cáo và bảo vệ (Tuần 11–15)
 
 | ID | Việc | TC | Trạng thái | Ghi chú |
 |---|---|---|---|---|
@@ -165,14 +182,15 @@ D-011. Ba mã này không cấp lại cho việc khác.*
 
 ## 5. Nhật ký tiến độ
 
-Mỗi tuần thêm một dòng. Bản đầy đủ nằm trên portal (D-021).
+Mỗi tuần thêm một dòng. Bản đầy đủ nằm trên portal (D-021). Số tuần theo lịch
+của khoa (§2); trước 02/10/2026 bốn dòng đầu mang số Tuần 1 tới Tuần 4.
 
 | Tuần | Việc chính | Kết quả |
 |---|---|---|
-| Tuần 1 | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
-| Tuần 2 | Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD Tuần 1; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018). 17/09: bắt đầu sớm P-10 — CI trên GitHub Actions (D-019); thêm migration còn thiếu từ TLCN (D-020) |
-| Tuần 3 | Xong P-17 — đóng toàn bộ mười chỗ lệch giữa đặc tả và mã nguồn: bảy chỗ sửa code (L-6 D-022, L-8 D-023, L-7 D-024, L-10 và L-9 D-025, L-5 D-026, L-3 D-027) và ba chỗ sửa đặc tả (L-1 D-015, L-2 và L-4 D-028) | Gộp bốn vòng lặp cộng tiền trong `core/views.py` thành `_refresh_cart`; tiền tính bằng `Decimal`; test `xfail` của L-6 chuyển xanh và thêm 3 test cho hành vi mới — bộ test còn 47 xanh + 4 `xfail`. `/add-to-cart/` rút còn hai tham số `id` và `qty`; gỡ phần JavaScript gửi giá và bốn `<input type="hidden">` chỉ tồn tại để nuôi nó trong 5 template. Ghi hai ràng buộc nghiệp vụ mới vào `SRS.md` §6.1 (§6 dòng 6). L-8: `payment_completed_view` bỏ đoạn tự đặt `paid_status = True`, đơn online chưa được VNPay xác nhận thì quay về trang thanh toán; thêm 2 test cho hai lối vào hợp lệ của trang hoàn tất — bộ test còn 50 xanh + 3 `xfail`. L-7: `_refresh_cart` đọc thêm `stock_count` nên một chỗ kiểm tra phủ cả ba lối vào (thêm giỏ, sửa số lượng, tạo đơn); `add_to_cart` phải gọi `_refresh_cart` trước khi trả JSON thì số lượng gửi về trang mới là số đã hạ. Đặc tả TLCN viết "báo lỗi và reset", nhưng báo lỗi qua AJAX thì phải sửa cả ba chỗ JavaScript trong `base.html`, nên chọn hạ số lượng và sửa lại câu đặc tả (§6 dòng 8) — bộ test còn 56 xanh + 2 `xfail`. 22/09: xong hai lỗi cuối của trợ lý AI. Hóa ra `status` và `in_stock` — hai cờ mà công cụ AI dùng để lọc — không có form nào ghi, luôn bằng `True`, nên câu lọc đó suốt thời gian qua không lọc gì cả; thay bằng `product_status` và `stock_count` là hai cột cửa hàng thật sự cập nhật (D-025). Bộ test lên 64 xanh, không còn `xfail`. 23/09: đóng nốt hai lỗi cuối. L-5 — viết test trước cho `change_order_status` thì phát hiện ô chọn trạng thái trên giao diện có dòng nhắc `value="pending"`, bấm Save khi chưa chọn gì là đơn rơi vào trạng thái không có trong hệ thống; view giờ từ chối cả giá trị lạ lẫn mọi thay đổi trên đơn đã giao — quan trọng vì nhánh trừ tồn kho chạy lại mỗi lần đơn đi qua `shipped` (D-026). L-3 — `ajax_add_review` trước nay không hỏi đăng nhập cũng không hỏi đã mua, toàn bộ phần chặn nằm ở template; giờ kiểm tra bằng đơn hàng ở ngay trong view và giao diện dùng chung một hàm (D-027). Đặc tả TLCN viết điều kiện là đơn `Shipped`, làm đúng thế thì khách nhận được hàng rồi lại mất quyền đánh giá, nên nhận cả `Delivered` và sửa lại câu đặc tả (§6 dòng 11). Chốt nốt L-2 và L-4 bằng đường sửa đặc tả (D-028): cả hai là dấu vết của mô hình nhiều người bán đã bỏ. Bộ test 79 xanh, độ phủ tổng 66% → 71%. 24/09: thêm hai chặng CI - lint và phân tích tĩnh bằng Ruff (D-029), lần chạy đầu ra 30 lỗi và sửa hết trong ngày, lộ ra luôn ảnh dòng đơn trong trang admin hỏng từ thời TLCN; đo trùng lặp bằng jscpd (D-031): mã Python 1,09%; xóa 13 template mẫu của theme mà không trang nào dùng, template còn lại trùng 26,6% (trước đó 78,6%); quét secret toàn bộ lịch sử bằng gitleaks (D-030), 0 phát hiện trên `origin`. Bộ test 81 xanh, độ phủ 70% |
-| Tuần 4 | Sửa lỗi trừ tồn kho hai lần khi đơn quay lại `shipped` (P-18, L-11); chốt hướng làm trạng thái `cancelled` (P-19) | Đơn chỉ đi tới, mỗi lần một bước (D-032): `change_order_status` từ chối bước lùi, bước nhảy cóc và việc gửi lại trạng thái đang có. Lúc đầu định hoàn kho khi đơn rời `shipped` hoặc thêm cờ cho đơn, rồi bỏ cả hai vì không use case nào cho đơn đi lùi. Đóng thêm lỗ đơn nhảy thẳng sang `delivered` không trừ kho. `SRS.md` §6.1 thêm ràng buộc cho UC-20. Bộ test 83 xanh, không còn `xfail`, độ phủ 70% |
+| Chuẩn bị (07/09 – 13/09) | Đọc rubric KLTN; rà soát repo so với rubric; dựng khung specs (P-01); chốt lịch (P-02); tạo AI Usage Log (P-04); điều chỉnh backlog | Xác định 4 gate đang vướng; tạo `AGENTS.md`, `CLAUDE.md`, `docs/`; xóa `.github/copilot-instructions.md`; gỡ gate G3; chốt làm theo nhánh + PR (D-012), tách SRS/SDD ngay từ đầu (D-011), gộp khảo sát vào thực nghiệm (D-013); chốt mô hình một nhà bán (D-015); soạn nháp bản cam kết (P-03) và đề cương KLTN; đổi sang làm trên nhánh `develop` (D-016); tách `SRS.md` / `SDD.md` (P-07) |
+| Tuần 1 (14/09 – 20/09) | Ghi nhận hạn nộp Thứ Sáu và ý kiến GVHD cho bản nộp 12/09; sửa đề cương sang 3–5 người thực nghiệm (D-017), xuất DOCX/PDF (P-08); làm rõ đề cương khác bản cam kết (P-03); soạn `tuan-02.md` | SV duyệt đề cương 16/09; chưa trình bản cam kết, chưa chốt L-2 → L-7, chưa chọn hạ tầng (P-11). Bắt đầu sớm P-12: 48 test tự động (43 xanh, 5 `xfail`), phát hiện L-8 → L-10 (D-018). 17/09: bắt đầu sớm P-10 — CI trên GitHub Actions (D-019); thêm migration còn thiếu từ TLCN (D-020) |
+| Tuần 2 (21/09 – 27/09) | Xong P-17 — đóng toàn bộ mười chỗ lệch giữa đặc tả và mã nguồn: bảy chỗ sửa code (L-6 D-022, L-8 D-023, L-7 D-024, L-10 và L-9 D-025, L-5 D-026, L-3 D-027) và ba chỗ sửa đặc tả (L-1 D-015, L-2 và L-4 D-028) | Gộp bốn vòng lặp cộng tiền trong `core/views.py` thành `_refresh_cart`; tiền tính bằng `Decimal`; test `xfail` của L-6 chuyển xanh và thêm 3 test cho hành vi mới — bộ test còn 47 xanh + 4 `xfail`. `/add-to-cart/` rút còn hai tham số `id` và `qty`; gỡ phần JavaScript gửi giá và bốn `<input type="hidden">` chỉ tồn tại để nuôi nó trong 5 template. Ghi hai ràng buộc nghiệp vụ mới vào `SRS.md` §6.1 (§6 dòng 6). L-8: `payment_completed_view` bỏ đoạn tự đặt `paid_status = True`, đơn online chưa được VNPay xác nhận thì quay về trang thanh toán; thêm 2 test cho hai lối vào hợp lệ của trang hoàn tất — bộ test còn 50 xanh + 3 `xfail`. L-7: `_refresh_cart` đọc thêm `stock_count` nên một chỗ kiểm tra phủ cả ba lối vào (thêm giỏ, sửa số lượng, tạo đơn); `add_to_cart` phải gọi `_refresh_cart` trước khi trả JSON thì số lượng gửi về trang mới là số đã hạ. Đặc tả TLCN viết "báo lỗi và reset", nhưng báo lỗi qua AJAX thì phải sửa cả ba chỗ JavaScript trong `base.html`, nên chọn hạ số lượng và sửa lại câu đặc tả (§6 dòng 8) — bộ test còn 56 xanh + 2 `xfail`. 22/09: xong hai lỗi cuối của trợ lý AI. Hóa ra `status` và `in_stock` — hai cờ mà công cụ AI dùng để lọc — không có form nào ghi, luôn bằng `True`, nên câu lọc đó suốt thời gian qua không lọc gì cả; thay bằng `product_status` và `stock_count` là hai cột cửa hàng thật sự cập nhật (D-025). Bộ test lên 64 xanh, không còn `xfail`. 23/09: đóng nốt hai lỗi cuối. L-5 — viết test trước cho `change_order_status` thì phát hiện ô chọn trạng thái trên giao diện có dòng nhắc `value="pending"`, bấm Save khi chưa chọn gì là đơn rơi vào trạng thái không có trong hệ thống; view giờ từ chối cả giá trị lạ lẫn mọi thay đổi trên đơn đã giao — quan trọng vì nhánh trừ tồn kho chạy lại mỗi lần đơn đi qua `shipped` (D-026). L-3 — `ajax_add_review` trước nay không hỏi đăng nhập cũng không hỏi đã mua, toàn bộ phần chặn nằm ở template; giờ kiểm tra bằng đơn hàng ở ngay trong view và giao diện dùng chung một hàm (D-027). Đặc tả TLCN viết điều kiện là đơn `Shipped`, làm đúng thế thì khách nhận được hàng rồi lại mất quyền đánh giá, nên nhận cả `Delivered` và sửa lại câu đặc tả (§6 dòng 11). Chốt nốt L-2 và L-4 bằng đường sửa đặc tả (D-028): cả hai là dấu vết của mô hình nhiều người bán đã bỏ. Bộ test 79 xanh, độ phủ tổng 66% → 71%. 24/09: thêm hai chặng CI - lint và phân tích tĩnh bằng Ruff (D-029), lần chạy đầu ra 30 lỗi và sửa hết trong ngày, lộ ra luôn ảnh dòng đơn trong trang admin hỏng từ thời TLCN; đo trùng lặp bằng jscpd (D-031): mã Python 1,09%; xóa 13 template mẫu của theme mà không trang nào dùng, template còn lại trùng 26,6% (trước đó 78,6%); quét secret toàn bộ lịch sử bằng gitleaks (D-030), 0 phát hiện trên `origin`. Bộ test 81 xanh, độ phủ 70% |
+| Tuần 3 (28/09 – 04/10) | Sửa lỗi trừ tồn kho hai lần khi đơn quay lại `shipped` (P-18, L-11); chốt hướng làm trạng thái `cancelled` (P-19); đổi lịch theo thông báo của khoa ngày 02/10 (§2) | Đơn chỉ đi tới, mỗi lần một bước (D-032): `change_order_status` từ chối bước lùi, bước nhảy cóc và việc gửi lại trạng thái đang có. Lúc đầu định hoàn kho khi đơn rời `shipped` hoặc thêm cờ cho đơn, rồi bỏ cả hai vì không use case nào cho đơn đi lùi. Đóng thêm lỗ đơn nhảy thẳng sang `delivered` không trừ kho. `SRS.md` §6.1 thêm ràng buộc cho UC-20. Bộ test 83 xanh, không còn `xfail`, độ phủ 70% |
 
 ---
 

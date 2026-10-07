@@ -15,6 +15,10 @@ file này thì có.
   đánh dấu cái cũ là bị thay thế. Lịch sử sai lầm cũng là bằng chứng.
 - Quyết định ảnh hưởng tới đặc tả thì sửa thẳng [`SRS.md`](SRS.md) (yêu cầu) hoặc
   [`SDD.md`](SDD.md) (thiết kế), và ghi lần sửa đó vào [`PLAN.md`](PLAN.md) §6.
+- Số tuần trong các quyết định ghi trước 02/10/2026 theo lịch cũ, lớn hơn số
+  tuần của khoa một đơn vị (Tuần 7 ở đó là Tuần 6 bây giờ). Khoa dời mốc Tuần 1
+  sang 14/09/2026; xem [`PLAN.md`](PLAN.md) §2. Link rubric ở D-001 là bản cũ, bản
+  khoa gửi lại cũng nằm ở §2 đó.
 
 ---
 
