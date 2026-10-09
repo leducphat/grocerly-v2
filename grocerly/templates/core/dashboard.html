@@ -128,7 +128,7 @@
                                                             <tr>
                                                                 <td>{{ o.oid }}</td>
                                                                 <td>{{ o.order_date }}</td>
-                                                                <td>{{ o.product_status|title }}</td>
+                                                                <td>{{ o.get_product_status_display }}</td>
                                                                 {% if o.paid_status %}
                                                                 <td class="text-success"><b>&#10003;</b></td>
                                                                 {% else %}

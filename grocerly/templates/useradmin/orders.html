@@ -60,7 +60,7 @@
                                 <td><b>{{c.full_name|title}}</b></td>
                                 <td>{{c.email}}</td>
                                 <td>{{c.price|vnd}} ₫</td>
-                                <td><span class="badge alert-secondary">{{ c.product_status|title }}</span></td>
+                                <td><span class="badge alert-secondary">{{ c.get_product_status_display }}</span></td>
                                 {% if c.paid_status == True %}
                                     <td><span class="badge alert-success"></span>Đã thanh toán</td>
                                 {% else %}

@@ -4,12 +4,18 @@ from django.utils.html import format_html
 from userauths.models import User
 from taggit.managers import TaggableManager
 from django.utils import timezone
+from django.utils.translation import pgettext_lazy
 
 
+# Delivery status of an order. The stored values stay as they are; only the labels
+# are translated (D-033). The labels carry the context "order status" because the
+# translation files already hold "Shipping" for the shipping fee on the cart page,
+# and gettext can only tell two meanings of one word apart by their context.
 STATUS_CHOICES = (
-    ('processing', 'Processing'),
-    ('shipped', 'Shipped'),
-    ('delivered', 'Delivered'),
+    ('processing', pgettext_lazy('order status', 'Processing')),
+    ('shipped', pgettext_lazy('order status', 'Shipping')),
+    ('delivered', pgettext_lazy('order status', 'Delivered')),
+    ('cancelled', pgettext_lazy('order status', 'Cancelled')),
 )
 
 PAYMENT_METHOD_CHOICES = (
