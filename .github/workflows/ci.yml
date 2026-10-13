@@ -4,8 +4,8 @@
 # Nothing here reads grocerly/.env or reaches a real service: Django runs with
 # grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini key).
 # Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
-# (D-030) run as their own jobs. Image build and deploy (P-11) are added when
-# the KLTN hosting exists.
+# (D-030) run as their own jobs. The deploy job (P-11, D-034) is added when the
+# KLTN hosting exists.
 
 name: CI
 
@@ -137,7 +137,8 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      # Same Python version as the production image (grocerly/Dockerfile).
+      # Keep in step with ruff.toml and with the Python version of the
+      # deployed service.
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
