@@ -1547,6 +1547,119 @@ cảnh cho nhất quán.
   đó bọc trong `translation.override` để trả ngôn ngữ về như cũ.
 
 
+## D-034 · Hạ tầng KLTN: Render, Neon và Cloudinary trên tài khoản mới; Render tự build như TLCN, CI ra lệnh deploy
+
+- **Ngày:** 13/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** D-002 chốt KLTN phải có host, database và nơi lưu ảnh riêng nhưng chưa
+chọn cái nào, và P-11 đứng yên từ đó. Pipeline chưa có chặng deploy (D-019), mà số
+lần deploy là minh chứng không bù lại được: từ Tuần 6 tới Tuần 15 còn mười tuần cho
+ngưỡng mười lần deploy trải đều của TC2.6.
+
+**Phương án đã cân nhắc**
+
+Về host:
+
+1. *Dịch vụ mới trong tài khoản Render đang chạy TLCN* - không phải đăng ký gì.
+   Nhưng Render cho 750 giờ miễn phí mỗi tháng tính chung cho cả workspace, mà một
+   tháng có tới 744 giờ. Giữ KLTN thức suốt thì dịch vụ TLCN gần như không còn giờ;
+   hết giờ là cả hai bị treo tới tháng sau.
+2. *Tài khoản Render mới.*
+3. *Nền tảng khác* như Azure for Students hay một VPS - phải học lại cách vận hành
+   và thêm thứ phải giải thích, trong khi Render đã chạy được cả kỳ TLCN.
+
+Về database:
+
+1. *Postgres miễn phí của Render* - hết hạn sau 30 ngày.
+2. *Neon, project mới trong tài khoản đang có* - database và mật khẩu riêng, chỉ
+   chung trang quản lý với TLCN.
+3. *Neon, tài khoản mới.*
+
+Về dữ liệu ban đầu:
+
+1. *Chỉ xuất danh mục, nhà cung cấp và sản phẩm thành fixture* - không mang theo
+   tài khoản và đơn hàng cũ, nhưng sản phẩm và nhà cung cấp có khóa ngoại trỏ tới
+   user nên phải xử lý chỗ đó và tạo lại tài khoản nhân viên.
+2. *Snapshot toàn bộ database TLCN rồi restore sang database mới.*
+
+Về đường deploy:
+
+1. *Để Render tự deploy mỗi lần `main` có commit mới* - như TLCN. Deploy khi đó
+   không chờ CI và không phải một chặng của pipeline.
+2. *CI dựng image Docker, đẩy lên GitHub Container Registry, Render chạy image đó* -
+   có thêm một chặng đóng gói. Nhưng đồ án không dùng Docker: bộ file Docker trong
+   repo là của đường deploy lên AWS, bỏ từ 12/05/2026 khi TLCN chuyển sang Render
+   với `build.sh`. Đi đường này là đưa vào một thứ chưa từng vận hành và phải giải
+   thích được ở buổi bảo vệ.
+3. *Render tự build bằng `build.sh` như TLCN, nhưng tắt auto-deploy; job deploy
+   trong CI gọi deploy hook của Render sau khi các job khác xanh.*
+
+**Quyết định.** SV chốt ngày 13/10/2026: host (2), database (3), dữ liệu (2),
+deploy (3).
+
+- Host: web service gói free trên một tài khoản Render mới, build bằng `build.sh`
+  như TLCN.
+- Database: PostgreSQL trên một tài khoản Neon mới.
+- Ảnh: một tài khoản Cloudinary mới. Ảnh cũ chép sang bằng lệnh `cld clone` của
+  Cloudinary CLI, phía TLCN chỉ bị đọc.
+- Dữ liệu: `pg_dump` database TLCN, `pg_restore` vào database mới. Hai migration
+  `0005` và `0006` được áp ở lần build đầu trên Render.
+- Deploy: tắt auto-deploy trên Render; job deploy trong CI gọi deploy hook khi
+  `main` có commit mới và các job còn lại đã xanh.
+
+**Lý do.** Giữ nguyên ba loại dịch vụ đã vận hành ở TLCN thì không có mảnh nào phải
+học lại, và `SDD.md` vẫn đúng. Tách bằng tài khoản mới thì không còn gì dùng chung
+với TLCN, kể cả hạn mức miễn phí, và không phải lo chuyện mở thêm workspace trong
+tài khoản cũ có bị tính tiền hay không.
+
+Snapshot toàn bộ gọn hơn fixture: hai lệnh, chỉ đọc phía TLCN, ra bản sao đúng từng
+dòng, và hai migration `0005`, `0006` được chạy lần đầu trên dữ liệu thật. Làm được
+vậy vì database mới vẫn là PostgreSQL.
+
+Để Render tự build là đường TLCN đang chạy, không thêm gì phải học. Cho CI ra lệnh
+deploy thì bản làm test đỏ không lên được trang thật, và mỗi lần deploy để lại một
+dòng trong lịch sử chạy của GitHub Actions.
+
+**Hệ quả.**
+- Xóa bảy file của đường deploy AWS cũ: `Dockerfile`, `.dockerignore`,
+  `docker-compose.yml`, `entrypoint.sh`, `nginx/default.conf`, `ec2-setup.sh`,
+  `ecr-lifecycle-policy.json`. Chúng không được dùng từ 12/05/2026. Để lại còn có
+  hại: `Dockerfile` chép cả thư mục vào image mà `.dockerignore` không loại `.env`,
+  nên ai dựng image ở máy làm việc là mang theo `.env` của TLCN.
+- `build.sh` chạy `migrate` ở cuối mỗi lần build, nên lần deploy đầu áp `0005` và
+  `0006` lên database mà `DATABASE_URL` của dịch vụ trỏ tới. Kiểm biến đó trước lần
+  deploy đầu.
+- Lệnh build, lệnh chạy và bản Python của dịch vụ nằm trong trang cài đặt của
+  Render chứ không nằm trong repo. Chép từ dịch vụ TLCN, ghim Python 3.12 cho khớp
+  CI.
+- Không có chặng đóng gói. Thêm deploy thì pipeline có năm chặng: build, lint và
+  phân tích tĩnh, test, quét secret, deploy. Chặng thứ sáu của Mức 5 phải là việc
+  có thật, như kiểm tra trang sau khi deploy (P-16) hay quét thư viện có lỗ hổng;
+  cách đếm chốt ở bản cam kết (P-03).
+- `.env.example` viết lại theo đúng các key ứng dụng đọc: thêm nhóm `VNPAY_*` (việc
+  D-002 để lại), bỏ `STRIPE_*` vì không còn dòng code nào đọc, bỏ các dòng nhắc EC2
+  và RDS. `AGENTS.md`/`CLAUDE.md` §10 bỏ hai key Stripe.
+- File snapshot có email, mật khẩu băm và đơn hàng của TLCN nên để ngoài thư mục
+  repo. Database KLTN bắt đầu với tài khoản và đơn hàng cũ, nên doanh thu trên
+  dashboard gồm cả đơn trước ngày chuyển.
+- Không cho ứng dụng KLTN trỏ vào Cloudinary của TLCN, kể cả tạm: gói
+  `django-cleanup` xóa file thật trên storage khi ảnh của một bản ghi bị thay hoặc
+  bản ghi bị xóa.
+- Gói free của Render ngủ sau 15 phút không có truy cập, lần mở đầu sau đó mất
+  khoảng một phút. Monitor của P-16 ping đều thì trang thức suốt, khoảng 744 giờ
+  mỗi tháng, vừa trong 750 giờ của tài khoản mới. Không đủ thì nâng gói trong các
+  tuần thực nghiệm và bảo vệ, không phải dựng lại.
+- Chưa kiểm chứng: `cld clone` có giữ nguyên public ID không. Database lưu đường
+  dẫn ảnh theo public ID nên chép xong phải mở thử vài sản phẩm.
+- Còn ngỏ: key Gemini và merchant VNPay sandbox dùng lại của TLCN hay tạo mới.
+- Gói `stripe` trong `requirements.txt` không còn dòng code nào dùng; gỡ ở bước dọn
+  của P-11.
+- `SDD.md` chưa phải sửa vì bảng công nghệ vẫn đúng. Thêm chặng deploy vào đó khi
+  pipeline chạy thật.
+- Các bước của P-11 ở `PLAN.md` §4.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
