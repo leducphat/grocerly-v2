@@ -15,6 +15,7 @@ import calendar
 from decimal import Decimal
 from core.vnpay import vnpay
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from zoneinfo import ZoneInfo
 
 from core.models import (
@@ -499,11 +500,15 @@ def _get_pending_order_from_session(request):
     if not pending_oid:
         return None
 
+    # A checkout still in progress is an unpaid order the staff has not handled
+    # yet. The session keeps the oid after the staff ships or cancels the order;
+    # without the status condition the next checkout would be written into it.
     if request.user.is_authenticated:
         return CartOrder.objects.filter(
             oid=pending_oid,
             user=request.user,
             paid_status=False,
+            product_status='processing',
         ).first()
 
     return None
@@ -598,14 +603,21 @@ def vnpay_payment(request, oid):
         messages.warning(request, "Order not found. Please start checkout again.")
         return redirect("core:checkout-info")
 
+    # D-033: a cancelled order is closed, so it cannot be paid for any more.
+    if order.product_status == 'cancelled':
+        messages.warning(request, _("This order has been cancelled."))
+        return redirect("core:dashboard")
+
     if order.paid_status:
         messages.info(request, "This order has already been paid.")
         return redirect("core:payment-completed", order.oid)
-        
+
+    # Only the payment method is written here. The delivery status belongs to the
+    # staff (useradmin change_order_status): this view used to write 'processing'
+    # too, which pulled a shipped order back and got its stock deducted again (L-12).
     order.payment_method = 'online' # vnpay is an online method
-    order.product_status = 'processing'
-    order.save(update_fields=['payment_method', 'product_status'])
-    
+    order.save(update_fields=['payment_method'])
+
     import time
     amount = int(order.price) * 100 # VNPAY expects amount * 100
     order_desc = f"Thanh_toan_don_hang_{order.oid}"
@@ -712,13 +724,18 @@ def place_cod_order(request, oid):
         messages.warning(request, "Order not found. Please start checkout again.")
         return redirect("core:checkout-info")
 
+    # D-033: a cancelled order is closed, so it cannot be placed again.
+    if order.product_status == 'cancelled':
+        messages.warning(request, _("This order has been cancelled."))
+        return redirect("core:dashboard")
+
     if order.paid_status:
         messages.info(request, "This order has already been paid.")
         return redirect("core:payment-completed", order.oid)
 
+    # As in vnpay_payment: the payment method only, never the delivery status (L-12).
     order.payment_method = 'cod'
-    order.product_status = 'processing'
-    order.save(update_fields=['payment_method', 'product_status'])
+    order.save(update_fields=['payment_method'])
 
     if 'cart_data_obj' in request.session:
         del request.session['cart_data_obj']
@@ -735,6 +752,11 @@ def checkout(request, oid):
         return redirect("core:checkout-info")
 
     order_items = CartOrderItem.objects.filter(order=order)
+
+    # D-033: no payment page, and no coupon, for an order the staff has cancelled.
+    if order.product_status == 'cancelled':
+        messages.warning(request, _("This order has been cancelled."))
+        return redirect("core:dashboard")
 
     if order.paid_status:
         messages.info(request, "This order has already been paid.")

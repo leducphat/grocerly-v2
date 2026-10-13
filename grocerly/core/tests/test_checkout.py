@@ -189,3 +189,59 @@ def test_payment_completed_page_shows_unpaid_cod_order(customer_client, customer
     order.refresh_from_db()
     assert response.status_code == 200  # COD is paid on delivery, so unpaid is expected here
     assert order.paid_status is False
+
+
+# ---------- Orders the staff has already handled (D-033, L-12) ----------
+
+
+def test_cancelled_order_cannot_be_placed_again_as_cod(customer_client, order):
+    order.product_status = "cancelled"
+    order.save()
+
+    response = customer_client.post(reverse("core:place-cod-order", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert response.url == reverse("core:dashboard")
+    assert (order.product_status, order.payment_method) == ("cancelled", "online")
+
+
+def test_checkout_page_of_cancelled_order_sends_customer_to_their_account(customer_client, order):
+    order.product_status = "cancelled"
+    order.save()
+
+    response = customer_client.get(reverse("core:checkout", args=[order.oid]))
+
+    assert response.url == reverse("core:dashboard")
+
+
+def test_placing_cod_order_again_does_not_move_shipped_order_back(customer_client, order):
+    """L-12: the COD button used to write `processing` over whatever status the
+    order had. A shipped order went back, the staff shipped it again, and the stock
+    was deducted a second time - the defect L-11 through another door."""
+    order.payment_method = "cod"
+    order.product_status = "shipped"
+    order.save()
+
+    customer_client.post(reverse("core:place-cod-order", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert order.product_status == "shipped"
+
+
+def test_checkout_after_a_cancelled_order_creates_a_new_order(
+    customer_client, customer, product, add_to_cart
+):
+    """The session still remembers the cancelled order as the checkout in progress.
+    The next checkout must not write its items into that order."""
+    add_to_cart(customer_client, product)
+    submit_shipping_info(customer_client)
+    cancelled = CartOrder.objects.get(user=customer)
+    cancelled.product_status = "cancelled"
+    cancelled.save()
+
+    response = submit_shipping_info(customer_client)
+
+    assert CartOrder.objects.filter(user=customer).count() == 2
+    new_order = CartOrder.objects.exclude(id=cancelled.id).get()
+    assert response.url == reverse("core:checkout", args=[new_order.oid])
+    assert new_order.product_status == "processing"

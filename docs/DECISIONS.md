@@ -1430,6 +1430,122 @@ một lần, không cần thêm cột nào để nhớ.
 - Khách gọi điện hủy đơn là việc riêng, làm ở P-19 (D-033); lúc đó bảng chuyển
   trạng thái có thêm nhánh `cancelled`.
 
+  > *Ghi chú 07/10/2026:* câu "đơn chỉ vào `shipped` được một lần" ở trên chỉ đúng
+  > với view của nhân viên. Hai view thanh toán của khách vẫn ghi `processing` lên
+  > đơn, nên đơn đã `shipped` còn một lối quay lại. Ghi thành L-12 và sửa ở D-033.
+
+
+## D-033 · Nhân viên hủy được đơn chưa giao xong; trạng thái đơn hiện bằng nhãn đã dịch
+
+- **Ngày:** 30/09/2026 (phần nhãn chốt 01/10/2026, cài đặt 07/10/2026)
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Sau D-032 đơn chỉ đi tới, nên một đơn khách không nhận nữa không có
+chỗ nào để đi: hoặc nằm mãi ở `processing`, hoặc bị đẩy tới `delivered` cho xong, mà
+đơn COD sang `delivered` là thành đã thanh toán và được cộng vào doanh thu. Ngày
+30/09/2026 SV đề xuất thêm trạng thái `cancelled` cho trường hợp khách gọi điện báo
+hủy. Đây là chức năng mới đầu tiên của KLTN, nên theo D-008 phải có quyết định riêng.
+
+Ngày 01/10/2026 SV nêu thêm một chỗ: khách ở `/vi/` thấy chữ "Shipped" tiếng Anh, vì
+template in thẳng giá trị lưu trong database bằng `product_status|title`, mà
+"shipped" lại dễ đọc thành đã giao xong. Việc này gộp vào đây vì cả hai cùng sửa
+`STATUS_CHOICES`, làm chung thì chỉ có một migration.
+
+**Phương án đã cân nhắc**
+
+Về hủy đơn:
+
+1. *Thêm `cancelled` và tự cộng lại tồn kho khi hủy đơn đã `shipped`* - đúng phương
+   án 1 của D-032, và hỏng ở đúng hai chỗ đó: đồ tươi đi giao rồi quay về chưa chắc
+   còn bán được, và nhánh trừ kho kẹp tồn kho về 0 nên cộng lại có thể ra nhiều hơn
+   số đã trừ.
+2. *Thêm cả `cancelled` lẫn `refunded`* - `refunded` là trạng thái của tiền chứ không
+   phải của hàng, và hệ thống không có luồng hoàn tiền nào qua VNPay để đứng sau nó.
+3. *Thêm `cancelled`, không tự hoàn kho, không đụng tới trạng thái thanh toán.*
+
+Về chữ hiển thị:
+
+1. *Đổi giá trị lưu từ `shipped` thành `shipping`* - phải viết data migration cho
+   đơn cũ và sửa mọi chỗ đang đọc giá trị này: bảng chuyển trạng thái, nhánh trừ
+   kho, điều kiện đánh giá của D-027, toàn bộ test. Đổi nhiều mà khách vẫn thấy
+   tiếng Anh.
+2. *Giữ giá trị lưu, chỉ đổi nhãn và cho nhãn đi qua bản dịch.*
+
+**Quyết định.** Chọn (3) và (2), SV chốt ngày 30/09 và 01/10/2026.
+
+`STATUS_CHOICES` có thêm `cancelled`. Bảng `NEXT_STATUS` trong `useradmin/views.py`
+giờ giữ một tập cho mỗi trạng thái: `processing` sang được `shipped` hoặc
+`cancelled`, `shipped` sang được `delivered` hoặc `cancelled`. `delivered` và
+`cancelled` không có trong bảng, tức là hai điểm dừng. Điều kiện trong
+`change_order_status` đổi từ so sánh bằng sang `not in`, còn lại giữ nguyên. Chỉ
+nhân viên hủy, bằng chính ô chọn trạng thái đang có; khách không tự hủy trên web.
+
+Hủy đơn không cộng lại tồn kho và không đổi `paid_status`. Đơn VNPay đã trả tiền
+rồi bị hủy sẽ đọc là "đã hủy, đã thanh toán", và đó chính là dấu hiệu đơn cần hoàn
+tiền; việc hoàn làm ngoài hệ thống. VNPay báo đã trả sau khi đơn bị hủy cũng ra đúng
+trạng thái đó, nên `vnpay_return` và `vnpay_ipn` không phải sửa.
+
+Doanh thu chỉ tính đơn đã thanh toán và không bị hủy. Điều kiện này nằm trong một
+hàm, `revenue_orders()`, và cả năm câu truy vấn ở `dashboard` và `shop_page` gọi nó
+thay cho `filter(paid_status=True)`.
+
+Bốn nhãn là Đang xử lý / Processing, Đang giao hàng / Shipping, Đã giao / Delivered,
+Đã hủy / Cancelled. Ba chỗ in trạng thái đơn (`core/dashboard.html`,
+`useradmin/orders.html`, `useradmin/order_detail.html`) dùng
+`get_product_status_display`, và ô chọn của nhân viên lặp qua `STATUS_CHOICES` thay
+cho ba dòng `<option>` viết tay.
+
+**Lý do.** Hủy đơn là việc có thật mà D-032 để lại, và không có nó thì nhân viên chỉ
+còn cách ghi sai trạng thái. Lý do không hoàn kho giống D-032: hàng về được kho hay
+không là việc người quyết, nhân viên chỉnh tồn kho ở trang sản phẩm. Khách tự hủy
+trên web thì cần thêm màn hình và luật về lúc nào còn được hủy, tức thêm một chức
+năng nữa vào bản cam kết; hủy qua điện thoại chỉ mở rộng CN-22 đã có.
+
+Giữ `paid_status` vì tiền vẫn đang nằm ở cửa hàng cho tới khi hoàn. Đổi nó về chưa
+thanh toán là xóa dấu vết duy nhất cho biết đơn này phải hoàn tiền. Cũng vì giữ
+`paid_status` nên doanh thu phải tự loại đơn hủy, nếu không tiền của đơn đã hủy vẫn
+được cộng.
+
+Nhãn dùng `pgettext_lazy` với ngữ cảnh `order status` chứ không phải `gettext_lazy`
+thường. Lúc đầu định dùng `gettext_lazy`, tới khi mở file dịch mới thấy chữ
+"Shipping" đã có sẵn với nghĩa phí giao hàng ở trang giỏ hàng. Cùng một chữ thì
+gettext chỉ giữ được một bản dịch, nên trạng thái đơn sẽ hiện thành "Phí giao hàng".
+Ngữ cảnh là cách gettext tách hai nghĩa của một chữ; cả bốn nhãn dùng chung một ngữ
+cảnh cho nhất quán.
+
+**Hệ quả.**
+- Migration `0006_alter_cartorder_product_status` chỉ đổi `choices`. Cột trong
+  database không đổi, đơn cũ không phải chuyển đổi gì.
+- Soát lại mọi chỗ ghi `product_status` để chắc `cancelled` là điểm dừng thì lộ ra
+  L-12: `place_cod_order` và `vnpay_payment` ghi `processing` lên đơn mỗi lần khách
+  chọn cách thanh toán. Đơn COD đã `shipped` mà khách mở lại trang thanh toán bấm
+  đặt COD lần nữa là quay về `processing`, nhân viên chuyển `shipped` lần hai và kho
+  bị trừ lần hai - đúng lỗi L-11, đi bằng cửa khác. Đơn đã hủy cũng sống lại bằng
+  đường đó. Hai dòng gán ấy thừa, vì đơn mới tạo đã mặc định `processing`, nên bỏ
+  hẳn: hai view này giờ chỉ ghi `payment_method`.
+- Ba view `checkout`, `place_cod_order`, `vnpay_payment` đưa khách về trang tài
+  khoản nếu đơn đã hủy. `_get_pending_order_from_session` chỉ nhận đơn còn
+  `processing`, để lần đặt hàng sau của khách tạo đơn mới chứ không ghi đè hàng vào
+  đơn đã hủy còn nhớ trong session.
+- Số đơn trên dashboard vẫn đếm cả đơn đã hủy; chỉ tiền của nó rời khỏi doanh thu.
+- Quyền đánh giá của D-027 không phải sửa: nó chỉ tính đơn `shipped` hoặc
+  `delivered`, nên đơn bị hủy trên đường giao không còn cho đánh giá. Đánh giá viết
+  trước lúc hủy thì ở lại.
+- Hủy nhầm thì nhân viên không tự gỡ được, phải nhờ quản trị viên sửa trong Django
+  admin, giống bấm nhầm `shipped` ở D-032. Hệ thống không ghi ai hủy, hủy lúc nào,
+  vì sao, và không báo cho khách; khách chỉ thấy nhãn "Đã hủy" trong lịch sử đơn.
+- Chưa làm: ô chọn của nhân viên vẫn hiện đủ bốn trạng thái chứ chưa lọc theo bước
+  hợp lệ, và thông báo sau khi đổi trạng thái vẫn là tiếng Anh kèm giá trị thô.
+- Máy làm việc không có GNU gettext nên `compilemessages` không chạy được. File
+  `locale/vi/LC_MESSAGES/django.mo` lần này biên dịch bằng thư viện polib; trước khi
+  ghi đè đã đối chiếu bản `.mo` cũ với `.po`, khớp cả 284 mục. Bản tiếng Anh không có
+  mục nào được dịch nên `.mo` của nó không đổi.
+- Test: `useradmin/tests/test_orders.py` thêm chín test, `test_dashboard.py` mới có
+  bốn test cho UC-26, phía khách thêm mười một test ở `core/tests/`. Test trang tiếng
+  Anh làm lộ một chuyện của Django: yêu cầu tới `/en/` bật tiếng Anh cho cả luồng
+  đang chạy và không ai tắt đi, nên các test chạy sau nó nhận trang tiếng Anh. Test
+  đó bọc trong `translation.override` để trả ngôn ngữ về như cũ.
+
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

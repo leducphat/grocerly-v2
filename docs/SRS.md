@@ -234,18 +234,37 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   phải người bán bên ngoài (D-015, D-028). Admin vẫn ẩn hoặc gỡ bán được bất kỳ sản
   phẩm nào.
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
-  lại; đơn đã `Delivered` không đổi được trạng thái. Máy chủ chỉ nhận đúng ba
-  trạng thái `Processing`, `Shipped`, `Delivered`; giá trị khác bị từ chối và đơn
-  giữ nguyên trạng thái cũ (D-026).
+  lại; đơn đã `Delivered` hoặc `Cancelled` không đổi được trạng thái. Máy chủ chỉ
+  nhận đúng bốn trạng thái `Processing`, `Shipped`, `Delivered`, `Cancelled`; giá
+  trị khác bị từ chối và đơn giữ nguyên trạng thái cũ (D-026, D-033).
 - **UC-20:** đơn chỉ đi tới, mỗi lần một bước: `Processing` sang `Shipped`, rồi
   `Shipped` sang `Delivered`. Lùi lại, nhảy thẳng từ `Processing` sang `Delivered`,
   hay gửi lại đúng trạng thái đơn đang có đều bị máy chủ từ chối và đơn giữ nguyên
   trạng thái cũ. Tồn kho bị trừ đúng một lần, lúc đơn sang `Shipped`. Hàng đã rời
   kho mà có sự cố (giao hụt, khách trả lại) thì nhân viên chỉnh tồn kho ở trang
   sản phẩm, không lùi trạng thái đơn (D-032).
+- **UC-20:** khách gọi điện báo hủy thì nhân viên chuyển đơn sang `Cancelled`. Hủy
+  được đơn đang `Processing` hoặc `Shipped`, không hủy được đơn đã `Delivered`;
+  khách không tự hủy trên web. Hủy đơn không cộng lại tồn kho: đơn đã `Shipped` mà
+  hàng về được kho thì nhân viên cộng tay ở trang sản phẩm. Đơn đã thanh toán qua
+  VNPay bị hủy vẫn ghi là đã thanh toán, tiền hoàn cho khách ngoài hệ thống (D-033).
+- **UC-09, UC-20:** đơn đã `Cancelled` thì khách không thanh toán hay đặt lại được
+  nữa: trang thanh toán, nút COD và lối sang VNPay đều đưa khách về trang tài khoản
+  kèm thông báo đơn đã hủy. Khách đặt hàng lần sau thì hệ thống tạo đơn mới, không
+  ghi vào đơn đã hủy (D-033).
+- **UC-09, UC-20:** các bước thanh toán của khách chỉ ghi phương thức thanh toán,
+  không đổi trạng thái giao hàng của đơn. Đơn đã `Shipped` mà khách bấm đặt COD
+  lần nữa thì vẫn là `Shipped` (L-12, D-033).
+- **UC-13, UC-20:** trạng thái đơn hiện theo ngôn ngữ đang chọn, không in giá trị
+  lưu trong database: `processing` là Đang xử lý / Processing, `shipped` là Đang
+  giao hàng / Shipping, `delivered` là Đã giao / Delivered, `cancelled` là Đã hủy /
+  Cancelled (D-033).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
+- **UC-26:** doanh thu, doanh thu theo tháng và số sản phẩm đã bán chỉ tính đơn đã
+  thanh toán và không bị hủy. Đơn VNPay đã trả tiền rồi bị hủy vẫn nằm trong danh
+  sách đơn nhưng không còn được cộng vào doanh thu (D-033).
 - **UC-16, UC-17:** trợ lý AI và API công khai `/api/v1/products/` chỉ thấy đúng
   những sản phẩm mà khách thấy ở cửa hàng — sản phẩm chưa duyệt hoặc đã bị gỡ bán
   thì AI không tìm ra và cũng không đề xuất thêm vào giỏ (D-025).

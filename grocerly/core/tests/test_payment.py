@@ -83,3 +83,41 @@ def test_vnpay_ipn_rejects_amount_different_from_order_total(client, order, sett
     order.refresh_from_db()
     assert response.json()["RspCode"] == "04"  # invalid amount
     assert order.paid_status is False
+
+
+# ---------- VNPay and the delivery status of the order (D-033, L-12) ----------
+
+
+def test_cancelled_order_cannot_start_a_vnpay_payment(customer_client, order):
+    order.product_status = "cancelled"
+    order.save()
+
+    response = customer_client.get(reverse("core:vnpay_payment", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert response.url == reverse("core:dashboard")  # not sent to VNPay
+    assert order.product_status == "cancelled"
+
+
+def test_starting_vnpay_payment_does_not_move_shipped_order_back(customer_client, order):
+    """L-12: paying must not touch the delivery status of the order."""
+    order.product_status = "shipped"
+    order.save()
+
+    customer_client.get(reverse("core:vnpay_payment", args=[order.oid]))
+
+    order.refresh_from_db()
+    assert order.product_status == "shipped"
+
+
+def test_vnpay_confirmation_arriving_after_cancellation_keeps_order_cancelled(client, order, settings):
+    """The customer was already on VNPay's page when the staff cancelled. The money
+    did arrive, so the order reads cancelled and paid: one to refund (D-033)."""
+    order.product_status = "cancelled"
+    order.save()
+    reply = sign(vnpay_reply(order), settings.VNPAY_HASH_SECRET)
+
+    client.get(reverse("core:vnpay_return"), reply)
+
+    order.refresh_from_db()
+    assert (order.product_status, order.paid_status) == ("cancelled", True)

@@ -12,9 +12,17 @@ from useradmin.decorators import admin_required
 
 import datetime
 
+def revenue_orders():
+    """Đơn được tính vào doanh thu: đã thanh toán và không bị hủy (UC-26, D-033).
+
+    Đơn VNPay đã trả tiền rồi bị hủy vẫn giữ paid_status=True, vì tiền hoàn cho
+    khách ngoài hệ thống. Chỉ lọc theo paid_status thì vẫn cộng cả tiền đơn đó.
+    """
+    return CartOrder.objects.filter(paid_status=True).exclude(product_status="cancelled")
+
 @admin_required
 def dashboard(request):
-    revenue = CartOrder.objects.filter(paid_status=True).aggregate(price=Sum("price"))
+    revenue = revenue_orders().aggregate(price=Sum("price"))
     total_orders_count = CartOrder.objects.all()
     all_products = Product.objects.all()
     all_categories = Category.objects.all()
@@ -22,12 +30,12 @@ def dashboard(request):
     latest_orders = CartOrder.objects.all()
 
     this_month = datetime.datetime.now().month
-    monthly_revenue = CartOrder.objects.filter(paid_status=True, order_date__month=this_month).aggregate(price=Sum("price"))
+    monthly_revenue = revenue_orders().filter(order_date__month=this_month).aggregate(price=Sum("price"))
 
     from django.db.models.functions import ExtractMonth
     import calendar
 
-    revenue_data = CartOrder.objects.filter(paid_status=True).annotate(
+    revenue_data = revenue_orders().annotate(
         month=ExtractMonth("order_date")
     ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue")
     
@@ -163,13 +171,18 @@ def order_detail(request, id):
     order_items = CartOrderItem.objects.filter(order=order)
     context = {
         'order':order,
-        'order_items':order_items
+        'order_items':order_items,
+        'status_choices': STATUS_CHOICES,  # nhãn của ô chọn trạng thái
     }
     return render(request, "useradmin/order_detail.html", context)
 
-# Bước kế tiếp được phép của từng trạng thái đơn. 'delivered' không có trong bảng
-# vì đó là điểm dừng.
-NEXT_STATUS = {"processing": "shipped", "shipped": "delivered"}
+# Các trạng thái mà đơn được phép chuyển sang, tính từ trạng thái đang có. Đơn đi
+# tới từng bước một (D-032), và đơn chưa giao xong thì hủy được (D-033).
+# 'delivered' và 'cancelled' không có trong bảng vì đó là hai điểm dừng.
+NEXT_STATUS = {
+    "processing": {"shipped", "cancelled"},
+    "shipped": {"delivered", "cancelled"},
+}
 
 @csrf_exempt
 @admin_required
@@ -178,21 +191,24 @@ def change_order_status(request, oid):
     if request.method == "POST":
         status = request.POST.get("status")
 
-        # Chỉ nhận ba trạng thái của STATUS_CHOICES. Ô chọn có sẵn một dòng nhắc
+        # Chỉ nhận bốn trạng thái của STATUS_CHOICES. Ô chọn có sẵn một dòng nhắc
         # không phải trạng thái, bấm Save mà chưa chọn gì thì không đổi gì cả.
         if status not in dict(STATUS_CHOICES):
             messages.error(request, "Please choose an order status")
             return redirect("useradmin:order_detail", order.id)
 
-        # Đơn chỉ đi tới, mỗi lần một bước (SRS §6.1, UC-20; D-032). Lùi, nhảy cóc
-        # hay gửi lại trạng thái đang có đều bị từ chối. Đơn đã giao không có bước
-        # kế tiếp nên cũng dừng ở đây.
-        if NEXT_STATUS.get(order.product_status) != status:
+        # Đơn chỉ đi tới, mỗi lần một bước, hoặc bị hủy khi chưa giao xong (SRS
+        # §6.1, UC-20; D-032, D-033). Lùi, nhảy cóc hay gửi lại trạng thái đang có
+        # đều bị từ chối. Đơn đã giao và đơn đã hủy không có trong bảng nên nhận về
+        # tập rỗng, tức là không đổi được nữa.
+        if status not in NEXT_STATUS.get(order.product_status, set()):
             messages.error(request, f"An order that is {order.product_status} cannot change to {status}")
             return redirect("useradmin:order_detail", order.id)
 
         # Hàng rời kho thì trừ tồn kho. Qua được điều kiện trên nghĩa là đơn đang ở
         # 'processing'; đơn đã 'shipped' thì không quay lại nhánh này được nữa.
+        # Hủy đơn không có nhánh cộng lại: đồ tươi đi giao rồi quay về chưa chắc
+        # còn bán được, nên nhân viên tự chỉnh tồn kho ở trang sản phẩm (D-033).
         if status == 'shipped':
             order_items = CartOrderItem.objects.filter(order=order)
             for item in order_items:
@@ -216,8 +232,8 @@ def change_order_status(request, oid):
 @admin_required
 def shop_page(request):
     products = Product.objects.filter(user=request.user)
-    revenue = CartOrder.objects.filter(paid_status=True).aggregate(price=Sum("price"))
-    total_sales = CartOrderItem.objects.filter(order__paid_status=True).aggregate(qty=Sum("quantity"))
+    revenue = revenue_orders().aggregate(price=Sum("price"))
+    total_sales = CartOrderItem.objects.filter(order__in=revenue_orders()).aggregate(qty=Sum("quantity"))
 
     context = {
         'products':products,

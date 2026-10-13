@@ -464,3 +464,25 @@ msgstr ""
 msgid "⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 giây rồi thử lại nhé!"
 msgstr ""
 
+# --- Order status (D-033) ---
+# The context keeps these apart from "Shipping" above, which is the shipping fee.
+
+msgctxt "order status"
+msgid "Processing"
+msgstr ""
+
+msgctxt "order status"
+msgid "Shipping"
+msgstr ""
+
+msgctxt "order status"
+msgid "Delivered"
+msgstr ""
+
+msgctxt "order status"
+msgid "Cancelled"
+msgstr ""
+
+msgid "This order has been cancelled."
+msgstr ""
+

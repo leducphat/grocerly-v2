@@ -16,7 +16,9 @@
 kết ở Bước 3 hoạt động"* — danh sách ở §2 chính là mẫu số. Cam kết quá nhiều thì
 tự hạ điểm TC2.2; cam kết quá ít thì dính gate G9 (sản phẩm không tương xứng khối
 lượng). Vì vậy danh sách dưới đây chỉ gồm **chức năng đã có trong mã nguồn**, cộng
-các sửa lỗi nghiệp vụ — không có tính năng mới (D-008).
+các sửa lỗi nghiệp vụ — không có tính năng mới (D-008). Ngoại lệ duy nhất là việc
+hủy đơn ở CN-22, thêm ngày 07/10/2026 theo D-033; nó mở rộng một chức năng đã có
+nên tổng số chức năng cam kết không đổi.
 
 ---
 
@@ -64,7 +66,7 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | ✅ Khớp — L-7 đã sửa 21/09/2026 |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
-| CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | ✅ Khớp — L-6, L-8 đã sửa 21/09/2026 |
+| CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | ✅ Khớp — L-6, L-8 đã sửa 21/09/2026, L-12 đã sửa 07/10/2026 |
 | CN-12 | Cập nhật hồ sơ cá nhân, đổi mật khẩu | UC-11 | Có |
 | CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Có |
 | CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn; đặt địa chỉ mặc định | UC-13 | Có |
@@ -87,9 +89,9 @@ doanh số thật.*
 
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
-| CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới | UC-26 | Có |
+| CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
 | CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | ✅ Khớp — L-1, L-2 chốt sửa đặc tả |
-| CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng; không có thao tác xóa đơn | UC-20 | ✅ Khớp — L-5 đã sửa 23/09/2026, L-11 đã sửa 01/10/2026 |
+| CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | ✅ Khớp — L-5 đã sửa 23/09/2026, L-11 đã sửa 01/10/2026; hủy đơn thêm 07/10/2026 (D-033) |
 | CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Có |
 
 ### 2.4 Quản trị viên — Django admin
@@ -129,6 +131,7 @@ bảo vệ.
 | **L-9** | AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối (UC-17, SRS §6.1) | `ai_chat` xử lý `request_add_to_cart` bằng `Product.objects.filter(p_id=...)`, không kiểm tra `in_stock` / `stock_count` — AI vẫn đề nghị thêm sản phẩm đã hết hàng. *Phát hiện 16/09/2026 (P-12)* | ✅ **Đã sửa 22/09/2026** (D-025). Nhánh `request_add_to_cart` tìm sản phẩm qua `published_products()` rồi tách hai trường hợp: không tìm thấy trả `Product not found`, tồn kho bằng 0 trả `Product is out of stock` để Gemini nói đúng lý do. Test `test_ai_add_to_cart_refuses_out_of_stock_product` đã gỡ `xfail`, có thêm khẳng định về lý do gửi cho Gemini |
 | **L-10** | Sản phẩm bị vô hiệu hóa không hiển thị với khách (FR-A-02, UC-24) | Trang cửa hàng lọc theo `product_status = 'published'`; công cụ AI `search_products`, `get_bestsellers` và API `/api/v1/products/` lại lọc theo cờ khác là `status = True`, bỏ qua `product_status` → sản phẩm đã ẩn khỏi cửa hàng vẫn được AI tìm thấy. *Phát hiện 16/09/2026 (P-12)* | ✅ **Đã sửa 22/09/2026** (D-025). `store_api/views.py` có `published_products()` (`product_status='published'`, đúng điều kiện các trang cửa hàng dùng) và `buyable_products()` (lọc thêm `stock_count > 0`); công cụ tìm kiếm, hàng bán chạy và `/api/v1/products/` đều gọi hàm này. Vai trò cờ `status`: **không còn chỗ nào đọc** — cùng với `in_stock`, đây là hai cột không form nào ghi nên luôn bằng `True`; đã ghi chú tại `core/models.py`, không xóa cột. Test `test_search_tool_does_not_return_product_hidden_from_store` đã gỡ `xfail`; thêm file `store_api/tests/test_product_api.py` cho API |
 | **L-11** | *(đặc tả không nói tới - mặc định mỗi đơn chỉ làm giảm tồn kho một lần)* | `change_order_status` trừ tồn kho mỗi lần đơn vào `shipped` từ một trạng thái khác, và không hoàn lại khi đơn rời `shipped`. Đơn đi shipped, processing rồi shipped lại bị trừ kho hai lần: tồn 10, mua 3, còn 4 thay vì 7 | ✅ **Đã sửa 01/10/2026** (D-032). Phát hiện 24/09/2026 khi review PR #8. Đơn chỉ đi tới, mỗi lần một bước: `change_order_status` tra bảng `NEXT_STATUS` và từ chối bước lùi, bước nhảy cóc, cả việc gửi lại trạng thái đang có, nên đơn chỉ vào `shipped` một lần. Cùng lần sửa đóng thêm một lỗ cùng gốc: đơn đi thẳng `processing` sang `delivered` thì kho không bị trừ lần nào. Đặc tả thêm ràng buộc cho UC-20 (`PLAN.md` §6 dòng 14). Test `xfail` viết lại thành `test_shipped_order_cannot_be_moved_back_to_processing` và đã gỡ `xfail`, thêm một test cho bước nhảy cóc |
+| **L-12** | *(đặc tả không nói tới - mặc định việc khách chọn cách thanh toán không đổi trạng thái giao hàng của đơn)* | `place_cod_order` và `vnpay_payment` ghi `product_status = 'processing'` mỗi lần khách chọn cách thanh toán, không hỏi đơn đang ở trạng thái nào. Đơn COD đã `shipped` mà khách mở lại trang thanh toán bấm đặt COD lần nữa là quay về `processing`; nhân viên chuyển `shipped` lần hai thì kho bị trừ lần hai, đúng hậu quả của L-11. `save_checkout_info` còn ghi hàng của lần đặt sau vào đơn cũ còn nhớ trong session, kể cả khi đơn đó đã bị hủy | ✅ **Đã sửa 07/10/2026** (D-033). Phát hiện cùng ngày, khi soát mọi chỗ ghi `product_status` cho việc hủy đơn. Hai view chỉ còn ghi `payment_method`; `_get_pending_order_from_session` chỉ nhận đơn còn `processing`. Đặc tả thêm ràng buộc cho UC-09 (`PLAN.md` §6 dòng 15). Ba test viết trước và chạy cho đỏ rồi mới sửa: `test_placing_cod_order_again_does_not_move_shipped_order_back`, `test_starting_vnpay_payment_does_not_move_shipped_order_back`, `test_checkout_after_a_cancelled_order_creates_a_new_order` |
 
 **Mười chỗ lệch đều đã chốt.** Ba chỗ chốt bằng cách sửa đặc tả — L-1 (11/09/2026,
 D-015), L-2 và L-4 (23/09/2026, D-028) — vì chúng mô tả mô hình nhiều người bán
@@ -140,6 +143,10 @@ nào. L-3 và L-5 không có test tái hiện sẵn từ P-12 nên được vi�
 
 L-11 phát hiện sau, ngày 24/09/2026, khi review PR #8, và sửa ngày 01/10/2026 bằng
 cách chỉ cho đơn đi tới (D-032). Từ hôm đó bộ test lại không còn `xfail` nào.
+
+L-12 phát hiện ngày 07/10/2026 trong lúc làm việc hủy đơn và sửa ngay trong ngày
+(D-033). Nó không qua giai đoạn `xfail`, vì test tái hiện và bản sửa nằm trong cùng
+một lượt làm.
 
 ---
 
