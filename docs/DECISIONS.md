@@ -1678,11 +1678,28 @@ dòng trong lịch sử chạy của GitHub Actions.
   của Render, không ghi vào repo. URL IPN của merchant mới
   (`/vi/payment/vnpay_ipn/` trên host KLTN, phải là HTTPS) gửi cho VNPay khi host
   đã chạy, rồi chạy bộ kịch bản SIT mà VNPay cấp cho URL IPN.
+- Ở sandbox, URL IPN tự đặt được, không phải gửi mail: đăng nhập merchant admin rồi
+  mở thẳng `https://sandbox.vnpayment.vn/merchantv2/Account/TerminalEdit.htm`. Giao
+  diện merchant admin không có nút nào dẫn tới trang này (SV tìm ngày 15/10/2026),
+  nên phải nhớ đường dẫn. Trang có ba ô: IPN Url, giao thức `GET`, kiểu mã hóa
+  `HMACSHA512`; hai ô sau phải giữ như vậy vì `vnpay_ipn` chỉ đọc `request.GET` và
+  `core/vnpay.py` ký bằng HMAC-SHA512. Thông báo "Link thanh toán chuyển sang hệ thống mới" ở
+  trang đăng nhập nói về tính năng tạo link thanh toán, đồ án không dùng.
+- Bỏ bộ kịch bản SIT, SV chốt ngày 15/10/2026. VNPay chỉ đòi SIT trước khi cấp
+  merchant thật, còn KLTN chỉ dùng sandbox, và rubric không nhắc tới SIT. Trang SIT
+  lại không nhận mật khẩu đăng ký merchant (đòi đủ chữ thường, in hoa, số, ký tự đặc
+  biệt), muốn vào phải đổi mật khẩu. Thay bằng sáu test cho các nhánh của
+  `vnpay_ipn` trong `core/tests/test_payment.py`: chạy lại được ở mỗi lần CI chạy,
+  SIT thì chạy một lần là hết. Bằng chứng từ phía VNPay chỉ có lần thanh toán thật
+  ngày 15/10/2026 (144.000 VND, thẻ NCB thử): chi tiết giao dịch có pha Confirm mã
+  `00`, nhiều khả năng là lượt gọi IPN nhưng trang không ghi rõ.
 - Còn ngỏ: tài liệu tích hợp của VNPay dặn URL quay về chỉ để hiển thị, không cập
   nhật database; `vnpay_return` vẫn ghi `paid_status` (D-023). Ở TLCN đó là đường
   duy nhất làm đơn thành đã thanh toán. Giữ hay bỏ thì quyết sau khi IPN chạy được
   trên host KLTN.
-- Còn ngỏ: key Gemini dùng lại của TLCN hay tạo mới.
+- Key Gemini: tạo key mới cho KLTN, SV chốt ngày 15/10/2026.
+- Dịch vụ trên Render: `https://grocerly-v2.onrender.com`, deploy lần đầu thành công
+  ngày 15/10/2026.
 - Gói `stripe` trong `requirements.txt` không còn dòng code nào dùng; gỡ ở bước dọn
   của P-11.
 - `SDD.md` chưa phải sửa vì bảng công nghệ vẫn đúng. Thêm chặng deploy vào đó khi
