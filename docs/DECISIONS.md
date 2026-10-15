@@ -1603,8 +1603,9 @@ deploy (3).
 - Database: PostgreSQL trên một tài khoản Neon mới.
 - Ảnh: một tài khoản Cloudinary mới. Ảnh cũ chép sang bằng lệnh `cld clone` của
   Cloudinary CLI, phía TLCN chỉ bị đọc.
-- Dữ liệu: `pg_dump` database TLCN, `pg_restore` vào database mới. Hai migration
-  `0005` và `0006` được áp ở lần build đầu trên Render.
+- Dữ liệu: chép toàn bộ database TLCN sang project Neon mới bằng Import Data
+  Assistant của Neon, làm ngày 15/10/2026. Hai migration `0005` và `0006` được áp ở
+  lần build đầu trên Render.
 - Deploy: tắt auto-deploy trên Render; job deploy trong CI gọi deploy hook khi
   `main` có commit mới và các job còn lại đã xanh.
 
@@ -1613,8 +1614,8 @@ học lại, và `SDD.md` vẫn đúng. Tách bằng tài khoản mới thì kh�
 với TLCN, kể cả hạn mức miễn phí, và không phải lo chuyện mở thêm workspace trong
 tài khoản cũ có bị tính tiền hay không.
 
-Snapshot toàn bộ gọn hơn fixture: hai lệnh, chỉ đọc phía TLCN, ra bản sao đúng từng
-dòng, và hai migration `0005`, `0006` được chạy lần đầu trên dữ liệu thật. Làm được
+Snapshot toàn bộ gọn hơn fixture: một lần chép, chỉ đọc phía TLCN, ra bản sao đúng
+từng dòng, và hai migration `0005`, `0006` được chạy lần đầu trên dữ liệu thật. Làm được
 vậy vì database mới vẫn là PostgreSQL.
 
 Để Render tự build là đường TLCN đang chạy, không thêm gì phải học. Cho CI ra lệnh
@@ -1640,9 +1641,15 @@ dòng trong lịch sử chạy của GitHub Actions.
 - `.env.example` viết lại theo đúng các key ứng dụng đọc: thêm nhóm `VNPAY_*` (việc
   D-002 để lại), bỏ `STRIPE_*` vì không còn dòng code nào đọc, bỏ các dòng nhắc EC2
   và RDS. `AGENTS.md`/`CLAUDE.md` §10 bỏ hai key Stripe.
-- File snapshot có email, mật khẩu băm và đơn hàng của TLCN nên để ngoài thư mục
-  repo. Database KLTN bắt đầu với tài khoản và đơn hàng cũ, nên doanh thu trên
-  dashboard gồm cả đơn trước ngày chuyển.
+- Lúc đầu định chép bằng `pg_dump` và `pg_restore` qua pgAdmin. `pg_dump` đi kèm
+  pgAdmin trên máy làm việc không chạy được vì thiếu `gssapi64.dll`, mà cài riêng
+  bộ công cụ PostgreSQL chỉ để chép một lần thì tốn công hơn, nên chuyển sang Import
+  Data Assistant: chạy trên web, phía TLCN chỉ bị đọc. Công cụ này đang là bản beta
+  và chỉ nhận database dưới 10 GB.
+- Không có file sao lưu nào trên máy. Cần một điểm để quay lại, ví dụ trước mỗi
+  buổi thực nghiệm, thì tạo một branch trong project Neon mới. Database KLTN bắt
+  đầu với tài khoản và đơn hàng cũ, nên doanh thu trên dashboard gồm cả đơn trước
+  ngày chuyển.
 - Không cho ứng dụng KLTN trỏ vào Cloudinary của TLCN, kể cả tạm: gói
   `django-cleanup` xóa file thật trên storage khi ảnh của một bản ghi bị thay hoặc
   bản ghi bị xóa.
@@ -1650,9 +1657,32 @@ dòng trong lịch sử chạy của GitHub Actions.
   khoảng một phút. Monitor của P-16 ping đều thì trang thức suốt, khoảng 744 giờ
   mỗi tháng, vừa trong 750 giờ của tài khoản mới. Không đủ thì nâng gói trong các
   tuần thực nghiệm và bảo vệ, không phải dựng lại.
-- Chưa kiểm chứng: `cld clone` có giữ nguyên public ID không. Database lưu đường
-  dẫn ảnh theo public ID nên chép xong phải mở thử vài sản phẩm.
-- Còn ngỏ: key Gemini và merchant VNPay sandbox dùng lại của TLCN hay tạo mới.
+- Ảnh chép ngày 15/10/2026. `cld clone` giữ nguyên public ID: mã nguồn của lệnh
+  chép trường `public_id` của từng file, và sau khi chép, cả 133 cặp loại file và
+  public ID bên TLCN đều có bên tài khoản mới. Database lưu đường dẫn ảnh theo
+  public ID nên không phải sửa gì. Lệnh chép cả tài khoản, nên 29 file trong thư
+  mục `techstore/` của một dự án khác dùng chung tài khoản TLCN cũng sang theo;
+  xóa bên tài khoản mới thì không ảnh hưởng TLCN.
+- Merchant VNPay sandbox: tạo mới, SV chốt ngày 14/10/2026, VNPay cấp ngày
+  15/10/2026. Lúc chốt, lý do ghi ở đây là URL IPN gửi cho VNPay một lần cho cả
+  merchant, nên dùng lại merchant của TLCN thì IPN của KLTN có thể chạy về host
+  TLCN. Khi đưa key mới vào mới thấy TLCN không có merchant riêng: `.env` của TLCN
+  dùng merchant demo công khai in sẵn trong code mẫu của VNPay, comment ngay trên
+  hai dòng key ghi là để tránh lỗi sai chữ ký của tài khoản sandbox cũ. Merchant
+  dùng chung thì không ai gửi được URL IPN của mình, nên `vnpay_ipn` chưa từng được
+  VNPay gọi thật; ở TLCN đơn chỉ thành đã thanh toán qua `vnpay_return`. Tạo mới
+  vẫn đúng, nhưng vì lý do này.
+- Key mới thử ngày 15/10/2026: một yêu cầu thanh toán ký bằng `core/vnpay.py` vào
+  tới trang chọn phương thức của sandbox, còn cùng yêu cầu ký bằng secret sai thì
+  VNPay báo lỗi 70 "Sai chữ ký". Key nằm trong `.env` ở máy và trong biến môi trường
+  của Render, không ghi vào repo. URL IPN của merchant mới
+  (`/vi/payment/vnpay_ipn/` trên host KLTN, phải là HTTPS) gửi cho VNPay khi host
+  đã chạy, rồi chạy bộ kịch bản SIT mà VNPay cấp cho URL IPN.
+- Còn ngỏ: tài liệu tích hợp của VNPay dặn URL quay về chỉ để hiển thị, không cập
+  nhật database; `vnpay_return` vẫn ghi `paid_status` (D-023). Ở TLCN đó là đường
+  duy nhất làm đơn thành đã thanh toán. Giữ hay bỏ thì quyết sau khi IPN chạy được
+  trên host KLTN.
+- Còn ngỏ: key Gemini dùng lại của TLCN hay tạo mới.
 - Gói `stripe` trong `requirements.txt` không còn dòng code nào dùng; gỡ ở bước dọn
   của P-11.
 - `SDD.md` chưa phải sửa vì bảng công nghệ vẫn đúng. Thêm chặng deploy vào đó khi
