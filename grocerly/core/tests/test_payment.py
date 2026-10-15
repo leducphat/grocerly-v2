@@ -85,6 +85,71 @@ def test_vnpay_ipn_rejects_amount_different_from_order_total(client, order, sett
     assert order.paid_status is False
 
 
+# The IPN answers below follow VNPay's IPN guide: 00 and 02 tell VNPay the message is
+# handled, any other code makes it send the IPN again (up to 10 times). These tests
+# replace VNPay's SIT run, which the project skipped (D-034).
+
+
+def test_vnpay_ipn_with_valid_signature_marks_order_paid(client, order, settings):
+    reply = sign(vnpay_reply(order), settings.VNPAY_HASH_SECRET)
+
+    response = client.get(reverse("core:vnpay_ipn"), reply)
+
+    order.refresh_from_db()
+    assert response.json()["RspCode"] == "00"
+    assert order.paid_status is True
+
+
+def test_vnpay_ipn_for_order_already_paid_answers_already_confirmed(client, order, settings):
+    """VNPay repeats an IPN it got no answer for; the repeat must not count twice."""
+    order.paid_status = True
+    order.save()
+    reply = sign(vnpay_reply(order), settings.VNPAY_HASH_SECRET)
+
+    response = client.get(reverse("core:vnpay_ipn"), reply)
+
+    assert response.json()["RspCode"] == "02"
+
+
+def test_vnpay_ipn_for_unknown_order_answers_order_not_found(client, order, settings):
+    reply = vnpay_reply(order)
+    reply["vnp_TxnRef"] = "nosuchorder-1758000000"
+    reply = sign(reply, settings.VNPAY_HASH_SECRET)
+
+    response = client.get(reverse("core:vnpay_ipn"), reply)
+
+    order.refresh_from_db()
+    assert response.json()["RspCode"] == "01"
+    assert order.paid_status is False
+
+
+def test_vnpay_ipn_with_forged_signature_does_not_mark_order_paid(client, order):
+    reply = sign(vnpay_reply(order), "not-the-real-secret")
+
+    response = client.get(reverse("core:vnpay_ipn"), reply)
+
+    order.refresh_from_db()
+    assert response.json()["RspCode"] == "97"  # invalid signature
+    assert order.paid_status is False
+
+
+def test_vnpay_ipn_for_failed_payment_answers_00_and_leaves_order_unpaid(client, order, settings):
+    """00 here only means "message received", so VNPay stops resending it."""
+    reply = sign(vnpay_reply(order, response_code="24"), settings.VNPAY_HASH_SECRET)  # 24: customer cancelled
+
+    response = client.get(reverse("core:vnpay_ipn"), reply)
+
+    order.refresh_from_db()
+    assert response.json()["RspCode"] == "00"
+    assert order.paid_status is False
+
+
+def test_vnpay_ipn_without_parameters_answers_unknown_error(client):
+    response = client.get(reverse("core:vnpay_ipn"))
+
+    assert response.json()["RspCode"] == "99"
+
+
 # ---------- VNPay and the delivery status of the order (D-033, L-12) ----------
 
 
