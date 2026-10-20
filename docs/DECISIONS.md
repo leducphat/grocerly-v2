@@ -1707,6 +1707,105 @@ dòng trong lịch sử chạy của GitHub Actions.
 - Các bước của P-11 ở `PLAN.md` §4.
 
 
+## D-035 · Sửa ba lỗi của khung chat AI: mỗi tin nhắn tới Gemini một lần, AI chỉ đề nghị số lượng kho có, chữ cố định theo ngôn ngữ của trang
+
+- **Ngày:** 20/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Ngày 15/10/2026, lần đầu chạy thử chat trên host KLTN, SV hỏi mua 2
+thùng thì AI đề nghị 22, bấm xác nhận thì AI báo đã thêm 22 trong khi giỏ chỉ có 3
+vì kho còn 3. Câu hỏi xác nhận và nút bấm lại hiện tiếng Anh giữa cuộc trò chuyện
+tiếng Việt. Ba lỗi đã ghi ở `COMMITMENT.md` §3 thành L-13, L-14, L-15, mỗi lỗi kèm
+một hướng sửa. Lúc bắt tay sửa thì mỗi lỗi có hơn một cách hợp lý, nên ghi chung
+một quyết định.
+
+**Phương án đã cân nhắc**
+
+Về L-13 (tin nhắn mới tới Gemini hai lần):
+
+1. *Chỉ sửa JavaScript:* lấy `history` trước khi đẩy tin nhắn mới vào. Đúng gốc,
+   nhưng dự án không có công cụ chạy test JavaScript nên không test nào giữ được
+   bản sửa, và trang khách mở trước lần deploy vẫn gửi bản sao.
+2. *Chỉ sửa máy chủ:* `ai_chat` bỏ phần tử cuối của `history` nếu đó chính là tin
+   nhắn mới. Test được, nhưng trình duyệt vẫn gửi dữ liệu sai nghĩa của hai trường.
+3. *Sửa cả hai.*
+
+Về L-14 (số lượng):
+
+1. *Giữ như cũ, để giỏ hạ số lượng (D-024), chỉ sửa câu báo.* Khách vẫn bị hỏi
+   "thêm 22?" rồi nhận 3.
+2. *AI tự hạ số lượng về tồn kho rồi mới hỏi.* Khách không biết vì sao số bị đổi,
+   và AI quyết thay khách.
+3. *Từ chối số lượng ngoài khoảng 1 tới tồn kho và báo lý do cho Gemini, giống
+   cách L-9 làm với hàng hết; câu báo sau khi thêm đọc số lượng giỏ trả về.*
+
+Về L-15 (ngôn ngữ): API `/api/v1/` cố ý nằm ngoài `i18n_patterns`, còn
+`ForceDefaultLanguageMiddleware` xóa header `Accept-Language`, nên máy chủ chỉ biết
+ngôn ngữ của khách qua cookie.
+
+1. *Dựa vào cookie ngôn ngữ.* Không thêm code, nhưng cookie chỉ có khi khách đổi
+   ngôn ngữ bằng ô chọn; khách mở thẳng một link `/en/...` vẫn nhận câu tiếng Việt.
+2. *Khung chat gửi kèm ngôn ngữ của trang; máy chủ chỉ nhận `vi` hoặc `en`, thiếu
+   hay lạ thì giữ ngôn ngữ Django đã chọn từ cookie.*
+3. *Dùng `JavaScriptCatalog` của Django để JavaScript tự dịch.* Thêm một route và
+   một file script chỉ để dịch tám câu, trong khi template dịch được sẵn.
+
+**Quyết định.** L-13 chọn (3), L-14 chọn (3), L-15 chọn (2) và dịch chữ của
+JavaScript ngay trong template.
+
+**Lý do.** Với L-13, chỗ sửa chính là JavaScript. Dòng kiểm ở máy chủ là lưới đỡ
+cho trang mở trước lần deploy, và là phần duy nhất pytest giữ được. Nó chỉ bỏ bản
+sao nằm ngay cuối `history`: khách nói "2" ở lượt trước rồi lại nói "2" thì giữa hai
+lượt có câu của AI, lượt cũ vẫn ở lại. Cái giá là một ca hiếm: trên trang cũ, lần
+gửi trước lỗi mạng rồi khách gõ lại đúng câu đó, thì máy chủ cũng bỏ bản cũ, tức là
+Gemini đọc câu ấy một lần thay vì hai.
+
+Với L-14, Gemini biết lý do nên nói được "kho chỉ còn 10", và khách tự quyết có lấy
+10 hay không. Số lượng nhỏ hơn 1 bị chặn luôn vì nằm ở cùng chỗ kiểm: trước đây
+Gemini gửi 0 hay số âm thì AI vẫn hỏi "thêm 0x ...". Câu báo phải đọc số từ giỏ vì
+giữa lúc AI hỏi và lúc khách bấm, kho vẫn có thể giảm; giỏ hạ số lượng theo D-024,
+câu báo nói đúng số đó, còn hàng hết hẳn thì câu báo nói là chưa thêm được.
+
+Với L-15, trang luôn biết chắc nó đang ở ngôn ngữ nào nhờ tiền tố URL, cookie thì
+không chắc có. Tám câu cố định của JavaScript dịch bằng `{% trans %}` ngay trong
+`base.html` và đi qua `escapejs`, để một bản dịch có dấu nháy không làm vỡ chuỗi
+JavaScript; `{qty}` và `{title}` điền bằng hàm `fillText`.
+
+**Hệ quả.**
+- Request tới `/api/v1/chat/` có thêm trường `language`. `SDD.md` chưa mô tả API
+  chat nên không có chỗ phải sửa.
+- `ai_chat` giờ chỉ chọn ngôn ngữ rồi gọi `_chat_reply`; thân cũ chuyển nguyên sang
+  hàm đó, vì bọc `translation.override` quanh cả thân thì phải lùi lề cả trăm dòng.
+  `override` trả ngôn ngữ về như cũ khi xong, tránh chuyện ngôn ngữ dính lại cho cả
+  luồng mà D-033 đã gặp.
+- Câu báo sau khi thêm đổi từ "Đã thêm ... thành công" thành "Giỏ hàng của bạn đã
+  có ...". `/add-to-cart/` đặt số lượng của dòng giỏ chứ không cộng thêm, nên với
+  sản phẩm đã có trong giỏ thì "đã thêm 2" sai, còn "giỏ có 2" đúng.
+- Ba câu báo lỗi kết nối và tạm hết lượt Gemini có msgid tiếng Việt từ TLCN, bản
+  tiếng Anh để trống, nên khách ở `/en/` vẫn đọc tiếng Việt. Lần này điền bản tiếng
+  Anh vào `locale/en`, không đổi msgid. Câu hết lượt theo ngày chưa từng có trong
+  file dịch, nay thêm vào cả hai. `locale/en/LC_MESSAGES/django.mo` lần đầu có mục
+  được dịch; cả hai `.mo` biên dịch bằng polib như D-033, đối chiếu với `.po` trước
+  và sau khi ghi.
+- Nút "Tiến hành thanh toán" của khung chat đi tới `{% url 'core:cart' %}` thay cho
+  `/cart/` viết cứng. Trước đây khách ở `/en/` chưa có cookie bấm vào thì sang
+  `/vi/cart/`.
+- `/add-to-cart/` lỗi khi gọi từ khung chat thì khách thấy câu báo lỗi kết nối,
+  trước đây không hiện gì.
+- Lời AI tự sinh vẫn theo ngôn ngữ khách gõ, không thuộc quyết định này.
+- Test: mười lăm test mới trong `store_api/tests/test_ai_chat.py`. Mười hai viết
+  trước, chạy thấy chín đỏ rồi mới sửa; không qua giai đoạn `xfail`, cùng lý do
+  với L-12. Ba test thêm sau, đều là ca trình duyệt gửi dữ liệu sai kiểu: `language`
+  là danh sách (lượt review chỉ ra), và `history` là object hay số. Ca sau do chính
+  dòng bỏ bản sao của L-13 gây ra: lúc đầu dòng này nằm ngoài khối `try`, nên view
+  lỗi 500 thay vì trả câu báo trục trặc như trước; nay đã chuyển vào trong.
+- Phần JavaScript không có test tự động. Test chỉ kiểm chữ đã dịch, ngôn ngữ và
+  đường dẫn giỏ hàng được đưa vào trang. Ngoài bộ test, script render ở cả hai ngôn
+  ngữ đã được kiểm cú pháp bằng `node --check`, và ba nhánh của câu báo sau khi
+  thêm (giỏ nhận đủ, giỏ hạ số lượng, hàng vừa hết) được chạy thử một lần trong
+  Node với giỏ giả.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

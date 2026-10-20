@@ -909,3 +909,51 @@ msgstr "Đã hủy"
 
 msgid "This order has been cancelled."
 msgstr "Đơn hàng này đã bị hủy."
+
+# --- AI chat window (L-13 to L-15, D-035) ---
+
+msgid "System Error: Gemini API Key is missing or invalid. Please configure it in .env."
+msgstr "Lỗi hệ thống: thiếu Gemini API Key hoặc key không hợp lệ. Hãy cấu hình trong .env."
+
+#, python-format
+msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
+msgstr "Bạn có muốn thêm **%(qty)sx %(title)s** vào giỏ hàng không?"
+
+msgid "You can review your items and complete your order at the checkout page."
+msgstr "Bạn có thể xem lại giỏ hàng và hoàn tất đơn hàng ở trang thanh toán."
+
+msgid "Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!"
+msgstr "Xin chào! Mình là trợ lý của Grocerly. Mình có thể giúp bạn tìm sản phẩm, xem giá và nhiều việc khác!"
+
+msgid "Assistant is thinking..."
+msgstr "Trợ lý đang trả lời..."
+
+msgid "Type your message..."
+msgstr "Nhập tin nhắn..."
+
+msgid "Yes, Add to Cart"
+msgstr "Có, thêm vào giỏ"
+
+msgid "Proceed to Checkout"
+msgstr "Tiến hành thanh toán"
+
+msgid "Yes, please add it."
+msgstr "Có, thêm giúp mình nhé."
+
+msgid "✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, or look for something else?"
+msgstr "✅ Giỏ hàng của bạn đã có **{qty}x {title}**. Bạn có muốn **thanh toán** luôn không, hay tìm thêm món khác?"
+
+msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
+msgstr "Kho chỉ còn {qty}, nên giỏ hàng của bạn có **{qty}x {title}**."
+
+msgid "Sorry, {title} has just sold out and was not added to your cart."
+msgstr "Xin lỗi, {title} vừa hết hàng nên chưa được thêm vào giỏ."
+
+msgid "Error:"
+msgstr "Lỗi:"
+
+msgid "Sorry, network error occurred."
+msgstr "Xin lỗi, kết nối mạng đang gặp sự cố."
+
+msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
+msgstr "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"

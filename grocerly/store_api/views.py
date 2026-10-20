@@ -3,6 +3,8 @@ import google.generativeai as genai
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.conf import settings
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Product, Category
@@ -110,18 +112,39 @@ except Exception as e:
 
 @api_view(['POST'])
 def ai_chat(request):
+    # The chat API sits outside i18n_patterns, so the URL does not say which
+    # language the customer is reading. The chat window sends the language of
+    # its page; without one, keep what Django chose from the language cookie
+    # (L-15).
+    language = request.data.get('language')
+    if not isinstance(language, str) or language not in dict(settings.LANGUAGES):
+        language = translation.get_language()
+    with translation.override(language):
+        return _chat_reply(request)
+
+
+def _chat_reply(request):
     if not model or not api_key:
         return Response({
-            "reply": "System Error: Gemini API Key is missing or invalid. Please configure it in .env."
+            "reply": str(_("System Error: Gemini API Key is missing or invalid. Please configure it in .env."))
         }, status=200) # Returns 200 so UI doesn't crash, but shows warning.
-        
+
     user_message = request.data.get('message', '')
     history_data = request.data.get('history', [])
-    
+
     if not user_message:
         return Response({"error": "Empty message"}, status=400)
 
     try:
+        # `history` is what was said before `message`. The chat window used to
+        # put the new message at the end of `history` as well, so Gemini read it
+        # twice and a customer answering "2" was offered 22 (L-13). The window
+        # no longer does that, but a page opened before the fix still sends the
+        # copy. This sits inside `try` because `history` comes from the browser
+        # and may not be a list at all.
+        if history_data and history_data[-1] == {'role': 'user', 'content': user_message}:
+            history_data = history_data[:-1]
+
         # Convert frontend history to gemini history format
         formatted_history = []
         for msg in history_data:
@@ -162,19 +185,27 @@ def ai_chat(request):
 
                 # The assistant may only offer what the customer could buy on
                 # the site itself: a product the shop has hidden is "not found"
-                # here too, and one with nothing left in stock is refused
-                # instead of proposed (L-9). The quantity is not checked here -
-                # the cart brings a line back down to the stock when the
-                # customer confirms (D-024).
+                # here too, one with nothing left in stock is refused instead
+                # of proposed (L-9), and so is a quantity the stock cannot cover
+                # (L-14). Gemini gets the reason so it can tell the customer.
+                # If the stock drops between this question and the customer's
+                # click, the cart still brings the line down to it (D-024).
                 p = published_products().filter(p_id=p_id).first()
+                stock = (p.stock_count or 0) if p else 0
                 if p is None:
                     tool_error = "Product not found"
-                elif (p.stock_count or 0) <= 0:
+                elif stock <= 0:
                     tool_error = "Product is out of stock"
+                elif qty < 1:
+                    tool_error = "Quantity must be at least 1"
+                elif qty > stock:
+                    tool_error = f"Only {stock} left in stock"
                 else:
                     # Interrupt conversation to ask for UI confirmation
                     return Response({
-                        "reply": f"Would you like to add **{qty}x {p.title}** to your cart?",
+                        "reply": str(_("Would you like to add **%(qty)sx %(title)s** to your cart?")) % {
+                            'qty': qty, 'title': p.title,
+                        },
                         "action": "confirm_add_cart",
                         "product": {
                             "id": str(p.id),
@@ -196,7 +227,7 @@ def ai_chat(request):
 
             elif name == "request_checkout":
                 return Response({
-                    "reply": "You can review your items and complete your order at the checkout page.",
+                    "reply": str(_("You can review your items and complete your order at the checkout page.")),
                     "action": "confirm_checkout"
                 })
 
