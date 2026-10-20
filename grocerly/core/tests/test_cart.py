@@ -141,3 +141,45 @@ def test_cart_drops_line_of_product_that_ran_out_of_stock(client, product, add_t
 
     assert cart_lines(client) == {}
     assert response.url == reverse("core:index")  # nothing left to show
+
+# ---------- known defects, not fixed yet ----------
+
+
+@pytest.mark.xfail(reason="L-18: /add-to-cart/ replaces the quantity in the cart instead of adding to it")
+def test_adding_product_already_in_cart_adds_to_its_quantity(client, product, add_to_cart):
+    # The "Add" button on the home page always sends qty=1, so a line of 3 goes
+    # back to 1; asking the assistant for 2 more leaves 2.
+    add_to_cart(client, product, qty=3)
+
+    add_to_cart(client, product, qty=2)
+
+    assert cart_lines(client)[str(product.id)]["qty"] == 5
+
+
+def put_in_cart(client, product, qty):
+    """Write a cart line straight into the session, without calling a cart view."""
+    session = client.session
+    session["cart_data_obj"] = {
+        str(product.id): {"title": product.title, "qty": qty, "price": str(product.price),
+                          "image": "", "pid": product.p_id},
+    }
+    session.save()
+
+
+@pytest.mark.xfail(reason="L-19: the cart changes on a GET request, which any other site can make the browser send")
+def test_add_to_cart_does_not_accept_get_request(client, product):
+    response = client.get(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})
+
+    assert response.status_code == 405
+    assert cart_lines(client) == {}
+
+
+@pytest.mark.xfail(reason="L-19: the cart changes on a GET request, which any other site can make the browser send")
+@pytest.mark.parametrize(("url_name", "params"), [("core:update-cart", {"qty": 4}), ("core:delete-from-cart", {})])
+def test_cart_line_cannot_be_changed_by_get_request(client, product, url_name, params):
+    put_in_cart(client, product, qty=1)
+
+    response = client.get(reverse(url_name), {"id": product.id, **params})
+
+    assert response.status_code == 405
+    assert cart_lines(client)[str(product.id)]["qty"] == 1

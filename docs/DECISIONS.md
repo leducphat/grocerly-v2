@@ -1799,6 +1799,8 @@ JavaScript; `{qty}` và `{title}` điền bằng hàm `fillText`.
   là danh sách (lượt review chỉ ra), và `history` là object hay số. Ca sau do chính
   dòng bỏ bản sao của L-13 gây ra: lúc đầu dòng này nằm ngoài khối `try`, nên view
   lỗi 500 thay vì trả câu báo trục trặc như trước; nay đã chuyển vào trong.
+- Lượt review còn chỉ ra bốn lỗi có từ TLCN, ghi thành L-16 → L-19 trong
+  `COMMITMENT.md` §3, chưa sửa (P-29).
 - Phần JavaScript không có test tự động. Test chỉ kiểm chữ đã dịch, ngôn ngữ và
   đường dẫn giỏ hàng được đưa vào trang. Ngoài bộ test, script render ở cả hai ngôn
   ngữ đã được kiểm cú pháp bằng `node --check`, và ba nhánh của câu báo sau khi
