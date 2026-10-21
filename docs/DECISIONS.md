@@ -1856,8 +1856,10 @@ Endpoint cũng là bước đầu của health check ở P-16.
 - Auto-deploy trên Render phải giữ tắt. Bật lại thì mỗi lần merge Render build hai
   lần, một lần tự nó và một lần do hook.
 - Pipeline có năm chặng như D-034 đã tính. `SDD.md` §3 thêm dòng CI/CD.
-- URL hook trong secret chỉ được kiểm khi job chạy thật lần đầu, ở lần merge kế
-  tiếp vào `main`.
+- Lần chạy thật đầu tiên là lần merge PR #11 ngày 21/10/2026, xanh sau khoảng hai
+  phút. Render nhận hook kèm `ref` và trả mã của lần deploy. `RENDER_GIT_COMMIT` là
+  SHA đầy đủ nên so thẳng được với `github.sha`; tài liệu của Render chỉ ghi "the
+  commit SHA", không nói đầy đủ hay rút gọn.
 - Test: ba test trong `store_api/tests/test_health.py`. Phần shell của job không có
   test tự động. Vòng chờ được chạy thử ở máy với server giả, cho bốn ca: đúng commit,
   commit cũ, chưa có endpoint, không có server. Workflow qua actionlint 1.7.7.
