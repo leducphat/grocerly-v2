@@ -270,6 +270,12 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   thì AI không tìm ra và cũng không đề xuất thêm vào giỏ (D-025).
 - **UC-17:** AI chỉ thêm vào giỏ khi sản phẩm còn hàng; hết hàng → AI từ chối và
   nói rõ là hết hàng, thay vì im lặng hoặc đề nghị thêm.
+- **UC-17:** AI chỉ đề nghị số lượng từ 1 tới số còn trong kho; khách hỏi nhiều hơn
+  thì AI nói kho còn bao nhiêu. Câu báo sau khi khách bấm xác nhận nói đúng số lượng
+  giỏ hàng đang giữ, không lặp lại số AI đã đề nghị (L-14, D-035).
+- **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
+  báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
+  tự sinh không thuộc ràng buộc này (L-15, D-035).
 - **UC-18:** giỏ trống → AI nhắc thêm hàng trước khi thanh toán.
 
 > **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được.

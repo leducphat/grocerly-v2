@@ -1547,6 +1547,322 @@ cảnh cho nhất quán.
   đó bọc trong `translation.override` để trả ngôn ngữ về như cũ.
 
 
+## D-034 · Hạ tầng KLTN: Render, Neon và Cloudinary trên tài khoản mới; Render tự build như TLCN, CI ra lệnh deploy
+
+- **Ngày:** 13/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** D-002 chốt KLTN phải có host, database và nơi lưu ảnh riêng nhưng chưa
+chọn cái nào, và P-11 đứng yên từ đó. Pipeline chưa có chặng deploy (D-019), mà số
+lần deploy là minh chứng không bù lại được: từ Tuần 6 tới Tuần 15 còn mười tuần cho
+ngưỡng mười lần deploy trải đều của TC2.6.
+
+**Phương án đã cân nhắc**
+
+Về host:
+
+1. *Dịch vụ mới trong tài khoản Render đang chạy TLCN* - không phải đăng ký gì.
+   Nhưng Render cho 750 giờ miễn phí mỗi tháng tính chung cho cả workspace, mà một
+   tháng có tới 744 giờ. Giữ KLTN thức suốt thì dịch vụ TLCN gần như không còn giờ;
+   hết giờ là cả hai bị treo tới tháng sau.
+2. *Tài khoản Render mới.*
+3. *Nền tảng khác* như Azure for Students hay một VPS - phải học lại cách vận hành
+   và thêm thứ phải giải thích, trong khi Render đã chạy được cả kỳ TLCN.
+
+Về database:
+
+1. *Postgres miễn phí của Render* - hết hạn sau 30 ngày.
+2. *Neon, project mới trong tài khoản đang có* - database và mật khẩu riêng, chỉ
+   chung trang quản lý với TLCN.
+3. *Neon, tài khoản mới.*
+
+Về dữ liệu ban đầu:
+
+1. *Chỉ xuất danh mục, nhà cung cấp và sản phẩm thành fixture* - không mang theo
+   tài khoản và đơn hàng cũ, nhưng sản phẩm và nhà cung cấp có khóa ngoại trỏ tới
+   user nên phải xử lý chỗ đó và tạo lại tài khoản nhân viên.
+2. *Snapshot toàn bộ database TLCN rồi restore sang database mới.*
+
+Về đường deploy:
+
+1. *Để Render tự deploy mỗi lần `main` có commit mới* - như TLCN. Deploy khi đó
+   không chờ CI và không phải một chặng của pipeline.
+2. *CI dựng image Docker, đẩy lên GitHub Container Registry, Render chạy image đó* -
+   có thêm một chặng đóng gói. Nhưng đồ án không dùng Docker: bộ file Docker trong
+   repo là của đường deploy lên AWS, bỏ từ 12/05/2026 khi TLCN chuyển sang Render
+   với `build.sh`. Đi đường này là đưa vào một thứ chưa từng vận hành và phải giải
+   thích được ở buổi bảo vệ.
+3. *Render tự build bằng `build.sh` như TLCN, nhưng tắt auto-deploy; job deploy
+   trong CI gọi deploy hook của Render sau khi các job khác xanh.*
+
+**Quyết định.** SV chốt ngày 13/10/2026: host (2), database (3), dữ liệu (2),
+deploy (3).
+
+- Host: web service gói free trên một tài khoản Render mới, build bằng `build.sh`
+  như TLCN.
+- Database: PostgreSQL trên một tài khoản Neon mới.
+- Ảnh: một tài khoản Cloudinary mới. Ảnh cũ chép sang bằng lệnh `cld clone` của
+  Cloudinary CLI, phía TLCN chỉ bị đọc.
+- Dữ liệu: chép toàn bộ database TLCN sang project Neon mới bằng Import Data
+  Assistant của Neon, làm ngày 15/10/2026. Hai migration `0005` và `0006` được áp ở
+  lần build đầu trên Render.
+- Deploy: tắt auto-deploy trên Render; job deploy trong CI gọi deploy hook khi
+  `main` có commit mới và các job còn lại đã xanh.
+
+**Lý do.** Giữ nguyên ba loại dịch vụ đã vận hành ở TLCN thì không có mảnh nào phải
+học lại, và `SDD.md` vẫn đúng. Tách bằng tài khoản mới thì không còn gì dùng chung
+với TLCN, kể cả hạn mức miễn phí, và không phải lo chuyện mở thêm workspace trong
+tài khoản cũ có bị tính tiền hay không.
+
+Snapshot toàn bộ gọn hơn fixture: một lần chép, chỉ đọc phía TLCN, ra bản sao đúng
+từng dòng, và hai migration `0005`, `0006` được chạy lần đầu trên dữ liệu thật. Làm được
+vậy vì database mới vẫn là PostgreSQL.
+
+Để Render tự build là đường TLCN đang chạy, không thêm gì phải học. Cho CI ra lệnh
+deploy thì bản làm test đỏ không lên được trang thật, và mỗi lần deploy để lại một
+dòng trong lịch sử chạy của GitHub Actions.
+
+**Hệ quả.**
+- Xóa bảy file của đường deploy AWS cũ: `Dockerfile`, `.dockerignore`,
+  `docker-compose.yml`, `entrypoint.sh`, `nginx/default.conf`, `ec2-setup.sh`,
+  `ecr-lifecycle-policy.json`. Chúng không được dùng từ 12/05/2026. Để lại còn có
+  hại: `Dockerfile` chép cả thư mục vào image mà `.dockerignore` không loại `.env`,
+  nên ai dựng image ở máy làm việc là mang theo `.env` của TLCN.
+- `build.sh` chạy `migrate` ở cuối mỗi lần build, nên lần deploy đầu áp `0005` và
+  `0006` lên database mà `DATABASE_URL` của dịch vụ trỏ tới. Kiểm biến đó trước lần
+  deploy đầu.
+- Lệnh build, lệnh chạy và bản Python của dịch vụ nằm trong trang cài đặt của
+  Render chứ không nằm trong repo. Chép từ dịch vụ TLCN, ghim Python 3.12 cho khớp
+  CI.
+- Không có chặng đóng gói. Thêm deploy thì pipeline có năm chặng: build, lint và
+  phân tích tĩnh, test, quét secret, deploy. Chặng thứ sáu của Mức 5 phải là việc
+  có thật, như kiểm tra trang sau khi deploy (P-16) hay quét thư viện có lỗ hổng;
+  cách đếm chốt ở bản cam kết (P-03).
+- `.env.example` viết lại theo đúng các key ứng dụng đọc: thêm nhóm `VNPAY_*` (việc
+  D-002 để lại), bỏ `STRIPE_*` vì không còn dòng code nào đọc, bỏ các dòng nhắc EC2
+  và RDS. `AGENTS.md`/`CLAUDE.md` §10 bỏ hai key Stripe.
+- Lúc đầu định chép bằng `pg_dump` và `pg_restore` qua pgAdmin. `pg_dump` đi kèm
+  pgAdmin trên máy làm việc không chạy được vì thiếu `gssapi64.dll`, mà cài riêng
+  bộ công cụ PostgreSQL chỉ để chép một lần thì tốn công hơn, nên chuyển sang Import
+  Data Assistant: chạy trên web, phía TLCN chỉ bị đọc. Công cụ này đang là bản beta
+  và chỉ nhận database dưới 10 GB.
+- Không có file sao lưu nào trên máy. Cần một điểm để quay lại, ví dụ trước mỗi
+  buổi thực nghiệm, thì tạo một branch trong project Neon mới. Database KLTN bắt
+  đầu với tài khoản và đơn hàng cũ, nên doanh thu trên dashboard gồm cả đơn trước
+  ngày chuyển.
+- Không cho ứng dụng KLTN trỏ vào Cloudinary của TLCN, kể cả tạm: gói
+  `django-cleanup` xóa file thật trên storage khi ảnh của một bản ghi bị thay hoặc
+  bản ghi bị xóa.
+- Gói free của Render ngủ sau 15 phút không có truy cập, lần mở đầu sau đó mất
+  khoảng một phút. Monitor của P-16 ping đều thì trang thức suốt, khoảng 744 giờ
+  mỗi tháng, vừa trong 750 giờ của tài khoản mới. Không đủ thì nâng gói trong các
+  tuần thực nghiệm và bảo vệ, không phải dựng lại.
+- Ảnh chép ngày 15/10/2026. `cld clone` giữ nguyên public ID: mã nguồn của lệnh
+  chép trường `public_id` của từng file, và sau khi chép, cả 133 cặp loại file và
+  public ID bên TLCN đều có bên tài khoản mới. Database lưu đường dẫn ảnh theo
+  public ID nên không phải sửa gì. Lệnh chép cả tài khoản, nên 29 file trong thư
+  mục `techstore/` của một dự án khác dùng chung tài khoản TLCN cũng sang theo;
+  xóa bên tài khoản mới thì không ảnh hưởng TLCN.
+- Merchant VNPay sandbox: tạo mới, SV chốt ngày 14/10/2026, VNPay cấp ngày
+  15/10/2026. Lúc chốt, lý do ghi ở đây là URL IPN gửi cho VNPay một lần cho cả
+  merchant, nên dùng lại merchant của TLCN thì IPN của KLTN có thể chạy về host
+  TLCN. Khi đưa key mới vào mới thấy TLCN không có merchant riêng: `.env` của TLCN
+  dùng merchant demo công khai in sẵn trong code mẫu của VNPay, comment ngay trên
+  hai dòng key ghi là để tránh lỗi sai chữ ký của tài khoản sandbox cũ. Merchant
+  dùng chung thì không ai gửi được URL IPN của mình, nên `vnpay_ipn` chưa từng được
+  VNPay gọi thật; ở TLCN đơn chỉ thành đã thanh toán qua `vnpay_return`. Tạo mới
+  vẫn đúng, nhưng vì lý do này.
+- Key mới thử ngày 15/10/2026: một yêu cầu thanh toán ký bằng `core/vnpay.py` vào
+  tới trang chọn phương thức của sandbox, còn cùng yêu cầu ký bằng secret sai thì
+  VNPay báo lỗi 70 "Sai chữ ký". Key nằm trong `.env` ở máy và trong biến môi trường
+  của Render, không ghi vào repo. URL IPN của merchant mới
+  (`/vi/payment/vnpay_ipn/` trên host KLTN, phải là HTTPS) gửi cho VNPay khi host
+  đã chạy, rồi chạy bộ kịch bản SIT mà VNPay cấp cho URL IPN.
+- Ở sandbox, URL IPN tự đặt được, không phải gửi mail: đăng nhập merchant admin rồi
+  mở thẳng `https://sandbox.vnpayment.vn/merchantv2/Account/TerminalEdit.htm`. Giao
+  diện merchant admin không có nút nào dẫn tới trang này (SV tìm ngày 15/10/2026),
+  nên phải nhớ đường dẫn. Trang có ba ô: IPN Url, giao thức `GET`, kiểu mã hóa
+  `HMACSHA512`; hai ô sau phải giữ như vậy vì `vnpay_ipn` chỉ đọc `request.GET` và
+  `core/vnpay.py` ký bằng HMAC-SHA512. Thông báo "Link thanh toán chuyển sang hệ thống mới" ở
+  trang đăng nhập nói về tính năng tạo link thanh toán, đồ án không dùng.
+- Bỏ bộ kịch bản SIT, SV chốt ngày 15/10/2026. VNPay chỉ đòi SIT trước khi cấp
+  merchant thật, còn KLTN chỉ dùng sandbox, và rubric không nhắc tới SIT. Trang SIT
+  lại không nhận mật khẩu đăng ký merchant (đòi đủ chữ thường, in hoa, số, ký tự đặc
+  biệt), muốn vào phải đổi mật khẩu. Thay bằng sáu test cho các nhánh của
+  `vnpay_ipn` trong `core/tests/test_payment.py`: chạy lại được ở mỗi lần CI chạy,
+  SIT thì chạy một lần là hết. Bằng chứng từ phía VNPay chỉ có lần thanh toán thật
+  ngày 15/10/2026 (144.000 VND, thẻ NCB thử): chi tiết giao dịch có pha Confirm mã
+  `00`, nhiều khả năng là lượt gọi IPN nhưng trang không ghi rõ.
+- Còn ngỏ: tài liệu tích hợp của VNPay dặn URL quay về chỉ để hiển thị, không cập
+  nhật database; `vnpay_return` vẫn ghi `paid_status` (D-023). Ở TLCN đó là đường
+  duy nhất làm đơn thành đã thanh toán. Giữ hay bỏ thì quyết sau khi IPN chạy được
+  trên host KLTN.
+- Key Gemini: tạo key mới cho KLTN, SV chốt ngày 15/10/2026.
+- Dịch vụ trên Render: `https://grocerly-v2.onrender.com`, deploy lần đầu thành công
+  ngày 15/10/2026.
+- Gói `stripe` trong `requirements.txt` không còn dòng code nào dùng; gỡ ở bước dọn
+  của P-11.
+- `SDD.md` chưa phải sửa vì bảng công nghệ vẫn đúng. Thêm chặng deploy vào đó khi
+  pipeline chạy thật.
+- Các bước của P-11 ở `PLAN.md` §4.
+
+
+## D-035 · Sửa ba lỗi của khung chat AI: mỗi tin nhắn tới Gemini một lần, AI chỉ đề nghị số lượng kho có, chữ cố định theo ngôn ngữ của trang
+
+- **Ngày:** 20/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Ngày 15/10/2026, lần đầu chạy thử chat trên host KLTN, SV hỏi mua 2
+thùng thì AI đề nghị 22, bấm xác nhận thì AI báo đã thêm 22 trong khi giỏ chỉ có 3
+vì kho còn 3. Câu hỏi xác nhận và nút bấm lại hiện tiếng Anh giữa cuộc trò chuyện
+tiếng Việt. Ba lỗi đã ghi ở `COMMITMENT.md` §3 thành L-13, L-14, L-15, mỗi lỗi kèm
+một hướng sửa. Lúc bắt tay sửa thì mỗi lỗi có hơn một cách hợp lý, nên ghi chung
+một quyết định.
+
+**Phương án đã cân nhắc**
+
+Về L-13 (tin nhắn mới tới Gemini hai lần):
+
+1. *Chỉ sửa JavaScript:* lấy `history` trước khi đẩy tin nhắn mới vào. Đúng gốc,
+   nhưng dự án không có công cụ chạy test JavaScript nên không test nào giữ được
+   bản sửa, và trang khách mở trước lần deploy vẫn gửi bản sao.
+2. *Chỉ sửa máy chủ:* `ai_chat` bỏ phần tử cuối của `history` nếu đó chính là tin
+   nhắn mới. Test được, nhưng trình duyệt vẫn gửi dữ liệu sai nghĩa của hai trường.
+3. *Sửa cả hai.*
+
+Về L-14 (số lượng):
+
+1. *Giữ như cũ, để giỏ hạ số lượng (D-024), chỉ sửa câu báo.* Khách vẫn bị hỏi
+   "thêm 22?" rồi nhận 3.
+2. *AI tự hạ số lượng về tồn kho rồi mới hỏi.* Khách không biết vì sao số bị đổi,
+   và AI quyết thay khách.
+3. *Từ chối số lượng ngoài khoảng 1 tới tồn kho và báo lý do cho Gemini, giống
+   cách L-9 làm với hàng hết; câu báo sau khi thêm đọc số lượng giỏ trả về.*
+
+Về L-15 (ngôn ngữ): API `/api/v1/` cố ý nằm ngoài `i18n_patterns`, còn
+`ForceDefaultLanguageMiddleware` xóa header `Accept-Language`, nên máy chủ chỉ biết
+ngôn ngữ của khách qua cookie.
+
+1. *Dựa vào cookie ngôn ngữ.* Không thêm code, nhưng cookie chỉ có khi khách đổi
+   ngôn ngữ bằng ô chọn; khách mở thẳng một link `/en/...` vẫn nhận câu tiếng Việt.
+2. *Khung chat gửi kèm ngôn ngữ của trang; máy chủ chỉ nhận `vi` hoặc `en`, thiếu
+   hay lạ thì giữ ngôn ngữ Django đã chọn từ cookie.*
+3. *Dùng `JavaScriptCatalog` của Django để JavaScript tự dịch.* Thêm một route và
+   một file script chỉ để dịch tám câu, trong khi template dịch được sẵn.
+
+**Quyết định.** L-13 chọn (3), L-14 chọn (3), L-15 chọn (2) và dịch chữ của
+JavaScript ngay trong template.
+
+**Lý do.** Với L-13, chỗ sửa chính là JavaScript. Dòng kiểm ở máy chủ là lưới đỡ
+cho trang mở trước lần deploy, và là phần duy nhất pytest giữ được. Nó chỉ bỏ bản
+sao nằm ngay cuối `history`: khách nói "2" ở lượt trước rồi lại nói "2" thì giữa hai
+lượt có câu của AI, lượt cũ vẫn ở lại. Cái giá là một ca hiếm: trên trang cũ, lần
+gửi trước lỗi mạng rồi khách gõ lại đúng câu đó, thì máy chủ cũng bỏ bản cũ, tức là
+Gemini đọc câu ấy một lần thay vì hai.
+
+Với L-14, Gemini biết lý do nên nói được "kho chỉ còn 10", và khách tự quyết có lấy
+10 hay không. Số lượng nhỏ hơn 1 bị chặn luôn vì nằm ở cùng chỗ kiểm: trước đây
+Gemini gửi 0 hay số âm thì AI vẫn hỏi "thêm 0x ...". Câu báo phải đọc số từ giỏ vì
+giữa lúc AI hỏi và lúc khách bấm, kho vẫn có thể giảm; giỏ hạ số lượng theo D-024,
+câu báo nói đúng số đó, còn hàng hết hẳn thì câu báo nói là chưa thêm được.
+
+Với L-15, trang luôn biết chắc nó đang ở ngôn ngữ nào nhờ tiền tố URL, cookie thì
+không chắc có. Tám câu cố định của JavaScript dịch bằng `{% trans %}` ngay trong
+`base.html` và đi qua `escapejs`, để một bản dịch có dấu nháy không làm vỡ chuỗi
+JavaScript; `{qty}` và `{title}` điền bằng hàm `fillText`.
+
+**Hệ quả.**
+- Request tới `/api/v1/chat/` có thêm trường `language`. `SDD.md` chưa mô tả API
+  chat nên không có chỗ phải sửa.
+- `ai_chat` giờ chỉ chọn ngôn ngữ rồi gọi `_chat_reply`; thân cũ chuyển nguyên sang
+  hàm đó, vì bọc `translation.override` quanh cả thân thì phải lùi lề cả trăm dòng.
+  `override` trả ngôn ngữ về như cũ khi xong, tránh chuyện ngôn ngữ dính lại cho cả
+  luồng mà D-033 đã gặp.
+- Câu báo sau khi thêm đổi từ "Đã thêm ... thành công" thành "Giỏ hàng của bạn đã
+  có ...". `/add-to-cart/` đặt số lượng của dòng giỏ chứ không cộng thêm, nên với
+  sản phẩm đã có trong giỏ thì "đã thêm 2" sai, còn "giỏ có 2" đúng.
+- Ba câu báo lỗi kết nối và tạm hết lượt Gemini có msgid tiếng Việt từ TLCN, bản
+  tiếng Anh để trống, nên khách ở `/en/` vẫn đọc tiếng Việt. Lần này điền bản tiếng
+  Anh vào `locale/en`, không đổi msgid. Câu hết lượt theo ngày chưa từng có trong
+  file dịch, nay thêm vào cả hai. `locale/en/LC_MESSAGES/django.mo` lần đầu có mục
+  được dịch; cả hai `.mo` biên dịch bằng polib như D-033, đối chiếu với `.po` trước
+  và sau khi ghi.
+- Nút "Tiến hành thanh toán" của khung chat đi tới `{% url 'core:cart' %}` thay cho
+  `/cart/` viết cứng. Trước đây khách ở `/en/` chưa có cookie bấm vào thì sang
+  `/vi/cart/`.
+- `/add-to-cart/` lỗi khi gọi từ khung chat thì khách thấy câu báo lỗi kết nối,
+  trước đây không hiện gì.
+- Lời AI tự sinh vẫn theo ngôn ngữ khách gõ, không thuộc quyết định này.
+- Test: mười lăm test mới trong `store_api/tests/test_ai_chat.py`. Mười hai viết
+  trước, chạy thấy chín đỏ rồi mới sửa; không qua giai đoạn `xfail`, cùng lý do
+  với L-12. Ba test thêm sau, đều là ca trình duyệt gửi dữ liệu sai kiểu: `language`
+  là danh sách (lượt review chỉ ra), và `history` là object hay số. Ca sau do chính
+  dòng bỏ bản sao của L-13 gây ra: lúc đầu dòng này nằm ngoài khối `try`, nên view
+  lỗi 500 thay vì trả câu báo trục trặc như trước; nay đã chuyển vào trong.
+- Lượt review còn chỉ ra bốn lỗi có từ TLCN, ghi thành L-16 → L-19 trong
+  `COMMITMENT.md` §3, chưa sửa (P-29).
+- Phần JavaScript không có test tự động. Test chỉ kiểm chữ đã dịch, ngôn ngữ và
+  đường dẫn giỏ hàng được đưa vào trang. Ngoài bộ test, script render ở cả hai ngôn
+  ngữ đã được kiểm cú pháp bằng `node --check`, và ba nhánh của câu báo sau khi
+  thêm (giỏ nhận đủ, giỏ hạ số lượng, hàng vừa hết) được chạy thử một lần trong
+  Node với giỏ giả.
+
+## D-036 · Job deploy trong CI chờ tới khi trang chạy đúng commit vừa test, hỏi qua endpoint `/api/v1/health/`
+
+- **Ngày:** 21/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** D-034 chốt tắt auto-deploy của Render, để một job trong CI gọi deploy
+hook khi `main` có commit mới (P-11 bước 7). Gọi hook chỉ là ra lệnh. Render trả lời
+ngay khi nhận lệnh, còn việc build chạy thêm vài phút nữa và vẫn có thể hỏng ở `pip
+install` hay `migrate`. Job dừng ở lệnh gọi thì lần nào cũng xanh, kể cả khi trang
+vẫn chạy bản cũ, và số lần deploy đếm cho TC2.6 sẽ gồm cả những lần không lên được.
+
+**Phương án đã cân nhắc**
+1. *Chỉ gọi hook.* Không thêm gì, nhưng xanh không có nghĩa là đã deploy.
+2. *Chờ trang chủ trả 200.* Bản cũ cũng trả 200, nên không phân biệt được cũ với mới.
+3. *Hỏi API của Render trạng thái lần deploy vừa tạo.* Đúng thông tin, nhưng phải
+   đặt thêm một API key của Render vào GitHub. Theo tài liệu API của Render, key "provides
+   access to *all* workspaces you belong to", và tài liệu không có cách nào giới hạn
+   key theo service hay chỉ cho đọc.
+4. *Thêm endpoint `/api/v1/health/` trả commit trang đang chạy; job hỏi nó tới khi
+   khớp commit vừa test.* Render tự đặt biến `RENDER_GIT_COMMIT` cho mỗi lần deploy.
+   Phải thêm một route và test cho nó.
+
+**Quyết định.** Phương án 4, SV chốt ngày 21/10/2026.
+
+**Lý do.** Trong bốn cách, chỉ cách này vừa trả lời đúng câu "trang đã chạy bản mới
+chưa" vừa không cần secret nào ngoài URL hook. Render giữ server cũ phục vụ cho tới
+khi server mới khởi động xong, build hỏng thì hủy lần deploy và giữ server cũ (trang
+Deploys trong tài liệu của Render). Vì vậy chừng nào endpoint còn trả commit cũ thì
+bản mới chưa lên, còn build hỏng thì không bao giờ khớp và job đỏ khi hết hạn chờ.
+Endpoint cũng là bước đầu của health check ở P-16.
+
+**Hệ quả.**
+- Job `deploy` trong `.github/workflows/ci.yml` chỉ chạy khi có push lên `main` và
+  bốn job kia đã xanh. Nó gọi hook kèm `ref=<sha>` để Render build đúng commit CI vừa
+  test, không phải commit mới nhất của `main` lúc build bắt đầu; tài liệu deploy hook
+  của Render cho phép tham số này, SHA không có trong repo thì trả 404. Sau đó cứ 20
+  giây hỏi `/api/v1/health/` một lần, quá 15 phút thì đỏ. Gói free có thể đang ngủ,
+  lần hỏi đầu mất khoảng một phút, nên mỗi lần hỏi chờ tối đa 90 giây.
+- Job gắn với GitHub Environment `production`, SV tạo ngày 21/10/2026: chỉ nhánh
+  `main` được deploy, không có bước duyệt tay, URL hook là secret của Environment nên
+  các job chạy trên PR không đọc được. Mỗi lần job chạy thành một dòng ở trang
+  Deployments của repo, có ngày và commit. Đó là chỗ đếm số lần deploy cho TC2.6.
+- Endpoint không cần đăng nhập và không đụng database. Ai cũng đọc được SHA của
+  commit đang chạy, nhưng repo để public nên không lộ thêm gì. Ngoài Render endpoint
+  trả `"unknown"`, không bao giờ trùng một SHA thật. Kiểm database hay Gemini là việc
+  của P-16, chưa làm ở đây.
+- Auto-deploy trên Render phải giữ tắt. Bật lại thì mỗi lần merge Render build hai
+  lần, một lần tự nó và một lần do hook.
+- Pipeline có năm chặng như D-034 đã tính. `SDD.md` §3 thêm dòng CI/CD.
+- URL hook trong secret chỉ được kiểm khi job chạy thật lần đầu, ở lần merge kế
+  tiếp vào `main`.
+- Test: ba test trong `store_api/tests/test_health.py`. Phần shell của job không có
+  test tự động. Vòng chờ được chạy thử ở máy với server giả, cho bốn ca: đúng commit,
+  commit cũ, chưa có endpoint, không có server. Workflow qua actionlint 1.7.7.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

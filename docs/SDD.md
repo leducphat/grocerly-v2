@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Tách từ [`SRS.md`](SRS.md) Mục 7–9 ngày 11/09/2026 (P-07, D-011); nội dung gốc chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 11/09/2026 |
+| Cập nhật | 21/10/2026 |
 
 > **Phạm vi của tài liệu này.** SDD trả lời câu hỏi *hệ thống được xây như thế
 > nào*: mô hình dữ liệu, giao diện, công nghệ và thiết kế các thành phần. Còn *hệ
@@ -84,6 +84,7 @@ phẩm · Quản lý Đơn hàng
 | Trí tuệ nhân tạo | Google Gemini API (function calling) |
 | Thanh toán | VNPay (Sandbox) + COD |
 | Triển khai | Nền tảng PaaS đám mây |
+| CI/CD | GitHub Actions, năm chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036) |
 | CSDL đám mây | Serverless Postgres |
 | Lưu trữ media | Cloudinary (CDN) |
 

@@ -948,12 +948,12 @@
         <div class="chatbot-body" id="chatbot-body" style="display: none;">
             <div class="chat-messages" id="chat-messages">
                 <div class="chat-message bot-message">
-                    Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!
+                    {% trans "Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!" %}
                 </div>
             </div>
-            <div id="typing-indicator" class="typing-indicator">Assistant is thinking...</div>
+            <div id="typing-indicator" class="typing-indicator">{% trans "Assistant is thinking..." %}</div>
             <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleChatEnter(event)">
+                <input type="text" id="chat-input" placeholder="{% trans 'Type your message...' %}" onkeypress="handleChatEnter(event)">
                 <button onclick="sendChatMessage()"><i class="fi-rs-paper-plane" style="color: white;"></i></button>
             </div>
         </div>
@@ -974,8 +974,27 @@
         .typing-indicator { display: none; padding: 5px 15px; font-style: italic; color: #777; font-size: 12px; background: #f8f9fa; }
     </style>
 
+    {% get_current_language as chat_language %}
     <script>
         let chatHistory = JSON.parse(sessionStorage.getItem('grocerlyChatHistory')) || [];
+
+        // Fixed text of the chat window, translated by Django like the rest of
+        // the page (L-15). escapejs keeps a translation from breaking out of its
+        // JavaScript string. fillText() puts in {qty} and {title}.
+        const CHAT_TEXT = {
+            addButton: "{% trans 'Yes, Add to Cart' as t %}{{ t|escapejs }}",
+            checkoutButton: "{% trans 'Proceed to Checkout' as t %}{{ t|escapejs }}",
+            yesAdd: "{% trans 'Yes, please add it.' as t %}{{ t|escapejs }}",
+            added: "{% trans '✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, or look for something else?' as t %}{{ t|escapejs }}",
+            lessAdded: "{% trans 'Only {qty} left in stock, so your cart now has **{qty}x {title}**.' as t %}{{ t|escapejs }}",
+            soldOut: "{% trans 'Sorry, {title} has just sold out and was not added to your cart.' as t %}{{ t|escapejs }}",
+            error: "{% trans 'Error:' as t %}{{ t|escapejs }}",
+            networkError: "{% trans 'Sorry, network error occurred.' as t %}{{ t|escapejs }}",
+        };
+
+        function fillText(text, values) {
+            return text.replace(/\{(\w+)\}/g, (match, key) => values[key]);
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             if (chatHistory.length > 0) {
@@ -1022,6 +1041,11 @@
             const text = input.value.trim();
             if (!text) return;
 
+            // The server gets the new message on its own in `message`, and
+            // `history` is what was said before it. Sending the message in both
+            // made Gemini read it twice (L-13), so the history is taken first.
+            const history = chatHistory.slice();
+
             // Display user msg
             appendMessage('user', text);
             chatHistory.push({role: 'user', content: text});
@@ -1039,7 +1063,8 @@
                 },
                 body: JSON.stringify({
                     message: text,
-                    history: chatHistory
+                    history: history,
+                    language: "{{ chat_language }}"
                 })
             })
             .then(response => response.json())
@@ -1056,20 +1081,20 @@
 
                     if (data.action === "confirm_add_cart") {
                         const p = data.product;
-                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="aiConfirmCartAdd('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${p.qty}')">Yes, Add to Cart</button>`;
+                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="aiConfirmCartAdd('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${p.qty}')">${CHAT_TEXT.addButton}</button>`;
                         appendMessage('bot', btnHtml);
                     } else if (data.action === "confirm_checkout") {
-                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="window.location.href='/cart/'">Proceed to Checkout</button>`;
+                        const btnHtml = `<button style="margin-top:10px; width:100%; border-radius:5px;" class="btn btn-sm btn-success" onclick="window.location.href='{% url 'core:cart' %}'">${CHAT_TEXT.checkoutButton}</button>`;
                         appendMessage('bot', btnHtml);
                     }
 
                 } else if(data.error) {
-                    appendMessage('bot', "Error: " + data.error);
+                    appendMessage('bot', CHAT_TEXT.error + " " + data.error);
                 }
             })
             .catch(err => {
                 document.getElementById('typing-indicator').style.display = 'none';
-                appendMessage('bot', "Sorry, network error occurred.");
+                appendMessage('bot', CHAT_TEXT.networkError);
                 console.error(err);
             });
         }
@@ -1092,8 +1117,8 @@
         // `title` is only used to write the reply; the cart line is built from
         // the database on the server side.
         function aiConfirmCartAdd(id, title, qty) {
-            appendMessage('user', "Yes, please add it.");
-            chatHistory.push({role: 'user', content: "Yes, please add it."});
+            appendMessage('user', CHAT_TEXT.yesAdd);
+            chatHistory.push({role: 'user', content: CHAT_TEXT.yesAdd});
 
             $.ajax({
                 url: '/add-to-cart/',
@@ -1104,12 +1129,26 @@
                 dataType: 'json',
                 success: function(response){
                     $(".cart-items-count").text(response.totalcartitems);
-                    
-                    const botReply = `✅ Đã thêm **${qty}x ${title}** vào giỏ hàng thành công! Bạn có muốn tiến hành **Thanh toán (Checkout)** luôn không, hay muốn tìm thêm đồ gì khác?`;
+
+                    // Say what the cart holds now, not what was proposed: the
+                    // cart brings the line down to the stock, or drops it if the
+                    // stock ran out after the assistant asked (L-14).
+                    const line = response.data[id];
+                    let botReply;
+                    if (!line) {
+                        botReply = fillText(CHAT_TEXT.soldOut, {title: title});
+                    } else if (line.qty < Number(qty)) {
+                        botReply = fillText(CHAT_TEXT.lessAdded, {qty: line.qty, title: title});
+                    } else {
+                        botReply = fillText(CHAT_TEXT.added, {qty: line.qty, title: title});
+                    }
                     appendMessage('bot', botReply);
-                    
+
                     chatHistory.push({role: 'assistant', content: botReply});
                     sessionStorage.setItem('grocerlyChatHistory', JSON.stringify(chatHistory));
+                },
+                error: function() {
+                    appendMessage('bot', CHAT_TEXT.networkError);
                 }
             });
         }

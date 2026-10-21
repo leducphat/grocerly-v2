@@ -204,7 +204,7 @@ msgid "My Wishlist"
 msgstr ""
 
 msgid "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"
-msgstr ""
+msgstr "I am having trouble connecting. Please try again later!"
 
 msgid "Need help? Call Us:"
 msgstr ""
@@ -459,10 +459,10 @@ msgid "← Quay về Trang Chủ"
 msgstr ""
 
 msgid "⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi **%(wait_seconds)s giây** rồi thử lại nhé!"
-msgstr ""
+msgstr "⏳ The AI assistant is paused by its free usage limit. Please wait **%(wait_seconds)s seconds** and try again!"
 
 msgid "⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 giây rồi thử lại nhé!"
-msgstr ""
+msgstr "⏳ The AI assistant is paused by its free usage limit. Please wait about 30 seconds and try again!"
 
 # --- Order status (D-033) ---
 # The context keeps these apart from "Shipping" above, which is the shipping fee.
@@ -486,3 +486,50 @@ msgstr ""
 msgid "This order has been cancelled."
 msgstr ""
 
+# --- AI chat window (L-13 to L-15, D-035) ---
+
+msgid "System Error: Gemini API Key is missing or invalid. Please configure it in .env."
+msgstr ""
+
+#, python-format
+msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
+msgstr ""
+
+msgid "You can review your items and complete your order at the checkout page."
+msgstr ""
+
+msgid "Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!"
+msgstr ""
+
+msgid "Assistant is thinking..."
+msgstr ""
+
+msgid "Type your message..."
+msgstr ""
+
+msgid "Yes, Add to Cart"
+msgstr ""
+
+msgid "Proceed to Checkout"
+msgstr ""
+
+msgid "Yes, please add it."
+msgstr ""
+
+msgid "✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, or look for something else?"
+msgstr ""
+
+msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
+msgstr ""
+
+msgid "Sorry, {title} has just sold out and was not added to your cart."
+msgstr ""
+
+msgid "Error:"
+msgstr ""
+
+msgid "Sorry, network error occurred."
+msgstr ""
+
+msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
+msgstr "🛑 The AI assistant has used up its free quota (500 messages a day). Please come back tomorrow!"
