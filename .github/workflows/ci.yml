@@ -1,11 +1,12 @@
 # Continuous integration for Grocerly. See docs/DECISIONS.md D-019.
 #
 # Runs on every push to develop/main and on every pull request into main.
-# Nothing here reads grocerly/.env or reaches a real service: Django runs with
-# grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini key).
-# Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
-# (D-030) run as their own jobs. The deploy job (P-11, D-034) is added when the
-# KLTN hosting exists.
+# The test jobs never read grocerly/.env or reach a real service: Django runs
+# with grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini
+# key). Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
+# (D-030) run as their own jobs. The deploy job (P-11, D-034, D-036) is the only
+# one that reaches a real service, and it runs only on a push to main, after
+# every other job has passed.
 
 name: CI
 
@@ -172,3 +173,52 @@ jobs:
           name: coverage-xml
           path: grocerly/coverage.xml
           if-no-files-found: ignore
+
+  deploy:
+    name: Deploy to Render
+    # Pull requests and develop stop at the jobs above. The production
+    # environment on GitHub only accepts main and holds the deploy hook, so no
+    # other job can read it, and every run of this job is listed as a deployment.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [twin-files, lint, secret-scan, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: https://grocerly-v2.onrender.com
+    env:
+      SITE_URL: https://grocerly-v2.onrender.com
+    steps:
+      # The hook URL ends in ?key=..., which is Render's secret, so it is kept in
+      # a secret and never echoed. ref= makes Render build exactly the commit
+      # tested above, not whatever main points to when the build starts. The
+      # answer only holds the id of the new deploy.
+      - name: Ask Render to deploy this commit
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: curl -fsS -X POST "${DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}"
+
+      # Render runs build.sh (install, collectstatic, migrate) and only then
+      # moves traffic to the new server, so until that moment the health
+      # endpoint still names the old commit. A build that fails never gets
+      # there, and the job turns red at the deadline. The free plan may also be
+      # asleep, which costs about a minute on the first request.
+      - name: Wait until the site runs this commit
+        run: |
+          deadline=$((SECONDS + 15 * 60))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            running=$(curl -fsS --max-time 90 "$SITE_URL/api/v1/health/" | jq -r '.commit' || true)
+            echo "Site runs: ${running:-no answer}"
+            if [ "$running" = "$GITHUB_SHA" ]; then
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "The site did not switch to $GITHUB_SHA within 15 minutes."
+          exit 1
+
+      - name: Write deploy result to the run summary
+        if: always()
+        run: |
+          echo "## Deploy" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit ${GITHUB_SHA} on ${SITE_URL}: ${{ job.status }}" >> "$GITHUB_STEP_SUMMARY"

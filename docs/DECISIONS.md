@@ -1807,6 +1807,61 @@ JavaScript; `{qty}` và `{title}` điền bằng hàm `fillText`.
   thêm (giỏ nhận đủ, giỏ hạ số lượng, hàng vừa hết) được chạy thử một lần trong
   Node với giỏ giả.
 
+## D-036 · Job deploy trong CI chờ tới khi trang chạy đúng commit vừa test, hỏi qua endpoint `/api/v1/health/`
+
+- **Ngày:** 21/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** D-034 chốt tắt auto-deploy của Render, để một job trong CI gọi deploy
+hook khi `main` có commit mới (P-11 bước 7). Gọi hook chỉ là ra lệnh. Render trả lời
+ngay khi nhận lệnh, còn việc build chạy thêm vài phút nữa và vẫn có thể hỏng ở `pip
+install` hay `migrate`. Job dừng ở lệnh gọi thì lần nào cũng xanh, kể cả khi trang
+vẫn chạy bản cũ, và số lần deploy đếm cho TC2.6 sẽ gồm cả những lần không lên được.
+
+**Phương án đã cân nhắc**
+1. *Chỉ gọi hook.* Không thêm gì, nhưng xanh không có nghĩa là đã deploy.
+2. *Chờ trang chủ trả 200.* Bản cũ cũng trả 200, nên không phân biệt được cũ với mới.
+3. *Hỏi API của Render trạng thái lần deploy vừa tạo.* Đúng thông tin, nhưng phải
+   đặt thêm một API key của Render vào GitHub. Theo tài liệu API của Render, key "provides
+   access to *all* workspaces you belong to", và tài liệu không có cách nào giới hạn
+   key theo service hay chỉ cho đọc.
+4. *Thêm endpoint `/api/v1/health/` trả commit trang đang chạy; job hỏi nó tới khi
+   khớp commit vừa test.* Render tự đặt biến `RENDER_GIT_COMMIT` cho mỗi lần deploy.
+   Phải thêm một route và test cho nó.
+
+**Quyết định.** Phương án 4, SV chốt ngày 21/10/2026.
+
+**Lý do.** Trong bốn cách, chỉ cách này vừa trả lời đúng câu "trang đã chạy bản mới
+chưa" vừa không cần secret nào ngoài URL hook. Render giữ server cũ phục vụ cho tới
+khi server mới khởi động xong, build hỏng thì hủy lần deploy và giữ server cũ (trang
+Deploys trong tài liệu của Render). Vì vậy chừng nào endpoint còn trả commit cũ thì
+bản mới chưa lên, còn build hỏng thì không bao giờ khớp và job đỏ khi hết hạn chờ.
+Endpoint cũng là bước đầu của health check ở P-16.
+
+**Hệ quả.**
+- Job `deploy` trong `.github/workflows/ci.yml` chỉ chạy khi có push lên `main` và
+  bốn job kia đã xanh. Nó gọi hook kèm `ref=<sha>` để Render build đúng commit CI vừa
+  test, không phải commit mới nhất của `main` lúc build bắt đầu; tài liệu deploy hook
+  của Render cho phép tham số này, SHA không có trong repo thì trả 404. Sau đó cứ 20
+  giây hỏi `/api/v1/health/` một lần, quá 15 phút thì đỏ. Gói free có thể đang ngủ,
+  lần hỏi đầu mất khoảng một phút, nên mỗi lần hỏi chờ tối đa 90 giây.
+- Job gắn với GitHub Environment `production`, SV tạo ngày 21/10/2026: chỉ nhánh
+  `main` được deploy, không có bước duyệt tay, URL hook là secret của Environment nên
+  các job chạy trên PR không đọc được. Mỗi lần job chạy thành một dòng ở trang
+  Deployments của repo, có ngày và commit. Đó là chỗ đếm số lần deploy cho TC2.6.
+- Endpoint không cần đăng nhập và không đụng database. Ai cũng đọc được SHA của
+  commit đang chạy, nhưng repo để public nên không lộ thêm gì. Ngoài Render endpoint
+  trả `"unknown"`, không bao giờ trùng một SHA thật. Kiểm database hay Gemini là việc
+  của P-16, chưa làm ở đây.
+- Auto-deploy trên Render phải giữ tắt. Bật lại thì mỗi lần merge Render build hai
+  lần, một lần tự nó và một lần do hook.
+- Pipeline có năm chặng như D-034 đã tính. `SDD.md` §3 thêm dòng CI/CD.
+- URL hook trong secret chỉ được kiểm khi job chạy thật lần đầu, ở lần merge kế
+  tiếp vào `main`.
+- Test: ba test trong `store_api/tests/test_health.py`. Phần shell của job không có
+  test tự động. Vòng chờ được chạy thử ở máy với server giả, cho bốn ca: đúng commit,
+  commit cũ, chưa có endpoint, không có server. Workflow qua actionlint 1.7.7.
+
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

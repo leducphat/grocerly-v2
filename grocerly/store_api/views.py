@@ -37,6 +37,17 @@ class CategoryListAPI(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+
+@api_view(['GET'])
+def health(request):
+    """Which commit this server runs; the deploy job in CI waits for it (D-036)."""
+    # Render sets RENDER_GIT_COMMIT on every deploy. Anywhere else it is unset,
+    # and "unknown" can never match the commit CI is waiting for.
+    return Response({
+        "status": "ok",
+        "commit": os.environ.get("RENDER_GIT_COMMIT", "unknown"),
+    })
+
 # ================= AI CHAT CONFIGURATION ================= #
 
 def search_products(query: str) -> list[dict]:
