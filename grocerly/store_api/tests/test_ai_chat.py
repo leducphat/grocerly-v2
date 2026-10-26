@@ -347,4 +347,4 @@ def test_chat_window_text_follows_page_language(client, language, button, user_r
     assert f'addButton: "{button}"' in page
     assert f'yesAdd: "{user_reply}"' in page
     assert f'language: "{language}"' in page
-    assert f"href='/{language}/cart/'" in page  # the checkout button keeps the language
+    assert f"href = '/{language}/cart/'" in page  # the checkout button keeps the language

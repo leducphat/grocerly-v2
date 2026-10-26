@@ -1856,11 +1856,85 @@ Endpoint cũng là bước đầu của health check ở P-16.
 - Auto-deploy trên Render phải giữ tắt. Bật lại thì mỗi lần merge Render build hai
   lần, một lần tự nó và một lần do hook.
 - Pipeline có năm chặng như D-034 đã tính. `SDD.md` §3 thêm dòng CI/CD.
-- URL hook trong secret chỉ được kiểm khi job chạy thật lần đầu, ở lần merge kế
-  tiếp vào `main`.
+- Lần chạy thật đầu tiên là lần merge PR #11 ngày 21/10/2026, xanh sau khoảng hai
+  phút. Render nhận hook kèm `ref` và trả mã của lần deploy. `RENDER_GIT_COMMIT` là
+  SHA đầy đủ nên so thẳng được với `github.sha`; tài liệu của Render chỉ ghi "the
+  commit SHA", không nói đầy đủ hay rút gọn.
 - Test: ba test trong `store_api/tests/test_health.py`. Phần shell của job không có
   test tự động. Vòng chờ được chạy thử ở máy với server giả, cho bốn ca: đúng commit,
   commit cũ, chưa có endpoint, không có server. Workflow qua actionlint 1.7.7.
+
+## D-037 · Khung chat và giỏ mini in dữ liệu như chữ: escape trước khi ghép HTML, nút của khung chat dựng bằng DOM
+
+- **Ngày:** 26/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-16 và L-17 (`COMMITMENT.md` §3) cùng một gốc: JavaScript trong
+`templates/partials/base.html` ghép dữ liệu thành chuỗi HTML rồi để trình duyệt dịch.
+`appendMessage` gán thẳng câu trả lời của Gemini, tên sản phẩm và chữ khách gõ vào
+`innerHTML`; nút "Có, thêm vào giỏ" nhét tên sản phẩm vào chuỗi `onclick` và chỉ
+thoát dấu `'`. Lúc sửa, soát mọi chỗ trong template ghép dữ liệu vào HTML thì ra
+thêm `renderMiniCartItems`: giỏ mini sau khi bấm Add cũng in tên sản phẩm vào thẻ
+`<a>` và thuộc tính `alt` mà không escape (L-20). NFR-03 trong `SRS.md` đã đòi có
+cơ chế chặn XSS, nên đặc tả không phải sửa; đây là chỗ code chưa làm đúng đặc tả.
+
+**Phương án đã cân nhắc**
+
+Về chữ trong khung chat và giỏ mini:
+
+1. *Escape năm ký tự `& < > " '` trước khi ghép vào HTML.* Khung chat escape cả câu
+   rồi mới đổi `**...**` thành `<strong>`; giỏ mini escape từng giá trị trước khi
+   ghép vào chuỗi mẫu. Sửa ít, nhưng phải đủ năm ký tự và `&` phải thay đầu tiên.
+2. *Bỏ hẳn HTML: dựng phần tử bằng `createElement`, chữ gán qua `textContent`.*
+   Trình duyệt không bao giờ dịch chữ thành thẻ. Với khung chat thì gọn, nhưng giỏ
+   mini là một chuỗi mẫu chục dòng, viết lại thành lời gọi DOM thì dài gấp mấy lần
+   cho cùng kết quả, và hai chỗ sẽ theo hai kiểu khác nhau.
+3. *Thêm thư viện DOMPurify để lọc HTML.* Thư viện này dành cho lúc buộc phải nhận
+   HTML từ người dùng. Ở đây thứ duy nhất cần hiện là chữ đậm.
+
+Về nút bấm của khung chat:
+
+1. *Giữ chuỗi `onclick`, escape tên cho đúng.* Tên nằm trong một chuỗi JavaScript,
+   chuỗi đó lại nằm trong một thuộc tính HTML, nên phải escape hai lớp theo đúng thứ
+   tự. TLCN sai đúng chỗ này.
+2. *Nút mang mã sản phẩm và số lượng trong thuộc tính `data-`, một hàm bắt sự kiện
+   chung đọc lại* (hướng đề xuất lúc ghi L-17).
+3. *Dựng nút bằng `createElement`, gắn hàm xử lý bằng `addEventListener`; hàm đó giữ
+   sẵn `data.product` của lần trả lời ấy.*
+
+**Quyết định.** Chữ chọn (1), nút chọn (3).
+
+**Lý do.** Với chữ, một hàm `escapeHtml` dùng chung cho khung chat lẫn giỏ mini cho
+một quy tắc dễ kiểm: giá trị nào lấy từ dữ liệu cũng đi qua nó trước khi thành
+HTML. Đổi `**...**` sau khi escape vẫn an toàn, vì lúc đó trong chữ không còn dấu
+`<` nào, thẻ duy nhất là `<strong>` do code tự thêm. Với nút, (3) không cần escape gì
+vì tên sản phẩm không bao giờ thành chuỗi, nên lỗi của L-17 không còn chỗ để xảy ra;
+nó cũng ngắn hơn (2), không cần hàm bắt sự kiện chung.
+
+**Hệ quả.**
+- `escapeHtml` nằm ở đầu script giỏ hàng trong `base.html`. Script khung chat đứng
+  sau trong cùng trang nên gọi được nó; cả hai có trên mọi trang cửa hàng.
+- Hàm mới `appendButton` dựng hai nút của khung chat; `appendMessage` không còn nhận
+  HTML. `aiConfirmCartAdd` nhận số lượng là số thay vì chuỗi, request gửi lên
+  `/add-to-cart/` vẫn là `qty=2`.
+- Câu trả lời của Gemini mà có thẻ HTML thì giờ hiện nguyên thẻ dưới dạng chữ. Prompt
+  không yêu cầu Gemini trả HTML, và trước giờ chỉ `**...**` được xử lý riêng. Xuống
+  dòng trong câu trả lời vẫn bị gộp như trước, không thuộc quyết định này.
+- Giỏ mini escape cả mã sản phẩm, đường dẫn ảnh và số lượng chứ không chỉ tên, để
+  quy tắc không có ngoại lệ phải nhớ.
+- Chưa đặt Content-Security-Policy. CSP chặn được script chèn vào kể cả ở chỗ còn
+  sót, nhưng template của bộ giao diện mẫu viết script và `onclick` thẳng trong HTML
+  ở khắp nơi, bật CSP là một việc lớn riêng.
+- Test: phần JavaScript không có test tự động, cùng lý do với D-035. Test
+  `test_chat_window_text_follows_page_language` đổi dòng kiểm đường dẫn của nút thanh
+  toán theo cách viết mới. Ngoài bộ test, hai đoạn script được lấy từ trang chủ render
+  bằng `settings_test` ở cả `/vi/` và `/en/`, chạy trong Chrome 155 headless với
+  `fetch`, `$.ajax` giả và tên sản phẩm là `<img src=x onerror=...>`; script kiểm là
+  script tạm ngoài repo. Bản cũ: payload chạy năm lần (lịch sử đọc lại, chữ khách
+  gõ, tên sản phẩm ở câu hỏi xác nhận và ở câu báo sau khi thêm, giỏ mini), nút của
+  sản phẩm `Nước mắm "Nam Ngư"` báo `SyntaxError` và không gọi `/add-to-cart/`. Bản
+  mới: payload không chạy lần nào, nút gọi đúng, chữ đậm vẫn hiện. Một lượt review
+  bằng agent không thấy lỗi mức cao nào. Bộ test 132 passed, 4 xfailed, độ phủ 76%.
 
 
 <!--
