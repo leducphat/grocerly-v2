@@ -80,12 +80,13 @@ dòng phải khớp với một commit có thật.
 | 20/10/2026 | Claude Code (Opus 5.5) | P-28: sửa L-13, L-14, L-15 | Sửa L-13, L-14, L-15 | `base.html`: `sendChatMessage` gửi lịch sử trước tin nhắn mới, `aiConfirmCartAdd` đọc số lượng giỏ trả về, chữ khung chat qua `{% trans %}`. `ai_chat`: chặn số lượng ngoài 1 tới tồn kho, nhận `language`, bỏ bản sao cuối `history`. 15 test, chuỗi dịch hai `.po`, `.mo` biên dịch bằng polib. SRS §6.1, D-035, `COMMITMENT.md`, `PLAN.md`. Review bằng agent: thêm chặn `language` không phải chuỗi (lỗi 500). Chuyển dòng bỏ bản sao của L-13 vào khối `try`. Lỗi #36, #37. 129 passed, độ phủ 75% | SV phát hiện ba lỗi trên host (15/10) | `0681855` |
 | 20/10/2026 | Claude Code (Opus 5.5) | P-29: ghi các lỗi lượt review tìm ra | Ghi các lỗi ở review thành L-16 trở đi | L-16 → L-19 trong `COMMITMENT.md` §3, P-29 trong `PLAN.md`; bốn test `xfail` cho L-18, L-19 trong `core/tests/test_cart.py`. Kiểm từng lỗi trong code và lịch sử Git trước khi ghi, bỏ một nghi vấn không đúng (số lượng âm). 129 passed, 4 xfailed | SV chốt ghi lỗi; xác nhận prompt hai dòng 15/10 | commit ngay sau `0681855` |
 | 21/10/2026 | Claude Code (Opus 5.5) | P-11 bước 7: job deploy trong CI | Lên plan bước 7. Làm theo cách endpoint health | `/api/v1/health/` trong `store_api` (trả `RENDER_GIT_COMMIT`), 3 test viết trước. Job `deploy` trong `ci.yml`: gọi deploy hook kèm `ref`, chờ health trả đúng commit, quá 15 phút thì đỏ. D-036, SDD §3, `PLAN.md`. Kiểm: actionlint, vòng chờ chạy thử với server giả, 132 passed, 4 xfailed, độ phủ 76%, ruff, jscpd sạch | SV tạo Environment `production` và secret deploy hook; chọn endpoint thay cho API Render | `bf5922d`, commit ngay sau |
+| 26/10/2026 | Claude Code (Opus 5.5) | P-29: sửa L-16, L-17 | Sửa L-16 và L-17 | `base.html`: hàm `escapeHtml` dùng chung, `appendMessage` escape trước khi đổi `**...**`, hàm `appendButton` dựng hai nút bằng DOM; giỏ mini escape tên, mã, ảnh, số lượng (L-20, tìm ra khi soát mọi chỗ ghép HTML). Sửa một dòng kiểm trong `test_ai_chat.py`. D-037, `COMMITMENT.md`, `PLAN.md`. Kiểm bằng Chrome headless qua script tạm ngoài repo: bản cũ payload chạy 5 lần, bản mới 0. Review bằng agent, không có lỗi mức cao. Lỗi #39. 132 passed, 4 xfailed, độ phủ 76%, ruff, jscpd sạch | SV chọn làm L-16, L-17 trước phần metric của bản cam kết | `3c460e8`, commit ngay sau |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **38**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **39**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -127,8 +128,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 36 | 20/10/2026 | Mô tả L-15 do AI viết ngày 15/10 lấy ba câu báo hết lượt và lỗi kết nối của `ai_chat` làm ví dụ đúng ("đã qua `_()`"), trong khi khách ở `/en/` vẫn đọc chúng bằng tiếng Việt: msgid là tiếng Việt, bản tiếng Anh để trống | AI coi chuỗi có bọc `_()` là đã dịch, không mở file dịch của ngôn ngữ kia ra xem có bản dịch không | AI (lúc điền bản tiếng Anh cho khung chat) | `0681855` |
 | 37 | 20/10/2026 | Dòng bỏ bản sao trong `history` của bản sửa L-13 do AI viết nằm trước khối `try`: `history` gửi lên là object hay số thì view lỗi 500, trong khi trước đó lỗi kiểu này rơi vào `except` và khách nhận câu báo trục trặc | AI chèn dòng mới ở chỗ đọc dữ liệu request mà không tính tới việc `history` là dữ liệu trình duyệt gửi, có thể không phải danh sách. Lượt review bằng AI soi đúng loại lỗi này ở trường `language` nhưng bỏ sót dòng này | AI (đọc lại code khi ghi lỗi của lượt review) | `0681855` |
 | 38 | 21/10/2026 | Dòng nhật ký 20/10 do AI viết ghi bản sửa L-13 tới L-15 có 13 test, trong khi commit `0681855` thêm 15 test case (11 hàm, bốn hàm có hai ca). D-035 và `PLAN.md` ghi đúng 15 | AI ghi con số mà không đối chiếu với pytest, dù cùng dòng đó có 129 passed, tức 114 cũ cộng 15. Số test đổi mấy lần trong phiên vì có ca thêm sau lượt review (lỗi #37), và nhiều khả năng dòng nhật ký giữ một số đếm giữa chừng | AI (lúc soạn mô tả PR #11, đếm lại bằng `pytest --collect-only`) | commit ngay sau `4e0cd20` |
+| 39 | 26/10/2026 | Mô tả L-16 do AI viết ngày 20/10 ghi tên sản phẩm "ở các trang khác đã escape", trong khi giỏ mini trong chính `base.html` ghép tên vào HTML không escape và chạy được script (L-20) | Lượt review chỉ đọc đoạn script khung chat đang sửa rồi khái quát cho cả trang, không tìm mọi chỗ ghép dữ liệu vào HTML. Cùng họ với #29 và #31: kết luận cho cả hệ thống từ đoạn code đang nhìn | AI (tìm mọi chỗ `innerHTML`, `.html(` khi sửa L-16) | `3c460e8` |
 
-**Ghi chú khi bảo vệ:** mười lăm trong ba mươi tám mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười lăm trong ba mươi chín mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
