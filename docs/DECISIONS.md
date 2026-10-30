@@ -1936,6 +1936,50 @@ nó cũng ngắn hơn (2), không cần hàm bắt sự kiện chung.
   mới: payload không chạy lần nào, nút gọi đúng, chữ đậm vẫn hiện. Một lượt review
   bằng agent không thấy lỗi mức cao nào. Bộ test 132 passed, 4 xfailed, độ phủ 76%.
 
+## D-038 · Lỗi của Django in ra log của Render qua `LOGGING`, kể cả khi `DEBUG` tắt
+
+- **Ngày:** 30/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Đêm 30/10/2026, lúc sinh viên thử tay trên host KLTN, `/vi/`, `/en/` và
+`/vi/products/` trả 500. Log của Render chỉ có dòng truy cập của gunicorn
+(`GET /vi/ ... 500 145`), không có traceback. `settings.py` chưa đặt `LOGGING` nên
+Django dùng cấu hình mặc định: handler `console` chỉ in khi `DEBUG` bật, còn lỗi của
+request thì gửi mail cho `ADMINS`, mà `ADMINS` để trống. Nguyên nhân phải lần ngược từ
+log truy cập (mấy lần tạo sản phẩm ngay trước đó), dữ liệu đọc qua `/api/v1/products/`
+và một test tái hiện: sản phẩm thử không có danh mục làm `{% url %}` ném
+`NoReverseMatch`.
+
+**Phương án đã cân nhắc**
+1. *Bật `DEBUG` trên host khi cần xem lỗi* - trang debug lộ cấu hình cho bất kỳ ai
+   mở trang, và lỗi đã xảy ra thì không xem lại được.
+2. *Điền `ADMINS` và cấu hình gửi mail* - cần SMTP và thêm một secret; `EMAIL_BACKEND`
+   hiện là console nên mail cũng chỉ in ra console.
+3. *Dịch vụ theo dõi lỗi như Sentry* - gom lỗi, có báo động, nhưng thêm thư viện, tài
+   khoản và DSN, nhiều hơn mức đồ án cần.
+4. *Đặt `LOGGING` cho logger `django` in ra stderr, bỏ điều kiện `DEBUG`.*
+
+**Quyết định.** Phương án 4: một `StreamHandler` tên `console`, logger `django` giữ mức
+`INFO` như mặc định, mỗi dòng dạng `LEVEL logger: message`.
+
+**Lý do.** Render đã lưu mọi thứ app in ra và có ô tìm theo chữ, nên in ra là đủ;
+không thêm thư viện hay secret nào. Logger và mức giữ như của Django, chỉ bỏ điều kiện
+`DEBUG`, nên ở máy làm việc (`DEBUG` bật) log gần như không đổi, chỉ thêm tiền tố mức và
+tên logger.
+
+**Hệ quả.**
+- Lỗi 500 in kèm traceback; 404 in một dòng `WARNING django.request: Not Found: ...`,
+  CSRF 403 in lý do. Log sẽ dày hơn: mỗi trang của `/useradmin/` đang gọi
+  `/static/assets2/js/main.js%3Fv%3D1.1` và một favicon sai đường dẫn, cả hai 404 (thấy
+  trong log ngày 30/10), nên mỗi lần mở trang thêm hai dòng.
+- Không có báo động: lỗi chỉ nằm trong log, phải mở Render mới thấy.
+- Chỉ có tác dụng trên host sau lần deploy kế tiếp.
+- Test: `grocerly/tests/test_logging.py`, hai test chạy với `DEBUG = False` như host,
+  hướng handler `console` vào một bộ đệm. View ném lỗi thì có dòng `ERROR` kèm
+  traceback; trang không tồn tại thì một dòng `WARNING`, không traceback. Tạm bỏ
+  `LOGGING` thì cả hai đỏ và bộ đệm rỗng, đúng như log của Render đêm đó. `pytest.ini`
+  thêm `grocerly` vào `testpaths`. Bộ test 134 passed, 10 xfailed, độ phủ 76%.
+
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

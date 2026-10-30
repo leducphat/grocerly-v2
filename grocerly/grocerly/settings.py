@@ -276,3 +276,24 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') # Your Gmail address
 # EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # App Password
+
+
+# Logging (D-038)
+# Render only shows what the app writes to stdout/stderr. Django's default config
+# prints to the console only while DEBUG is on; with DEBUG off it emails errors
+# to ADMINS, which is empty here, so a 500 on the host left no traceback anywhere.
+# This keeps Django's logger and level but drops the DEBUG condition: a 404 or a
+# CSRF 403 prints one line, a 500 prints its traceback.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'plain': {'format': '{levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'plain'},
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'INFO'},
+    },
+}

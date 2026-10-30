@@ -85,6 +85,7 @@ phẩm · Quản lý Đơn hàng
 | Thanh toán | VNPay (Sandbox) + COD |
 | Triển khai | Nền tảng PaaS đám mây |
 | CI/CD | GitHub Actions, năm chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036) |
+| Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; xem và tìm ở trang Logs của Render (D-038) |
 | CSDL đám mây | Serverless Postgres |
 | Lưu trữ media | Cloudinary (CDN) |
 
