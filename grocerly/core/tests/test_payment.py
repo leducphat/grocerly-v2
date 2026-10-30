@@ -85,6 +85,19 @@ def test_vnpay_ipn_rejects_amount_different_from_order_total(client, order, sett
     assert order.paid_status is False
 
 
+@pytest.mark.xfail(reason="L-22: vnpay_return marks the order paid without comparing the amount paid with the order total")
+def test_vnpay_return_with_amount_different_from_order_total_does_not_mark_order_paid(client, order, settings):
+    # How it happens: the customer opens VNPay for a 25,000 VND order, adds to the cart
+    # in another tab and sends the shipping form again, which raises the same pending
+    # order to 100,000; then pays the 25,000 in the first tab.
+    reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+
+    client.get(reverse("core:vnpay_return"), reply)
+
+    order.refresh_from_db()
+    assert order.paid_status is False
+
+
 # The IPN answers below follow VNPay's IPN guide: 00 and 02 tell VNPay the message is
 # handled, any other code makes it send the IPN again (up to 10 times). These tests
 # replace VNPay's SIT run, which the project skipped (D-034).
