@@ -533,3 +533,12 @@ msgstr ""
 
 msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
 msgstr "🛑 The AI assistant has used up its free quota (500 messages a day). Please come back tomorrow!"
+
+msgid "Please choose a vendor."
+msgstr ""
+
+msgid "Please choose a category."
+msgstr ""
+
+msgid "The amount paid does not match this order, so it has not been confirmed. Please contact the store."
+msgstr ""

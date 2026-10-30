@@ -1981,6 +1981,93 @@ tên logger.
   thêm `grocerly` vào `testpaths`. Bộ test 134 passed, 10 xfailed, độ phủ 76%.
 
 
+## D-039 · Sản phẩm bắt buộc có danh mục và nhà cung cấp, thẻ sản phẩm vẫn chịu được dòng thiếu
+
+- **Ngày:** 30/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-27. Form ở `/useradmin/` để hai ô này không bắt buộc, `add_product` tự
+gán nhà cung cấp đầu tiên nhưng không gán danh mục, `edit_product` không gán gì. Mỗi
+thẻ sản phẩm dựng link bằng `{% url %}`, mà `{% url %}` ném `NoReverseMatch` khi tham
+số rỗng, nên một sản phẩm thiếu danh mục làm `/vi/`, `/en/` và `/vi/products/` trả 500
+với mọi khách. Việc này đã xảy ra trên host ngày 30/10/2026.
+
+**Phương án đã cân nhắc**
+1. *Chỉ sửa form* - chặn đường tạo mới, nhưng dòng đã thiếu trong database vẫn làm sập
+   trang, và xóa hẳn một danh mục vẫn để lại dòng trống (`SET_NULL`, L-28).
+2. *Chỉ sửa template* - trang hết sập, nhưng nhân viên vẫn tạo được sản phẩm không
+   thuộc danh mục nào, khách lọc theo danh mục không thấy nó.
+3. *Đổi hai cột thành `NOT NULL`* - chặt nhất, nhưng cần migration, phải dọn dữ liệu cũ
+   trước, và phải bỏ `SET_NULL`, tức là đổi luôn cách xóa danh mục ở UC-23.
+4. *Giữ ô không bắt buộc, view tự gán bản ghi đầu tiên* - như `add_product` đang làm với
+   nhà cung cấp. Đoán sai thì không ai biết, chưa có bản ghi nào thì vẫn trống.
+5. *Làm cả form lẫn template.*
+
+**Quyết định.** Phương án 5. `AddProductForm` bắt buộc hai ô, kèm câu báo riêng qua
+`gettext_lazy`. Template in link trong `{% if p.category %}` và `{% if p.vendor %}`, cùng
+cách `tag.html` đã làm với nhà cung cấp. `add_product` bỏ đoạn tự gán nhà cung cấp.
+
+**Lý do.** Hai lớp giữ hai việc khác nhau. Form giữ dữ liệu mới cho đúng, template bảo
+đảm một dòng sai không kéo sập trang của sản phẩm khác; bỏ một lớp thì còn đúng một
+trong hai nguy cơ ở phương án 1 và 2. Không đổi schema nên không có migration và không
+có rủi ro khi deploy, hợp với việc đây là bản sửa lỗi chứ không phải đổi mô hình dữ liệu.
+
+**Hệ quả.**
+- Nhân viên phải tự chọn nhà cung cấp, trước đây bỏ trống được. Cửa hàng chưa có nhà
+  cung cấp nào thì không tạo được sản phẩm; nhà cung cấp tạo trong Django admin.
+- Sản phẩm cũ thiếu danh mục vẫn mở được ở trang sửa; muốn lưu thì phải chọn, đó cũng
+  là cách bổ sung dữ liệu. Không có script dọn dữ liệu.
+- Khối theo danh mục của trang chủ không cần điều kiện cho danh mục, vì sản phẩm ở đó
+  lấy từ `c.products.all`. Trang danh mục, trang nhà cung cấp và trang chi tiết không
+  dựng link bằng `{% url %}` từ hai trường này nên không phải sửa.
+- Test: `useradmin/tests/test_products.py` cho form, `core/tests/test_product_pages.py`
+  cho mọi trang có thẻ sản phẩm, với ba trường hợp thiếu danh mục, thiếu nhà cung cấp,
+  thiếu cả hai.
+
+
+## D-040 · `vnpay_return` so số tiền như IPN, lệch thì đơn giữ chưa thanh toán
+
+- **Ngày:** 30/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-22. `vnpay_ipn` so `vnp_Amount` với giá đơn, `vnpay_return` thì không. Giá
+đơn lại đổi được sau khi đã tạo link VNPay: gửi lại form giao hàng ở tab khác, hay áp
+mã giảm giá. Khách mở VNPay cho đơn 25.000đ, tab khác nâng đơn lên 100.000đ, trả
+25.000đ: IPN trả `04` nhưng trang trả về vẫn đánh dấu đơn 100.000đ đã thanh toán.
+
+**Phương án đã cân nhắc**
+1. *Chỉ IPN được ghi `paid_status`, trang trả về chỉ hiển thị* - đúng cách VNPay khuyên,
+   nhưng host Render free ngủ sau 15 phút và IPN có thể đến muộn, trong lúc đó khách vừa
+   trả tiền lại thấy lời nhắc thanh toán (D-023). Đổi nhiều hơn mức một bản sửa lỗi.
+2. *Khóa giá đơn từ lúc tạo link* - chặn tận gốc, nhưng phải xác định lúc nào link hết
+   hạn để mở khóa, và cả `save_checkout_info` lẫn việc áp mã đều phải đổi.
+3. *Lưu số tiền đã gửi VNPay vào đơn* - thêm một cột và migration, mà đơn đã đổi giá thì
+   vẫn phải coi là lệch.
+4. *So `vnp_Amount` với giá đơn ngay trong `vnpay_return`, dùng chung một hàm với IPN.*
+
+**Quyết định.** Phương án 4. Hàm `_vnpay_amount(order)` trả giá đơn theo cách VNPay ghi
+(VND nhân 100, dạng chuỗi); link thanh toán và cả hai chỗ kiểm đều dùng nó. Lệch thì
+đơn giữ chưa thanh toán, khách về trang thanh toán thất bại kèm lời nhắc liên hệ cửa
+hàng, giỏ và đơn đang chờ giữ nguyên để trả lại được đúng giá.
+
+**Lý do.** Lỗi sinh ra vì hai đường xác nhận không giống nhau, nên cách sửa trực tiếp nhất
+là cho chúng dùng chung một phép so. Không đổi schema, không đổi luồng thanh toán bình
+thường. So bằng chuỗi vì `vnp_Amount` trong phản hồi là chuỗi và có thể thiếu; `int()`
+gặp thiếu thì văng 500.
+
+**Hệ quả.**
+- `vnpay_ipn` cũng dùng `_vnpay_amount`, nên thiếu `vnp_Amount` giờ trả `04` thay vì 500.
+- Giá có phần lẻ (áp mã phần trăm) vẫn trả được: link và phép so cùng cắt phần lẻ bằng
+  `int()`, khách trả số nguyên VND.
+- Hệ thống không ghi lại khoản tiền đã trả khi lệch. Khách được nhắc liên hệ cửa hàng,
+  nhân viên đối chiếu trong trang quản lý của VNPay rồi xử lý ngoài hệ thống, cùng cách
+  với đơn VNPay đã trả rồi bị hủy (D-033).
+- Rủi ro đã ghi ở L-22 vẫn còn: khách mở VNPay ở hai tab và trả cả hai lần với cùng số
+  tiền thì bị trừ hai lần, không ai được báo.
+- Test: `core/tests/test_payment.py`, gồm kịch bản đầy đủ qua các view thật, trang trả
+  về lệch một đồng ở cả hai phía, thiếu `vnp_Amount` và đơn có phần lẻ.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
