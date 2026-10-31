@@ -3,13 +3,15 @@ Adding and editing products in /useradmin/ (UC-19, L-27): a product must have a
 category and a vendor, and the server decides that, not the browser.
 """
 
+import re
 from decimal import Decimal
 
 import pytest
+from django.test import Client
 from django.urls import reverse
 from django.utils import translation
 
-from core.models import Category, Product, Vendor
+from core.models import Category, Product, ProductReview, Vendor
 
 pytestmark = pytest.mark.django_db
 
@@ -183,3 +185,111 @@ def test_product_left_without_category_can_be_repaired_on_the_edit_page(staff_cl
     assert opened.status_code == 200
     stocked_product.refresh_from_db()
     assert (stocked_product.category, stocked_product.vendor) == (category, vendor)
+
+
+# ---------- Deleting a product (L-28, L-29, D-041) ----------
+
+
+def delete_url(product):
+    return reverse("useradmin:dashboard-delete-products", args=[product.p_id])
+
+
+def still_on_sale(product):
+    return Product.objects.filter(pk=product.pk).exists()
+
+
+def test_delete_button_hides_the_product_and_keeps_its_row(staff_client, stocked_product):
+    response = staff_client.post(delete_url(stocked_product))
+
+    assert response.url == reverse("useradmin:dashboard-products")
+    assert not still_on_sale(stocked_product)
+    assert Product.all_objects.get(pk=stocked_product.pk).is_deleted is True
+
+
+def test_get_request_does_not_delete_product(staff_client, stocked_product):
+    # A link on another site reaches this URL with the staff's cookie (L-29).
+    response = staff_client.get(delete_url(stocked_product))
+
+    assert response.status_code == 405
+    assert still_on_sale(stocked_product)
+
+
+def test_delete_without_csrf_token_is_rejected(staff, stocked_product):
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(staff)
+
+    response = client.post(delete_url(stocked_product))
+
+    assert response.status_code == 403
+    assert still_on_sale(stocked_product)
+
+
+def test_delete_form_carries_the_csrf_token_it_needs(staff, stocked_product):
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(staff)
+    html = client.get(reverse("useradmin:dashboard-products")).content.decode()
+    form = html.split(f'action="{delete_url(stocked_product)}"')[1].split("</form>")[0]
+    token = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', form).group(1)
+
+    response = client.post(delete_url(stocked_product), {"csrfmiddlewaretoken": token})
+
+    assert response.status_code == 302
+    assert not still_on_sale(stocked_product)
+
+
+def test_customer_cannot_delete_product(customer_client, stocked_product):
+    response = customer_client.post(delete_url(stocked_product))
+
+    assert response.url == reverse("userauths:sign-in")
+    assert still_on_sale(stocked_product)
+
+
+def test_anonymous_visitor_cannot_delete_product(client, stocked_product):
+    response = client.post(delete_url(stocked_product))
+
+    assert response.url == reverse("userauths:sign-in")
+    assert still_on_sale(stocked_product)
+
+
+def test_deleting_a_product_again_answers_404(staff_client, stocked_product):
+    staff_client.post(delete_url(stocked_product))
+
+    response = staff_client.post(delete_url(stocked_product))
+
+    assert response.status_code == 404
+
+
+def test_product_list_offers_delete_as_a_form_that_asks_first(staff_client, stocked_product):
+    html = staff_client.get(reverse("useradmin:dashboard-products")).content.decode()
+
+    form = re.search(rf'<form[^>]*action="{delete_url(stocked_product)}"[^>]*>', html).group()
+    assert 'method="post"' in form
+    assert "Xóa sản phẩm này?" in form
+    assert f'href="{delete_url(stocked_product)}"' not in html
+
+
+def test_edit_page_of_deleted_product_answers_404(staff_client, stocked_product):
+    # A second tab, or the Back button, still holds the link.
+    staff_client.post(delete_url(stocked_product))
+
+    response = staff_client.get(reverse(EDIT_URL, args=[stocked_product.p_id]))
+
+    assert response.status_code == 404
+
+
+def test_deleted_product_leaves_the_staff_product_list(staff_client, stocked_product):
+    staff_client.post(delete_url(stocked_product))
+
+    html = staff_client.get(reverse("useradmin:dashboard-products")).content.decode()
+
+    assert stocked_product.p_id not in html
+
+
+def test_reviews_page_still_names_a_deleted_product(staff_client, stocked_product, customer):
+    ProductReview.objects.create(product=stocked_product, user=customer, review="Ngọt", rating=5)
+    stocked_product.delete()
+
+    response = staff_client.get(reverse("useradmin:reviews"))
+
+    assert response.status_code == 200
+    assert stocked_product.title in response.content.decode()

@@ -41,6 +41,12 @@ def test_product_api_does_not_return_product_out_of_stock(client, product):
     assert list_products(client) == []
 
 
+def test_product_api_does_not_return_deleted_product(client, product):
+    product.delete()  # L-28
+
+    assert list_products(client) == []
+
+
 def test_product_api_does_not_return_product_awaiting_review(client):
     Product.objects.create(title="Táo Fuji", price=Decimal("50000.00"), stock_count=5)  # in_review
 

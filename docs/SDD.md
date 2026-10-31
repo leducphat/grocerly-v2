@@ -51,7 +51,10 @@
   chính số.
 - **Tiền tệ:** `DecimalField(max_digits=20, decimal_places=2)`, đơn vị VND.
 - **Xóa mềm:** `core_category`, `core_vendor`, `core_product`, `core_coupon` mang
-  cặp cờ `is_deleted` / `deleted_at`.
+  cặp cờ `is_deleted` / `deleted_at`. `delete()` của bốn model này chỉ bật cờ, ở cả
+  một dòng lẫn QuerySet; xóa hẳn phải gọi `hard_delete()` và không màn hình nào gọi
+  nó (D-041). Khóa ngoại vẫn đọc được dòng đã xóa, nên chỗ nào đi từ khóa ngoại tới
+  sản phẩm phải tự lọc: wishlist đi qua `wishlist_of()`.
 - **Trạng thái sản phẩm:** `draft | disabled | in_review | rejected | published`.
 
 ---

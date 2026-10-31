@@ -91,6 +91,7 @@ class SoftDeleteModel(models.Model):
      - MyModel.all_objects.all()         → everything (including deleted)
      - MyModel.all_objects.dead()        → only deleted items
      - instance.soft_delete()            → mark as deleted
+     - instance.delete()                 → same as soft_delete(), the row stays
      - instance.restore()               → undo soft delete
      - instance.hard_delete()            → permanently remove from DB
     """
@@ -103,8 +104,22 @@ class SoftDeleteModel(models.Model):
     class Meta:
         abstract = True
 
+    def delete(self, *args, **kwargs):
+        """Soft-delete this object, so that no caller can remove the row by accident.
+
+        Django's own delete() removes it for good (L-28), and this is what the Delete
+        buttons of /useradmin/ and of the Django admin call. See D-041.
+        """
+        self.soft_delete()
+
     def soft_delete(self):
-        """Mark this object as deleted."""
+        """Mark this object as deleted.
+
+        Deleting it again changes nothing: the Django admin lists deleted rows, and
+        Vendor.restore() finds its products by the first deleted_at.
+        """
+        if self.is_deleted:
+            return
         self.is_deleted = True
         self.deleted_at = timezone.now()
         self.save(update_fields=['is_deleted', 'deleted_at'])
@@ -178,9 +193,11 @@ class Vendor(SoftDeleteModel):
     def soft_delete(self):
         """Soft-delete this vendor and all their products."""
         super().soft_delete()
-        # Cascade soft-delete to all products belonging to this vendor
+        # Cascade soft-delete to all products belonging to this vendor. They take the
+        # vendor's own deleted_at, which is how restore() tells them from products
+        # that were deleted on their own earlier.
         Product.all_objects.filter(vendor=self, is_deleted=False).update(
-            is_deleted=True, deleted_at=timezone.now()
+            is_deleted=True, deleted_at=self.deleted_at
         )
 
     def restore(self):
@@ -363,6 +380,17 @@ class Wishlist(models.Model):
         if self.product:
             return self.product.title
         return f"Wishlist #{self.pk}"
+
+
+def wishlist_of(user):
+    """The wishlist lines of `user` that can still be shown.
+
+    A foreign key reaches a soft-deleted product, so the line would stay on the page
+    with a link that answers 404 (L-28, D-041). The filter also drops a line whose
+    product is empty: the old Delete button left those behind, and the page cannot
+    build a link to them.
+    """
+    return Wishlist.objects.filter(user=user, product__is_deleted=False)
 
 
 class Address(models.Model):

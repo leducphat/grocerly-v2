@@ -82,6 +82,20 @@ def test_search_tool_does_not_return_product_hidden_from_store(product):
     assert results == [{"message": "No matching products found."}]
 
 
+def test_search_tool_does_not_return_deleted_product(product):
+    product.delete()  # L-28
+
+    assert views.search_products("cà rốt") == [{"message": "No matching products found."}]
+
+
+def test_bestsellers_tool_does_not_return_deleted_product(product):
+    product.featured = True
+    product.save()
+    product.delete()  # L-28
+
+    assert views.get_bestsellers() == []
+
+
 def test_bestsellers_tool_does_not_return_product_hidden_from_store(product):
     # L-10: the same visibility question as the store, in every AI tool.
     product.featured = True

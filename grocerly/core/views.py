@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo
 
 from core.models import (
     Category, Vendor, Product, ProductReview,
-    CartOrder, CartOrderItem, Wishlist, Address, Coupon,
+    CartOrder, CartOrderItem, Wishlist, Address, Coupon, wishlist_of,
 )
 from core.forms import ProductReviewForm
 from userauths.models import ContactUs, Profile
@@ -114,7 +114,7 @@ def product_list_view(request):
 
 
 def category_product_list_view(request, c_id):
-    category = Category.objects.get(c_id=c_id)
+    category = get_object_or_404(Category, c_id=c_id)
     products = Product.objects.filter(category=category, product_status='published').order_by('-id')
 
     context = {
@@ -136,7 +136,7 @@ def vendor_list_view(request):
 
 
 def vendor_detail_view(request, v_id):
-    vendor = Vendor.objects.get(v_id=v_id)
+    vendor = get_object_or_404(Vendor, v_id=v_id)
     products = Product.objects.filter(vendor=vendor, product_status='published').order_by('-id')
     context = {
         'vendor': vendor,
@@ -912,7 +912,7 @@ def make_address_default(request):
 
 @login_required
 def wishlist_view(request):
-    wishlist = Wishlist.objects.filter(user=request.user)
+    wishlist = wishlist_of(request.user)
     context = {
         "w": wishlist,
     }
@@ -922,8 +922,10 @@ def add_to_wishlist(request):
     if not request.user.is_authenticated:
         return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để thêm vào Wishlist!"})
 
-    product_id = request.GET.get('id')
-    product = Product.objects.get(id=product_id)
+    # A page opened before staff deleted the product still shows its heart (L-28).
+    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    if product is None:
+        return JsonResponse({"bool": False, "error": _("This product is no longer available.")})
 
     wishlist_qs = Wishlist.objects.filter(product=product, user=request.user)
 
@@ -937,7 +939,7 @@ def add_to_wishlist(request):
         )
         added = True
         
-    total_wishlist = Wishlist.objects.filter(user=request.user).count()
+    total_wishlist = wishlist_of(request.user).count()
     context = {"bool": True, "added": added, "total_wishlist_items": total_wishlist}
 
     return JsonResponse(context)
@@ -954,7 +956,7 @@ def remove_wishlist(request):
     except Wishlist.DoesNotExist:
         pass
 
-    wishlist = Wishlist.objects.filter(user=request.user)
+    wishlist = wishlist_of(request.user)
     total_wishlist = wishlist.count()
 
     context = {

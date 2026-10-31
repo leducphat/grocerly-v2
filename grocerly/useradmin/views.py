@@ -1,7 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 
@@ -115,7 +116,7 @@ def add_product(request):
 
 @admin_required
 def edit_product(request, pid):
-    product = Product.objects.get(p_id=pid)
+    product = get_object_or_404(Product, p_id=pid)
 
     if request.method == "POST":
         form = AddProductForm(request.POST, request.FILES, instance=product)
@@ -150,8 +151,10 @@ def edit_product(request, pid):
     return render(request, "useradmin/edit-products.html", context)
 
 @admin_required
+@require_POST
 def delete_product(request, pid):
-    product = Product.objects.get(p_id=pid)
+    # POST only: a link opened from another site still carries the staff's cookie (L-29).
+    product = get_object_or_404(Product, p_id=pid)
     product.delete()
     return redirect("useradmin:dashboard-products")
 

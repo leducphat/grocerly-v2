@@ -2068,6 +2068,66 @@ gặp thiếu thì văng 500.
   về lệch một đồng ở cả hai phía, thiếu `vnp_Amount` và đơn có phần lẻ.
 
 
+## D-041 · `delete()` của model luôn là xóa mềm, nút xóa của nhân viên chỉ nhận POST
+
+- **Ngày:** 31/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-28 và L-29. `SoftDeleteModel` chỉ đè `delete()` của QuerySet, nên
+`obj.delete()` chạy `delete()` gốc của Django và xóa hẳn dòng. Nút Delete ở
+`/useradmin/products/` và nút Delete trên trang sửa của Django admin đều đi đường đó, trái
+FR-A-02. Nút ở `/useradmin/` lại là một thẻ `<a>`: view không kiểm tra method và không
+hỏi xác nhận, nên một GET là mất sản phẩm, kể cả GET từ link ở trang khác, vì `SameSite=Lax`
+vẫn gửi cookie khi điều hướng cả trang.
+
+**Phương án đã cân nhắc**
+1. *Đổi `delete_product` sang gọi `product.soft_delete()`* - một dòng, nhưng Django admin
+   vẫn xóa hẳn, và lời gọi `delete()` viết sau này lại sai đúng kiểu cũ.
+2. *Đè `delete()` trong `SoftDeleteModel`.*
+3. *Trang xác nhận riêng cho thao tác xóa* - kiểu của Django admin, không cần JavaScript,
+   nhưng thêm một route và một template cho một câu hỏi có hay không.
+4. *Form POST có `csrf_token`, hỏi xác nhận bằng `confirm()` của trình duyệt.*
+
+**Quyết định.** Phương án 2 và 4. `SoftDeleteModel.delete()` gọi `soft_delete()`;
+`hard_delete()` là đường duy nhất để xóa hẳn và không màn hình nào gọi nó. `delete_product`
+thêm `@require_POST` và tìm bằng `get_object_or_404`. Nút Delete thành form POST.
+
+**Lý do.** Quy tắc không xóa hẳn đặt ở một chỗ thì mọi đường gọi cùng đúng, kể cả đường
+chưa viết. Chỗ chặn thật là POST và CSRF ở máy chủ; `confirm()` chỉ chống bấm nhầm, nên
+JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
+
+**Hệ quả.**
+- `delete()` không còn đúng nghĩa trong tài liệu Django: nó không xóa dòng và không kéo
+  theo các dòng liên quan. Trang xác nhận của Django admin vẫn liệt kê ảnh phụ như sẽ
+  bị xóa cùng, thực ra chúng còn nguyên.
+- Dòng đã xóa vẫn đọc được qua khóa ngoại, vì Django đi theo khóa ngoại bằng manager thường
+  chứ không qua `objects`. Nên wishlist phải tự lọc, qua hàm `wishlist_of()`; hàm này
+  cũng bỏ các dòng đã mất sản phẩm từ trước, vốn làm trang wishlist trả 500.
+- Trang danh mục và nhà cung cấp dùng `get_object_or_404`. Trước đây xóa hẳn danh mục làm
+  sản phẩm mất luôn link; nay dòng còn đó nên link còn, và `Category.objects.get` sẽ trả
+  500 thay vì 404.
+- Nút Delete của Django admin giờ đi qua `Vendor.soft_delete()`, tức ẩn cả hàng của nhà
+  cung cấp, nên việc khôi phục phải chạy được. Hai chỗ vốn hỏng được sửa cùng lượt:
+  `soft_delete` gán cho sản phẩm cùng một `deleted_at` với nhà cung cấp, vì `restore` tìm
+  sản phẩm theo đúng mốc đó, và hành động "Restore selected" gọi `restore()` từng dòng
+  thay vì `update`.
+- `soft_delete` không làm gì khi dòng đã xóa: Django admin vẫn hiện dòng đã xóa và nút
+  Delete của nó, bấm lại mà ghi đè `deleted_at` thì `Vendor.restore()` không tìm được hàng
+  nữa. Lỗi này do chính thiết kế trên sinh ra, lượt review bằng AI chỉ ra.
+- `add_to_wishlist` không còn văng lỗi với sản phẩm đã xóa hay `id` sai, trả câu báo theo
+  đúng cách view này báo chưa đăng nhập. `edit_product` trả 404 như `delete_product`.
+- Chưa xử lý: sản phẩm thuộc danh mục đã xóa vẫn bán, link danh mục trên thẻ ra 404. Hai
+  hành động xóa hàng loạt của Django admin vẫn dùng `update`, nên chọn nhiều nhà cung
+  cấp rồi xóa thì hàng của họ không bị ẩn; có từ trước, không mất dữ liệu.
+- Chưa xử lý: giao đơn có sản phẩm đã xóa thì không trừ kho, vì `change_order_status` tìm
+  sản phẩm qua `objects`. Khôi phục sản phẩm đó thì tồn kho cao hơn thực tế. Đổi sang
+  `all_objects` thì tìm theo tên lại trúng cả dòng đã xóa cùng tên, nên để sửa cùng L-25.
+- Trong Django admin, sửa một đánh giá của sản phẩm đã xóa có thể bị từ chối, vì ô chọn
+  sản phẩm không liệt kê dòng đã xóa. Đọc code, chưa thử.
+- File ảnh trên Cloudinary được giữ, vì khôi phục cần tới.
+- Test: `core/tests/test_soft_delete.py`, phần xóa trong `useradmin/tests/test_products.py`.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

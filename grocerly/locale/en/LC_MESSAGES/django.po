@@ -542,3 +542,9 @@ msgstr ""
 
 msgid "The amount paid does not match this order, so it has not been confirmed. Please contact the store."
 msgstr ""
+
+msgid "Delete this product?"
+msgstr ""
+
+msgid "This product is no longer available."
+msgstr ""
