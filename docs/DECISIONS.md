@@ -2128,6 +2128,32 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Test: `core/tests/test_soft_delete.py`, phần xóa trong `useradmin/tests/test_products.py`.
 
 
+## D-042 · Test trình duyệt bằng Playwright, tách khỏi bộ test thường bằng marker `e2e`
+
+- **Ngày:** 31/10/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Khi sửa L-28 và L-29, có hai điều pytest không kiểm được: hộp `confirm()` có thật sự hiện ra không, và Chrome có gửi cookie phiên kèm một link từ site khác không (L-29 dựa vào đó). Lần đầu phải viết script riêng chạy Playwright trong thư mục tạm, ngoài repo, nên không ai chạy lại được và không thành minh chứng. Trước đó L-16, L-17, L-20 cũng chỉ kiểm được bằng Chrome headless chạy tay, vì phần JavaScript không có test nào giữ.
+
+**Phương án đã cân nhắc**
+1. *Giữ script ngoài repo* - không thêm thư viện, nhưng mỗi lần phải dựng lại bản chép, database và dữ liệu giả; kết quả không tái lập được.
+2. *Selenium* - quen thuộc hơn, nhưng cần tải driver khớp phiên bản trình duyệt và phải tự viết phần chờ; không có sẵn plugin pytest nhận `live_server`.
+3. *Cypress* - kéo theo Node và một bộ chạy test thứ hai, tách khỏi pytest.
+4. *Playwright cho Python qua `pytest-playwright`* - chạy trong pytest, dùng chung fixture và `live_server` của pytest-django.
+
+**Quyết định.** Phương án 4. `playwright` và `pytest-playwright` ghim phiên bản trong `requirements-dev.txt`, không vào `requirements.txt` nên Render không cài. Test nằm ở `grocerly/tests/e2e/`, đánh dấu `e2e`; `pytest` thường bỏ qua chúng (`-m "not e2e"` trong `pytest.ini`), `pytest -m e2e` chạy riêng. CI thêm hai bước sau bước test: tải Chromium rồi chạy `pytest -m e2e`.
+
+**Lý do.** `live_server` dựng site thật trên database test, nên không cần bản chép hay dữ liệu giả như lần thử tay. Site thứ hai cho kịch bản "link từ trang khác" không cần server: `context.route` làm trình duyệt tự trả lời một host giả `other-site.test`, và Chrome vẫn coi nó là site khác. Tách bằng marker để bộ test thường vẫn chạy vài giây, còn bộ trình duyệt chậm hơn nên chỉ chạy khi cần.
+
+**Hệ quả.**
+- Playwright chạy vòng lặp sự kiện trong luồng test, mà Django từ chối truy vấn khi có vòng lặp; `e2e/conftest.py` đặt `DJANGO_ALLOW_ASYNC_UNSAFE`. Chỉ test e2e bị ảnh hưởng, và chúng tạo hay đọc dữ liệu giữa các bước trình duyệt, không trong lúc đó.
+- Ở máy dùng luôn Chrome đã cài: `pytest -m e2e --browser-channel chrome`. CI tải Chromium (`playwright install --with-deps chromium`, khoảng 150 MB), thêm chừng một phút mỗi lần chạy.
+- Cố ý giữ ít test, chỉ cho điều mà test không trình duyệt không với tới: câu hỏi xác nhận, cookie qua site khác, trang mở trước khi dữ liệu bị xóa. Mỗi test phải giải thích được khi bảo vệ (`CLAUDE.md` §4a).
+- Test trình duyệt không tính vào độ phủ, vì `.coveragerc` chỉ đo bốn app và chạy riêng.
+- Chưa có test cho JavaScript của khung chat (L-16, L-17, L-20); cần giả Gemini ở phía server, làm khi có nhu cầu.
+- Test: `grocerly/tests/e2e/test_delete_product.py`, sáu test. Làm hỏng từng chỗ sửa của L-28, L-29 sáu lần, đều bị bắt.
+
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
