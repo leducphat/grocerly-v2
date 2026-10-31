@@ -957,3 +957,12 @@ msgstr "Xin lỗi, kết nối mạng đang gặp sự cố."
 
 msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
 msgstr "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
+
+msgid "Please choose a vendor."
+msgstr "Vui lòng chọn nhà cung cấp."
+
+msgid "Please choose a category."
+msgstr "Vui lòng chọn danh mục."
+
+msgid "The amount paid does not match this order, so it has not been confirmed. Please contact the store."
+msgstr "Số tiền đã thanh toán không khớp với đơn hàng nên đơn chưa được xác nhận. Vui lòng liên hệ cửa hàng."

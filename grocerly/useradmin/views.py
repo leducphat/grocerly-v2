@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 
-from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, Vendor, STATUS_CHOICES
+from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, STATUS_CHOICES
 from userauths.models import Profile, User
 from useradmin.forms import AddProductForm
 from useradmin.decorators import admin_required
@@ -93,8 +93,6 @@ def add_product(request):
             new_form = form.save(commit=False)
             new_form.user = request.user
             new_form.product_status = 'published'
-            if not new_form.vendor:
-                new_form.vendor = Vendor.objects.filter(user=request.user).first() or Vendor.objects.first()
             new_form.save()
             form.save_m2m()
             

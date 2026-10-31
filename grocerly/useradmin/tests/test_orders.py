@@ -10,6 +10,7 @@ yet; `cancelled` is final too (D-033).
 """
 
 import pytest
+from django.test import Client
 from django.urls import reverse
 
 pytestmark = pytest.mark.django_db
@@ -249,3 +250,42 @@ def test_order_detail_offers_cancelled_in_the_status_list(staff_client, order_wi
     page = response.content.decode()
     assert '<option value="cancelled">Đã hủy</option>' in page
     assert "Order Status: Đang xử lý" in page
+
+
+@pytest.mark.xfail(reason="L-25: change_order_status finds the product by its title, so a renamed product loses no stock")
+def test_shipping_order_deducts_stock_of_product_renamed_after_the_order(
+    staff_client, order_with_item, product
+):
+    product.title = "Cà rốt Đà Lạt loại 1"
+    product.save()
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    product.refresh_from_db()
+    assert product.stock_count == 7  # 10 in stock, 3 ordered
+
+
+@pytest.mark.xfail(reason="L-26: change_order_status is csrf_exempt")
+def test_order_status_form_without_csrf_token_is_rejected(staff, order_with_item):
+    client = Client(enforce_csrf_checks=True)  # the test client skips CSRF checks by default
+    client.force_login(staff)
+
+    response = change_status(client, order_with_item, "shipped")
+
+    order_with_item.refresh_from_db()
+    assert response.status_code == 403
+    assert order_with_item.product_status == "processing"
+
+
+@pytest.mark.xfail(reason="L-26: update_stock is csrf_exempt")
+def test_stock_update_without_csrf_token_is_rejected(staff, product):
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(staff)
+
+    response = client.post(
+        reverse("useradmin:update_stock"), {"pid": product.p_id, "stock_count": 0}
+    )
+
+    product.refresh_from_db()
+    assert response.status_code == 403
+    assert product.stock_count == 10
