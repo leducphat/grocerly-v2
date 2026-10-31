@@ -31,7 +31,7 @@ dòng phải khớp với một commit có thật.
 
 - Ghi **ngay sau mỗi phiên làm việc có dùng AI**, không dồn.
 - Mỗi dòng phải gắn được với commit tương ứng — chưa commit thì ghi
-  `*(chưa commit)*` rồi cập nhật lại sau.
+  ``635b208`, commit ngay sau` rồi cập nhật lại sau.
 - **Không dán secret, khóa API, chuỗi kết nối hay dữ liệu người dùng thật vào
   prompt** — và cũng không dán chúng vào file này.
 - Ghi **prompt ở dạng câu lệnh ngắn**, nêu đúng việc đã yêu cầu — không chép
@@ -84,12 +84,13 @@ dòng phải khớp với một commit có thật.
 | 30/10/2026 | Claude Code (Opus 5.5) | Ghi L-21 → L-26: gửi trùng, số tiền VNPay, tìm sản phẩm theo tên, CSRF | Ghi lỗi bấm "Tạo sản phẩm" hai lần ra hai sản phẩm. Soát các chỗ khác có lỗi tương tự, nhất là thanh toán. Ghi các lỗi tìm được. Ghi thêm hai lỗi thấy khi đọc code | L-21 → L-26 trong `COMMITMENT.md` §3, thêm ghi chú idempotency vào L-18; sáu test `xfail`: L-22 trong `core/tests/test_payment.py`, L-25 trong `test_reviews.py` và `useradmin/tests/test_orders.py`, L-26 trong `test_orders.py`, chạy `--runxfail` thấy đỏ đúng chỗ. Kiểm bằng test tạm, đã xóa: trả 25.000đ cho đơn đã lên 100.000đ vẫn thành đã thanh toán, thêm địa chỉ hai lần ra hai địa chỉ, gửi form giao hàng hai lần liền ra một đơn. Đọc log khởi động trên Render: một worker `sync`. Lỗi #40, #41. 132 passed, 10 xfailed, độ phủ 76%, ruff, jscpd sạch | SV phát hiện L-21 khi thử tay | `55325d4`, commit ngay sau |
 | 30/10/2026 | Claude Code (Opus 5.5) | P-11 bước 9: lỗi 500 trên host, in lỗi ra log Render; ghi L-27, L-28 | Tìm lỗi 500 trên host sau khi đăng nhập. Xóa sản phẩm thử khỏi database. Đợi phiên kia ghi lỗi xong rồi thêm hai lỗi mới. Cấu hình `LOGGING` như đề xuất | Khoanh vùng qua log Render và API: sản phẩm thử không có danh mục làm `{% url %}` ném `NoReverseMatch`, tái hiện bằng test tạm ngoài repo; xóa sản phẩm đó qua trang nhân viên thì thấy nút xóa xóa cứng. Ghi hai lỗi thành L-27 (sản phẩm thiếu danh mục hay nhà cung cấp làm sập trang) và L-28 (nút xóa không xóa mềm) trong `COMMITMENT.md` §3, chưa có test. `LOGGING` trong `settings.py`, `grocerly/tests/test_logging.py` (hai test, tạm bỏ `LOGGING` thì đỏ), `pytest.ini`, D-038, SDD §3, `PLAN.md`. 134 passed, 10 xfailed, độ phủ 76%, ruff, jscpd sạch | SV phát hiện lỗi 500 khi thử tay, cho phép xóa sản phẩm, chọn đợi session kia ghi xong mới ghi hai lỗi mới | `e1dbfaf`, `55325d4`, commit ngay sau |
 | 30/10/2026 | Claude Code (Opus 5.5) | P-35: sửa L-22 (VNPay trả về không so số tiền), L-27 (sản phẩm thiếu danh mục làm sập trang) | Sửa L-22 và L-27, test đầy đủ | `_vnpay_amount` trong `core/views.py`, `vnpay_return` so số tiền; `AddProductForm` bắt buộc hai ô, bỏ tự gán nhà cung cấp; năm template in link có điều kiện; ba chuỗi dịch; SRS §6.1, D-039, D-040, `COMMITMENT.md`, `PLAN.md`. 53 test mới, chạy đỏ trước khi sửa; làm hỏng từng chỗ sửa 37 lần, đều bị bắt. Lỗi #42, #43. 188 passed, 9 xfailed, độ phủ 81%, ruff, jscpd 0,73% | SV chọn hai lỗi này, yêu cầu test đầy đủ | `752e426`, commit ngay sau |
+| 31/10/2026 | Claude Code (Opus 5.5) | P-36: sửa L-28 (nút xóa xóa hẳn dòng), L-29 (nút xóa nhận GET) | Sửa L-28 và lỗi xóa bằng GET. Thử bằng trình duyệt thật ở local | `SoftDeleteModel.delete()`, `wishlist_of()`, `delete_product` chỉ nhận POST, nút xóa thành form có `confirm()`, `Vendor.soft_delete` dùng chung `deleted_at`, `restore_selected`, nút yêu thích, trang danh mục, nhà cung cấp và trang sửa sản phẩm trả 404; hai chuỗi dịch; SRS §6.1, SDD §1, D-041, `COMMITMENT.md`, `PLAN.md`. 55 test mới, chạy đỏ trước khi sửa; làm hỏng từng chỗ sửa, 23 chỗ, đều bị bắt; thử năm kịch bản bằng Chrome trên hai server local (bản cũ, bản mới), script ngoài repo. Lỗi #44, #45. 243 passed, 9 xfailed, độ phủ 85%, ruff, jscpd 0,72% | SV chọn sửa hai lỗi này trước | `635b208`, commit ngay sau |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **43**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **45**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -137,8 +138,10 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 
 | 42 | 30/10/2026 | Viết test cho L-27 trước khi sửa, 9 test trong `useradmin/tests/test_products.py` đỏ, nhìn như đã tái hiện được lỗi. Thực ra cả 9 đỏ vì chính test: `product_form(category, vendor, category="")` truyền `category` hai lần, ném `TypeError` trước khi gửi request, nên chưa chạm tới form. Sửa helper xong còn 7 đỏ đúng vì lỗi | AI viết helper mà không chạy thử một test đơn lẻ. Giai đoạn đỏ chỉ có giá trị khi test đỏ đúng vì lỗi cần tái hiện. Thấy ra khi đọc danh sách: hai test gửi mã không tồn tại cũng đỏ, trong khi form vốn từ chối mã đó | AI (tự phát hiện khi đọc danh sách test đỏ) | `752e426` |
 | 43 | 30/10/2026 | Test `test_complete_product_keeps_its_vendor_and_category_links` do AI viết để giữ link của sản phẩm bình thường, nhưng ẩn hẳn link ở từng khối trên trang chủ và khối sản phẩm nổi bật ở trang danh sách thì test vẫn xanh | Test chỉ hỏi "trang có link không", mà sản phẩm hiện ở ba khối, còn một khối là qua. Chạy test sau khi sửa code thì lúc nào cũng xanh nên không lộ; chỉ thấy khi cố ý làm hỏng từng chỗ sửa (37 lần, 5 lần không bị bắt). Thêm hai test đếm đúng số link | AI (tự phát hiện khi làm hỏng từng chỗ sửa) | `752e426` |
+| 44 | 31/10/2026 | Trong `COMMITMENT.md` AI ghi cách sửa L-28 là "một chỗ sửa", và nói với SV bản sửa gói trong ba chỗ: đè `delete()`, sửa view, đổi template. Chỉ làm vậy thì wishlist hiện sản phẩm đã xóa với link 404, trang danh mục đã xóa trả 500, và nút xóa nhà cung cấp trong Django admin ẩn cả hàng mà không khôi phục được | AI nhìn đường ghi (chỗ gọi `delete()`) mà chưa lần các đường đọc. Xóa mềm đổi điều mà chỗ đọc dựa vào: trước đây khóa ngoại thành trống, nay vẫn trỏ tới dòng đã ẩn, và Django đi theo khóa ngoại không qua `objects`. Cùng họ với #29, #31, #39: kết luận từ đoạn code đang nhìn | AI (tự phát hiện khi soát các chỗ đọc khóa ngoại trước khi sửa, test đỏ xác nhận) | `635b208`, commit ngay sau |
+| 45 | 31/10/2026 | Bản sửa L-28 do AI viết sinh ra lỗi mới: `Vendor.restore()` tìm sản phẩm theo `deleted_at`, nhưng `soft_delete` ghi đè mốc đó khi bấm Delete lần nữa trên nhà cung cấp đã xóa, mà Django admin vẫn hiện dòng đã xóa. Khôi phục xong thì hàng vẫn ẩn. 42 test và 19 lần làm hỏng code đều không thấy lỗi này | AI dùng `deleted_at` làm khóa khớp mà không hỏi giá trị đó có thể đổi lúc nào, và chỉ làm hỏng những chỗ mình đã sửa, nên không lộ ca chưa từng nghĩ tới. Đây là giới hạn của cách tự kiểm: nó chứng minh test giữ được code đã viết, không chứng minh code đủ ca | AI (lượt review độc lập, không đọc phiên viết code) | `635b208`, commit ngay sau |
 
-**Ghi chú khi bảo vệ:** mười lăm trong bốn mươi ba mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười lăm trong bốn mươi lăm mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
