@@ -53,8 +53,12 @@ def health(request):
 def search_products(query: str) -> list[dict]:
     """Search for products in the grocery store based on a text query.
     Call this whenever the user asks about product availability, price, details, or stock.
+    Product titles are in Vietnamese, so write the query in Vietnamese: translate
+    product names from any other language first (e.g. "watermelon" -> "dưa hấu").
     Returns a list of matching products.
     """
+    # Gemini reads this docstring as the tool description. The search below
+    # only matches words in the title, so an English query found nothing (L-31).
     products = buyable_products()
     for word in query.split():
         products = products.filter(title__icontains=word)
