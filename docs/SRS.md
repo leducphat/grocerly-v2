@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 11/09/2026 |
+| Cập nhật | 02/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -306,6 +306,10 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   rồi hỏi xác nhận thêm vào giỏ như khi khách bảo thêm, không báo lỗi kết nối. Cùng
   một câu, AI dùng được nhiều công cụ nối nhau, tối đa ba lần; cần nhiều hơn thì AI
   nhờ khách nói lần lượt từng bước, cũng không báo lỗi kết nối (L-30).
+- **UC-16:** tên sản phẩm trong cửa hàng viết bằng tiếng Việt. Khách hỏi trợ lý bằng
+  tiếng Anh thì AI dịch tên hàng sang tiếng Việt rồi mới tìm, nên hỏi "watermelon" vẫn
+  ra dưa hấu (L-31). Ô tìm kiếm thường của cửa hàng không dịch: ở trang `/en/` vẫn
+  phải gõ tên tiếng Việt.
 - **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
   báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
   tự sinh không thuộc ràng buộc này (L-15, D-035).

@@ -77,6 +77,18 @@ def test_search_tool_needs_every_word_of_the_query(product):
     assert results == [{"message": "No matching products found."}]
 
 
+def test_search_tool_tells_gemini_to_search_in_vietnamese():
+    # L-31: titles are Vietnamese and the search matches words, so "watermelon"
+    # found nothing. Gemini reads the docstring as the tool description; whether
+    # it then translates can only be checked against the real Gemini.
+    assert "Product titles are in Vietnamese" in views.search_products.__doc__
+
+
+def test_search_tool_finds_nothing_for_an_english_name(product):
+    # The search itself does not translate: the query has to arrive in Vietnamese.
+    assert views.search_products("carrot") == [{"message": "No matching products found."}]
+
+
 def test_search_tool_returns_at_most_five_products(db):
     for i in range(6):
         Product.objects.create(

@@ -49,7 +49,7 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 | Mốc | Tuần | Ngày |
 |---|---|---|
 | Bắt đầu | Tuần 1 | 14/09/2026 – 20/09/2026 |
-| **Hạn chốt cam kết sản phẩm + bộ metric** | **Tuần 7 → hết Tuần 10** | 26/10/2026 – **22/11/2026**; nộp lên portal khi khoa thông báo |
+| **Hạn chốt cam kết sản phẩm + bộ metric** | **Tuần 7 → hết Tuần 10** | 26/10/2026 – **22/11/2026**; mục nộp trên portal hạn 16:49 23/11/2026 |
 | Kết thúc | Tuần 15 | 21/12/2026 – 27/12/2026 |
 | Phản biện | — | Dự kiến tháng 12/2026 |
 
