@@ -548,3 +548,6 @@ msgstr ""
 
 msgid "This product is no longer available."
 msgstr ""
+
+msgid "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
+msgstr ""

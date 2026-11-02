@@ -20,10 +20,23 @@ from store_api import views
 pytestmark = pytest.mark.django_db
 
 
+class ToolCallReply:
+    """A Gemini answer that is only a tool call. Like the real response, it has
+    no text: reading .text raises, which is how L-30 reached the customer."""
+
+    def __init__(self, function_call):
+        self.parts = [SimpleNamespace(function_call=function_call)]
+
+    @property
+    def text(self):
+        raise ValueError("The response has no text, only a function call")
+
+
 def gemini_reply(text="", tool=None, **tool_args):
     """One Gemini answer: plain text, or a request to call one of our tools."""
-    function_call = SimpleNamespace(name=tool, args=tool_args) if tool else None
-    return SimpleNamespace(parts=[SimpleNamespace(function_call=function_call)], text=text)
+    if tool:
+        return ToolCallReply(SimpleNamespace(name=tool, args=tool_args))
+    return SimpleNamespace(parts=[SimpleNamespace(function_call=None)], text=text)
 
 
 @pytest.fixture
@@ -154,6 +167,75 @@ def test_ai_add_to_cart_with_unknown_product_tells_gemini_not_found(client, gemi
     second_message = gemini_chat.send_message.call_args_list[1].args[0]
     assert second_message[0]["function_response"]["response"] == {"error": "Product not found"}
     assert "action" not in response.json()
+
+
+def test_ai_search_then_add_to_cart_in_one_turn_asks_user_to_confirm(client, product, gemini_chat):
+    # UC-16, UC-17, L-30: "find it and add one" makes Gemini search, then ask for the
+    # cart with the p_id it just found. On the host the second answer has no text, so
+    # reading response.text raised and the customer got the connection error.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="search_products", query="cà rốt"),
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=1),
+    ]
+
+    response = ask(client, "Tìm cà rốt rồi thêm 1 cái vào giỏ giúp mình")
+
+    body = response.json()
+    assert body.get("action") == "confirm_add_cart"
+    assert (body["product"]["pid"], body["product"]["qty"]) == (product.p_id, 1)
+
+
+def test_ai_bestsellers_then_search_then_add_to_cart_in_one_turn_asks_user_to_confirm(
+    client, product, gemini_chat
+):
+    # L-30: the bestseller list carries no p_id, so "add the most popular one" takes
+    # three tools in a row, the most one message may use.
+    product.featured = True
+    product.save()
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="get_bestsellers"),
+        gemini_reply(tool="search_products", query=product.title),
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=1),
+    ]
+
+    response = ask(client, "Thêm món bán chạy nhất vào giỏ giúp mình")
+
+    assert response.json().get("action") == "confirm_add_cart"
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"]["result"][0]["title"] == product.title
+
+
+def test_ai_still_calling_tools_after_three_asks_user_to_go_step_by_step(client, product, gemini_chat):
+    # L-30: one message may use three tools. If Gemini wants a fourth, there is no
+    # text to show; the customer is asked to go step by step, not told the
+    # connection failed.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="search_products", query="cà rốt") for _ in range(4)
+    ]
+
+    response = ask(client, "Tìm cà rốt, cà chua, khoai tây rồi thêm hết vào giỏ")
+
+    assert response.status_code == 200
+    assert response.json()["reply"] == (
+        "Xin lỗi, mình chưa làm xong yêu cầu này trong một lượt. Bạn nói lần lượt từng bước giúp mình nhé?"
+    )
+
+
+def test_ai_search_answer_keeps_results_for_the_next_message(client, product, gemini_chat):
+    # UC-16: a plain answer after a search still carries the results, so that the
+    # chat window can send them back with the next message ("add the first one").
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="search_products", query="cà rốt"),
+        gemini_reply("Shop có Cà rốt Đà Lạt, 25.000 VND."),
+    ]
+
+    response = ask(client, "Có cà rốt không?")
+
+    body = response.json()
+    assert body["reply"] == "Shop có Cà rốt Đà Lạt, 25.000 VND."
+    assert product.p_id in body["hidden_context"]
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"]["result"][0]["title"] == product.title
 
 
 def test_ai_checkout_request_sends_user_to_checkout(client, gemini_chat):

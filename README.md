@@ -1,67 +1,70 @@
-# Grocerly E-Commerce Platform
+# Grocerly
 
-![Grocerly Logo](https://grocerly-ecom.onrender.com/static/assets/imgs/theme/logo.png)
+![Grocerly](https://grocerly-v2.onrender.com/static/assets/imgs/theme/logo.png)
 
-Grocerly is a single-store grocery e-commerce web application designed to provide a seamless shopping experience. Built with Python and Django, this platform supports dynamic product management, user authentication, a comprehensive shopping cart system, a staff dashboard, and an AI-powered shopping assistant.
+Website bán thực phẩm của một cửa hàng, có trợ lý AI (Google Gemini) giúp khách
+tìm sản phẩm, thêm vào giỏ và đi tới thanh toán bằng hội thoại. Mã nguồn khóa
+luận tốt nghiệp, phát triển tiếp từ
+[tiểu luận chuyên ngành](https://github.com/leducphat/grocerly-ecom).
 
-## 🌐 Live Demo
-**Check out the live deployment here:** [https://grocerly-ecom.onrender.com](https://grocerly-ecom.onrender.com/)
+Bản đang chạy: <https://grocerly-v2.onrender.com> (gói miễn phí, lần mở đầu có
+thể mất khoảng nửa phút).
 
-*(Note: Since this is hosted on a free Render instance, it might take a minute to spin up upon initial request).*
+## Chức năng
 
-## 🚀 Key Features
+Đủ các chức năng của một website thương mại điện tử thông thường, cộng thêm trợ
+lý AI hỗ trợ khách mua hàng ngay trong khung chat.
 
-*   **AI Shopping Assistant**: Integrated with Google's Gemini AI to provide a smart chat widget that helps customers search for products, answer queries, and manage their cart.
-*   **VNPay Payment Gateway**: Secure online checkout process with VNPay integration for fast and reliable payments.
-*   **Dynamic AJAX Filtering**: Real-time product filtering by categories, tags, vendors, and price slider without reloading the page.
-*   **Multilingual Support (i18n)**: Fully supports English and Vietnamese, with smart middleware ensuring the preferred default language.
-*   **Store Staff Dashboard**: Store staff manage products, inventory, orders, and sales in a dedicated dashboard. Grocerly is a single-seller store; "vendors" are the suppliers whose products the store sells, not seller accounts.
-*   **Dynamic Shopping Cart**: Real-time cart updates, session-based cart management, coupon application, and a seamless checkout process.
-*   **Robust Data Safety**: Implements soft-deletion for critical models (like Products) to prevent accidental data loss.
-*   **User Profiles & Authentication**: Secure sign-up/login, wishlists, address management, and order history tracking.
-*   **Product Reviews & Ratings**: Customers can leave feedback and ratings on products they've purchased.
-*   **Cloud Media Storage**: All product images and user uploads are securely stored and delivered via Cloudinary.
-*   **Modern Admin Panel**: Powered by `django-jazzmin` for an intuitive and beautiful admin interface.
+- Khách: xem và lọc sản phẩm, giỏ hàng, mã giảm giá, yêu thích, đánh giá, thanh
+  toán VNPay (sandbox) hoặc khi nhận hàng.
+- Trợ lý AI: tìm sản phẩm, gợi ý hàng bán chạy; thêm vào giỏ và thanh toán chỉ
+  chạy khi khách bấm xác nhận.
+- Nhân viên cửa hàng: dashboard quản lý sản phẩm, tồn kho, đơn hàng.
+- Giao diện tiếng Việt và tiếng Anh.
 
-## 🛠️ Technology Stack
+"Vendor" trong mã nguồn là nhà cung cấp hàng, không phải người bán.
 
-*   **Backend framework:** Django 5.2 (Python 3)
-*   **AI Integration:** Google Generative AI SDK (Gemini)
-*   **Database:** PostgreSQL (Hosted on Neon.tech)
-*   **Media Storage:** Cloudinary & WhiteNoise (for static assets)
-*   **Frontend:** HTML5, CSS3, Vanilla JavaScript, Bootstrap, jQuery (for AJAX)
-*   **Hosting/Deployment:** Render
+## Công nghệ
 
-## ⚙️ Local Development Setup
+Python 3.12, Django 5.2, Django REST Framework, PostgreSQL, Cloudinary, Google
+Gemini, Bootstrap và jQuery, chạy trên Render. Kiểm thử bằng pytest và
+Playwright, kiểm mã bằng ruff và jscpd.
 
-To run this project locally, follow these steps:
+## Chạy ở máy cá nhân
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/leducphat/grocerly-ecom.git
-    cd grocerly-ecom
-    ```
+```bash
+git clone https://github.com/leducphat/grocerly-v2.git
+cd grocerly-v2/grocerly          # manage.py nằm ở đây
+python -m venv .venv
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+python manage.py migrate
+python manage.py runserver
+```
 
-2.  **Create and activate a virtual environment:**
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
+Trong `.env`, đặt `DJANGO_DEBUG=1`, `DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1`,
+`USE_CLOUDINARY=False` và xóa dòng `DATABASE_URL` để dùng SQLite. Trợ lý AI cần
+`GEMINI_API_KEY`.
 
-3.  **Install dependencies:**
-    ```bash
-    cd grocerly
-    pip install -r requirements.txt
-    ```
+## Kiểm thử
 
-4.  **Set up environment variables:**
-    Copy `.env.example` to `.env` and fill in your local Postgres database credentials and Cloudinary API keys.
+```bash
+pip install -r requirements-dev.txt
+pytest --cov        # test thường, kèm độ phủ
+pytest -m e2e       # test trình duyệt (cần: playwright install chromium)
+ruff check .
+```
 
-5.  **Run migrations and start the server:**
-    ```bash
-    python manage.py migrate
-    python manage.py runserver
-    ```
+Test dùng SQLite trong bộ nhớ, không đọc `.env` và không gọi dịch vụ thật. CI
+trên GitHub Actions chạy các bước này cho mỗi lần push và pull request, rồi tự
+deploy lên Render khi `main` có commit mới.
 
-## 📝 License
-This project is open-source and available under the MIT License.
+## Tài liệu
+
+Đặc tả ở [`docs/SRS.md`](docs/SRS.md), thiết kế ở [`docs/SDD.md`](docs/SDD.md),
+kế hoạch ở [`docs/PLAN.md`](docs/PLAN.md), các quyết định kỹ thuật ở
+[`docs/DECISIONS.md`](docs/DECISIONS.md), nhật ký dùng AI ở
+[`docs/AI_USAGE_LOG.md`](docs/AI_USAGE_LOG.md).
+
+Giấy phép MIT.
