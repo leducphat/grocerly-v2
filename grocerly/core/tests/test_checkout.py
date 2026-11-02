@@ -245,3 +245,35 @@ def test_checkout_after_a_cancelled_order_creates_a_new_order(
     new_order = CartOrder.objects.exclude(id=cancelled.id).get()
     assert response.url == reverse("core:checkout", args=[new_order.oid])
     assert new_order.product_status == "processing"
+
+
+# ---------- Order lines know their product (L-25, D-045) ----------
+
+
+def test_checkout_links_each_order_line_to_its_product(customer_client, product, add_to_cart):
+    add_to_cart(customer_client, product, qty=2)
+
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+
+    assert CartOrderItem.objects.get().product == product
+
+
+def test_order_line_keeps_the_title_of_the_day_it_was_bought(customer_client, product, add_to_cart):
+    add_to_cart(customer_client, product)
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+
+    product.title = "Cà rốt Đà Lạt loại 1"
+    product.save()
+
+    line = CartOrderItem.objects.get()
+    assert (line.item, line.product) == ("Cà rốt Đà Lạt", product)
+
+
+def test_order_line_stays_when_its_product_is_erased(customer_client, product, add_to_cart):
+    add_to_cart(customer_client, product)
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+
+    product.hard_delete()
+
+    line = CartOrderItem.objects.get()
+    assert (line.item, line.product) == ("Cà rốt Đà Lạt", None)

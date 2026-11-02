@@ -293,3 +293,14 @@ def test_reviews_page_still_names_a_deleted_product(staff_client, stocked_produc
 
     assert response.status_code == 200
     assert stocked_product.title in response.content.decode()
+
+
+def test_add_and_edit_forms_lock_their_button_on_submit(staff_client, stocked_product):
+    # L-21: the script is in useradmin/base.html, the forms opt in with this attribute.
+    add_page = staff_client.get(reverse(ADD_URL)).content.decode()
+    edit_page = staff_client.get(
+        reverse("useradmin:dashboard-edit-products", args=[stocked_product.p_id])
+    ).content.decode()
+
+    assert "data-lock-on-submit>" in add_page
+    assert "data-lock-on-submit>" in edit_page

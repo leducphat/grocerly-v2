@@ -11,7 +11,7 @@ from core.models import CartOrder, CartOrderItem
 @pytest.fixture
 def add_to_cart():
     """Return a function that adds a product to the session cart the way the product
-    page does: GET /add-to-cart/ with the product's id and a quantity.
+    page does: POST /add-to-cart/ with the product's id and a quantity.
 
     Passing price= adds a price parameter to the request, the way a customer
     editing the URL would, so a test can check that the server ignores it (L-6).
@@ -21,7 +21,7 @@ def add_to_cart():
         data = {"id": product.id, "qty": qty}
         if price is not None:
             data["price"] = price
-        return client.get(reverse("core:add-to-cart"), data)
+        return client.post(reverse("core:add-to-cart"), data)
 
     return add
 
@@ -40,13 +40,9 @@ def order(customer):
 
 @pytest.fixture
 def shipped_order(customer, product):
-    """An order of `customer` holding `product`, already handed to the courier.
+    """An order of `customer` holding `product`, already handed to the courier."""
 
-    `CartOrderItem` stores the product's title instead of a foreign key - that is
-    how checkout writes it, so this is also how the code finds the buyer again.
-    """
-
-    def make(status="shipped", user=None, item=None):
+    def make(status="shipped", user=None):
         order = CartOrder.objects.create(
             user=user or customer,
             price=product.price,
@@ -58,7 +54,8 @@ def shipped_order(customer, product):
         CartOrderItem.objects.create(
             order=order,
             invoice_no=f"INVOICE_NO-{order.id}",
-            item=item or product.title,
+            product=product,
+            item=product.title,
             quantity=1,
             price=product.price,
             total=product.price,

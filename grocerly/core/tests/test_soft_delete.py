@@ -14,6 +14,7 @@ start from a wishlist line or a product card are tested here too (D-041).
 from decimal import Decimal
 
 import pytest
+from django.test import Client
 from django.urls import reverse
 
 from core.models import Coupon, Product, ProductImage, ProductReview, Vendor, Wishlist
@@ -269,7 +270,7 @@ def test_removing_from_wishlist_leaves_out_deleted_product(
     kept = Wishlist.objects.create(user=customer, product=other_product)
     product.delete()
 
-    response = customer_client.get(reverse("core:remove-from-wishlist"), {"id": kept.id})
+    response = customer_client.post(reverse("core:remove-from-wishlist"), {"id": kept.id})
 
     body = response.json()
     assert body["total_wishlist_items"] == 0
@@ -280,7 +281,7 @@ def test_adding_deleted_product_to_wishlist_is_refused_with_a_reason(customer_cl
     # The page was opened before staff deleted the product, so its heart still works.
     product.delete()
 
-    response = customer_client.get(reverse("core:add-to-wishlist"), {"id": product.id})
+    response = customer_client.post(reverse("core:add-to-wishlist"), {"id": product.id})
 
     body = response.json()
     assert body["bool"] is False
@@ -290,7 +291,7 @@ def test_adding_deleted_product_to_wishlist_is_refused_with_a_reason(customer_cl
 
 @pytest.mark.parametrize("bad_id", ["999999", "abc", ""])
 def test_add_to_wishlist_refuses_unknown_product(customer_client, bad_id):
-    response = customer_client.get(reverse("core:add-to-wishlist"), {"id": bad_id})
+    response = customer_client.post(reverse("core:add-to-wishlist"), {"id": bad_id})
 
     assert response.json()["bool"] is False
 
@@ -300,6 +301,28 @@ def test_adding_to_wishlist_counts_only_products_still_on_sale(
 ):
     product.delete()
 
-    response = customer_client.get(reverse("core:add-to-wishlist"), {"id": other_product.id})
+    response = customer_client.post(reverse("core:add-to-wishlist"), {"id": other_product.id})
 
     assert response.json()["total_wishlist_items"] == 1
+
+
+@pytest.mark.parametrize("url_name", ["core:add-to-wishlist", "core:remove-from-wishlist"])
+def test_wishlist_cannot_be_changed_by_get_request(customer_client, customer, product, wishlist_line, url_name):
+    target = product.id if url_name == "core:add-to-wishlist" else wishlist_line.id
+
+    response = customer_client.get(reverse(url_name), {"id": target})
+
+    assert response.status_code == 405
+    assert Wishlist.objects.filter(user=customer).count() == 1
+
+
+@pytest.mark.parametrize("url_name", ["core:add-to-wishlist", "core:remove-from-wishlist"])
+def test_wishlist_post_without_csrf_token_is_rejected(customer, product, wishlist_line, url_name):
+    client = Client(enforce_csrf_checks=True)
+    client.force_login(customer)
+    target = product.id if url_name == "core:add-to-wishlist" else wishlist_line.id
+
+    response = client.post(reverse(url_name), {"id": target})
+
+    assert response.status_code == 403
+    assert Wishlist.objects.filter(user=customer).count() == 1

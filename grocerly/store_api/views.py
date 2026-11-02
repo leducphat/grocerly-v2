@@ -198,19 +198,25 @@ def _chat_reply(request):
                 # the site itself: a product the shop has hidden is "not found"
                 # here too, one with nothing left in stock is refused instead
                 # of proposed (L-9), and so is a quantity the stock cannot cover
-                # (L-14). Gemini gets the reason so it can tell the customer.
+                # (L-14). The cart adds to the line it already has, so what must
+                # fit the stock is the total (L-18). Gemini gets the reason so it
+                # can tell the customer.
                 # If the stock drops between this question and the customer's
                 # click, the cart still brings the line down to it (D-024).
                 p = published_products().filter(p_id=p_id).first()
                 stock = (p.stock_count or 0) if p else 0
+                cart_line = request.session.get('cart_data_obj', {}).get(str(p.id), {}) if p else {}
+                in_cart = cart_line.get('qty', 0)
                 if p is None:
                     tool_error = "Product not found"
                 elif stock <= 0:
                     tool_error = "Product is out of stock"
                 elif qty < 1:
                     tool_error = "Quantity must be at least 1"
-                elif qty > stock:
+                elif in_cart + qty > stock:
                     tool_error = f"Only {stock} left in stock"
+                    if in_cart:
+                        tool_error += f" and the cart already has {in_cart}"
                 else:
                     # Interrupt conversation to ask for UI confirmation
                     return Response({

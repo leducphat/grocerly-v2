@@ -321,6 +321,10 @@ class CartOrder(models.Model):
 
 class CartOrderItem(models.Model):
     order = models.ForeignKey(CartOrder, on_delete=models.CASCADE)
+    # Which product this line is. `item` stays as the name on the day of the sale, and
+    # is not used to find the product: names change and are not unique (L-25, D-045).
+    # Empty on an old line no single product matched, and if a product is erased.
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True)
     invoice_no = models.CharField(max_length=200)
     product_status = models.CharField(max_length=200)
     item = models.CharField(max_length=200)

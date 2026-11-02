@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db.models import Sum
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
@@ -71,7 +70,6 @@ def products(request):
     }
     return render(request, "useradmin/products.html", context)
 
-@csrf_exempt
 @admin_required
 def update_stock(request):
     if request.method == "POST":
@@ -185,7 +183,6 @@ NEXT_STATUS = {
     "shipped": {"delivered", "cancelled"},
 }
 
-@csrf_exempt
 @admin_required
 def change_order_status(request, oid):
     order = CartOrder.objects.get(oid=oid)
@@ -210,10 +207,12 @@ def change_order_status(request, oid):
         # 'processing'; đơn đã 'shipped' thì không quay lại nhánh này được nữa.
         # Hủy đơn không có nhánh cộng lại: đồ tươi đi giao rồi quay về chưa chắc
         # còn bán được, nên nhân viên tự chỉnh tồn kho ở trang sản phẩm (D-033).
+        # Khóa ngoại đọc được cả sản phẩm đã xóa mềm: hàng đã rời kho thì vẫn phải
+        # trừ. Dòng không có khóa ngoại thì bỏ qua, không đoán theo tên (L-25, D-045).
         if status == 'shipped':
-            order_items = CartOrderItem.objects.filter(order=order)
+            order_items = CartOrderItem.objects.filter(order=order).select_related("product")
             for item in order_items:
-                product = Product.objects.filter(title=item.item).first()
+                product = item.product
                 if product and product.stock_count is not None:
                     product.stock_count -= item.quantity
                     if product.stock_count < 0:

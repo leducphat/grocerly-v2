@@ -35,7 +35,7 @@
 | 4 | `core_product` | Sản phẩm — có soft delete, trạng thái duyệt, tồn kho, HSD |
 | 5 | `core_productimage` | Ảnh phụ của sản phẩm |
 | 6 | `core_cartorder` | Đơn hàng: thông tin nhận hàng, thanh toán, vận chuyển |
-| 7 | `core_cartorderitem` | Dòng chi tiết của đơn hàng |
+| 7 | `core_cartorderitem` | Dòng chi tiết của đơn hàng: khóa ngoại `product` tới sản phẩm (`SET_NULL`), cột `item` giữ tên lúc mua (D-045) |
 | 8 | `core_productreview` | Đánh giá + rating 1–5 |
 | 9 | `core_wishlist` | Danh sách yêu thích |
 | 10 | `core_address` | Địa chỉ giao hàng của người dùng |

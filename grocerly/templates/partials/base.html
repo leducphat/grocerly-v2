@@ -744,6 +744,13 @@
 
     <!-- Add to Cart AJAX -->
     <script>
+        // Every jQuery request of the page carries its CSRF token. The token comes
+        // from the template, not from the cookie: Django only sets the cookie on a
+        // page that uses the token (L-19).
+        $.ajaxSetup({
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        });
+
         // Turns text into HTML that shows exactly that text. Anything that comes
         // from data (product names, Gemini's replies, what the customer types)
         // goes through it before it is written into the page as HTML (L-16).
@@ -814,14 +821,20 @@
 
             // The server reads the title, the price and the image from the
             // database, so the request only carries the product and the quantity.
+            // The URLs carry the language prefix: without it the server answers
+            // 302 and the browser repeats the POST as a GET.
             $.ajax({
-                url: '/add-to-cart/',
+                url: '{% url 'core:add-to-cart' %}',
+                type: 'POST',
                 data: {
                     'id': product_id,
                     'qty': quantity,
                 },
                 dataType: 'json',
+                // The server adds to the line, so a second click while this
+                // request runs would count twice (L-18).
                 beforeSend: function(){
+                    this_val.prop("disabled", true);
                     console.log("Adding product to cart...");
                 },
                 success: function(response){
@@ -829,6 +842,12 @@
                     console.log("Added to cart successfully!", response);
                     updateMiniCartCount(response.totalcartitems);
                     renderMiniCartItems(response.data);
+                },
+                error: function(){
+                    alert(CHAT_TEXT.networkError);
+                },
+                complete: function(){
+                    this_val.prop("disabled", false);
                 }
             });
         });
@@ -841,7 +860,8 @@
             console.log("Product ID:", product_id);
 
             $.ajax({
-                url: '/delete-from-cart/',
+                url: '{% url 'core:delete-from-cart' %}',
+                type: 'POST',
                 data: { 'id': product_id },
                 dataType: 'json',
                 beforeSend: function(){
@@ -850,6 +870,10 @@
                 success: function(response){
                     updateMiniCartCount(response.totalcartitems);
                     $("#cart-list").html(response.data);
+                },
+                error: function(){
+                    this_val.show();
+                    alert(CHAT_TEXT.networkError);
                 }
             });
         });
@@ -859,7 +883,8 @@
 
         function triggerCartQuantityUpdate(product_id, product_quantity) {
             $.ajax({
-                url: '/update-cart/',
+                url: '{% url 'core:update-cart' %}',
+                type: 'POST',
                 data: {
                     'id': product_id,
                     'qty': product_quantity,
@@ -868,6 +893,9 @@
                 success: function(response){
                     updateMiniCartCount(response.totalcartitems);
                     $("#cart-list").html(response.data);
+                },
+                error: function(){
+                    alert(CHAT_TEXT.networkError);
                 }
             });
         }
@@ -897,6 +925,7 @@
 
             $.ajax({
                 url: "{% url 'core:add-to-wishlist' %}",
+                type: "POST",
                 data: { "id": product_id },
                 dataType: "json",
                 success: function(response){
@@ -926,10 +955,11 @@
             let phone = $("#phone").val();
             let subject = $("#subject").val();
             let message = $("#message").val();
+            let submit_button = $(this).find("button[type=submit]");
 
             $.ajax({
                 url: "{% url 'core:ajax-contact-form' %}",
-                type: "GET",
+                type: "POST",
                 data: {
                     "full_name": full_name,
                     "email": email,
@@ -938,12 +968,23 @@
                     "message": message,
                 },
                 dataType: "json",
+                // Each request stores one message, so the button waits for the
+                // answer; a second click would store it twice (L-23).
+                beforeSend: function(){
+                    submit_button.prop("disabled", true);
+                },
                 success: function(response){
                     if(response.data.bool === true){
                         $("#message-response").html("Message Sent Successfully!");
                         $("form#contact-form-ajax").hide();
                         $(".contact_us_p").hide();
                     }
+                },
+                error: function(){
+                    alert(CHAT_TEXT.networkError);
+                },
+                complete: function(){
+                    submit_button.prop("disabled", false);
                 }
             });
         });
@@ -1110,7 +1151,7 @@
 
                     if (data.action === "confirm_add_cart") {
                         const p = data.product;
-                        appendButton(CHAT_TEXT.addButton, () => aiConfirmCartAdd(p.id, p.title, p.qty));
+                        appendButton(CHAT_TEXT.addButton, (event) => aiConfirmCartAdd(p.id, p.title, p.qty, event.currentTarget));
                     } else if (data.action === "confirm_checkout") {
                         appendButton(CHAT_TEXT.checkoutButton, () => {
                             window.location.href = '{% url 'core:cart' %}';
@@ -1144,20 +1185,25 @@
         }
 
         // `title` is only used to write the reply; the cart line is built from
-        // the database on the server side.
-        function aiConfirmCartAdd(id, title, qty) {
+        // the database on the server side. One proposal is confirmed once: the
+        // cart adds to its line, so a second click would add the quantity again,
+        // and the button stays off unless the request failed (L-18).
+        function aiConfirmCartAdd(id, title, qty, button) {
+            button.disabled = true;
             appendMessage('user', CHAT_TEXT.yesAdd);
             chatHistory.push({role: 'user', content: CHAT_TEXT.yesAdd});
 
             $.ajax({
-                url: '/add-to-cart/',
+                url: '{% url 'core:add-to-cart' %}',
+                type: 'POST',
                 data: {
                     'id': id,
                     'qty': qty,
                 },
                 dataType: 'json',
                 success: function(response){
-                    $(".cart-items-count").text(response.totalcartitems);
+                    updateMiniCartCount(response.totalcartitems);
+                    renderMiniCartItems(response.data);
 
                     // Say what the cart holds now, not what was proposed: the
                     // cart brings the line down to the stock, or drops it if the
@@ -1166,7 +1212,7 @@
                     let botReply;
                     if (!line) {
                         botReply = fillText(CHAT_TEXT.soldOut, {title: title});
-                    } else if (line.qty < Number(qty)) {
+                    } else if (line.qty < response.wanted_qty) {
                         botReply = fillText(CHAT_TEXT.lessAdded, {qty: line.qty, title: title});
                     } else {
                         botReply = fillText(CHAT_TEXT.added, {qty: line.qty, title: title});
@@ -1177,6 +1223,7 @@
                     sessionStorage.setItem('grocerlyChatHistory', JSON.stringify(chatHistory));
                 },
                 error: function() {
+                    button.disabled = false;
                     appendMessage('bot', CHAT_TEXT.networkError);
                 }
             });

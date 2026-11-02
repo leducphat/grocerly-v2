@@ -13,6 +13,8 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from core.models import CartOrderItem, Product
+
 pytestmark = pytest.mark.django_db
 
 
@@ -252,7 +254,6 @@ def test_order_detail_offers_cancelled_in_the_status_list(staff_client, order_wi
     assert "Order Status: Đang xử lý" in page
 
 
-@pytest.mark.xfail(reason="L-25: change_order_status finds the product by its title, so a renamed product loses no stock")
 def test_shipping_order_deducts_stock_of_product_renamed_after_the_order(
     staff_client, order_with_item, product
 ):
@@ -265,7 +266,44 @@ def test_shipping_order_deducts_stock_of_product_renamed_after_the_order(
     assert product.stock_count == 7  # 10 in stock, 3 ordered
 
 
-@pytest.mark.xfail(reason="L-26: change_order_status is csrf_exempt")
+def test_shipping_order_deducts_stock_of_the_product_bought_not_of_its_namesake(
+    staff_client, order_with_item, product
+):
+    bought = Product.objects.create(title=product.title, price=product.price, stock_count=5)
+    CartOrderItem.objects.update(product=bought)
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    bought.refresh_from_db()
+    product.refresh_from_db()
+    assert (bought.stock_count, product.stock_count) == (2, 10)
+
+
+def test_shipping_order_deducts_stock_of_a_product_deleted_after_the_order(
+    staff_client, order_with_item, product
+):
+    # The goods leave the shelf whether or not the product is still on sale (D-041).
+    product.delete()
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    product.refresh_from_db()
+    assert product.stock_count == 7
+
+
+def test_order_line_without_a_product_ships_and_touches_no_stock(
+    staff_client, order_with_item, product
+):
+    CartOrderItem.objects.update(product=None)
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    order_with_item.refresh_from_db()
+    product.refresh_from_db()
+    assert order_with_item.product_status == "shipped"
+    assert product.stock_count == 10  # the title is not used to guess the product
+
+
 def test_order_status_form_without_csrf_token_is_rejected(staff, order_with_item):
     client = Client(enforce_csrf_checks=True)  # the test client skips CSRF checks by default
     client.force_login(staff)
@@ -277,7 +315,6 @@ def test_order_status_form_without_csrf_token_is_rejected(staff, order_with_item
     assert order_with_item.product_status == "processing"
 
 
-@pytest.mark.xfail(reason="L-26: update_stock is csrf_exempt")
 def test_stock_update_without_csrf_token_is_rejected(staff, product):
     client = Client(enforce_csrf_checks=True)
     client.force_login(staff)

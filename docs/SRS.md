@@ -212,6 +212,11 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-06, UC-09:** số lượng của một dòng giỏ không vượt quá tồn kho. Máy chủ
   kiểm tra mỗi lần khách thêm vào giỏ, sửa số lượng và lúc tạo đơn; vượt thì hạ
   xuống đúng bằng tồn kho và báo cho khách biết đã hạ (D-024).
+- **UC-06:** thêm một sản phẩm đã có trong giỏ thì số lượng được cộng vào số đang có,
+  vẫn trong giới hạn tồn kho ở trên; đặt lại số lượng là việc của trang giỏ hàng. Nút
+  thêm bị khóa trong lúc chờ máy chủ trả lời, nên bấm đúp chỉ tính một lần (L-18, D-044).
+- **UC-06, UC-12:** giỏ hàng và wishlist chỉ đổi bằng POST có CSRF token. Link hay form
+  đặt ở trang web khác không đổi được giỏ và wishlist của khách (L-19, D-043).
 - **UC-06:** sản phẩm hết hàng khi đang nằm trong giỏ → dòng đó bị bỏ khỏi giỏ
   kèm thông báo, giống như sản phẩm bị gỡ bán.
 - **UC-06, UC-09:** giá của mỗi dòng giỏ hàng và tổng tiền của đơn đều do hệ thống
@@ -238,6 +243,9 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   — không có bước Admin duyệt, vì nhân viên là người của chính cửa hàng chứ không
   phải người bán bên ngoài (D-015, D-028). Admin vẫn ẩn hoặc gỡ bán được bất kỳ sản
   phẩm nào.
+- **UC-08, UC-19:** nút gửi của form liên hệ và của form thêm, sửa sản phẩm bị khóa khi
+  form đã gửi đi, nên bấm đúp chỉ gửi một lần. Chặn ở trình duyệt, không chặn được
+  request do script gửi trùng (L-21, L-23, D-044).
 - **UC-19:** sản phẩm phải có danh mục và nhà cung cấp. Nhân viên để trống một trong
   hai ở form thêm hoặc sửa thì máy chủ từ chối và báo ô còn thiếu; hệ thống không tự
   chọn hộ (L-27, D-039).
@@ -292,6 +300,8 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-17:** AI chỉ đề nghị số lượng từ 1 tới số còn trong kho; khách hỏi nhiều hơn
   thì AI nói kho còn bao nhiêu. Câu báo sau khi khách bấm xác nhận nói đúng số lượng
   giỏ hàng đang giữ, không lặp lại số AI đã đề nghị (L-14, D-035).
+- **UC-17:** số AI đề nghị được tính thêm vào số đã có trong giỏ, nên tổng sau khi thêm
+  không vượt tồn kho. Mỗi lần AI đề nghị chỉ xác nhận được một lần (L-18, D-044).
 - **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
   báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
   tự sinh không thuộc ràng buộc này (L-15, D-035).
