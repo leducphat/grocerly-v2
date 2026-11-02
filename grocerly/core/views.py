@@ -20,7 +20,7 @@ from zoneinfo import ZoneInfo
 
 from core.models import (
     Category, Vendor, Product, ProductReview,
-    CartOrder, CartOrderItem, Wishlist, Address, Coupon,
+    CartOrder, CartOrderItem, Wishlist, Address, Coupon, wishlist_of,
 )
 from core.forms import ProductReviewForm
 from userauths.models import ContactUs, Profile
@@ -114,7 +114,7 @@ def product_list_view(request):
 
 
 def category_product_list_view(request, c_id):
-    category = Category.objects.get(c_id=c_id)
+    category = get_object_or_404(Category, c_id=c_id)
     products = Product.objects.filter(category=category, product_status='published').order_by('-id')
 
     context = {
@@ -136,7 +136,7 @@ def vendor_list_view(request):
 
 
 def vendor_detail_view(request, v_id):
-    vendor = Vendor.objects.get(v_id=v_id)
+    vendor = get_object_or_404(Vendor, v_id=v_id)
     products = Product.objects.filter(vendor=vendor, product_status='published').order_by('-id')
     context = {
         'vendor': vendor,
@@ -596,6 +596,17 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+
+def _vnpay_amount(order):
+    """The order total the way VNPay writes it: VND x 100, as a string.
+
+    The payment link and both replies from VNPay use this one function, so they
+    cannot disagree on the rounding. VNPay's reply carries the amount as text and it
+    can be missing, so the two checks compare text instead of calling int() (L-22).
+    """
+    return str(int(order.price) * 100)
+
+
 @login_required
 def vnpay_payment(request, oid):
     order = _get_checkout_order_or_none(request, oid)
@@ -619,7 +630,6 @@ def vnpay_payment(request, oid):
     order.save(update_fields=['payment_method'])
 
     import time
-    amount = int(order.price) * 100 # VNPAY expects amount * 100
     order_desc = f"Thanh_toan_don_hang_{order.oid}"
     txn_ref = f"{order.oid}-{int(time.time())}"
 
@@ -627,7 +637,7 @@ def vnpay_payment(request, oid):
     vnp.requestData['vnp_Version'] = '2.1.0'
     vnp.requestData['vnp_Command'] = 'pay'
     vnp.requestData['vnp_TmnCode'] = settings.VNPAY_TMN_CODE
-    vnp.requestData['vnp_Amount'] = str(amount)
+    vnp.requestData['vnp_Amount'] = _vnpay_amount(order)
     vnp.requestData['vnp_CurrCode'] = 'VND'
     vnp.requestData['vnp_TxnRef'] = txn_ref
     vnp.requestData['vnp_OrderInfo'] = order_desc
@@ -658,9 +668,19 @@ def vnpay_return(request):
             if vnp_ResponseCode == "00":
                 try:
                     order = CartOrder.objects.get(oid=order_id)
+
+                    # The order total can change after the link was made: another
+                    # tab sends the shipping form again, or a coupon is applied.
+                    # vnpay_ipn answers 04 for that; without this check the same
+                    # payment would still mark the order paid here (L-22, D-040).
+                    # The cart and the pending order stay, so the total can be paid.
+                    if inputData.get('vnp_Amount') != _vnpay_amount(order):
+                        messages.error(request, _("The amount paid does not match this order, so it has not been confirmed. Please contact the store."))
+                        return redirect("core:payment-failed")
+
                     order.paid_status = True
                     order.save()
-                    
+
                     if 'cart_data_obj' in request.session:
                         del request.session['cart_data_obj']
                         
@@ -695,7 +715,7 @@ def vnpay_ipn(request):
         if vnp.validate_response(settings.VNPAY_HASH_SECRET):
             try:
                 order = CartOrder.objects.get(oid=order_id)
-                if int(amount) != int(order.price) * 100:
+                if amount != _vnpay_amount(order):
                     return JsonResponse({'RspCode': '04', 'Message': 'Invalid amount'})
                     
                 if order.paid_status:
@@ -892,7 +912,7 @@ def make_address_default(request):
 
 @login_required
 def wishlist_view(request):
-    wishlist = Wishlist.objects.filter(user=request.user)
+    wishlist = wishlist_of(request.user)
     context = {
         "w": wishlist,
     }
@@ -902,8 +922,10 @@ def add_to_wishlist(request):
     if not request.user.is_authenticated:
         return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để thêm vào Wishlist!"})
 
-    product_id = request.GET.get('id')
-    product = Product.objects.get(id=product_id)
+    # A page opened before staff deleted the product still shows its heart (L-28).
+    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    if product is None:
+        return JsonResponse({"bool": False, "error": _("This product is no longer available.")})
 
     wishlist_qs = Wishlist.objects.filter(product=product, user=request.user)
 
@@ -917,7 +939,7 @@ def add_to_wishlist(request):
         )
         added = True
         
-    total_wishlist = Wishlist.objects.filter(user=request.user).count()
+    total_wishlist = wishlist_of(request.user).count()
     context = {"bool": True, "added": added, "total_wishlist_items": total_wishlist}
 
     return JsonResponse(context)
@@ -934,7 +956,7 @@ def remove_wishlist(request):
     except Wishlist.DoesNotExist:
         pass
 
-    wishlist = Wishlist.objects.filter(user=request.user)
+    wishlist = wishlist_of(request.user)
     total_wishlist = wishlist.count()
 
     context = {

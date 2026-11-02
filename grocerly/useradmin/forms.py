@@ -1,5 +1,6 @@
 from core.models import Product, Vendor, Category
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from taggit.forms import TagField, TagWidget
 
 class AddProductForm(forms.ModelForm):
@@ -14,8 +15,10 @@ class AddProductForm(forms.ModelForm):
     weight_volume = forms.CharField(widget=forms.TextInput(attrs={'placeholder': "Volume/Weight (e.g. 1kg, 500ml)", "class":"form-control"}), required=False)
     ingredients = forms.CharField(widget=forms.Textarea(attrs={'placeholder': "Ingredients list", "class":"form-control"}), required=False)
     storage_instructions = forms.CharField(widget=forms.TextInput(attrs={'placeholder': "e.g. Store in a cool dry place", "class":"form-control"}), required=False)
-    vendor = forms.ModelChoiceField(queryset=Vendor.objects.all(), widget=forms.Select(attrs={"class":"form-select select-nice"}), required=False)
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={"class":"form-select select-nice"}), required=False)
+    # Required on purpose: the product cards link to these two, and an empty link
+    # used to take the home page down for every customer (L-27, D-039).
+    vendor = forms.ModelChoiceField(queryset=Vendor.objects.all(), widget=forms.Select(attrs={"class":"form-select select-nice"}), error_messages={"required": _("Please choose a vendor.")})
+    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={"class":"form-select select-nice"}), error_messages={"required": _("Please choose a category.")})
 
     class Meta:
         model = Product

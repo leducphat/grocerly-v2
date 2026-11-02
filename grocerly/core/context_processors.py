@@ -1,4 +1,4 @@
-from core.models import Category, Wishlist, Address
+from core.models import Category, Address, wishlist_of
 
 def default(request):
     categories = Category.objects.all()
@@ -11,8 +11,8 @@ def default(request):
             address = Address.objects.filter(user=request.user, status=True).first()
         except Address.DoesNotExist:
             address = None
-        wishlist_count = Wishlist.objects.filter(user=request.user).count()
-        wishlist_product_ids = list(Wishlist.objects.filter(user=request.user).values_list('product_id', flat=True))
+        wishlist_count = wishlist_of(request.user).count()
+        wishlist_product_ids = list(wishlist_of(request.user).values_list('product_id', flat=True))
 
     # Session-based cart count
     cart_total_items = 0

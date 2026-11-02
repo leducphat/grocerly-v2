@@ -222,6 +222,11 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   xác nhận và chữ ký hợp lệ; trang hoàn tất chỉ hiển thị, không tự xác nhận (D-023).
 - **UC-09:** đơn online chưa được VNPay xác nhận mà mở trang hoàn tất → quay về
   trang thanh toán kèm nhắc thanh toán, không hiện màn hình thanh toán thành công.
+- **UC-09:** đơn chỉ thành *đã thanh toán* khi số tiền VNPay báo đúng bằng giá đơn
+  lúc đó. Giá đơn đổi sau khi khách đã mở trang VNPay (thêm hàng ở tab khác, áp mã
+  giảm giá) thì đơn giữ nguyên *chưa thanh toán*, khách về trang thanh toán thất bại
+  kèm lời nhắc liên hệ cửa hàng, và vẫn trả lại được đúng giá đơn. Khoản đã trả
+  nhân viên đối chiếu với VNPay và xử lý ngoài hệ thống (L-22, D-040).
 - **UC-14:** chỉ đánh giá được sản phẩm đã nhận — khách có đơn chứa sản phẩm ấy ở
   trạng thái `Shipped` hoặc `Delivered` — và mỗi khách chỉ đánh giá một lần cho
   một sản phẩm. Chưa đủ điều kiện thì biểu mẫu không hiện, và máy chủ từ chối cả
@@ -233,6 +238,20 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   — không có bước Admin duyệt, vì nhân viên là người của chính cửa hàng chứ không
   phải người bán bên ngoài (D-015, D-028). Admin vẫn ẩn hoặc gỡ bán được bất kỳ sản
   phẩm nào.
+- **UC-19:** sản phẩm phải có danh mục và nhà cung cấp. Nhân viên để trống một trong
+  hai ở form thêm hoặc sửa thì máy chủ từ chối và báo ô còn thiếu; hệ thống không tự
+  chọn hộ (L-27, D-039).
+- **UC-03, UC-19:** sản phẩm còn sót lại không có danh mục hay nhà cung cấp vẫn bán
+  bình thường, thẻ sản phẩm chỉ bỏ link tương ứng. Một dòng dữ liệu thiếu không được
+  làm hỏng trang của các sản phẩm khác (L-27, D-039).
+- **UC-19, UC-24:** xóa sản phẩm là xóa mềm: dòng dữ liệu, ảnh và đánh giá còn nguyên,
+  quản trị viên khôi phục được trong Django admin. Nhân viên phải xác nhận trước khi
+  xóa. Máy chủ chỉ nhận thao tác xóa gửi từ form của trang quản lý, nên mở một đường
+  link không xóa được gì (L-28, L-29, D-041).
+- **UC-03, UC-19:** sản phẩm đã xóa không còn hiện ở bất kỳ trang nào của khách, kể cả
+  wishlist. Trang của sản phẩm, danh mục hay nhà cung cấp đã xóa trả 404, không trả lỗi
+  máy chủ; khách bấm yêu thích sản phẩm vừa bị xóa thì được báo sản phẩm không còn bán
+  (L-28, D-041).
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
   lại; đơn đã `Delivered` hoặc `Cancelled` không đổi được trạng thái. Máy chủ chỉ
   nhận đúng bốn trạng thái `Processing`, `Shipped`, `Delivered`, `Cancelled`; giá

@@ -160,6 +160,14 @@ jobs:
       - name: Run tests with coverage
         run: pytest --cov --cov-report=term --cov-report=xml
 
+      # Tests that drive a real browser (D-042). A plain pytest skips them, so they
+      # run here as a step of their own and a failure shows up under its own name.
+      - name: Install the browser
+        run: playwright install --with-deps chromium
+
+      - name: Run the browser tests
+        run: pytest -m e2e
+
       - name: Write coverage table to the run summary
         if: always()
         run: |

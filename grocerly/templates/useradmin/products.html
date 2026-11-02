@@ -53,7 +53,10 @@
                     </div>
                     <div class="col-lg-3 col-sm-2 col-4 col-action text-end">
                         <a href="{% url 'useradmin:dashboard-edit-products'  p.p_id %}" class="btn btn-sm font-sm rounded btn-brand"> <i class="material-icons md-edit"></i> Edit </a>
-                        <a href="{% url 'useradmin:dashboard-delete-products' p.p_id  %}" class="btn btn-sm font-sm btn-light rounded"> <i class="material-icons md-delete_forever"></i> Delete </a>
+                        <form method="post" action="{% url 'useradmin:dashboard-delete-products' p.p_id %}" class="d-inline" onsubmit="return confirm('{% trans "Delete this product?" %}');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm font-sm btn-light rounded"> <i class="material-icons md-delete_forever"></i> Delete </button>
+                        </form>
                     </div>
                 </div>
             </article>

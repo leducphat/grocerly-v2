@@ -214,6 +214,9 @@ Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ tes
 - Lỗi đã biết mà chưa sửa (L-x trong `docs/COMMITMENT.md`): viết test mô tả hành vi
   **đúng**, đánh dấu `@pytest.mark.xfail(reason="L-x: ...")`. Sửa xong lỗi thì gỡ
   `xfail` trong cùng commit — `xfail_strict` làm bộ test đỏ nếu quên.
+- Test chạy trình duyệt thật (Playwright, D-042) nằm ở `grocerly/tests/e2e/`, đánh dấu
+  `@pytest.mark.e2e`; `pytest` thường bỏ qua chúng. Chỉ viết cho điều mà test không
+  trình duyệt không với tới (hộp xác nhận, cookie qua site khác), không viết tràn lan.
 - CI (`.github/workflows/ci.yml`, D-019) chạy `manage.py check`,
   `makemigrations --check` và `pytest --cov` trên mỗi lần push lên `develop`/`main`
   và mỗi PR vào `main`. Đổi model thì commit migration kèm theo, nếu không CI đỏ.
@@ -238,6 +241,7 @@ python manage.py collectstatic      # trước khi deploy
 pip install -r requirements-dev.txt # test và kiểm tra mã (pytest, ruff, jscpd)
 pytest                              # chạy toàn bộ test (settings_test, SQLite)
 pytest --cov                        # kèm báo cáo độ phủ
+pytest -m e2e --browser-channel chrome   # test trình duyệt (D-042); CI dùng Chromium
 ruff check .                        # lint theo ruff.toml; --fix sửa được phần tự động
 jscpd .                             # tỉ lệ trùng lặp mã Python theo .jscpd.json
 

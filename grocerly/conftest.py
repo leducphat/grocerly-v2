@@ -10,7 +10,7 @@ from decimal import Decimal
 import pytest
 from django.conf import settings
 
-from core.models import Category, Product
+from core.models import Category, Product, Vendor
 
 
 def pytest_configure(config):
@@ -58,3 +58,9 @@ def product(db):
         status=True,
         product_status="published",
     )
+
+
+@pytest.fixture
+def vendor(db):
+    """A supplier. `product` above has none, so a test that needs one links them."""
+    return Vendor.objects.create(name="HTX Rau Đà Lạt")

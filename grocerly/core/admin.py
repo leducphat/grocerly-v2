@@ -30,11 +30,12 @@ class SoftDeleteAdminMixin:
     soft_delete_selected.short_description = "Soft delete selected items"
 
     def restore_selected(self, request, queryset):
-        count = queryset.filter(is_deleted=True).update(
-            is_deleted=False,
-            deleted_at=None
-        )
-        self.message_user(request, f"{count} item(s) restored.")
+        # One at a time, so that Vendor.restore() also brings back the products that
+        # were deleted with the vendor; update() would skip it (D-041).
+        rows = queryset.filter(is_deleted=True)
+        for row in rows:
+            row.restore()
+        self.message_user(request, f"{len(rows)} item(s) restored.")
 
     restore_selected.short_description = "Restore selected items"
 

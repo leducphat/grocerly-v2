@@ -5,12 +5,26 @@ themselves and sign them with the fake secret of grocerly/settings_test.py.
 
 import hashlib
 import hmac
+from decimal import Decimal
 from urllib.parse import parse_qs, urlencode, urlparse
 
 import pytest
 from django.urls import reverse
+from django.utils import translation
+
+from core.models import CartOrder, Coupon
 
 pytestmark = pytest.mark.django_db
+
+SHIPPING_INFO = {
+    "full_name": "Nguyễn Văn A",
+    "email": "khachhang@example.com",
+    "mobile": "0901234567",
+    "address": "1 Võ Văn Ngân",
+    "city": "Thủ Đức",
+    "state": "TP.HCM",
+    "country": "Việt Nam",
+}
 
 
 def vnpay_reply(order, response_code="00", amount=None):
@@ -34,6 +48,12 @@ def sign(params, secret):
     query = urlencode(sorted(params.items()))
     digest = hmac.new(secret.encode(), query.encode(), hashlib.sha512).hexdigest()
     return {**params, "vnp_SecureHash": digest}
+
+
+def amount_sent_to_vnpay(client, order):
+    """vnp_Amount of the payment link, the amount VNPay will charge."""
+    link = client.get(reverse("core:vnpay_payment", args=[order.oid]))
+    return parse_qs(urlparse(link.url).query)["vnp_Amount"][0]
 
 
 def test_payment_sends_order_total_times_100_to_vnpay(customer_client, order):
@@ -83,6 +103,144 @@ def test_vnpay_ipn_rejects_amount_different_from_order_total(client, order, sett
     order.refresh_from_db()
     assert response.json()["RspCode"] == "04"  # invalid amount
     assert order.paid_status is False
+
+
+def test_vnpay_ipn_without_amount_answers_invalid_amount(client, order, settings):
+    reply = vnpay_reply(order)
+    del reply["vnp_Amount"]
+
+    response = client.get(reverse("core:vnpay_ipn"), sign(reply, settings.VNPAY_HASH_SECRET))
+
+    order.refresh_from_db()
+    assert response.json()["RspCode"] == "04"
+    assert order.paid_status is False
+
+
+# ---------- The amount paid must be the order total (L-22, D-040) ----------
+
+
+@pytest.mark.parametrize(
+    "amount",
+    [
+        pytest.param(100, id="far-below-total"),
+        pytest.param(4999900, id="one-dong-below-total"),
+        pytest.param(5000100, id="one-dong-above-total"),
+    ],
+)
+def test_vnpay_return_with_amount_different_from_order_total_does_not_mark_order_paid(client, order, settings, amount):
+    reply = sign(vnpay_reply(order, amount=amount), settings.VNPAY_HASH_SECRET)
+
+    response = client.get(reverse("core:vnpay_return"), reply)
+
+    order.refresh_from_db()
+    assert response.url == reverse("core:payment-failed")
+    assert order.paid_status is False
+
+
+def test_vnpay_return_without_amount_does_not_mark_order_paid(client, order, settings):
+    reply = vnpay_reply(order)
+    del reply["vnp_Amount"]
+
+    response = client.get(reverse("core:vnpay_return"), sign(reply, settings.VNPAY_HASH_SECRET))
+
+    order.refresh_from_db()
+    assert response.url == reverse("core:payment-failed")
+    assert order.paid_status is False
+
+
+def test_order_raised_after_opening_vnpay_is_not_paid_by_the_old_amount(customer_client, product, add_to_cart, settings):
+    """The case behind L-22: the customer opens VNPay for 25,000 VND, adds to the cart
+    in another tab and sends the shipping form again, which raises the same pending
+    order; then pays the 25,000 in the first tab."""
+    add_to_cart(customer_client, product, qty=1)
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+    order = CartOrder.objects.get()
+    paid_amount = amount_sent_to_vnpay(customer_client, order)
+    add_to_cart(customer_client, product, qty=4)
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+    order.refresh_from_db()
+    reply = sign(vnpay_reply(order, amount=paid_amount), settings.VNPAY_HASH_SECRET)
+
+    ipn_response = customer_client.get(reverse("core:vnpay_ipn"), reply)
+    return_response = customer_client.get(reverse("core:vnpay_return"), reply)
+
+    order.refresh_from_db()
+    assert paid_amount == "2500000"
+    assert order.price > Decimal("25000.00")  # the two amounts really differ
+    assert ipn_response.json()["RspCode"] == "04"
+    assert return_response.url == reverse("core:payment-failed")
+    assert order.paid_status is False
+
+
+def test_order_lowered_by_a_coupon_after_opening_vnpay_is_not_paid_by_the_old_amount(customer_client, order, settings):
+    Coupon.objects.create(code="GIAM10", discount=10, active=True)
+    paid_amount = amount_sent_to_vnpay(customer_client, order)
+    customer_client.post(reverse("core:checkout", args=[order.oid]), {"code": "GIAM10"})
+    order.refresh_from_db()
+    reply = sign(vnpay_reply(order, amount=paid_amount), settings.VNPAY_HASH_SECRET)
+
+    customer_client.get(reverse("core:vnpay_return"), reply)
+
+    order.refresh_from_db()
+    assert order.price == Decimal("45000.00")
+    assert order.paid_status is False
+
+
+def test_wrong_amount_keeps_cart_and_pending_order(customer_client, product, add_to_cart, settings):
+    add_to_cart(customer_client, product, qty=2)
+    customer_client.post(reverse("core:save_checkout_info"), SHIPPING_INFO)
+    order = CartOrder.objects.get()
+    reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+
+    customer_client.get(reverse("core:vnpay_return"), reply)
+
+    session = customer_client.session
+    assert session["pending_order_oid"] == order.oid
+    assert "cart_data_obj" in session
+
+
+def test_total_can_still_be_paid_after_a_wrong_amount(client, order, settings):
+    wrong_reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+    right_reply = sign(vnpay_reply(order), settings.VNPAY_HASH_SECRET)
+
+    client.get(reverse("core:vnpay_return"), wrong_reply)
+    client.get(reverse("core:vnpay_return"), right_reply)
+
+    order.refresh_from_db()
+    assert order.paid_status is True
+
+
+@pytest.mark.parametrize("url_name", ["core:vnpay_return", "core:vnpay_ipn"])
+def test_order_with_cents_is_paid_by_the_amount_sent_to_vnpay(customer_client, order, settings, url_name):
+    """A percentage coupon can leave cents on the order, and the link only carries
+    whole VND. Checking against any other rounding would make this order unpayable."""
+    order.price = Decimal("33333.33")
+    order.save()
+    reply = sign(vnpay_reply(order, amount=amount_sent_to_vnpay(customer_client, order)), settings.VNPAY_HASH_SECRET)
+
+    customer_client.get(reverse(url_name), reply)
+
+    order.refresh_from_db()
+    assert order.paid_status is True
+
+
+def test_wrong_amount_tells_the_customer_to_contact_the_store(client, order, settings):
+    reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+
+    response = client.get(reverse("core:vnpay_return"), reply, follow=True)
+
+    assert "Số tiền đã thanh toán không khớp với đơn hàng" in response.content.decode()
+
+
+def test_wrong_amount_message_follows_page_language(client, order, settings):
+    reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+
+    # override() as in test_order_history.py: a request to /en/ would otherwise
+    # leave the whole test thread in English.
+    with translation.override("en"):
+        response = client.get(reverse("core:vnpay_return"), reply, follow=True)
+
+    assert "The amount paid does not match this order" in response.content.decode()
 
 
 # The IPN answers below follow VNPay's IPN guide: 00 and 02 tell VNPay the message is
