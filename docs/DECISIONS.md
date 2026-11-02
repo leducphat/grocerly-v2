@@ -2152,6 +2152,7 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Test trình duyệt không tính vào độ phủ, vì `.coveragerc` chỉ đo bốn app và chạy riêng.
 - Chưa có test cho JavaScript của khung chat (L-16, L-17, L-20); cần giả Gemini ở phía server, làm khi có nhu cầu.
 - Test: `grocerly/tests/e2e/test_delete_product.py`, sáu test. Làm hỏng từng chỗ sửa của L-28, L-29 sáu lần, đều bị bắt.
+- **02/11/2026:** `live_server` phục vụ lần lượt từng request (`OneRequestAtATimeServer` trong `e2e/conftest.py`). Database test là SQLite trong bộ nhớ, và Django đưa đúng một kết nối đó cho mọi thread của live server. Khi có thêm 18 test ở P-38, trên CI một lời gọi AJAX chạy cùng lúc với request 404 của ảnh sản phẩm: giỏ trả về trống, một dòng wishlist vẫn còn sau khi trả 200. Ba trong bốn lần chạy CI đỏ, mỗi lần một test; ở máy thì không tái hiện được. Bỏ thread thì hết chạy chồng; Django tự gửi `Connection: close` khi server không có thread nên trình duyệt không bị treo. Sau bản sửa, hai lần chạy CI đều xanh.
 
 
 ## D-043 · Giỏ hàng, wishlist và form liên hệ chỉ nhận POST có CSRF token, token lấy từ template

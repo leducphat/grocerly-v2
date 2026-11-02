@@ -156,6 +156,23 @@ def test_ai_add_to_cart_with_unknown_product_tells_gemini_not_found(client, gemi
     assert "action" not in response.json()
 
 
+@pytest.mark.xfail(reason="L-30: the search branch answers before Gemini's next tool call")
+def test_ai_search_then_add_to_cart_in_one_turn_asks_user_to_confirm(client, product, gemini_chat):
+    # UC-16, UC-17: "find it and add one" makes Gemini search, then ask for the cart
+    # with the p_id it just found. On the host the second answer has no text, so
+    # reading response.text raised and the customer got the connection error.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="search_products", query="cà rốt"),
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=1),
+    ]
+
+    response = ask(client, "Tìm cà rốt rồi thêm 1 cái vào giỏ giúp mình")
+
+    body = response.json()
+    assert body.get("action") == "confirm_add_cart"
+    assert (body["product"]["pid"], body["product"]["qty"]) == (product.p_id, 1)
+
+
 def test_ai_checkout_request_sends_user_to_checkout(client, gemini_chat):
     # UC-18
     gemini_chat.send_message.side_effect = [gemini_reply(tool="request_checkout")]
