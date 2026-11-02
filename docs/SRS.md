@@ -304,7 +304,8 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   không vượt tồn kho. Mỗi lần AI đề nghị chỉ xác nhận được một lần (L-18, D-044).
 - **UC-16, UC-17:** khách nhờ "tìm rồi thêm vào giỏ" trong cùng một câu thì AI tìm,
   rồi hỏi xác nhận thêm vào giỏ như khi khách bảo thêm, không báo lỗi kết nối. Cùng
-  một câu, AI dùng được nhiều công cụ nối nhau, tối đa ba lần (L-30).
+  một câu, AI dùng được nhiều công cụ nối nhau, tối đa ba lần; cần nhiều hơn thì AI
+  nhờ khách nói lần lượt từng bước, cũng không báo lỗi kết nối (L-30).
 - **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
   báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
   tự sinh không thuộc ràng buộc này (L-15, D-035).

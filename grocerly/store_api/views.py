@@ -279,7 +279,14 @@ def _chat_reply(request):
             else:
                 break
 
-        reply = {"reply": response.text}
+        if any(part.function_call for part in response.parts):
+            # Three tools in a row and Gemini still asks for another. Such an
+            # answer has no text, and reading .text would raise (L-30).
+            reply = {"reply": str(_(
+                "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
+            ))}
+        else:
+            reply = {"reply": response.text}
         # The chat window keeps the results in its history so that the next
         # message ("add the second one") can name a product Gemini just found.
         if hidden_context:
