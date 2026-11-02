@@ -9,7 +9,7 @@
 | Đề tài | Xây dựng website bán thực phẩm tích hợp trợ lý AI tự động đặt hàng |
 | Sinh viên | Lê Đức Phát — 21139083 |
 | GVHD | Hoàng Văn Dũng |
-| Hạn chốt | **22/11/2026** — hết Tuần 10 (rubric Mục 2 Bước 3: từ Tuần 7 đến Tuần 10; gate G1). Nộp lên portal khi khoa thông báo |
+| Hạn chốt | **22/11/2026** — hết Tuần 10 (rubric Mục 2 Bước 3: từ Tuần 7 đến Tuần 10; gate G1). Mục nộp trên portal hạn 16:49 Thứ Hai 23/11/2026, cần GVHD xác nhận |
 | Theo dõi | [`PLAN.md`](PLAN.md) P-03 |
 
 **Vì sao văn bản này quan trọng.** Rubric TC2.2 chấm theo *"tỉ lệ chức năng đã cam
@@ -259,11 +259,11 @@ Ba con số của TC2.4 đều đo bằng công cụ chạy trong CI ở mỗi l
 có số đo cho từng commit chứ không chỉ một lần cuối kỳ. Ngưỡng đề xuất giữ đúng Mức
 5 của rubric, vì số đo hiện tại đã đạt.
 
-| Metric | Công cụ và cách đo | Ngưỡng | Số đo 24/09/2026 |
-|---|---|---|---|
-| Lỗi lint | Ruff, bộ luật ghi trong `grocerly/ruff.toml` | 0 | 0 (30 trước khi sửa) |
-| Issue Blocker/Critical | Ruff, quy đổi theo danh sách dưới đây | 0 | 0 (5 trước khi sửa) |
-| Tỉ lệ dòng trùng lặp | jscpd, trên mã Python của ứng dụng | ≤ 3% | 1,09% |
+| Metric | Công cụ và cách đo | Ngưỡng | Số đo 24/09/2026 | Số đo 02/11/2026 |
+|---|---|---|---|---|
+| Lỗi lint | Ruff, bộ luật ghi trong `grocerly/ruff.toml` | 0 | 0 (30 trước khi sửa) | 0 |
+| Issue Blocker/Critical | Ruff, quy đổi theo danh sách dưới đây | 0 | 0 (5 trước khi sửa) | 0 |
+| Tỉ lệ dòng trùng lặp | jscpd, trên mã Python của ứng dụng | ≤ 3% | 1,09% | 0,71% |
 
 **Quy đổi Blocker/Critical.** Ruff không chia mức nghiêm trọng, mọi vi phạm đều là
 một lỗi như nhau. Rubric cũng không định nghĩa hai mức này, nên đồ án quy đổi theo
