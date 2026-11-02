@@ -89,13 +89,13 @@ dòng phải khớp với một commit có thật.
 | 02/11/2026 | Claude Code (Opus 5.5) | P-38: sửa L-18, L-19, L-21, L-23, L-25, L-26 | Thực hiện kế hoạch sửa L-18 tới L-26 | `core/views.py`, `useradmin/views.py`, `store_api/views.py`, `base.html`, `useradmin/base.html`, `wishlist.html`, `products.html`, hai form sản phẩm; `CartOrderItem.product`, migration `0007`, `0008`; SRS §6.1, SDD §1, D-043, D-044, D-045, `COMMITMENT.md`, `PLAN.md`. 53 test mới, viết trước khi sửa; làm hỏng từng chỗ sửa, 30 chỗ, đều bị bắt. Lỗi #48, #49. 287 passed, 24 e2e, 0 xfail, độ phủ 85%, ruff, jscpd 0,72% | SV chọn lỗi và duyệt kế hoạch | `10bc0db` |
 | 02/11/2026 | Claude Code (Opus 5.5) | P-38: test trình duyệt chập chờn trên CI; thử bản sửa trên host; ghi L-30 | Kiểm deploy và migration trên host. Chạy test prod, dọn dữ liệu thử, đối chiếu số liệu. Ghi lỗi trợ lý AI thành L-30 | `OneRequestAtATimeServer` trong `grocerly/tests/e2e/conftest.py`, D-042; script thử prod ngoài repo (hai lượt chat, ghi mã trả về của API chat); L-30 trong `COMMITMENT.md`, test `xfail` trong `store_api/tests/test_ai_chat.py`, P-39; `PLAN.md`. Lỗi #50, #51. CI hai lần xanh sau khi đỏ ba lần; trên host sáu lỗi không còn, số liệu khớp sau khi dọn | SV cho phép ghi dữ liệu thử lên prod | `ba8e058`, `43ef943` |
 | 02/11/2026 | Claude Code (Opus 5.5) | Viết lại `README.md` cho KLTN | Sửa README còn giữ bản của TLCN. Viết ngắn gọn lại | `README.md` viết lại bằng tiếng Việt: host `grocerly-v2`, link repo TLCN, chức năng, chạy local, kiểm thử, CI, tài liệu. Đối chiếu với code trước khi giao, sửa hai câu sai (lọc theo thẻ, thiếu `DJANGO_ALLOWED_HOSTS`) | SV yêu cầu rút gọn, giữ logo, đổi link TLCN thành chữ | `8fe40be` |
-| 02/11/2026 | Claude Code (Opus 5.5) | P-39: sửa L-30 | Sửa L-30 | `store_api/views.py`: nhánh tìm kiếm và hàng bán chạy quay lại vòng lặp công cụ; gỡ `xfail`, thêm hai test trong `test_ai_chat.py`; SRS §6.1, `COMMITMENT.md`, `PLAN.md`. Làm hỏng tạm từng nhánh, 3 lần, đều bị bắt. 290 passed, 0 xfail, ruff, jscpd 0,71% | SV chọn việc từ danh sách đề xuất | `c44d4ce` |
+| 02/11/2026 | Claude Code (Opus 5.5) | P-39: sửa L-30 | Sửa L-30 | `store_api/views.py`: nhánh tìm kiếm và hàng bán chạy quay lại vòng lặp công cụ; gỡ `xfail`, thêm hai test trong `test_ai_chat.py`; SRS §6.1, `COMMITMENT.md`, `PLAN.md`. Làm hỏng tạm từng nhánh, 3 lần, đều bị bắt. Review PR #15: thêm câu dự phòng khi hết ba công cụ (vi + en, `.mo` biên dịch polib), mock `.text` ném lỗi, một test mới. Lỗi #52. 291 passed, 0 xfail, 85%, ruff, jscpd 0,71% | SV chọn việc từ danh sách đề xuất | `c44d4ce`, `621ba8e` |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **51**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **52**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -151,8 +151,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 49 | 02/11/2026 | Lượt review bằng AI báo lỗi mức cao: số lượng âm làm giảm tổng đơn. Sai: `safe_int("-5")` trả 5 | Reviewer kết luận từ đọc code, không chạy hàm; `safe_float` bỏ dấu trừ | AI, khi chạy thử hàm trước khi sửa; không đổi code, thêm test ghim hành vi | `10bc0db` |
 | 50 | 02/11/2026 | 18 test trình duyệt do AI viết cho P-38 xanh ở máy và ở lần CI đầu, rồi đỏ ba trong bốn lần CI kế tiếp, mỗi lần một test: giỏ trả về trống, dòng wishlist còn sau khi trả 200 | `live_server` chạy mỗi request một thread nhưng dùng chung một kết nối SQLite trong bộ nhớ; AI chỉ chạy test ở máy nhanh, không nghĩ tới việc request ảnh 404 chạy chồng lên lời gọi AJAX | CI, trên PR #14 | `ba8e058` |
 | 51 | 02/11/2026 | Lúc dò lỗi #50, AI kết luận test đỏ 8/8 lần với Chromium ở máy, tức tái hiện được. Sai: máy chưa có bản Chromium mà Playwright cần, cả tám lần đỏ vì không mở được trình duyệt | Vòng lặp chỉ đếm mã thoát, bỏ hết output, nên lỗi khởi động trông như test đỏ | AI, khi chạy một lần có in output; chưa sửa gì theo kết luận sai | không có commit sửa |
+| 52 | 02/11/2026 | Bản sửa L-30 do AI viết cho nhánh tìm kiếm đi tiếp vòng lặp, nhưng Gemini đòi công cụ thứ tư thì vòng lặp hết lượt và khách vẫn nhận lỗi kết nối, đúng triệu chứng cũ chậm một bước. Test xanh vì mock của Gemini có `.text` rỗng, còn thư viện thật ném lỗi | AI chỉ sửa đúng ca đã thấy trên host, không xét lối ra khác của vòng lặp; mock viết từ trước không giống thư viện thật ở đúng điểm gây lỗi | AI, lượt review độc lập của PR #15 | `621ba8e` |
 
-**Ghi chú khi bảo vệ:** mười lăm trong năm mươi mốt mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười lăm trong năm mươi hai mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
