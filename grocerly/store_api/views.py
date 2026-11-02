@@ -166,7 +166,8 @@ def _chat_reply(request):
         chat = model.start_chat(history=formatted_history)
         
         response = chat.send_message(user_message)
-        
+        hidden_context = None
+
         # Manual loop to process function calls (max 3 loops to prevent recursion)
         for _step in range(3):
             if not response.parts:
@@ -248,39 +249,42 @@ def _chat_reply(request):
                     "action": "confirm_checkout"
                 })
 
+            # The answer to a search may be another tool call, not text: asked to
+            # "find carrots and add one", Gemini searches, then asks for the cart
+            # with the p_id it found. So both lookups go round the loop like the
+            # other tools instead of answering at once (L-30).
             elif name == "search_products":
                 query_val = args.get('query', '')
                 results = search_products(query_val)
+                hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Search Results: {results})"
                 response = chat.send_message([{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
                     }
                 }])
-                return Response({
-                    "reply": response.text,
-                    "hidden_context": f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Search Results: {results})"
-                })
-                
+                continue
+
             elif name == "get_bestsellers":
                 results = get_bestsellers()
+                hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Bestsellers: {results})"
                 response = chat.send_message([{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
                     }
                 }])
-                return Response({
-                    "reply": response.text,
-                    "hidden_context": f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Bestsellers: {results})"
-                })
-                
+                continue
+
             else:
                 break
-        
-        return Response({
-            "reply": response.text
-        })
+
+        reply = {"reply": response.text}
+        # The chat window keeps the results in its history so that the next
+        # message ("add the second one") can name a product Gemini just found.
+        if hidden_context:
+            reply["hidden_context"] = hidden_context
+        return Response(reply)
     except Exception as e:
         import traceback
         import re
