@@ -79,6 +79,7 @@
 
             $.ajax({
                 url: "{% url 'core:remove-from-wishlist' %}",
+                type: "POST",
                 data: { "id": wishlist_id },
                 dataType: "json",
                 success: function(response){

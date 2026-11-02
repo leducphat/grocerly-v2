@@ -2154,6 +2154,71 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Test: `grocerly/tests/e2e/test_delete_product.py`, sáu test. Làm hỏng từng chỗ sửa của L-28, L-29 sáu lần, đều bị bắt.
 
 
+## D-043 · Giỏ hàng, wishlist và form liên hệ chỉ nhận POST có CSRF token, token lấy từ template
+
+- **Ngày:** 02/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-19: ba route giỏ hàng đổi session bằng GET, nên một link đặt ở site khác đổi được giỏ của khách. Hai route wishlist cùng lỗi. L-26: `change_order_status` và `update_stock` tắt kiểm tra CSRF, chỉ còn `SameSite=Lax` chặn.
+
+**Phương án đã cân nhắc**
+1. *Đọc token từ cookie `csrftoken`* - cách trong tài liệu Django, khung chat đang dùng. Nhưng Django chỉ đặt cookie trên trang có dùng token, nên trang không có form sẽ gửi token rỗng.
+2. *Giữ GET, thêm token vào URL* - token lọt vào log và lịch sử trình duyệt, và GET đổi dữ liệu vẫn sai nghĩa.
+
+**Quyết định.** Năm route và `ajax_contact_form` dùng `@require_POST`, đọc `request.POST`. `base.html` đặt `$.ajaxSetup` gửi `X-CSRFToken` từ `{{ csrf_token }}`; `useradmin/products.html` gửi cùng header trong `fetch`. Bỏ hai `@csrf_exempt`. Mọi lời gọi dùng `{% url %}`.
+
+**Lý do.** POST một mình chưa đủ, form ở site khác cũng POST được; token mới là phần chặn. Lấy token từ template thì trang nào cũng có. `{% url %}` là bắt buộc chứ không chỉ gọn: URL thiếu tiền tố ngôn ngữ bị 302, trình duyệt lặp lại bằng GET và nhận 405.
+
+**Hệ quả.**
+- Mọi trang kế thừa `partials/base.html` giờ đặt cookie CSRF. Không ảnh hưởng gì vì site không dùng cache trang.
+- Trang mở từ trước khi đăng nhập ở tab khác giữ token cũ, POST nhận 403. Nút Add và các thao tác giỏ báo lỗi thay vì im lặng; khách tải lại trang là xong.
+- Link trực tiếp tới các route này giờ trả 405.
+- `make_address_default` vẫn đổi địa chỉ mặc định bằng GET, cùng họ lỗi, chưa có mã và ngoài phạm vi lần sửa này.
+- `base.html` nạp hai bản jQuery (dòng 21 và 722). `$.ajaxSetup` phải đặt sau bản thứ hai vì bản đó thay `$` toàn cục.
+
+## D-044 · Thêm vào giỏ cộng dồn, trùng lặp chặn bằng khóa nút ở trình duyệt
+
+- **Ngày:** 02/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-18: `/add-to-cart/` ghi đè số lượng, khách có 3 bấm Add còn 1. Sửa thành cộng dồn thì route hết idempotent: bấm đúp là thêm gấp đôi. L-21, L-23: bấm đúp nút "Tạo sản phẩm" hay form liên hệ ra hai bản ghi.
+
+**Phương án đã cân nhắc**
+1. *Mã dùng một lần ở server* - chặn được cả request gửi trùng bằng script, nhưng phải thêm một bảng hay khóa session, sửa mọi form, và viết nhánh xử lý khi gặp mã đã dùng.
+2. *Gộp request giống nhau trong vài giây ở server* - khách bấm Add hai lần có chủ đích sẽ bị nuốt mất một lần.
+
+**Quyết định.** `add_to_cart` cộng dồn, `update_cart` vẫn đặt thẳng, `_refresh_cart` vẫn hạ về tồn kho. Nút khóa từ lúc gửi tới lúc server trả lời; nút xác nhận của khung chat khóa luôn sau khi thành công, vì mỗi lần AI đề nghị chỉ xác nhận một lần. Form nhân viên dùng thuộc tính `data-lock-on-submit`, mở lại ở `pageshow`. `/add-to-cart/` trả thêm `wanted_qty` để khung chat biết tồn kho đã hạ số lượng.
+
+**Lý do.** Lỗi cần chặn là người bấm đúp, không phải kẻ gửi trùng có chủ đích, và bản ghi trùng không gây mất tiền. Khóa nút giải quyết đúng việc đó với vài dòng JavaScript sinh viên giải thích được. Sau khi lưu xong view chuyển hướng nên F5 không gửi lại form.
+
+**Hệ quả.**
+- Script gửi trùng vẫn tạo được hai bản ghi. Đã chấp nhận và ghi rõ trong SRS §6.1.
+- `request_add_to_cart` so tổng mới gồm số trong giỏ với tồn kho, câu báo cho Gemini nói thêm số đã có trong giỏ.
+- Ô số lượng ở trang chi tiết sản phẩm giờ là số thêm vào, không còn là số đặt lại.
+- Trình duyệt gộp hai lần submit trong cùng một tick làm một, và server local trả lời nhanh hơn cú bấm thứ hai. Test bấm đúp của form phải giữ chậm câu trả lời và cho hai cú bấm cách nhau, nếu không test xanh cả khi chưa khóa.
+
+## D-045 · Dòng đơn hàng trỏ tới sản phẩm bằng khóa ngoại, cột tên giữ làm tên lúc mua
+
+- **Ngày:** 02/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-25: `CartOrderItem` chỉ lưu tên sản phẩm, trong khi tên đổi được và không unique. Đổi tên sau khi đặt thì giao đơn không trừ kho và người mua mất quyền đánh giá; hai sản phẩm trùng tên thì trừ nhầm và đánh giá nhầm. D-041 còn để lại việc giao đơn có sản phẩm đã xóa không trừ kho.
+
+**Phương án đã cân nhắc**
+1. *Bắt tên sản phẩm unique* - hai nhà cung cấp cùng bán "Cà rốt Đà Lạt" là hợp lệ, và đổi tên vẫn làm hỏng liên kết.
+2. *Lưu `p_id` dạng chuỗi trên dòng đơn* - không cần migration khóa ngoại nhưng database không bảo đảm gì.
+3. *Khóa ngoại `CASCADE` hoặc `PROTECT`* - `CASCADE` làm mất dòng của đơn cũ khi xóa hẳn sản phẩm, `PROTECT` chặn việc xóa hẳn có chủ đích.
+
+**Quyết định.** Thêm `CartOrderItem.product`, cho phép trống, `SET_NULL`. Cột `item` giữ nguyên làm tên lúc mua. Dòng không có khóa ngoại thì bỏ qua, không lùi về tìm theo tên. Hai migration: `0007` thêm cột, `0008` gán dữ liệu.
+
+**Lý do.** Đơn cũ phải đọc được mãi kể cả khi sản phẩm mất. Gán sai tệ hơn để trống, vì tồn kho và quyền đánh giá đi theo khóa ngoại, nên `0008` chỉ gán khi đúng một sản phẩm có tên đó, kể cả đã xóa mềm. Tách hai migration để mỗi cái một transaction, tránh lỗi "pending trigger events" của PostgreSQL khi đổi bảng và ghi dữ liệu chung một transaction.
+
+**Hệ quả.**
+- Khóa ngoại đọc được sản phẩm đã xóa mềm vì không đi qua manager mặc định, nên giao đơn vẫn trừ kho.
+- Django admin hiện `product` ở dạng chỉ đọc, vì ô chọn không liệt kê sản phẩm đã xóa mềm.
+- Đọc chỉ đọc ngày 02/11/2026: 13/13 dòng trên database KLTN khớp đúng một sản phẩm.
+- Migration chạy khi deploy qua `build.sh`, cột cho phép trống nên bản đang chạy không bị ảnh hưởng. `migrate core 0006` gỡ được. Mới chạy trên SQLite trong bộ test, chưa chạy trên PostgreSQL.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

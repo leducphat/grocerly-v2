@@ -283,6 +283,36 @@ def test_ai_add_to_cart_proposes_quantity_equal_to_stock(client, product, gemini
     assert body["product"]["qty"] == 10
 
 
+def test_ai_add_to_cart_counts_what_the_cart_already_holds(client, product, gemini_chat):
+    # L-18: the cart adds to its line, so 3 more on top of 8 is 11, and 10 are left.
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 8})
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=3),
+        gemini_reply("Giỏ đã có 8, kho còn 10, bạn lấy thêm 2 nhé?"),
+    ]
+
+    response = ask(client, "Thêm 3 cà rốt nữa")
+
+    assert response.json().get("action") != "confirm_add_cart"
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {
+        "error": "Only 10 left in stock and the cart already has 8"
+    }
+
+
+def test_ai_add_to_cart_proposes_exactly_what_still_fits(client, product, gemini_chat):
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 8})
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=2)
+    ]
+
+    response = ask(client, "Thêm 2 cà rốt nữa")
+
+    body = response.json()
+    assert body["action"] == "confirm_add_cart"
+    assert body["product"]["qty"] == 2
+
+
 @pytest.mark.parametrize("qty", [0, -2])
 def test_ai_add_to_cart_refuses_quantity_below_one(client, product, gemini_chat, qty):
     gemini_chat.send_message.side_effect = [

@@ -154,6 +154,18 @@
             
             {% endblock content %}
 
+            <script>
+                // A form with data-lock-on-submit goes out once: each POST creates
+                // a product, and the second click of a double click would be a
+                // second POST (L-21). The browser may keep the page as it was when
+                // the staff comes back with Back, so pageshow turns the button on.
+                document.querySelectorAll("form[data-lock-on-submit]").forEach(function (form) {
+                    const button = form.querySelector('button[type="submit"]');
+                    form.addEventListener("submit", function () { button.disabled = true; });
+                    window.addEventListener("pageshow", function () { button.disabled = false; });
+                });
+            </script>
+
             <!-- content-main end// -->
             <footer class="main-footer font-xs">
                 <div class="row pb-30 pt-15">

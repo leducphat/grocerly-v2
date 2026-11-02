@@ -88,6 +88,7 @@ class CartOrderAdmin(admin.ModelAdmin):
 
 class CartOrderItemsAdmin(admin.ModelAdmin):
     list_display = ['order_oid', 'order', 'invoice_no', 'item', 'order_image', 'quantity', 'price', 'total']
+    readonly_fields = ['product']  # checkout sets it; the select would not list a deleted product
     list_filter = ['product_status']
     search_fields = ['invoice_no', 'item', 'order__oid', 'order__email', 'order__user__email']
 

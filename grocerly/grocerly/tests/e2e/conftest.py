@@ -13,7 +13,9 @@ To use the Chrome that is already installed instead of downloading Chromium, add
 import os
 
 import pytest
+from django.core.servers.basehttp import WSGIServer
 from django.test import Client
+from django.test.testcases import LiveServerThread
 
 # Playwright's sync API runs an event loop in the test thread, and Django refuses
 # database queries made while a loop is running. The tests only create and read
@@ -21,6 +23,30 @@ from django.test import Client
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 OTHER_SITE = "http://other-site.test"
+
+
+class OneRequestAtATimeServer(WSGIServer):
+    """The live server, without a thread per request.
+
+    The test database is SQLite in memory, and Django hands that one connection to
+    every thread of the live server. Two requests at once, say an AJAX call and the
+    404 of a missing product image, then share it and can read each other's rows:
+    on CI the cart came back empty and a wishlist line stayed after a 200. Serving
+    requests one by one removes the overlap. Django sends `Connection: close` when
+    the server has no threads, so the browser does not wait on an open connection.
+    """
+
+    def __init__(self, *args, connections_override=None, **kwargs):
+        # Only the threaded server takes this argument; the live server thread
+        # already put the shared connection in place before serving.
+        super().__init__(*args, **kwargs)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def one_request_at_a_time():
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(LiveServerThread, "server_class", OneRequestAtATimeServer)
+        yield
 
 
 @pytest.fixture

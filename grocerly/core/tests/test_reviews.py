@@ -8,7 +8,7 @@ view used to accept a review from anyone (L-3 in docs/COMMITMENT.md).
 import pytest
 from django.urls import reverse
 
-from core.models import Product, ProductReview
+from core.models import CartOrderItem, Product, ProductReview
 
 pytestmark = pytest.mark.django_db
 
@@ -129,7 +129,6 @@ def test_review_form_is_hidden_from_a_customer_who_did_not_buy_the_product(
     assert response.context["make_review"] is False
 
 
-@pytest.mark.xfail(reason="L-25: has_received_product matches order lines by title, so a renamed product loses its buyers")
 def test_customer_can_review_product_renamed_after_buying_it(
     customer_client, product, shipped_order
 ):
@@ -142,7 +141,6 @@ def test_customer_can_review_product_renamed_after_buying_it(
     assert response.status_code == 200
 
 
-@pytest.mark.xfail(reason="L-25: has_received_product matches order lines by title, so any product with that title counts as bought")
 def test_buying_one_product_does_not_allow_reviewing_another_with_the_same_title(
     customer_client, product, shipped_order
 ):
@@ -153,5 +151,17 @@ def test_buying_one_product_does_not_allow_reviewing_another_with_the_same_title
     )
 
     response = post_review(customer_client, same_title)
+
+    assert response.status_code == 403
+
+
+def test_order_line_without_a_product_gives_no_right_to_review(
+    customer_client, product, shipped_order
+):
+    # A line the migration could not link stays unlinked; the title is not a way back.
+    shipped_order()
+    CartOrderItem.objects.update(product=None)
+
+    response = post_review(customer_client, product)
 
     assert response.status_code == 403

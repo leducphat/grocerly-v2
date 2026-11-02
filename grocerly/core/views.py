@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.conf import settings
 from django.core import serializers
@@ -210,16 +211,11 @@ def tag_list(request, tag_slug=None):
 
 
 def has_received_product(user, product):
-    """True if `user` has an order holding `product` that already left the store.
-
-    `CartOrderItem` keeps the product's title instead of a foreign key, so the
-    order lines are matched by title - the same way change_order_status finds
-    the product whose stock it has to lower.
-    """
+    """True if `user` has an order holding `product` that already left the store."""
     return CartOrderItem.objects.filter(
         order__user=user,
         order__product_status__in=('shipped', 'delivered'),
-        item=product.title,
+        product=product,
     ).exists()
 
 
@@ -379,8 +375,11 @@ def _refresh_cart(request):
     return cart_total_amount
 
 
+# The cart and wishlist routes only take POST, which the CSRF check covers: on GET a
+# link planted on another site could change them for a signed-in customer (L-19).
+@require_POST
 def add_to_cart(request):
-    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    product = Product.objects.filter(id=safe_int(request.POST.get('id'), 0)).first()
     if product is None:
         return JsonResponse({'error': "Product not found"}, status=404)
 
@@ -388,29 +387,33 @@ def add_to_cart(request):
     # line shows is read from the database.
     product_id = str(product.id)
     cart_data = request.session.get('cart_data_obj', {})
+    qty = safe_int(request.POST.get('qty'))
 
+    # This route adds to the line; setting a quantity is update_cart's job (L-18).
     if product_id in cart_data:
-        cart_data[product_id]['qty'] = safe_int(request.GET.get('qty'))
+        cart_data[product_id]['qty'] = safe_int(cart_data[product_id].get('qty')) + qty
     else:
         cart_data[product_id] = {
             'title': product.title,
-            'qty': safe_int(request.GET.get('qty')),
+            'qty': qty,
             'price': str(product.price),
             'image': product.image.url if product.image else '',
             'pid': product.p_id,
         }
 
     request.session['cart_data_obj'] = cart_data
+    wanted_qty = cart_data[product_id]['qty']
 
     # The quantity asked for can be more than the shop has left, so the cart is
     # refreshed before answering: the line sent back to the page holds what can
-    # actually be sold (L-7).
+    # actually be sold (L-7). wanted_qty lets the chat window tell the two apart.
     _refresh_cart(request)
     cart_data = request.session.get('cart_data_obj', {})
 
     return JsonResponse({
         'data': cart_data,
         'totalcartitems': len(cart_data),
+        'wanted_qty': wanted_qty,
     })
 
 
@@ -446,8 +449,9 @@ def checkout_info_view(request):
         return redirect("core:index")
 
 
+@require_POST
 def delete_item_from_cart(request):
-    product_id = str(request.GET['id'])
+    product_id = str(request.POST['id'])
     if 'cart_data_obj' in request.session:
         if product_id in request.session['cart_data_obj']:
             cart_data = request.session['cart_data_obj']
@@ -468,14 +472,15 @@ def delete_item_from_cart(request):
     })
 
 
+@require_POST
 def update_cart(request):
-    product_id = str(request.GET['id'])
-    product_qty = request.GET['qty']
+    product_id = str(request.POST['id'])
+    product_qty = request.POST['qty']
 
     if 'cart_data_obj' in request.session:
         if product_id in request.session['cart_data_obj']:
             cart_data = request.session['cart_data_obj']
-            cart_data[str(request.GET['id'])]['qty'] = safe_int(product_qty)
+            cart_data[product_id]['qty'] = safe_int(product_qty)
             request.session['cart_data_obj'] = cart_data
 
     cart_total_amount = _refresh_cart(request)
@@ -568,11 +573,14 @@ def save_checkout_info(request):
                     country=country,
                 )
 
-            for item in cart_data.values():
+            # The keys of the cart are product ids, and _refresh_cart above dropped
+            # every line whose product is gone.
+            for product_id, item in cart_data.items():
                 price = Decimal(item['price'])
                 quantity = safe_int(item.get('qty'))
                 CartOrderItem.objects.create(
                     order=order,
+                    product_id=product_id,
                     invoice_no="INVOICE_NO-" + str(order.id),
                     item=item['title'],
                     image=item['image'],
@@ -918,12 +926,13 @@ def wishlist_view(request):
     }
     return render(request, "core/wishlist.html", context)
 
+@require_POST
 def add_to_wishlist(request):
     if not request.user.is_authenticated:
         return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để thêm vào Wishlist!"})
 
     # A page opened before staff deleted the product still shows its heart (L-28).
-    product = Product.objects.filter(id=safe_int(request.GET.get('id'), 0)).first()
+    product = Product.objects.filter(id=safe_int(request.POST.get('id'), 0)).first()
     if product is None:
         return JsonResponse({"bool": False, "error": _("This product is no longer available.")})
 
@@ -945,11 +954,12 @@ def add_to_wishlist(request):
     return JsonResponse(context)
 
 
+@require_POST
 def remove_wishlist(request):
     if not request.user.is_authenticated:
         return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để sử dụng Wishlist!"})
 
-    pid = request.GET.get('id')
+    pid = request.POST.get('id')
     try:
         wishlist_d = Wishlist.objects.get(id=pid, user=request.user)
         wishlist_d.delete()
@@ -972,12 +982,13 @@ def remove_wishlist(request):
 def contact(request):
     return render(request, "core/contact.html")
 
+@require_POST
 def ajax_contact_form(request):
-    full_name = request.GET.get('full_name')
-    email = request.GET.get('email')
-    phone = request.GET.get('phone')
-    subject = request.GET.get('subject')
-    message = request.GET.get('message')
+    full_name = request.POST.get('full_name')
+    email = request.POST.get('email')
+    phone = request.POST.get('phone')
+    subject = request.POST.get('subject')
+    message = request.POST.get('message')
 
     ContactUs.objects.create(
         full_name=full_name,

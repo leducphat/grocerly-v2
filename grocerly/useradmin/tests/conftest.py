@@ -27,11 +27,7 @@ def staff_client(client, staff):
 
 @pytest.fixture
 def order_with_item(customer, product):
-    """A COD order of `customer`, not paid yet, holding 3 units of `product`.
-
-    `CartOrderItem` keeps the product's title, not a foreign key - that is how
-    checkout writes it, and how change_order_status finds the product again.
-    """
+    """A COD order of `customer`, not paid yet, holding 3 units of `product`."""
     order = CartOrder.objects.create(
         user=customer,
         price=Decimal("75000.00"),
@@ -43,6 +39,7 @@ def order_with_item(customer, product):
     CartOrderItem.objects.create(
         order=order,
         invoice_no=f"INVOICE_NO-{order.id}",
+        product=product,
         item=product.title,
         quantity=3,
         price=product.price,
