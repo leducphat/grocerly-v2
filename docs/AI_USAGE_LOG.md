@@ -92,12 +92,14 @@ dòng phải khớp với một commit có thật.
 | 02/11/2026 | Claude Code (Opus 5.5) | P-39: sửa L-30 | Sửa L-30 | `store_api/views.py`: nhánh tìm kiếm và hàng bán chạy quay lại vòng lặp công cụ; gỡ `xfail`, thêm hai test trong `test_ai_chat.py`; SRS §6.1, `COMMITMENT.md`, `PLAN.md`. Làm hỏng tạm từng nhánh, 3 lần, đều bị bắt. Review PR #15: thêm câu dự phòng khi hết ba công cụ (vi + en, `.mo` biên dịch polib), mock `.text` ném lỗi, một test mới. Lỗi #52. 291 passed, 0 xfail, 85%, ruff, jscpd 0,71% | SV chọn việc từ danh sách đề xuất | `c44d4ce`, `621ba8e` |
 | 02/11/2026 | Claude Code (Opus 5.5) | P-40: ghi và sửa L-31 | Ghi thành L-31 | Docstring `search_products` bảo Gemini dịch tên hàng sang tiếng Việt; in mô tả công cụ thư viện tạo ra để kiểm; hai test; SRS §6.1, `COMMITMENT.md`, `PLAN.md`. 293 passed, ruff, jscpd 0,71% | SV chọn giữ song ngữ, không làm tìm kiếm thông minh | `41a5211` |
 | 02/11/2026 | Claude Code (Opus 5.5) | Rà PLAN §3 và các tài liệu lỗi thời | Cập nhật mục Hiện trạng so với rubric trong PLAN. Kiểm tra docs còn mục nào lỗi thời | PLAN §3 viết lại theo rubric V2-1 với số đo lại ngày 02/11 (test, độ phủ, lượt CI, deploy, review PR, branch protection); hạn nộp cam kết theo portal ở PLAN, `COMMITMENT.md`, `AGENTS.md`/`CLAUDE.md`; P-03, P-06, P-13, P-16; cột commit §6; ngày cập nhật SRS, SDD; `COMMITMENT.md` §5.1 thêm số đo 02/11 | SV chép hạn nộp các mục hồ sơ từ portal | `6998837` |
+| 02/11/2026 | Claude Code (Opus 5.5) | P-41: ghi L-32 → L-36 | Ghi các lỗi mới thành L-32 trở đi | Đọc lại code từng lỗi, tra commit gốc; năm dòng L-32 → L-36 và đoạn ghi chú trong `COMMITMENT.md`, cột Hiện trạng CN-09, CN-11, CN-14, CN-29; P-41, P-12, §3 trong `PLAN.md`. Một test chi tiết đơn, bảy ca `xfail` trong `test_order_history.py`, `test_payment.py`, `test_soft_delete.py`, `test_page_requests.py`, chạy `--runxfail` thấy đỏ đúng chỗ. Lỗi #53. 294 passed, 6 xfailed, ruff | SV chọn ghi cả năm lỗi; L-33 chờ SV chốt bỏ hay làm giao diện | `1e99055` |
+| 02/11/2026 | Claude Code (Opus 5.5), workflow 12 agent | P-24: sơ đồ thiết kế | Vẽ sơ đồ thiết kế cho SDD bằng workflow, mỗi sơ đồ một agent vẽ, một agent kiểm với code | Sáu sơ đồ Mermaid: ERD, trạng thái đơn, triển khai, tuần tự thanh toán VNPay, tuần tự trợ lý AI, use case, kèm lời giải thích; sơ đồ để ở `docs/diagrams/` ngoài Git, lời giải thích vào `SDD.md` §1.2, §3.2, §4; sửa câu về `Product.sku` ở SDD §1.1 và bảng công nghệ; P-24, §3, §6 dòng 25 trong `PLAN.md`. Lượt kiểm sửa 24 chỗ; tự kiểm lại các điểm chính với code, parse lại sáu khối. Lỗi #54 | SV chọn chạy workflow; đã đọc từng sơ đồ | `1e99055` |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **52**.
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **54**.
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -154,8 +156,10 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 50 | 02/11/2026 | 18 test trình duyệt do AI viết cho P-38 xanh ở máy và ở lần CI đầu, rồi đỏ ba trong bốn lần CI kế tiếp, mỗi lần một test: giỏ trả về trống, dòng wishlist còn sau khi trả 200 | `live_server` chạy mỗi request một thread nhưng dùng chung một kết nối SQLite trong bộ nhớ; AI chỉ chạy test ở máy nhanh, không nghĩ tới việc request ảnh 404 chạy chồng lên lời gọi AJAX | CI, trên PR #14 | `ba8e058` |
 | 51 | 02/11/2026 | Lúc dò lỗi #50, AI kết luận test đỏ 8/8 lần với Chromium ở máy, tức tái hiện được. Sai: máy chưa có bản Chromium mà Playwright cần, cả tám lần đỏ vì không mở được trình duyệt | Vòng lặp chỉ đếm mã thoát, bỏ hết output, nên lỗi khởi động trông như test đỏ | AI, khi chạy một lần có in output; chưa sửa gì theo kết luận sai | không có commit sửa |
 | 52 | 02/11/2026 | Bản sửa L-30 do AI viết cho nhánh tìm kiếm đi tiếp vòng lặp, nhưng Gemini đòi công cụ thứ tư thì vòng lặp hết lượt và khách vẫn nhận lỗi kết nối, đúng triệu chứng cũ chậm một bước. Test xanh vì mock của Gemini có `.text` rỗng, còn thư viện thật ném lỗi | AI chỉ sửa đúng ca đã thấy trên host, không xét lối ra khác của vòng lặp; mock viết từ trước không giống thư viện thật ở đúng điểm gây lỗi | AI, lượt review độc lập của PR #15 | `621ba8e` |
+| 53 | 02/11/2026 | Lúc ghi L-32 → L-36, AI ghi vào PLAN §3 "299 chạy thường, 5 `xfail`, 26 chạy trình duyệt", trong khi pytest vừa in 294 passed, 6 xfailed, 25 e2e | AI cộng nhẩm số test mới vào số cũ thay vì chép từ output, và đếm test có tham số của L-36 (hai lệnh xóa) là một ca | AI, khi đếm lại để ghi P-12 | sửa trước khi commit |
+| 54 | 02/11/2026 | Sáu bản nháp sơ đồ do AI vẽ có 24 chỗ sai hoặc thiếu so với code. Ví dụ: ghi `Product.sku` dùng trên URL, chép từ SDD cũ; vẽ việc xóa `pending_order_oid` là vô điều kiện; gộp `start_chat` vào lời gọi tới Gemini; mũi tên "needs" giữa các job CI vẽ ngược chiều | Agent vẽ dựa vào câu chữ của SDD, SRS cũ và tên hàm hơn là đọc từng nhánh code; vài chỗ là hiểu sai ký hiệu của Mermaid | AI, lượt kiểm thứ hai mở lại code cho từng sơ đồ | sửa trước khi đưa vào SDD |
 
-**Ghi chú khi bảo vệ:** mười lăm trong năm mươi hai mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười lăm trong năm mươi tư mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 
