@@ -73,6 +73,23 @@ def test_guest_can_add_to_cart(browser, product, live_server):
     context.close()
 
 
+@pytest.mark.xfail(reason="L-35: the mini cart builds /products/<pid>/ without the language prefix")
+def test_mini_cart_link_keeps_the_english_site(browser, product, live_server):
+    # A guest who opened an /en/ link has no language cookie yet. A link without
+    # the prefix is redirected by LocaleMiddleware to the default language, so the
+    # product page opens in Vietnamese.
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto(f"{live_server.url}/en/")
+
+    with page.expect_response(lambda r: "add-to-cart" in r.url):
+        add_button(page, product).dispatch_event("click")
+
+    link = page.locator(".shopping-cart-title h4 a").first
+    assert link.get_attribute("href").startswith("/en/")
+    context.close()
+
+
 def test_cart_page_changes_quantity_and_removes_a_line(sign_in, customer, product, live_server):
     page = sign_in(customer).new_page()
     page.goto(live_server.url + reverse("core:index"))

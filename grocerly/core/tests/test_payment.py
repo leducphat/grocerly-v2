@@ -243,6 +243,19 @@ def test_wrong_amount_message_follows_page_language(client, order, settings):
     assert "The amount paid does not match this order" in response.content.decode()
 
 
+@pytest.mark.xfail(reason="L-34: a wrong amount on vnpay_return leaves no trace for the store")
+def test_wrong_amount_is_written_to_the_log_for_the_store(client, order, settings, caplog):
+    # The customer is told to contact the store, but the order stays unpaid and the
+    # money VNPay took shows nowhere in Grocerly. A warning in the Render log, with
+    # the order and both amounts, is what staff can find when the customer calls.
+    reply = sign(vnpay_reply(order, amount=100), settings.VNPAY_HASH_SECRET)
+
+    client.get(reverse("core:vnpay_return"), reply)
+
+    warnings = [r.getMessage() for r in caplog.records if r.levelname == "WARNING"]
+    assert any(str(order.oid) in message and "100" in message for message in warnings)
+
+
 # The IPN answers below follow VNPay's IPN guide: 00 and 02 tell VNPay the message is
 # handled, any other code makes it send the IPN again (up to 10 times). These tests
 # replace VNPay's SIT run, which the project skipped (D-034).
