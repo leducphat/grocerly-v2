@@ -5,7 +5,7 @@ which values the server accepts, and what a status change does to the stock.
 The rules under test are the ones SRS.md §6.1 states for UC-20: an order only
 moves forward, one step at a time (processing, shipped, delivered), and an order
 already `delivered` cannot change status any more (L-5 and L-11 in
-docs/COMMITMENT.md). The staff may also cancel an order that is not delivered
+docs/ISSUES.md). The staff may also cancel an order that is not delivered
 yet; `cancelled` is final too (D-033).
 """
 

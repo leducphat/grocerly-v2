@@ -35,6 +35,7 @@ chuyên ngành (TLCN)** cùng đề tài, cùng GVHD, đã nộp và đã có đ
 | Hệ thống được xây thế nào? | [`docs/SDD.md`](docs/SDD.md) |
 | Sắp làm gì, đang tới đâu? | [`docs/PLAN.md`](docs/PLAN.md) |
 | Vì sao lại làm theo cách này? | [`docs/DECISIONS.md`](docs/DECISIONS.md) |
+| Lỗi nào đã biết, sửa tới đâu? | [`docs/ISSUES.md`](docs/ISSUES.md) |
 | Đã báo cáo gì với GVHD? | Portal của trường (không lưu trong repo — D-021) |
 | AI đã sinh ra phần nào? | [`docs/AI_USAGE_LOG.md`](docs/AI_USAGE_LOG.md) |
 
@@ -155,7 +156,8 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
 ├── .github/workflows/ci.yml  # CI trên GitHub Actions (D-019)
-├── docs/                     # SRS, SDD, PLAN, DECISIONS, COMMITMENT, AI_USAGE_LOG
+├── docs/                     # SRS, SDD, PLAN, DECISIONS, COMMITMENT, ISSUES, AI_USAGE_LOG
+│   └── diagrams/, weekly_report/   # bản nháp sơ đồ, báo cáo tuần: gitignore (D-046, D-021)
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
     ├── grocerly/             # settings, urls gốc, wsgi/asgi, middleware
     ├── core/                 # catalog, giỏ hàng, đơn hàng, checkout, VNPay, đánh giá
@@ -211,7 +213,7 @@ Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ tes
 - Phủ cả ca âm và ca biên, không chỉ luồng thuận lợi — rubric yêu cầu rõ điều này.
 - Mỗi test nên truy vết được về một use case / acceptance criteria trong
   `docs/SRS.md` — ghi mã UC hoặc TC ở docstring hay comment.
-- Lỗi đã biết mà chưa sửa (L-x trong `docs/COMMITMENT.md`): viết test mô tả hành vi
+- Lỗi đã biết mà chưa sửa (L-x trong `docs/ISSUES.md`): viết test mô tả hành vi
   **đúng**, đánh dấu `@pytest.mark.xfail(reason="L-x: ...")`. Sửa xong lỗi thì gỡ
   `xfail` trong cùng commit — `xfail_strict` làm bộ test đỏ nếu quên.
 - Test chạy trình duyệt thật (Playwright, D-042) nằm ở `grocerly/tests/e2e/`, đánh dấu
