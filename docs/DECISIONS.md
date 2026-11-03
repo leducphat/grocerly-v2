@@ -2220,6 +2220,26 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Đọc chỉ đọc ngày 02/11/2026: 13/13 dòng trên database KLTN khớp đúng một sản phẩm.
 - Migration chạy khi deploy qua `build.sh`, cột cho phép trống nên bản đang chạy không bị ảnh hưởng. `migrate core 0006` gỡ được. Mới chạy trên SQLite trong bộ test, chưa chạy trên PostgreSQL.
 
+## D-046 · Sổ lỗi tách khỏi bản cam kết, sơ đồ để ngoài Git
+
+- **Ngày:** 03/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** `COMMITMENT.md` §3 giữ danh sách L-1 → L-36, dài hơn mọi phần còn lại của bản cam kết cộng lại, trong khi bản cam kết sắp ký với GVHD và từ lúc ký thì không nên sửa nữa. Cùng lúc, sáu sơ đồ Mermaid vẽ ngày 02/11/2026 nằm ngay trong SDD và SRS, và theo kế hoạch còn tuần tự cho mọi use case, nên repo sẽ có thêm vài chục sơ đồ.
+
+**Phương án đã cân nhắc**
+1. *Gộp danh sách lỗi vào `PLAN.md`* - PLAN đã chứa backlog, lịch, nhật ký tiến độ và nhật ký sửa đặc tả; thêm 36 mục dài thì khó đọc, và sổ lỗi không còn là một chỗ riêng để chỉ ra khi bảo vệ.
+2. *Giữ sơ đồ trong repo, mỗi sơ đồ một file trong `docs/diagrams/`* - GitHub vẽ thẳng, lịch sử commit cho thấy sơ đồ sửa cùng code. Nhưng bản chính của sơ đồ là hình trong báo cáo KLTN, và repo phình theo số sơ đồ.
+
+**Quyết định.** Danh sách lỗi và chỗ lệch chuyển nguyên văn sang `docs/ISSUES.md`, giữ nguyên mã L-x. `COMMITMENT.md` §3 chỉ còn một câu trỏ sang đó, các mục khác giữ số. Cột Hiện trạng ở §2 chỉ ghi `Có` hoặc `Lệch (L-x)`. Sơ đồ để ở `docs/diagrams/`, thư mục này gitignore; SDD giữ phần chữ.
+
+**Lý do.** Bản cam kết trả lời "sản phẩm cuối cùng làm được gì", còn sổ lỗi thay đổi hằng tuần; tách ra thì bản đã ký không phải sửa mỗi lần sửa lỗi. Sơ đồ là việc của báo cáo, như TLCN từng vẽ trên draw.io rồi dán vào báo cáo; repo chỉ cần phần chữ để đối chiếu với code. Sinh viên chọn cách này.
+
+**Hệ quả.**
+- Các dòng cũ trong `DECISIONS.md` và `AI_USAGE_LOG.md` còn ghi "`COMMITMENT.md` §3"; đó là ghi chép lịch sử, để nguyên. PLAN, hai file hướng dẫn và docstring test đã trỏ sang `ISSUES.md`.
+- Sơ đồ không có lịch sử Git. Mỗi lần đổi luồng trong code, sơ đồ trong báo cáo phải sửa tay theo.
+- Kiểm sơ đồ khớp code (TC2.1) dựa trên báo cáo và SDD, không dựa trên repo.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

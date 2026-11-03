@@ -2,7 +2,7 @@
 Product review tests (UC-14, CN-15): who may rate a product and how often.
 
 SRS.md §6.1 grants the review to the customer who has bought the product; the
-view used to accept a review from anyone (L-3 in docs/COMMITMENT.md).
+view used to accept a review from anyone (L-3 in docs/ISSUES.md).
 """
 
 import pytest

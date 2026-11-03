@@ -23,7 +23,7 @@
 >
 > File này chỉ có phần chữ. Sơ đồ thiết kế (lớp, tuần tự, trạng thái đơn, triển
 > khai) vẽ trong báo cáo KLTN; bản nháp Mermaid để ở `docs/diagrams/`, không đưa
-> vào Git.
+> vào Git (D-046).
 
 ---
 
