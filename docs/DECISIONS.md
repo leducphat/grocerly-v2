@@ -2240,6 +2240,56 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Sơ đồ không có lịch sử Git. Mỗi lần đổi luồng trong code, sơ đồ trong báo cáo phải sửa tay theo.
 - Kiểm sơ đồ khớp code (TC2.1) dựa trên báo cáo và SDD, không dựa trên repo.
 
+## D-047 · Chi tiết đơn mở bằng `oid`; bỏ "đặt địa chỉ mặc định" khỏi CN-14
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Hai lỗi của P-41 có hơn một cách sửa. L-32: `order_detail` lấy đơn bằng `.get()` theo khóa chính số, đơn của khách khác hay số không có thì trang trả 500, và URL `/dashboard/order/<int:id>/` trái quy ước ShortUUID (`CLAUDE.md` §7). L-33: `make_address_default` đổi địa chỉ mặc định bằng GET, cùng họ với L-19, nhưng trang tài khoản không có nút nào gọi nó và không chỗ nào trong code đọc địa chỉ mặc định, kể cả trang thanh toán. CN-14 vẫn cam kết chức năng này.
+
+**Phương án đã cân nhắc**
+1. *L-32: chỉ đổi sang `get_object_or_404`, giữ id số* - hết 500, ít thay đổi nhất, nhưng số đơn kế tiếp vẫn đoán được và URL vẫn khác các trang thanh toán.
+2. *L-33: làm giao diện* - thêm danh sách địa chỉ và nút đặt mặc định ở trang tài khoản, chuyển view sang POST có CSRF. Là thêm chức năng, trái D-008, và địa chỉ mặc định vẫn chưa được dùng ở đâu, nên phải làm thêm cả phần trang thanh toán đọc nó.
+
+**Quyết định.** L-32: URL đổi thành `/dashboard/order/<oid>/`, view dùng `get_object_or_404(CartOrder, user=request.user, oid=oid)`. L-33: bỏ "đặt địa chỉ mặc định" khỏi CN-14, gỡ route `make-default-address`, view `make_address_default` và đoạn JavaScript chờ nút `.make-default-address` trong `core/dashboard.html`. Sinh viên chọn cả hai ngày 04/11/2026.
+
+**Lý do.** `oid` là cách các trang thanh toán và VNPay đã gọi đơn, nên một đơn chỉ còn một kiểu định danh trên URL. Với L-33, khách chưa bao giờ làm được việc này qua giao diện, nên gỡ đi không bớt của ai thứ gì; sửa cam kết cho đúng sản phẩm rẻ hơn và dễ bảo vệ hơn làm một chức năng không có chỗ dùng.
+
+**Hệ quả.**
+- Link cũ dạng `/dashboard/order/12/` giờ trả 404. Chỉ trang tài khoản dựng link này, và nó đã đổi theo.
+- Cột `Address.status` vẫn còn trong model, không migration nào đổi. Nếu sau này trang thanh toán cần địa chỉ mặc định, đó là chức năng mới, thuộc "hướng phát triển mở rộng".
+- Test L-33 gọi thẳng `/vi/make-default-address/` và chờ 404, vì `reverse()` không còn biết tên route.
+
+## D-048 · Máy chủ kiểm đề nghị thêm vào giỏ của AI: giá, số lượng lớn, nhiều sản phẩm cùng khớp
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Nhận xét của GVHD cho báo cáo Tuần 7: việc AI tự đặt hàng cần cơ chế kiểm soát để đúng, hợp lý và tối ưu (P-42). Trước đó máy chủ đã kiểm mã sản phẩm, tồn kho, số lượng tối thiểu và tổng trong giỏ (D-025, D-035, D-044), khách phải bấm xác nhận, giá lấy từ database. Còn ba chỗ hở. Câu xác nhận chỉ ghi tên và số lượng, nên khách không biết mình sắp trả bao nhiêu. Gemini hiểu nhầm "30" thì khách vẫn chỉ thấy một nút như mọi lần. Và khi tìm ra nhiều sản phẩm, Gemini tự chọn một mà khách không hay. Thêm nữa, kết quả tìm gửi cho Gemini viết giá bằng `float`, trái quy ước tiền tệ.
+
+**Phương án đã cân nhắc**
+1. *Dặn Gemini trong `system_instruction`*: "số lượng lớn thì hỏi lại", "nhiều sản phẩm thì liệt kê để khách chọn". Ít code nhất, lời hỏi tự nhiên. Nhưng không có gì bảo đảm Gemini làm theo, test với Gemini giả lập không kiểm được, và mỗi lần Gemini đổi phiên bản thì hành vi có thể đổi theo.
+2. *Vừa dặn Gemini vừa kiểm ở máy chủ.* Hỏi sớm hơn, nhưng khách có thể bị hỏi hai lần cho cùng một số lượng, và phần lời dặn vẫn không test được.
+3. *Chỉ kiểm ở máy chủ, trên đề nghị Gemini gửi về qua công cụ `request_add_to_cart`.* Mọi tiêu chí là code thường, test được. Lời hỏi lại là câu cố định có bản dịch, không tự nhiên bằng lời Gemini viết.
+4. *Ngưỡng số lượng theo tỉ lệ tồn kho* (ví dụ quá nửa số còn lại) thay vì một con số cố định. Ngưỡng đổi theo từng sản phẩm, khách và người chấm khó đoán trước, và với hàng còn ít thì 2 đơn vị đã bị coi là bất thường.
+5. *Khi nhiều sản phẩm khớp, khách chọn bằng chữ*, rồi Gemini đọc câu trả lời và gọi lại công cụ. Không phải sửa JavaScript, nhưng lại phụ thuộc vào việc Gemini hiểu đúng câu "cái thứ hai", tức đúng chỗ đang cần kiểm.
+
+**Quyết định.** Phương án 3, sinh viên duyệt ngày 04/11/2026.
+- Ngưỡng cố định `LARGE_QTY = 10` cho một lần thêm, đặt trong `store_api/views.py`. Từ 11 trở lên thì câu xác nhận mở đầu bằng lời hỏi lại, nút ghi đúng con số.
+- Câu xác nhận có đơn giá và thành tiền, tính bằng `Decimal` từ giá trong database, viết bằng hàm `vnd` mà các template đang dùng.
+- Trong cùng một tin nhắn, nếu lần `search_products` gần nhất ra từ hai sản phẩm trở lên thêm được đúng số lượng Gemini đề nghị, máy chủ trả `action: "choose_product"` cùng danh sách đó (tối đa 5, cùng giới hạn của hàm tìm), thay cho sản phẩm Gemini chọn. Khung chat hiện mỗi sản phẩm một nút; bấm một nút là chọn và xác nhận, rồi mọi nút của lần hỏi ấy tắt.
+- Mỗi đề nghị trả về có `pid`, `qty`, `price`, `total`, `large_qty` và `label` (chữ trên nút), để bộ kịch bản đánh giá (P-42 phần d) so được với đáp án mà không phải đọc câu chữ.
+- Kết quả tìm và danh sách bán chạy gửi giá cho Gemini dưới dạng số nguyên VND, không qua `float`.
+
+**Lý do.** Thứ GVHD hỏi là cơ chế kiểm soát, và một cơ chế chỉ tính khi kiểm chứng được. Đặt ở máy chủ thì từng tiêu chí trong SRS §6.2 có test riêng, chạy trong CI, không gọi Gemini thật. Con số 10 dễ giải thích: một lần mua hàng tạp hóa cho gia đình hiếm khi quá 10 gói cùng loại, và mua nhiều hơn vẫn làm được, chỉ thêm một lần nhìn lại. Gộp "chọn" với "xác nhận" vào một nút vì chữ trên nút đã ghi đủ số lượng, tên và thành tiền, nên bấm nút ấy là đồng ý rõ ràng, và khách khỏi phải chờ thêm một lượt Gemini.
+
+**Hệ quả.**
+- Câu xác nhận dài hơn và có thêm năm chuỗi dịch mới. Nút xác nhận lấy chữ từ máy chủ; trang nào không nhận được `label` thì dùng chữ cũ `Yes, Add to Cart`.
+- Chỉ lần tìm trong cùng tin nhắn được tính. Nếu khách đã xem danh sách ở tin nhắn trước rồi gõ "thêm cái thứ hai", máy chủ không biết khách đã chọn hay chưa và coi như đã chọn (SRS AC-17.4). Gemini chọn nhầm ở bước này thì khách vẫn thấy tên và giá trong câu xác nhận trước khi bấm.
+- Các sản phẩm trong danh sách chọn đều đã qua cùng phép kiểm tồn kho như đề nghị đơn lẻ. Sản phẩm thêm được thì có nút; sản phẩm không thêm được thì không hiện.
+- Ngưỡng 10 chưa dựa trên số liệu mua hàng thật. Có số liệu thực nghiệm (P-25) thì xem lại.
+- Tỉ lệ AI chọn đúng sản phẩm và số lượng (P-42 phần d) vẫn phải đo bằng Gemini thật, chạy tay, ngoài CI.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

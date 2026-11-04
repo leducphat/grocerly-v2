@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Tách từ [`SRS.md`](SRS.md) Mục 7–9 ngày 11/09/2026 (P-07, D-011); nội dung gốc chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 02/11/2026 |
+| Cập nhật | 04/11/2026 |
 
 > **Phạm vi của tài liệu này.** SDD trả lời câu hỏi *hệ thống được xây như thế
 > nào*: mô hình dữ liệu, giao diện, công nghệ và thiết kế các thành phần. Còn *hệ
@@ -53,17 +53,19 @@
 - **Định danh công khai:** `Category.c_id`, `Vendor.v_id`, `Product.p_id`,
   `CartOrder.oid` là ShortUUID, dùng trong URL thay cho khóa chính số.
   `Product.sku` cũng là ShortUUID nhưng chỉ in ra làm mã sản phẩm trên trang chi
-  tiết, không URL nào dùng. Còn ba URL dùng khóa chính số: chi tiết đơn của khách
-  (L-32), chi tiết đơn ở trang nhân viên, và `ajax-add-review/<int:p_id>/` (tên
-  tham số là `p_id` nhưng nhận khóa chính).
+  tiết, không URL nào dùng. Chi tiết đơn của khách chuyển sang `oid` ngày
+  04/11/2026 (L-32, D-047). Còn hai URL dùng khóa chính số: chi tiết đơn ở trang
+  nhân viên, và `ajax-add-review/<int:p_id>/` (tên tham số là `p_id` nhưng nhận
+  khóa chính).
 - **Tiền tệ:** `DecimalField(max_digits=20, decimal_places=2)`, đơn vị VND.
 - **Xóa mềm:** `core_category`, `core_vendor`, `core_product`, `core_coupon` mang
   cặp cờ `is_deleted` / `deleted_at`. `delete()` của bốn model này chỉ bật cờ, ở cả
   một dòng lẫn QuerySet; xóa hẳn phải gọi `hard_delete()` và không màn hình nào gọi
   nó (D-041). Khóa ngoại vẫn đọc được dòng đã xóa, nên chỗ nào đi từ khóa ngoại tới
-  sản phẩm phải tự lọc: wishlist đi qua `wishlist_of()`. Xóa từng nhà cung cấp
-  một thì sản phẩm của họ bị xóa mềm theo; lệnh xóa hàng loạt trong Django admin
-  chưa làm vậy (L-36).
+  sản phẩm phải tự lọc: wishlist đi qua `wishlist_of()`. Xóa nhà cung cấp thì sản
+  phẩm của họ bị xóa mềm theo, kể cả hai lệnh xóa hàng loạt trong Django admin:
+  `SoftDeleteAdminMixin` gọi `soft_delete()` từng dòng thay cho một câu `UPDATE`
+  (L-36).
 - **Trạng thái sản phẩm:** `draft | disabled | in_review | rejected | published`.
 
 ### 1.2 Trạng thái đơn hàng
@@ -108,7 +110,7 @@ phẩm · Quản lý Đơn hàng
 | Thanh toán | VNPay (Sandbox) + COD |
 | Triển khai | Render (web service chạy `gunicorn`), tự build bằng `build.sh` (D-034); luồng deploy ở §3.2 |
 | CI/CD | GitHub Actions, năm chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036) |
-| Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; xem và tìm ở trang Logs của Render (D-038) |
+| Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; logger `core` in cảnh báo của cửa hàng, hiện có một loại là số tiền VNPay báo khác giá đơn (L-34); xem và tìm ở trang Logs của Render (D-038) |
 | CSDL đám mây | Neon (Serverless Postgres) |
 | Lưu trữ media | Cloudinary (CDN) |
 
@@ -163,11 +165,23 @@ theo đúng thứ tự kiểm trong code: `99`, `97`, `01`, `04`, `02`, `00`.
 Mỗi tin nhắn là một request `POST /api/v1/chat/` mang theo lịch sử lưu ở
 `sessionStorage`; server không lưu hội thoại. `ai_chat` cho Gemini gọi tối đa ba
 công cụ nối nhau trong một tin nhắn (L-30). Tìm kiếm chạy ngay trên server, còn
-`request_add_to_cart` chỉ kiểm sản phẩm, tồn kho và số đã có trong giỏ rồi trả
-`action: confirm_add_cart`, giỏ chưa đổi gì. Giỏ chỉ đổi khi khách bấm nút xác
-nhận: khung chat gọi `/add-to-cart/` giống nút Add ở trang sản phẩm, nên giá và tồn
-kho vẫn đi qua `_refresh_cart`, và câu báo sau đó đọc số lượng giỏ thật sự giữ
-(D-044).
+`request_add_to_cart` chỉ kiểm sản phẩm, tồn kho và số đã có trong giỏ (`cart_problem`)
+rồi trả một đề nghị, giỏ chưa đổi gì. Đề nghị có hai dạng (D-048):
+
+- `action: confirm_add_cart` kèm một `product`: câu hỏi xác nhận do server viết, có
+  đơn giá và thành tiền tính từ giá trong database. Quá `LARGE_QTY` (10) đơn vị thì
+  câu mở đầu bằng lời hỏi lại và nút ghi đúng con số.
+- `action: choose_product` kèm `choices`: lần `search_products` gần nhất trong cùng
+  tin nhắn ra từ hai sản phẩm trở lên thêm được số lượng đó, nên server bỏ sản phẩm
+  Gemini chọn và đưa cả danh sách cho khách. Kết quả tìm vẫn về `hidden_context` để
+  khách trả lời bằng chữ được.
+
+Mỗi đề nghị (`product` hay một phần tử của `choices`) có `id`, `pid`, `title`, `qty`,
+`price`, `total`, `large_qty` và `label` là chữ trên nút. Bộ kịch bản đánh giá AI
+(P-42 phần d) đọc các trường này. Khung chat hiện một nút cho mỗi đề nghị; bấm một nút
+thì mọi nút của câu trả lời ấy tắt. Giỏ chỉ đổi khi khách bấm: khung chat gọi
+`/add-to-cart/` giống nút Add ở trang sản phẩm, nên giá và tồn kho vẫn đi qua
+`_refresh_cart`, và câu báo sau đó đọc số lượng giỏ thật sự giữ (D-044).
 
 ---
 

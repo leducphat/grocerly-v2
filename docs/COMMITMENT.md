@@ -65,12 +65,12 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
 | CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | *(chưa có UC)* | Có |
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
-| CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Lệch (L-35) |
+| CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
 | CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | Có |
 | CN-12 | Cập nhật hồ sơ cá nhân, đổi mật khẩu | UC-11 | Có |
 | CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Có |
-| CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn; đặt địa chỉ mặc định | UC-13 | Lệch (L-32, L-33) |
+| CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn | UC-13 | Có |
 | CN-15 | Đánh giá và chấm điểm sản phẩm (1–5 sao) | UC-14 | Có |
 
 ### 2.2 Trợ lý AI
@@ -104,12 +104,13 @@ doanh số thật.*
 | CN-26 | Quản lý danh mục: thêm, sửa, xóa mềm và khôi phục | UC-23 | Có |
 | CN-27 | Quản lý toàn bộ sản phẩm: đổi trạng thái hiển thị, xóa mềm và khôi phục | UC-24 | Có |
 | CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Có |
-| CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Lệch (L-36) |
+| CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 03/11/2026 có 27 `Có` và 3 `Lệch`. Hai lỗi còn mở
-khác không làm chức năng nào lệch đặc tả: L-24 chưa xảy ra vì host chạy một
-worker, L-34 chỉ thiếu log cho cửa hàng còn khách vẫn thấy đúng UC-09. Các chức
+**Tổng: 30 chức năng**, ngày 04/11/2026 cả 30 đều `Có`. Lỗi duy nhất còn mở, L-24,
+không làm chức năng nào lệch đặc tả vì chưa xảy ra khi host chạy một worker.
+CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
+nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
 sẽ bổ sung UC ở P-23.
 

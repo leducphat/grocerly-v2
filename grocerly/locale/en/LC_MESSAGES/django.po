@@ -551,3 +551,22 @@ msgstr ""
 
 msgid "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
 msgstr ""
+
+#, python-format
+msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
+msgstr ""
+
+#, python-format
+msgid "%(qty)s is more than usual, please check the quantity."
+msgstr ""
+
+#, python-format
+msgid "Yes, add %(qty)s to cart"
+msgstr ""
+
+msgid "Several products match. Tap the one you want to add to your cart:"
+msgstr ""
+
+#, python-format
+msgid "Add %(qty)sx %(title)s - %(total)s ₫"
+msgstr ""

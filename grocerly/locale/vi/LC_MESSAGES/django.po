@@ -975,3 +975,22 @@ msgstr "Sản phẩm này không còn bán nữa."
 
 msgid "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
 msgstr "Xin lỗi, mình chưa làm xong yêu cầu này trong một lượt. Bạn nói lần lượt từng bước giúp mình nhé?"
+
+#, python-format
+msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
+msgstr "Đơn giá %(price)s ₫, thành tiền **%(total)s ₫**."
+
+#, python-format
+msgid "%(qty)s is more than usual, please check the quantity."
+msgstr "%(qty)s là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé."
+
+#, python-format
+msgid "Yes, add %(qty)s to cart"
+msgstr "Đúng %(qty)s, thêm vào giỏ"
+
+msgid "Several products match. Tap the one you want to add to your cart:"
+msgstr "Có nhiều sản phẩm khớp với yêu cầu. Bạn bấm vào sản phẩm muốn thêm vào giỏ:"
+
+#, python-format
+msgid "Add %(qty)sx %(title)s - %(total)s ₫"
+msgstr "Thêm %(qty)sx %(title)s - %(total)s ₫"

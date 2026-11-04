@@ -135,7 +135,7 @@
                                                                 <td class="text-danger"><b>X</b></td>
                                                                 {% endif %}
                                                                 <td>{{ o.price|vnd }} ₫</td>
-                                                                <td><a href="{% url 'core:order-detail' o.id %}" class="btn-small d-block">{% trans "View" %}</a></td>
+                                                                <td><a href="{% url 'core:order-detail' o.oid %}" class="btn-small d-block">{% trans "View" %}</a></td>
                                                             </tr>
                                                             {% empty %}
                                                             <tr>
@@ -184,29 +184,6 @@
             document.getElementById('myChart'),
             config
         );
-
-        // Make Default Address AJAX
-        $(document).on("click", ".make-default-address", function(){
-            let id = $(this).attr("data-address-id");
-            let this_val = $(this);
-
-            $.ajax({
-                url: "{% url 'core:make-default-address' %}",
-                data: { "id": id },
-                dataType: "json",
-                success: function(response){
-                    if(response.boolean === true){
-                        // Hide all check icons and show all buttons
-                        $(".check").hide();
-                        $(".action_btn").show();
-
-                        // Show the check for this address and hide its button
-                        $(".check" + id).show();
-                        $(".button" + id).hide();
-                    }
-                }
-            });
-        });
     </script>
 {% endblock content %}
 

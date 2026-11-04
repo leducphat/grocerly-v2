@@ -8,6 +8,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Product, Category
+from core.templatetags.currency_filters import vnd
 from store_api.serializers import ProductSerializer, CategorySerializer
 
 # The store pages decide what a customer may see with one condition:
@@ -59,23 +60,32 @@ def search_products(query: str) -> list[dict]:
     """
     # Gemini reads this docstring as the tool description. The search below
     # only matches words in the title, so an English query found nothing (L-31).
+    return search_results(find_products(query))
+
+
+def find_products(query):
+    """Buyable products whose title holds every word of `query`, at most 5."""
     products = buyable_products()
     for word in query.split():
         products = products.filter(title__icontains=word)
-    products = products[:5]
-    if not products.exists():
+    return list(products[:5])
+
+
+def search_results(products):
+    """What Gemini is told about the products a search found."""
+    if not products:
         return [{"message": "No matching products found."}]
-        
-    results = []
-    for p in products:
-        results.append({
+    return [
+        {
             "title": p.title,
-            "price": f"{float(p.price)} VND",
+            # Whole VND, written from the Decimal; float is not used for money.
+            "price": f"{p.price:.0f} VND",
             "stock_count": p.stock_count,
             "weight_volume": p.weight_volume,
-            "product_url_id": p.p_id
-        })
-    return results
+            "product_url_id": p.p_id,
+        }
+        for p in products
+    ]
 
 def request_add_to_cart(product_url_id: str, qty: int = 1):
     """Call this function when the user asks to add an item to their cart or wants to buy an item.
@@ -97,9 +107,108 @@ def get_bestsellers() -> list[dict]:
     for p in products:
         results.append({
             "title": p.title,
-            "price": f"{float(p.price)} VND"
+            "price": f"{p.price:.0f} VND"
         })
     return results
+
+
+# ---------- what the assistant may propose for the cart (UC-17) ----------
+
+# Above this many units of one product in one go, the assistant asks the
+# customer to check the number before adding (SRS AC-17.2, D-048).
+LARGE_QTY = 10
+
+
+def cart_problem(p, qty, cart):
+    """Why `qty` of product `p` may not be proposed, or None if it may.
+
+    The assistant may only offer what the customer could buy on the site
+    itself: a product the shop has hidden is "not found" here too, one with
+    nothing left in stock is refused instead of proposed (L-9), and so is a
+    quantity the stock cannot cover (L-14). The cart adds to the line it
+    already has, so what must fit the stock is the total (L-18). The reason
+    goes back to Gemini so it can tell the customer.
+    If the stock drops between this question and the customer's click, the
+    cart still brings the line down to it (D-024).
+    """
+    if p is None:
+        return "Product not found"
+    stock = p.stock_count or 0
+    if stock <= 0:
+        return "Product is out of stock"
+    if qty < 1:
+        return "Quantity must be at least 1"
+    in_cart = cart.get(str(p.id), {}).get('qty', 0)
+    if in_cart + qty > stock:
+        problem = f"Only {stock} left in stock"
+        if in_cart:
+            problem += f" and the cart already has {in_cart}"
+        return problem
+    return None
+
+
+def money_text(p, qty):
+    """Quantity, name, unit price and total, ready for the translated sentences.
+    Prices come from the database and are written like on the shop pages,
+    never taken from what Gemini said (AC-17.1)."""
+    return {'qty': qty, 'title': p.title, 'price': vnd(p.price), 'total': vnd(p.price * qty)}
+
+
+def proposal(p, qty):
+    """One product offered for the cart, as data the chat window and the
+    assistant evaluation (P-42 d) can read without parsing sentences (AC-17.5)."""
+    large_qty = qty > LARGE_QTY
+    if large_qty:
+        label = str(_("Yes, add %(qty)s to cart")) % {'qty': qty}
+    else:
+        label = str(_("Yes, Add to Cart"))
+    return {
+        "id": str(p.id),
+        "pid": p.p_id,
+        "title": p.title,
+        "qty": qty,
+        "price": str(p.price),
+        "total": str(p.price * qty),
+        "large_qty": large_qty,
+        "label": label,
+        "image": p.image.url if p.image else "",
+    }
+
+
+def large_qty_warning(qty):
+    """The ask-again sentence for a quantity above LARGE_QTY, else nothing."""
+    if qty <= LARGE_QTY:
+        return ""
+    return str(_("%(qty)s is more than usual, please check the quantity.")) % {'qty': qty} + " "
+
+
+def confirm_add_cart(p, qty):
+    """Ask the customer to confirm one product (AC-17.1, AC-17.2)."""
+    values = money_text(p, qty)
+    question = str(_("Would you like to add **%(qty)sx %(title)s** to your cart?")) % values
+    price = str(_("Unit price %(price)s ₫, total **%(total)s ₫**.")) % values
+    return {
+        "reply": f"{large_qty_warning(qty)}{question} {price}",
+        "action": "confirm_add_cart",
+        "product": proposal(p, qty),
+    }
+
+
+def choose_product(choices, qty, hidden_context):
+    """Let the customer pick among several matching products (AC-17.3).
+    Each button already says quantity, name and total, so clicking one both
+    picks and confirms. The search results stay in the chat history, so the
+    customer may also answer in words ("the second one")."""
+    reply = large_qty_warning(qty) + str(_("Several products match. Tap the one you want to add to your cart:"))
+    return {
+        "reply": reply,
+        "action": "choose_product",
+        "choices": [
+            {**proposal(c, qty), "label": str(_("Add %(qty)sx %(title)s - %(total)s ₫")) % money_text(c, qty)}
+            for c in choices
+        ],
+        "hidden_context": hidden_context,
+    }
 
 api_key = os.environ.get("GEMINI_API_KEY", "")
 genai.configure(api_key=api_key)
@@ -171,6 +280,9 @@ def _chat_reply(request):
         
         response = chat.send_message(user_message)
         hidden_context = None
+        # Products the latest search of this message found. Several of them
+        # and Gemini goes straight to the cart: the customer picks (AC-17.3).
+        found = []
 
         # Manual loop to process function calls (max 3 loops to prevent recursion)
         for _step in range(3):
@@ -199,45 +311,17 @@ def _chat_reply(request):
                 except Exception:
                     qty = 1
 
-                # The assistant may only offer what the customer could buy on
-                # the site itself: a product the shop has hidden is "not found"
-                # here too, one with nothing left in stock is refused instead
-                # of proposed (L-9), and so is a quantity the stock cannot cover
-                # (L-14). The cart adds to the line it already has, so what must
-                # fit the stock is the total (L-18). Gemini gets the reason so it
-                # can tell the customer.
-                # If the stock drops between this question and the customer's
-                # click, the cart still brings the line down to it (D-024).
+                cart = request.session.get('cart_data_obj', {})
                 p = published_products().filter(p_id=p_id).first()
-                stock = (p.stock_count or 0) if p else 0
-                cart_line = request.session.get('cart_data_obj', {}).get(str(p.id), {}) if p else {}
-                in_cart = cart_line.get('qty', 0)
-                if p is None:
-                    tool_error = "Product not found"
-                elif stock <= 0:
-                    tool_error = "Product is out of stock"
-                elif qty < 1:
-                    tool_error = "Quantity must be at least 1"
-                elif in_cart + qty > stock:
-                    tool_error = f"Only {stock} left in stock"
-                    if in_cart:
-                        tool_error += f" and the cart already has {in_cart}"
-                else:
-                    # Interrupt conversation to ask for UI confirmation
-                    return Response({
-                        "reply": str(_("Would you like to add **%(qty)sx %(title)s** to your cart?")) % {
-                            'qty': qty, 'title': p.title,
-                        },
-                        "action": "confirm_add_cart",
-                        "product": {
-                            "id": str(p.id),
-                            "pid": p.p_id,
-                            "title": p.title,
-                            "qty": qty,
-                            "price": str(p.price),
-                            "image": p.image.url if p.image else ""
-                        }
-                    })
+                tool_error = cart_problem(p, qty, cart)
+                if tool_error is None:
+                    # Stop the conversation here: the customer confirms in
+                    # the chat window. Only products that could take this
+                    # quantity are offered as choices.
+                    choices = [c for c in found if cart_problem(c, qty, cart) is None]
+                    if len(choices) >= 2:
+                        return Response(choose_product(choices, qty, hidden_context))
+                    return Response(confirm_add_cart(p, qty))
 
                 response = chat.send_message([{
                     "function_response": {
@@ -258,8 +342,8 @@ def _chat_reply(request):
             # with the p_id it found. So both lookups go round the loop like the
             # other tools instead of answering at once (L-30).
             elif name == "search_products":
-                query_val = args.get('query', '')
-                results = search_products(query_val)
+                found = find_products(args.get('query', ''))
+                results = search_results(found)
                 hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Search Results: {results})"
                 response = chat.send_message([{
                     "function_response": {

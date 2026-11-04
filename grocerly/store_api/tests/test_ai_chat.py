@@ -427,8 +427,10 @@ def test_ai_add_to_cart_refuses_quantity_below_one(client, product, gemini_chat,
 @pytest.mark.parametrize(
     ("language", "question"),
     [
-        ("vi", "Bạn có muốn thêm **2x Cà rốt Đà Lạt** vào giỏ hàng không?"),
-        ("en", "Would you like to add **2x Cà rốt Đà Lạt** to your cart?"),
+        ("vi", "Bạn có muốn thêm **2x Cà rốt Đà Lạt** vào giỏ hàng không? "
+               "Đơn giá 25.000 ₫, thành tiền **50.000 ₫**."),
+        ("en", "Would you like to add **2x Cà rốt Đà Lạt** to your cart? "
+               "Unit price 25.000 ₫, total **50.000 ₫**."),
     ],
 )
 def test_ai_add_to_cart_question_follows_page_language(client, product, gemini_chat, language, question):
@@ -486,3 +488,180 @@ def test_chat_window_text_follows_page_language(client, language, button, user_r
     assert f'yesAdd: "{user_reply}"' in page
     assert f'language: "{language}"' in page
     assert f"href = '/{language}/cart/'" in page  # the checkout button keeps the language
+
+
+# ---------- control over what the assistant proposes (UC-17, SRS §6.2, D-048) ----------
+
+
+@pytest.fixture
+def baby_carrot(product):
+    """A second product that a search for "cà rốt" also finds: 40,000 VND, 10 left."""
+    return Product.objects.create(
+        title="Cà rốt baby", category=product.category, price=Decimal("40000.00"),
+        stock_count=10, product_status="published",
+    )
+
+
+def propose(gemini_chat, product, qty, search=None):
+    """Script Gemini to search for `search` (if given), then propose `qty` of `product`."""
+    replies = [gemini_reply(tool="search_products", query=search)] if search else []
+    replies.append(gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=qty))
+    gemini_chat.send_message.side_effect = replies
+
+
+def test_confirm_question_shows_unit_price_and_total(client, product, gemini_chat):
+    # AC-17.1: 3 x 25,000 VND, written like the shop pages write prices.
+    propose(gemini_chat, product, 3)
+
+    body = ask(client, "Thêm 3 cà rốt vào giỏ").json()
+
+    assert body["reply"].endswith("Đơn giá 25.000 ₫, thành tiền **75.000 ₫**.")
+    assert (body["product"]["price"], body["product"]["total"]) == ("25000.00", "75000.00")
+
+
+def test_confirm_question_uses_the_price_in_the_database(client, product, gemini_chat):
+    # AC-17.1: Gemini only names the product; the price is read when it asks.
+    Product.objects.filter(pk=product.pk).update(price=Decimal("27500.00"))
+    propose(gemini_chat, product, 2)
+
+    body = ask(client, "Thêm 2 cà rốt vào giỏ").json()
+
+    assert "thành tiền **55.000 ₫**" in body["reply"]
+
+
+def test_search_results_give_gemini_whole_vnd_without_float(product):
+    # D-048: money is not written through float.
+    assert views.search_products("cà rốt")[0]["price"] == "25000 VND"
+
+
+def test_more_than_ten_units_makes_the_assistant_ask_again(client, product, gemini_chat):
+    # AC-17.2: 11 is the first quantity above the threshold.
+    Product.objects.filter(pk=product.pk).update(stock_count=50)
+    propose(gemini_chat, product, 11)
+
+    body = ask(client, "Thêm 11 cà rốt vào giỏ").json()
+
+    assert body["action"] == "confirm_add_cart"
+    assert body["reply"].startswith("11 là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé.")
+    assert body["product"]["large_qty"] is True
+    assert body["product"]["label"] == "Đúng 11, thêm vào giỏ"
+
+
+def test_ten_units_is_asked_as_usual(client, product, gemini_chat):
+    # AC-17.2, the boundary: 10 is not above the threshold.
+    propose(gemini_chat, product, 10)
+
+    body = ask(client, "Thêm 10 cà rốt vào giỏ").json()
+
+    assert body["reply"].startswith("Bạn có muốn thêm **10x Cà rốt Đà Lạt**")
+    assert body["product"]["large_qty"] is False
+    assert body["product"]["label"] == "Có, thêm vào giỏ"
+
+
+def test_large_quantity_above_stock_is_still_refused(client, product, gemini_chat):
+    # AC-17.2: the threshold does not replace the stock limit (10 left).
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_add_to_cart", product_url_id=product.p_id, qty=30),
+        gemini_reply("Kho chỉ còn 10."),
+    ]
+
+    response = ask(client, "Thêm 30 cà rốt vào giỏ")
+
+    assert "action" not in response.json()
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {"error": "Only 10 left in stock"}
+
+
+@pytest.mark.parametrize(
+    ("language", "warning", "label"),
+    [
+        ("vi", "11 là số lượng lớn hơn thường lệ", "Đúng 11, thêm vào giỏ"),
+        ("en", "11 is more than usual, please check the quantity.", "Yes, add 11 to cart"),
+    ],
+)
+def test_large_quantity_question_follows_page_language(client, product, gemini_chat, language, warning, label):
+    Product.objects.filter(pk=product.pk).update(stock_count=50)
+    propose(gemini_chat, product, 11)
+
+    body = ask(client, "Add 11 carrots", language=language).json()
+
+    assert body["reply"].startswith(warning)
+    assert body["product"]["label"] == label
+
+
+def test_two_matches_let_the_customer_choose(client, product, baby_carrot, gemini_chat):
+    # AC-17.3: the search found two, Gemini picked one; the customer gets both.
+    propose(gemini_chat, baby_carrot, 2, search="cà rốt")
+
+    body = ask(client, "Tìm cà rốt rồi thêm 2 cái vào giỏ").json()
+
+    assert body["action"] == "choose_product"
+    assert "product" not in body
+    assert [(c["pid"], c["qty"]) for c in body["choices"]] == [(product.p_id, 2), (baby_carrot.p_id, 2)]
+    assert [c["label"] for c in body["choices"]] == [
+        "Thêm 2x Cà rốt Đà Lạt - 50.000 ₫",
+        "Thêm 2x Cà rốt baby - 80.000 ₫",
+    ]
+    assert "cart_data_obj" not in client.session  # nothing added yet
+
+
+def test_choices_stay_in_the_history_for_an_answer_in_words(client, product, baby_carrot, gemini_chat):
+    # AC-17.3: the customer may type "the second one" instead of clicking.
+    propose(gemini_chat, baby_carrot, 1, search="cà rốt")
+
+    body = ask(client, "Thêm cà rốt vào giỏ").json()
+
+    assert baby_carrot.p_id in body["hidden_context"]
+
+
+def test_choices_leave_out_products_that_cannot_take_the_quantity(client, product, baby_carrot, gemini_chat):
+    # AC-17.3: with 1 baby carrot left, only one product can take 2, so there is
+    # nothing to choose between.
+    Product.objects.filter(pk=baby_carrot.pk).update(stock_count=1)
+    propose(gemini_chat, product, 2, search="cà rốt")
+
+    body = ask(client, "Tìm cà rốt rồi thêm 2 cái vào giỏ").json()
+
+    assert body["action"] == "confirm_add_cart"
+    assert body["product"]["pid"] == product.p_id
+
+
+def test_choice_with_a_large_quantity_also_asks_again(client, product, baby_carrot, gemini_chat):
+    # AC-17.2 and AC-17.3 together.
+    Product.objects.filter(pk__in=[product.pk, baby_carrot.pk]).update(stock_count=50)
+    propose(gemini_chat, product, 12, search="cà rốt")
+
+    body = ask(client, "Thêm 12 cà rốt").json()
+
+    assert body["action"] == "choose_product"
+    assert body["reply"].startswith("12 là số lượng lớn hơn thường lệ")
+    assert all(c["large_qty"] for c in body["choices"])
+
+
+def test_only_the_latest_search_of_the_message_counts(client, product, baby_carrot, gemini_chat):
+    # AC-17.4: Gemini narrowed "cà rốt" (two) down to "cà rốt baby" (one).
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="search_products", query="cà rốt"),
+        gemini_reply(tool="search_products", query="cà rốt baby"),
+        gemini_reply(tool="request_add_to_cart", product_url_id=baby_carrot.p_id, qty=1),
+    ]
+
+    body = ask(client, "Thêm 1 cà rốt baby").json()
+
+    assert body["action"] == "confirm_add_cart"
+    assert body["product"]["pid"] == baby_carrot.p_id
+
+
+def test_a_pick_from_an_earlier_message_is_not_questioned(client, product, baby_carrot, gemini_chat):
+    # AC-17.4: the list was shown in the turn before; "the second one" is a choice.
+    history = [
+        {"role": "user", "content": "Có cà rốt không?"},
+        {"role": "assistant", "content": "Có Cà rốt Đà Lạt và Cà rốt baby."},
+        {"role": "user", "content": str(views.search_results([product, baby_carrot])), "hidden": True},
+    ]
+    propose(gemini_chat, baby_carrot, 1)
+
+    body = ask(client, "Thêm cái thứ hai", history=history).json()
+
+    assert body["action"] == "confirm_add_cart"
+    assert body["product"]["pid"] == baby_carrot.p_id

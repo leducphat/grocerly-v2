@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 02/11/2026 |
+| Cập nhật | 04/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -231,7 +231,9 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lúc đó. Giá đơn đổi sau khi khách đã mở trang VNPay (thêm hàng ở tab khác, áp mã
   giảm giá) thì đơn giữ nguyên *chưa thanh toán*, khách về trang thanh toán thất bại
   kèm lời nhắc liên hệ cửa hàng, và vẫn trả lại được đúng giá đơn. Khoản đã trả
-  nhân viên đối chiếu với VNPay và xử lý ngoài hệ thống (L-22, D-040).
+  nhân viên đối chiếu với VNPay và xử lý ngoài hệ thống (L-22, D-040). Mỗi lần lệch,
+  ở trang quay về hay ở lời báo IPN, máy chủ ghi một dòng cảnh báo vào log kèm mã
+  đơn và hai số tiền, để nhân viên tra được khi khách gọi tới (L-34).
 - **UC-14:** chỉ đánh giá được sản phẩm đã nhận — khách có đơn chứa sản phẩm ấy ở
   trạng thái `Shipped` hoặc `Delivered` — và mỗi khách chỉ đánh giá một lần cho
   một sản phẩm. Chưa đủ điều kiện thì biểu mẫu không hiện, và máy chủ từ chối cả
@@ -260,6 +262,8 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   wishlist. Trang của sản phẩm, danh mục hay nhà cung cấp đã xóa trả 404, không trả lỗi
   máy chủ; khách bấm yêu thích sản phẩm vừa bị xóa thì được báo sản phẩm không còn bán
   (L-28, D-041).
+- **FR-A-02:** xóa mềm một nhà cung cấp thì sản phẩm của họ ẩn theo, dù xóa từng nhà
+  cung cấp hay chọn nhiều rồi xóa hàng loạt trong Django admin (L-36, D-041).
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
   lại; đơn đã `Delivered` hoặc `Cancelled` không đổi được trạng thái. Máy chủ chỉ
   nhận đúng bốn trạng thái `Processing`, `Shipped`, `Delivered`, `Cancelled`; giá
@@ -286,6 +290,12 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lưu trong database: `processing` là Đang xử lý / Processing, `shipped` là Đang
   giao hàng / Shipping, `delivered` là Đã giao / Delivered, `cancelled` là Đã hủy /
   Cancelled (D-033).
+- **UC-13:** khách chỉ mở được chi tiết đơn của chính mình. URL gọi đơn bằng mã đơn
+  (`oid`), không bằng số thứ tự; đơn không có hoặc của khách khác thì trang trả 404
+  (L-32, D-047). Lịch sử đơn không kèm chức năng đặt địa chỉ mặc định (L-33, D-047).
+- **UC-07:** link trên trang giữ ngôn ngữ đang xem, kể cả link sản phẩm trong giỏ
+  mini dựng bằng JavaScript; khách vào thẳng trang `/en/` bấm sang sản phẩm vẫn ở
+  trang tiếng Anh (L-35).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
@@ -315,8 +325,41 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   tự sinh không thuộc ràng buộc này (L-15, D-035).
 - **UC-18:** giỏ trống → AI nhắc thêm hàng trước khi thanh toán.
 
-> **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được.
-> Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem [`PLAN.md`](PLAN.md).
+> **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được,
+> trừ UC-17 (§6.2). Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem
+> [`PLAN.md`](PLAN.md).
+
+### 6.2 Acceptance criteria của UC-17 Nhờ AI Thêm vào Giỏ
+
+GVHD yêu cầu có cơ chế kiểm soát việc AI đặt hàng: đúng sản phẩm, số lượng hợp lý,
+khách thấy rõ mình sắp trả bao nhiêu (nhận xét báo cáo Tuần 7, P-42). Các ràng buộc ở
+§6.1 vẫn giữ nguyên. Mọi tiêu chí dưới đây do máy chủ kiểm, không dựa vào lời dặn
+Gemini, nên test tự động kiểm được bằng Gemini giả lập (D-048).
+
+- **AC-17.1 Giá trong câu xác nhận.** Khi AI đề nghị thêm một sản phẩm, câu hỏi xác
+  nhận ghi số lượng, tên sản phẩm, đơn giá và thành tiền (đơn giá nhân số lượng). Giá
+  lấy từ database lúc hỏi và viết như ở các trang khác của cửa hàng (`25.000 ₫`),
+  không lấy con số AI nói ra. Giỏ vẫn tự tính lại giá lúc thêm (§6.1).
+- **AC-17.2 Số lượng lớn hơn thường lệ.** Một lần thêm từ 11 đơn vị trở lên thì câu
+  xác nhận mở đầu bằng lời hỏi lại, nói số lượng này lớn hơn thường lệ và nhờ khách
+  kiểm tra, còn nút xác nhận ghi đúng con số đó (`Đúng 30, thêm vào giỏ`). Từ 10 trở
+  xuống thì hỏi như thường. Ngưỡng này không thay giới hạn tồn kho: vượt kho vẫn bị
+  từ chối như trước.
+- **AC-17.3 Nhiều sản phẩm cùng khớp.** Trong cùng một tin nhắn của khách, AI tìm
+  sản phẩm rồi đề nghị thêm vào giỏ, mà lần tìm gần nhất ra từ hai sản phẩm trở lên
+  thêm được đúng số lượng đó, thì hệ thống không đề nghị sản phẩm AI tự chọn. Thay vào
+  đó, khung chat hiện tất cả các sản phẩm ấy (tối đa 5, theo thứ tự tìm được), mỗi sản
+  phẩm một nút ghi số lượng, tên và thành tiền. Bấm một nút là vừa chọn vừa xác nhận;
+  sau đó mọi nút của lần hỏi ấy tắt, nên chỉ một sản phẩm được thêm. Khách vẫn có thể
+  gõ chữ thay vì bấm.
+- **AC-17.4 Khách đã chọn rồi thì không hỏi lại.** Tin nhắn của khách không kèm lần
+  tìm nào (ví dụ "thêm cái thứ hai" sau khi đã xem danh sách), hoặc lần tìm chỉ ra một
+  sản phẩm thêm được, thì AI hỏi xác nhận đúng sản phẩm đó như AC-17.1.
+- **AC-17.5 Kết quả đọc được bằng máy.** Câu trả lời của `/api/v1/chat/` ghi đề nghị
+  dưới dạng dữ liệu, không chỉ bằng câu chữ: `action` là `confirm_add_cart` (kèm
+  `product`) hoặc `choose_product` (kèm `choices`), mỗi đề nghị có `pid`, `qty`,
+  `price`, `total` và cờ `large_qty`. Bộ kịch bản đánh giá AI (P-42 phần d) so các
+  trường này với đáp án.
 
 ---
 

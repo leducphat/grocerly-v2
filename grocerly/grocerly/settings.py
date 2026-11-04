@@ -295,5 +295,9 @@ LOGGING = {
     },
     'loggers': {
         'django': {'handlers': ['console'], 'level': 'INFO'},
+        # Warnings of the shop itself, such as a VNPay amount that does not match
+        # the order (L-34). It still passes them up to the root logger, which has
+        # no handler here, so each line prints once.
+        'core': {'handlers': ['console'], 'level': 'INFO'},
     },
 }
