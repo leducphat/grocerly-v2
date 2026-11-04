@@ -250,13 +250,27 @@ def test_ai_search_answer_keeps_results_for_the_next_message(client, product, ge
     assert second_message[0]["function_response"]["response"]["result"][0]["title"] == product.title
 
 
-def test_ai_checkout_request_sends_user_to_checkout(client, gemini_chat):
+def test_ai_checkout_request_sends_user_to_checkout(client, product, gemini_chat):
     # UC-18
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})
     gemini_chat.send_message.side_effect = [gemini_reply(tool="request_checkout")]
 
     response = ask(client, "Thanh toán giúp mình")
 
     assert response.json()["action"] == "confirm_checkout"
+
+
+@pytest.mark.xfail(reason="L-41: request_checkout does not look at the cart before the checkout button")
+def test_ai_checkout_with_an_empty_cart_does_not_offer_checkout(client, gemini_chat):
+    # UC-18, SRS §6.1: an empty cart makes the assistant ask for items first.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_checkout"),
+        gemini_reply("Giỏ của bạn đang trống, bạn muốn mua gì nào?"),
+    ]
+
+    response = ask(client, "Thanh toán giúp mình")
+
+    assert response.json().get("action") != "confirm_checkout"
 
 
 def test_chat_over_gemini_quota_asks_user_to_retry_later(client, gemini_chat):

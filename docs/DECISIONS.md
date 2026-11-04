@@ -2290,6 +2290,47 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Ngưỡng 10 chưa dựa trên số liệu mua hàng thật. Có số liệu thực nghiệm (P-25) thì xem lại.
 - Tỉ lệ AI chọn đúng sản phẩm và số lượng (P-42 phần d) vẫn phải đo bằng Gemini thật, chạy tay, ngoài CI.
 
+## D-049 · Trợ lý AI tìm bằng chữ chính của tên hàng; hàm tìm vẫn đòi đủ mọi chữ
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt, chưa làm
+
+**Bối cảnh.** L-42: `find_products` giữ sản phẩm mà tên có đủ mọi chữ của câu tìm. Khách hỏi "bò" hay "beef", Gemini tìm "thịt bò", nên "Đùi bò 150g" không ra. Hàm tìm không sai: câu tìm có chữ thừa.
+
+**Phương án đã cân nhắc**
+1. *Docstring của `search_products` bảo Gemini tìm bằng chữ chính của tên hàng*, không thêm chữ chung như "thịt", "rau", "trái". Cùng cách đã sửa L-31: Gemini đọc docstring làm mô tả công cụ. Ít code, nhưng việc Gemini có làm theo hay không chỉ kiểm được bằng Gemini thật.
+2. *Tìm không ra thì tìm lại bằng ít chữ hơn.* Không phụ thuộc Gemini, nhưng phải chọn bỏ chữ nào. Bỏ chữ đầu thì "cà chua" thành "chua"; tìm theo từng chữ riêng lẻ thì "cà chua" ra "Cà rốt", trái test `test_search_tool_needs_every_word_of_the_query`. Đi xa hơn nữa là tìm kiếm thông minh, ngoài phạm vi KLTN (`CLAUDE.md` §5).
+
+**Quyết định.** Phương án 1, sinh viên chọn ngày 04/11/2026.
+
+**Lý do.** Chỗ sai nằm ở câu Gemini đặt ra, nên sửa ở lời mô tả mà Gemini đọc. Hàm tìm giữ nguyên hành vi đã có test, và lần sửa L-31 cho thấy Gemini làm theo docstring.
+
+**Hệ quả.**
+- Test chỉ kiểm được docstring có câu dặn, như `test_search_tool_tells_gemini_to_search_in_vietnamese`. Tỉ lệ Gemini tìm đúng thì đo bằng bộ kịch bản của P-42 phần (d), nên thêm câu kiểu "có bán bò không".
+- Câu tìm vẫn có thể có chữ thừa nếu Gemini không làm theo. Khi đó khách nhận "không tìm thấy", không có gì sai được thêm vào giỏ.
+
+## D-050 · Thư đặt lại mật khẩu gửi qua API HTTP của dịch vụ thư, dùng django-anymail
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt, chưa làm
+
+**Bối cảnh.** L-43: `settings.py` đặt cứng `EMAIL_BACKEND` là console, nên thư đặt lại mật khẩu (CN-03) chỉ in ra log của server. Sinh viên chọn gửi thư thật thay vì bỏ chức năng khỏi cam kết. Kiểm ngày 04/11/2026: host `grocerly-v2` chạy gói free của Render, và từ 26/09/2025 Render chặn kết nối ra cổng SMTP 25, 465, 587 với mọi web service gói free. Vậy cách gửi qua SMTP, như phần comment sẵn có trong `settings.py`, không chạy được trên host.
+
+**Phương án đã cân nhắc**
+1. *SMTP qua biến môi trường* (ví dụ Gmail với mật khẩu ứng dụng). Không thêm thư viện, nhưng bị chặn trên gói free.
+2. *Nâng Render lên gói trả phí* rồi dùng SMTP. Tốn tiền hằng tháng chỉ để mở một cổng mạng.
+3. *Gửi qua API HTTPS của một dịch vụ thư* (Brevo, Resend, SendGrid...) bằng thư viện `django-anymail`. Đi qua cổng 443 nên chạy được trên gói free. Thêm một thư viện và một tài khoản dịch vụ thư.
+4. *Như phương án 3 nhưng tự viết email backend* gọi API bằng `requests`. Không thêm thư viện, nhưng thêm code phải tự giải thích và tự test, trong khi `django-anymail` đã làm đúng việc đó.
+
+**Quyết định.** Phương án 3, sinh viên chọn ngày 04/11/2026. Có API key trong biến môi trường thì dùng backend của `django-anymail`; không có thì giữ console, để máy làm việc và bộ test không gửi thư thật. Dịch vụ thư cụ thể chọn lúc làm.
+
+**Lý do.** Đây là cách duy nhất gửi được thư trên host hiện tại mà không tốn phí. `django-anymail` là một email backend của Django, nên `PasswordResetView` và template thư giữ nguyên; chỉ đổi cấu hình.
+
+**Hệ quả.**
+- Thêm `django-anymail` vào `requirements.txt`; thêm biến môi trường của dịch vụ thư và `DEFAULT_FROM_EMAIL` vào `.env.example`, `CLAUDE.md` và `AGENTS.md` §10, SDD; đặt biến trên Render.
+- Dịch vụ thư thường đòi xác minh địa chỉ hay tên miền gửi. Grocerly chưa có tên miền riêng, nên phải chọn dịch vụ cho gửi từ một địa chỉ đã xác minh.
+- Test kiểm phần chọn backend theo biến môi trường; việc thư tới được hộp thư thì thử tay trên host.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

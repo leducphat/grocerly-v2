@@ -326,3 +326,14 @@ def test_stock_update_without_csrf_token_is_rejected(staff, product):
     product.refresh_from_db()
     assert response.status_code == 403
     assert product.stock_count == 10
+
+
+@pytest.mark.xfail(reason="L-39: change_order_status uses .get(oid), an unknown oid answers 500")
+@pytest.mark.parametrize("method", ["get", "post"])
+def test_status_change_of_unknown_order_answers_404(staff_client, method):
+    # Like L-32 on the customer side: a mistyped or old link is "not found", not a crash.
+    url = reverse("useradmin:change_order_status", args=["khongcodon"])
+
+    response = getattr(staff_client, method)(url, {"status": "shipped"})
+
+    assert response.status_code == 404

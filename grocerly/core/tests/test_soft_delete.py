@@ -34,17 +34,6 @@ def row(request, product, vendor):
 
 
 @pytest.fixture
-def superuser_client(client, django_user_model, password):
-    """The test client, signed in to the Django admin. pytest-django's own admin_client
-    cannot be used: it creates the user without the `username` this model requires."""
-    superuser = django_user_model.objects.create_superuser(
-        email="quantri@example.com", username="quantri", password=password
-    )
-    client.force_login(superuser)
-    return client
-
-
-@pytest.fixture
 def vendor_product(product, vendor):
     """`product`, sold by `vendor`."""
     product.vendor = vendor
