@@ -3,13 +3,16 @@ Adding and editing products in /useradmin/ (UC-19, L-27): a product must have a
 category and a vendor, and the server decides that, not the browser.
 """
 
+import io
 import re
 from decimal import Decimal
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 from django.utils import translation
+from PIL import Image
 
 from core.models import Category, Product, ProductImage, ProductReview, Vendor
 
@@ -185,6 +188,39 @@ def test_product_left_without_category_can_be_repaired_on_the_edit_page(staff_cl
     assert opened.status_code == 200
     stocked_product.refresh_from_db()
     assert (stocked_product.category, stocked_product.vendor) == (category, vendor)
+
+
+# ---------- The product photo goes through Pillow (D-052) ----------
+# Django's ImageField opens every upload with Pillow. No other test sends a real
+# image, so these two pin the move to Pillow 13 (review of PR #21).
+
+
+def png_bytes():
+    """A real 2x2 PNG, drawn with Pillow in memory."""
+    buffer = io.BytesIO()
+    Image.new("RGB", (2, 2), "green").save(buffer, "PNG")
+    return buffer.getvalue()
+
+
+def test_add_product_with_a_real_photo_saves_it(staff_client, category, vendor):
+    photo = SimpleUploadedFile("ca-chua.png", png_bytes(), content_type="image/png")
+
+    response = staff_client.post(reverse(ADD_URL), product_form(category, vendor, image=photo))
+
+    assert response.url == reverse("useradmin:dashboard-products")
+    product = Product.objects.get(title="Cà chua bi")
+    with product.image.open("rb") as saved, Image.open(saved) as picture:
+        assert picture.size == (2, 2)
+
+
+def test_add_product_rejects_a_file_that_is_not_an_image(staff_client, category, vendor):
+    fake = SimpleUploadedFile("ca-chua.png", b"not an image", content_type="image/png")
+
+    response = staff_client.post(reverse(ADD_URL), product_form(category, vendor, image=fake))
+
+    assert response.status_code == 200  # the form again, not a redirect
+    assert "image" in response.context["form"].errors
+    assert Product.objects.count() == 0
 
 
 # ---------- Deleting extra images on the edit page (UC-19, CN-21) ----------

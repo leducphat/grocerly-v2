@@ -4,12 +4,14 @@
 # when the site does not answer with HTTP 200 and JSON {"status": "ok", ...}.
 # The endpoint is public, so no secret is needed.
 #
-# Three things about the schedule:
+# Four things about the schedule:
 # - GitHub runs a scheduled workflow only from the default branch (main), so
 #   the hourly check starts once this file is merged into main. Before that it
 #   only runs by hand (workflow_dispatch: "Run workflow" on the Actions tab).
 # - The alert is GitHub's own e-mail: when a scheduled run fails, GitHub mails
 #   the person who last changed the cron line below.
+# - GitHub turns the schedule off in a public repository that has had no
+#   activity for 60 days; it then has to be turned on again on the Actions tab.
 # - The free Render plan puts the service to sleep after about 15 minutes
 #   without traffic. One call an hour does not keep it awake round the clock,
 #   so most runs find it asleep and have to wait for it to start.
@@ -40,7 +42,8 @@ jobs:
       # each try waits up to 90 s, a failed try is repeated after 20 s, and the
       # check gives up after 10 minutes. The view (health in store_api/views.py)
       # answers {"status": "ok", "commit": "<sha>"}; jq fails on anything that
-      # is not JSON, which leaves status empty.
+      # is not JSON, which leaves status empty. Steps run with bash -e, so the
+      # `|| true` after curl and jq keeps one failed try from ending the check.
       - name: Call the health endpoint until it answers
         run: |
           echo "## Health check" >> "$GITHUB_STEP_SUMMARY"

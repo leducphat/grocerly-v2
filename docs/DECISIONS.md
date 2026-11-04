@@ -2373,7 +2373,7 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 
 **Hệ quả.**
 - Lần deploy kế tiếp host cài bản mới của năm gói. Sau deploy cần thử upload ảnh sản phẩm, và xem log `migrate` của `build.sh`: sqlparse 0.6 là bản 0.x, nâng bản phụ vẫn có thể phá vỡ.
-- Bộ test không có test nào upload ảnh thật qua `ImageField`; phép thử ảnh ở trên chạy tay, ngoài repo.
+- Lúc chọn, bộ test chưa có test nào upload ảnh thật qua `ImageField`, nên phép thử ảnh ở trên chạy tay, ngoài repo. Review của PR #21 chỉ ra chỗ hở này; cùng ngày thêm hai test ở `useradmin/tests/test_products.py`: một ảnh PNG thật lưu được, một file không phải ảnh bị form từ chối.
 - Lỗ hổng mới được công bố có thể làm CI đỏ dù code không đổi. Khi đó nâng gói, hoặc ghi lý do bỏ qua ở một quyết định mới.
 - Lần chạy pip-audit đầu ở máy làm việc treo hơn 10 phút ở bước tải gói, nên job có `timeout-minutes: 15`.
 - Virtualenv ở máy làm việc phải cài lại theo `requirements-dev.txt` mới.
