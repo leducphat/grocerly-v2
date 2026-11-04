@@ -325,8 +325,41 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   tự sinh không thuộc ràng buộc này (L-15, D-035).
 - **UC-18:** giỏ trống → AI nhắc thêm hàng trước khi thanh toán.
 
-> **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được.
-> Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem [`PLAN.md`](PLAN.md).
+> **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được,
+> trừ UC-17 (§6.2). Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem
+> [`PLAN.md`](PLAN.md).
+
+### 6.2 Acceptance criteria của UC-17 Nhờ AI Thêm vào Giỏ
+
+GVHD yêu cầu có cơ chế kiểm soát việc AI đặt hàng: đúng sản phẩm, số lượng hợp lý,
+khách thấy rõ mình sắp trả bao nhiêu (nhận xét báo cáo Tuần 7, P-42). Các ràng buộc ở
+§6.1 vẫn giữ nguyên. Mọi tiêu chí dưới đây do máy chủ kiểm, không dựa vào lời dặn
+Gemini, nên test tự động kiểm được bằng Gemini giả lập (D-048).
+
+- **AC-17.1 Giá trong câu xác nhận.** Khi AI đề nghị thêm một sản phẩm, câu hỏi xác
+  nhận ghi số lượng, tên sản phẩm, đơn giá và thành tiền (đơn giá nhân số lượng). Giá
+  lấy từ database lúc hỏi và viết như ở các trang khác của cửa hàng (`25.000 ₫`),
+  không lấy con số AI nói ra. Giỏ vẫn tự tính lại giá lúc thêm (§6.1).
+- **AC-17.2 Số lượng lớn hơn thường lệ.** Một lần thêm từ 11 đơn vị trở lên thì câu
+  xác nhận mở đầu bằng lời hỏi lại, nói số lượng này lớn hơn thường lệ và nhờ khách
+  kiểm tra, còn nút xác nhận ghi đúng con số đó (`Đúng 30, thêm vào giỏ`). Từ 10 trở
+  xuống thì hỏi như thường. Ngưỡng này không thay giới hạn tồn kho: vượt kho vẫn bị
+  từ chối như trước.
+- **AC-17.3 Nhiều sản phẩm cùng khớp.** Trong cùng một tin nhắn của khách, AI tìm
+  sản phẩm rồi đề nghị thêm vào giỏ, mà lần tìm gần nhất ra từ hai sản phẩm trở lên
+  thêm được đúng số lượng đó, thì hệ thống không đề nghị sản phẩm AI tự chọn. Thay vào
+  đó, khung chat hiện tất cả các sản phẩm ấy (tối đa 5, theo thứ tự tìm được), mỗi sản
+  phẩm một nút ghi số lượng, tên và thành tiền. Bấm một nút là vừa chọn vừa xác nhận;
+  sau đó mọi nút của lần hỏi ấy tắt, nên chỉ một sản phẩm được thêm. Khách vẫn có thể
+  gõ chữ thay vì bấm.
+- **AC-17.4 Khách đã chọn rồi thì không hỏi lại.** Tin nhắn của khách không kèm lần
+  tìm nào (ví dụ "thêm cái thứ hai" sau khi đã xem danh sách), hoặc lần tìm chỉ ra một
+  sản phẩm thêm được, thì AI hỏi xác nhận đúng sản phẩm đó như AC-17.1.
+- **AC-17.5 Kết quả đọc được bằng máy.** Câu trả lời của `/api/v1/chat/` ghi đề nghị
+  dưới dạng dữ liệu, không chỉ bằng câu chữ: `action` là `confirm_add_cart` (kèm
+  `product`) hoặc `choose_product` (kèm `choices`), mỗi đề nghị có `pid`, `qty`,
+  `price`, `total` và cờ `large_qty`. Bộ kịch bản đánh giá AI (P-42 phần d) so các
+  trường này với đáp án.
 
 ---
 

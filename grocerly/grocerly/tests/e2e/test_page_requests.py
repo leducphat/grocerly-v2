@@ -204,11 +204,15 @@ def test_add_button_adds_again_once_the_first_click_is_answered(sign_in, custome
 
 def chat_proposes(page, product, qty):
     """Answer the chat window the way the server does when Gemini proposes to add `qty`."""
-    answer = {
+    return chat_answers(page, {
         "reply": f"Thêm {qty}x {product.title}?",
         "action": "confirm_add_cart",
         "product": {"id": str(product.id), "pid": product.p_id, "title": product.title, "qty": qty},
-    }
+    })
+
+
+def chat_answers(page, answer):
+    """Send a chat message, have the server answer `answer`, return the buttons shown."""
     page.route(
         "**/api/v1/chat/",
         lambda route: route.fulfill(status=200, content_type="application/json", body=json.dumps(answer)),
@@ -271,6 +275,34 @@ def test_chat_confirm_button_works_again_after_a_failed_request(sign_in, custome
     page.wait_for_timeout(500)
 
     assert button.is_enabled()
+
+
+def test_chat_choice_adds_only_the_product_clicked(sign_in, customer, product, live_server):
+    # SRS AC-17.3, D-048: several products match, one button each. Clicking one
+    # picks and confirms it, and turns every button of that reply off.
+    other = Product.objects.create(
+        title="Cà rốt baby", category=product.category, price=product.price,
+        stock_count=10, product_status="published",
+    )
+    page = sign_in(customer).new_page()
+    page.goto(live_server.url + reverse("core:index"))
+    posts = posts_to(page, "core:add-to-cart")
+    choices = [
+        {"id": str(p.id), "pid": p.p_id, "title": p.title, "qty": 2, "label": f"Thêm 2x {p.title}"}
+        for p in (product, other)
+    ]
+    buttons = chat_answers(page, {"reply": "Bạn chọn một:", "action": "choose_product", "choices": choices})
+
+    with page.expect_response(lambda r: "add-to-cart" in r.url):
+        buttons.nth(1).click()
+    # The buttons hold "2x Cà rốt baby" too, so wait for the cart's own answer.
+    page.wait_for_function("() => document.querySelector('#chat-messages').innerText.includes('đã có 2x Cà rốt baby')")
+
+    assert buttons.count() == 2
+    assert buttons.nth(0).is_disabled() and buttons.nth(1).is_disabled()
+    assert len(posts) == 1
+    assert cart_quantity(page, live_server, other) == 2
+    assert cart_quantity(page, live_server, product) is None
 
 
 def test_double_click_on_create_product_makes_one_product(sign_in, staff, product, live_server, monkeypatch):

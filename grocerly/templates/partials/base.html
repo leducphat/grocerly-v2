@@ -1107,6 +1107,7 @@
             msgDiv.appendChild(button);
             msgs.appendChild(msgDiv);
             msgs.scrollTop = msgs.scrollHeight;
+            return button;
         }
 
         function sendChatMessage() {
@@ -1152,9 +1153,16 @@
                     }
                     sessionStorage.setItem('grocerlyChatHistory', JSON.stringify(chatHistory));
 
-                    if (data.action === "confirm_add_cart") {
-                        const p = data.product;
-                        appendButton(CHAT_TEXT.addButton, (event) => aiConfirmCartAdd(p.id, p.title, p.qty, event.currentTarget));
+                    if (data.action === "confirm_add_cart" || data.action === "choose_product") {
+                        // One proposal, or several matching products to pick
+                        // from (D-048). The server writes each button's text;
+                        // clicking one picks and confirms it, and turns all of
+                        // this reply's buttons off so only one is added.
+                        const proposals = data.action === "choose_product" ? data.choices : [data.product];
+                        const buttons = [];
+                        proposals.forEach(p => {
+                            buttons.push(appendButton(p.label || CHAT_TEXT.addButton, () => aiConfirmCartAdd(p.id, p.title, p.qty, buttons)));
+                        });
                     } else if (data.action === "confirm_checkout") {
                         appendButton(CHAT_TEXT.checkoutButton, () => {
                             window.location.href = '{% url 'core:cart' %}';
@@ -1190,9 +1198,10 @@
         // `title` is only used to write the reply; the cart line is built from
         // the database on the server side. One proposal is confirmed once: the
         // cart adds to its line, so a second click would add the quantity again,
-        // and the button stays off unless the request failed (L-18).
-        function aiConfirmCartAdd(id, title, qty, button) {
-            button.disabled = true;
+        // and the buttons stay off unless the request failed (L-18). `buttons`
+        // are all the buttons of one reply, one per product offered (D-048).
+        function aiConfirmCartAdd(id, title, qty, buttons) {
+            buttons.forEach(b => { b.disabled = true; });
             appendMessage('user', CHAT_TEXT.yesAdd);
             chatHistory.push({role: 'user', content: CHAT_TEXT.yesAdd});
 
@@ -1226,7 +1235,7 @@
                     sessionStorage.setItem('grocerlyChatHistory', JSON.stringify(chatHistory));
                 },
                 error: function() {
-                    button.disabled = false;
+                    buttons.forEach(b => { b.disabled = false; });
                     appendMessage('bot', CHAT_TEXT.networkError);
                 }
             });
