@@ -1,0 +1,60 @@
+# Scheduled health check of the live site (P-16).
+#
+# Once an hour GitHub calls /api/v1/health/ on the KLTN host. The run turns red
+# when the site does not answer with HTTP 200 and JSON {"status": "ok", ...}.
+# The endpoint is public, so no secret is needed.
+#
+# Three things about the schedule:
+# - GitHub runs a scheduled workflow only from the default branch (main), so
+#   the hourly check starts once this file is merged into main. Before that it
+#   only runs by hand (workflow_dispatch: "Run workflow" on the Actions tab).
+# - The alert is GitHub's own e-mail: when a scheduled run fails, GitHub mails
+#   the person who last changed the cron line below.
+# - The free Render plan puts the service to sleep after about 15 minutes
+#   without traffic. One call an hour does not keep it awake round the clock,
+#   so most runs find it asleep and have to wait for it to start.
+
+name: Health check
+
+on:
+  schedule:
+    # Minute 17 of every hour, UTC. Off the full hour, when GitHub's scheduler
+    # is busiest and runs start late.
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+# The check only calls the site; it never writes to the repository.
+permissions:
+  contents: read
+
+jobs:
+  health:
+    name: Live site answers /api/v1/health/
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      HEALTH_URL: https://grocerly-v2.onrender.com/api/v1/health/
+    steps:
+      # A sleeping instance needs about a minute for its first answer, and
+      # Render may answer with its own error page while the server starts. So
+      # each try waits up to 90 s, a failed try is repeated after 20 s, and the
+      # check gives up after 10 minutes. The view (health in store_api/views.py)
+      # answers {"status": "ok", "commit": "<sha>"}; jq fails on anything that
+      # is not JSON, which leaves status empty.
+      - name: Call the health endpoint until it answers
+        run: |
+          echo "## Health check" >> "$GITHUB_STEP_SUMMARY"
+          deadline=$((SECONDS + 10 * 60))
+          while [ "$SECONDS" -lt "$deadline" ]; do
+            rm -f answer.json
+            code=$(curl -sS --max-time 90 -o answer.json -w '%{http_code}' "$HEALTH_URL" || true)
+            status=$(jq -r '.status' answer.json 2>/dev/null || true)
+            echo "After ${SECONDS} s: HTTP ${code}, status ${status:-none}"
+            if [ "$code" = "200" ] && [ "$status" = "ok" ]; then
+              echo "${HEALTH_URL}: ok after ${SECONDS} s, commit $(jq -r '.commit' answer.json)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 20
+          done
+          echo "${HEALTH_URL}: no healthy answer within 10 minutes" | tee -a "$GITHUB_STEP_SUMMARY"
+          exit 1

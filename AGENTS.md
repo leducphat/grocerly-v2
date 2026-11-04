@@ -156,6 +156,7 @@ hướng phát triển mở rộng" ở cuối báo cáo. Đừng tự ý bắt 
 grocerly-ecom/
 ├── AGENTS.md, CLAUDE.md      # hướng dẫn agent (hai bản song sinh)
 ├── .github/workflows/ci.yml  # CI trên GitHub Actions (D-019)
+├── .github/workflows/health.yml  # gọi health của host mỗi giờ (D-053)
 ├── docs/                     # SRS, SDD, PLAN, DECISIONS, COMMITMENT, ISSUES, AI_USAGE_LOG
 │   └── diagrams/, weekly_report/   # bản nháp sơ đồ, báo cáo tuần: gitignore (D-046, D-021)
 └── grocerly/                 # thư mục gốc Django — manage.py nằm ở ĐÂY
@@ -222,9 +223,11 @@ Rubric yêu cầu kiểm thử tự động kèm báo cáo độ phủ. Bộ tes
 - CI (`.github/workflows/ci.yml`, D-019) chạy `manage.py check`,
   `makemigrations --check` và `pytest --cov` trên mỗi lần push lên `develop`/`main`
   và mỗi PR vào `main`. Đổi model thì commit migration kèm theo, nếu không CI đỏ.
-- Cùng lần chạy đó còn hai job: `lint` chạy `ruff check` theo `grocerly/ruff.toml`
+- Cùng lần chạy đó còn ba job: `lint` chạy `ruff check` theo `grocerly/ruff.toml`
   (D-029) và jscpd đo trùng lặp theo `grocerly/.jscpd.json` (D-031); `secret-scan`
-  chạy gitleaks trên toàn bộ lịch sử Git (D-030). Chạy `ruff check .` và `jscpd .`
+  chạy gitleaks trên toàn bộ lịch sử Git (D-030); `dependency-audit` chạy
+  pip-audit trên `requirements.txt` (D-052), thư viện có lỗ hổng đã biết thì CI đỏ
+  và không deploy được. Chạy `ruff check .` và `jscpd .`
   trước khi đẩy lên; còn một lỗi lint, hoặc trùng lặp quá 3%, là CI đỏ.
 
 ---

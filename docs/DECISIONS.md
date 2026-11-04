@@ -2353,6 +2353,53 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Thời hạn tính cho từng lời gọi. Một tin nhắn gọi Gemini tối đa bốn lần (tin nhắn và ba câu trả lời công cụ), nên nếu lần nào cũng chậm mà vẫn dưới 20 giây thì tổng vẫn có thể quá 30 giây. Chưa thấy ca này trên host; gặp thì chuyển sang phương án 4.
 - Test với Gemini giả lập chỉ kiểm được mọi lời gọi mang đúng tùy chọn, vì mock nhận mọi tham số. Thêm một test dùng `ChatSession` thật của thư viện, chỉ thay client bên dưới, để kiểm tùy chọn tới được lời gọi xuống Gemini. Việc `retry=None` tắt gọi lại là hành vi của `google-api-core` (bỏ qua decorator `None`), đọc trong mã của bản thư viện đang ghim; nâng `google-generativeai` thì đọc lại.
 
+## D-052 · Quét thư viện có lỗ hổng bằng pip-audit trong CI; nâng năm gói, Pillow lên 13
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Chặng quét bảo mật của CI mới có nửa quét secret (D-030); nửa còn lại là quét thư viện có lỗ hổng (P-10). Lần chạy đầu `pip-audit -r requirements.txt` ngày 04/11/2026 báo lỗ hổng ở năm gói ghim trực tiếp: Django 5.2.4, pillow 12.0.0, sqlparse 0.5.3, python-dotenv 1.0.1, djangorestframework 3.15.2. Không gói kéo theo nào bị báo.
+
+**Phương án đã cân nhắc**
+1. *pip-audit* của PyPA, đọc cơ sở dữ liệu lỗ hổng công khai của PyPI, chạy thẳng trên `requirements.txt`, không cần tài khoản.
+2. *Dependabot của GitHub.* Không thêm job, GitHub tự mở PR nâng gói. Nhưng nó không nằm trong lần chạy CI và không làm CI đỏ, nên không thành một chặng của pipeline.
+3. *Dịch vụ ngoài như Snyk.* Thêm tài khoản và token cho một việc pip-audit đã làm được.
+
+Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pillow lên 13.0.0; (b) giữ 12.3.0, bỏ qua từng mã bằng `--ignore-vuln` kèm lý do; (c) để job không chặn deploy.
+
+**Quyết định.** Phương án 1. Job `dependency-audit` riêng trong `ci.yml`, kiểm `grocerly/requirements.txt` (thứ host cài qua `build.sh`) và nằm trong `needs` của job deploy, nên thư viện có lỗ hổng đã biết thì không deploy được. Phiên bản pip-audit ghim trong `requirements-dev.txt` như ruff và jscpd. Mỗi gói bị báo nâng lên bản thấp nhất sửa được trong cùng major: Django 5.2.17, sqlparse 0.6.0, python-dotenv 1.2.2, djangorestframework 3.18.2. Pillow còn 39 lỗ hổng chỉ sửa ở 13.0.0; sinh viên chọn (a) ngày 04/11/2026. Gỡ `stripe` cùng lượt (P-11 bước 8), không code nào dùng.
+
+**Lý do.** pip-audit chạy được ngay trên file requirements, và kết quả nằm trong chính lần chạy CI như các chặng khác. Chặn deploy vì mục đích của chặng là không đưa thư viện có lỗ hổng đã biết lên host. Pillow 13.0.0 đã được thử trước khi chọn: bộ test thường và e2e đều xanh, và chạy tay thì `forms.ImageField` của Django nhận ảnh JPEG, PNG, WEBP thật, từ chối file không phải ảnh. Pillow 13 cần Python 3.11 trở lên, CI và host chạy 3.12. Hướng (c) để job đỏ ở mọi lần push, kéo tỉ lệ CI xanh xuống.
+
+**Hệ quả.**
+- Lần deploy kế tiếp host cài bản mới của năm gói. Sau deploy cần thử upload ảnh sản phẩm, và xem log `migrate` của `build.sh`: sqlparse 0.6 là bản 0.x, nâng bản phụ vẫn có thể phá vỡ.
+- Bộ test không có test nào upload ảnh thật qua `ImageField`; phép thử ảnh ở trên chạy tay, ngoài repo.
+- Lỗ hổng mới được công bố có thể làm CI đỏ dù code không đổi. Khi đó nâng gói, hoặc ghi lý do bỏ qua ở một quyết định mới.
+- Lần chạy pip-audit đầu ở máy làm việc treo hơn 10 phút ở bước tải gói, nên job có `timeout-minutes: 15`.
+- Virtualenv ở máy làm việc phải cài lại theo `requirements-dev.txt` mới.
+
+## D-053 · Kiểm health của host mỗi giờ bằng GitHub Actions, lỗi thì GitHub gửi thư
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** P-16 cần cảnh báo khi host lỗi. Đã có `/api/v1/health/` (D-036) và log lỗi ra Render (D-038), nhưng host ngừng thì không ai biết cho tới khi tự vào trang. Host chạy gói free của Render: không có request khoảng 15 phút thì ngủ, lần gọi đầu sau đó mất khoảng một phút.
+
+**Phương án đã cân nhắc**
+1. *Workflow GitHub Actions theo lịch* gọi health; lỗi thì run đỏ và GitHub gửi thư. Không thêm dịch vụ, không cần secret, lịch sử chạy nằm cạnh CI.
+2. *Dịch vụ giám sát ngoài* (UptimeRobot và các dịch vụ tương tự). Báo nhanh hơn, có trang trạng thái, nhưng thêm một tài khoản, và gọi mỗi 5 phút thì host không bao giờ ngủ.
+3. *Gọi dày hơn, mỗi 5 hay 15 phút*, cũng bằng GitHub Actions. Báo sớm hơn, nhưng giữ host thức suốt ngày đêm, và mỗi lần chạy là một dòng trong lịch sử Actions.
+
+**Quyết định.** Phương án 1, cách làm do sinh viên chọn khi giao P-16. File riêng `.github/workflows/health.yml`, chạy phút 17 mỗi giờ (giờ UTC) và chạy tay được. Mỗi lần thử chờ tối đa 90 giây, hỏng thì thử lại sau 20 giây, quá 10 phút thì run đỏ. Đạt khi HTTP 200 và JSON có `status` là `ok`. Nhịp mỗi giờ là đề xuất lúc làm, đổi được bằng một dòng cron.
+
+**Lý do.** Không thêm dịch vụ hay tài khoản, và lịch sử chạy tích lũy thành minh chứng như CI. Mỗi giờ một lần không giữ host thức suốt ngày. Phút 17 vì đầu giờ là lúc bộ lập lịch của GitHub bận nhất, run hay bị trễ. Chờ tới 10 phút vì host có thể đang ngủ: chạy thử khối lệnh với host thật ngày 04/11/2026, lần gọi đầu mất 39 giây mới có câu trả lời.
+
+**Hệ quả.**
+- GitHub chỉ chạy lịch từ nhánh mặc định, nên việc kiểm bắt đầu sau khi file vào `main`. Thư báo lỗi gửi cho người sửa dòng cron gần nhất. Repo public không có hoạt động 60 ngày thì GitHub tự tắt lịch.
+- View health không đọc database, nên Neon hỏng thì vẫn trả 200. Lần kiểm này chỉ cho biết server trên Render còn chạy và chạy commit nào; lỗi 500 vẫn xem ở log Render.
+- Host hỏng thì chậm nhất khoảng một giờ sau mới có thư.
+- Mỗi lần chạy đánh thức host, nên người vào trang ngay sau đó không phải chờ khởi động.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
