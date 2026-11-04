@@ -18,9 +18,11 @@ Hiện trạng của nó trong [`COMMITMENT.md`](COMMITMENT.md) §2 đổi thàn
 Sửa xong thì ghi cách sửa vào cột cuối, gỡ `xfail` trong cùng commit, và trả cột
 Hiện trạng về `Có`.
 
-**Hiện trạng 04/11/2026:** 36 mục, đã xử lý 35. Bốn mục chốt bằng cách sửa đặc tả
+**Hiện trạng 04/11/2026:** 38 mục, đã xử lý 35. Bốn mục chốt bằng cách sửa đặc tả
 (L-1, L-2, L-4, L-33), 31 mục bằng cách sửa code, trong đó có cả sáu lỗi nặng. Còn mở
-một: L-24 (đọc rồi ghi không khóa, chưa xảy ra vì host chạy một worker).
+ba: L-24 (đọc rồi ghi không khóa, chưa xảy ra vì host chạy một worker), L-37 (Gemini
+quá tải thì API chat bị gunicorn cắt ngang) và L-38 (khách sửa số lượng sau câu xác nhận
+thì AI mất mã sản phẩm); hai mục sau ghi ngày 04/11/2026 khi thử P-41, P-42 trên host.
 
 ---
 
@@ -68,6 +70,8 @@ bảo vệ.
 | **L-34** | *(đặc tả UC-09 ghi: số tiền lệch thì đơn giữ chưa thanh toán, khách được nhắc liên hệ cửa hàng - `PLAN.md` §6 dòng 19)* | Khi `vnpay_return` thấy số tiền VNPay báo khác giá đơn, khách nhận câu nhắc liên hệ cửa hàng còn đơn giữ chưa thanh toán, nhưng Grocerly không ghi lại gì: không log, không dòng nào trong database. Khách gọi tới thì nhân viên không tìm được dấu vết khoản đã trả, chỉ còn cách tra trong trang quản lý merchant của VNPay. `vnpay_ipn` trả `04` cho VNPay cũng không ghi gì. Có từ bản sửa L-22 của KLTN (`752e426`, D-040) | ✅ **Đã sửa 04/11/2026.** Theo đề xuất ban đầu: hàm `_log_wrong_vnpay_amount` trong `core/views.py` ghi `logger.warning` gồm tên view, mã đơn, số tiền VNPay báo và giá đơn, gọi ở `vnpay_return` và ở nhánh `04` của `vnpay_ipn`. `LOGGING` thêm logger `core` in ra console, tức trang Logs của Render như D-038. Lượt review PR #13 (31/10/2026) xếp mức MEDIUM. Gỡ `xfail` của `test_wrong_amount_is_written_to_the_log_for_the_store` trong `core/tests/test_payment.py`, thêm `test_wrong_amount_on_ipn_is_written_to_the_log_for_the_store` cho nhánh IPN |
 | **L-35** | *(UC-07 - mặc định khách đang xem tiếng Anh thì ở lại trang tiếng Anh)* | Giỏ mini dựng link tới sản phẩm bằng `/products/<pid>/`, thiếu tiền tố ngôn ngữ, trong `renderMiniCartItems` của `templates/partials/base.html`. `LocaleMiddleware` chuyển link đó sang ngôn ngữ ghi trong cookie, không có cookie thì sang `vi`. Khách vào thẳng một link `/en/`, chưa bấm nút đổi ngôn ngữ lần nào, bấm vào sản phẩm trong giỏ mini là sang trang tiếng Việt. Có từ TLCN (`af5ef41`, 02/03/2026) | ✅ **Đã sửa 04/11/2026.** Theo đề xuất ban đầu: `renderMiniCartItems` dựng link bằng `{% url 'core:product-detail' 'PID' %}` rồi thay `PID` bằng mã sản phẩm, nên link mang tiền tố ngôn ngữ của trang đang xem. Ghi chú từ lúc sửa L-20 (26/10/2026). Gỡ `xfail` của test trình duyệt `test_mini_cart_link_keeps_the_english_site` trong `grocerly/tests/e2e/test_page_requests.py` |
 | **L-36** | *(FR-A-02, D-041 - mặc định xóa mềm một nhà cung cấp thì ẩn luôn hàng của họ, như nút Delete của từng nhà cung cấp)* (CN-29) | Trang danh sách nhà cung cấp trong Django admin có hai lệnh xóa hàng loạt: "Soft delete selected items" của `SoftDeleteAdminMixin` và "Delete selected" của Django. Cả hai chạy một câu `UPDATE` trên các nhà cung cấp đã chọn, nên `Vendor.soft_delete()` với bước ẩn sản phẩm không chạy. Nhà cung cấp biến khỏi cửa hàng, trang của họ trả 404, còn sản phẩm của họ vẫn bán và thẻ sản phẩm vẫn dẫn tới trang 404 đó. Nút Delete trên trang của từng nhà cung cấp thì đúng (D-041). Có từ TLCN (`aaefe74`, 09/04/2026) | ✅ **Đã sửa 04/11/2026.** Theo đề xuất ban đầu: trong `SoftDeleteAdminMixin`, lệnh "Soft delete selected items" gọi `soft_delete()` từng dòng như lệnh khôi phục, và `delete_queryset` (chỗ lệnh "Delete selected" của Django đi tới) cũng vậy. Áp cho cả bốn model xóa mềm; với `Vendor` thì sản phẩm của nhà cung cấp ẩn theo. Ghi chú từ lúc sửa L-28 (31/10/2026). Gỡ `xfail` của `test_django_admin_bulk_delete_of_a_vendor_hides_their_products` trong `core/tests/test_soft_delete.py`, cả hai lệnh |
+| **L-37** | *(đặc tả không nói tới - mặc định Gemini không trả lời thì khách nhận câu báo lỗi trong khung chat, và các trang khác vẫn chạy)* (UC-15, NFR-02) | `_chat_reply` gọi `chat.send_message` không đặt thời hạn. Gemini báo quá tải (503 "This model is currently experiencing high demand") thì thư viện `google-api-core` tự gọi lại nhiều lần, lâu hơn 30 giây; gunicorn, chạy với thời hạn mặc định 30 giây, giết worker trước khi tới nhánh `except` đã có câu "Mình đang gặp trục trặc kết nối". Khung chat nhận 500 rỗng sau khoảng 31 giây. Host chạy một worker, nên trong lúc đó mọi trang của cửa hàng đều chờ. Log Render 04/11/2026 13:51: `WORKER TIMEOUT`, rồi traceback `ServiceUnavailable: 503`. Có từ TLCN (`6ddf919`, 17/04/2026) | ⏳ **Mở.** Đề xuất: truyền `request_options` có `timeout` (và giới hạn số lần gọi lại) cho `send_message`, ngắn hơn thời hạn của gunicorn, để lỗi rơi vào nhánh `except` sẵn có. Cần test `xfail` mô tả hành vi đúng trước khi sửa. CN-16 vẫn `Có`: khi Gemini trả lời thì chức năng chạy đúng đặc tả |
+| **L-38** | *(đặc tả không nói tới - mặc định khách sửa số lượng ngay sau câu hỏi xác nhận thì AI hỏi lại với số mới, cùng sản phẩm)* (UC-17) | Khi Gemini đi tới bước thêm vào giỏ, `_chat_reply` trả câu xác nhận (`confirm_add_cart`) mà không gửi kèm kết quả tìm kiếm (`hidden_context`), trong khi nhánh trả lời bằng chữ và nhánh nút chọn đều gửi. Lịch sử chat chỉ còn tên sản phẩm trong câu hỏi, không còn mã. Câu sau của khách, ví dụ "À nhầm, chỉ lấy 10 quả thôi", buộc Gemini đoán mã; đoán sai thì server báo không tìm thấy, và Gemini trả lời "không tìm thấy sản phẩm với mã đó... (Đang tìm kiếm...)" mà không tìm gì. Lúc có lúc không: cùng ngày ở `/en/`, câu "Sorry, make it 10" chạy đúng vì Gemini tự tìm lại. Có từ TLCN (`b1dbe05`, 19/04/2026) | ⏳ **Mở.** Đề xuất: câu xác nhận cũng gửi kèm kết quả tìm kiếm của tin nhắn đó, như nhánh nút chọn (D-048). Cần test `xfail` mô tả hành vi đúng trước khi sửa. CN-18 vẫn `Có`: server vẫn kiểm mã, kho và số lượng, khách vẫn phải bấm xác nhận, nên không có gì sai được thêm vào giỏ |
 
 ---
 
@@ -167,3 +171,14 @@ Cả năm sửa xong ngày 04/11/2026 (P-41). L-33 chốt bằng cách bỏ ch�
 làm thêm giao diện (D-047). Lúc sửa L-35, comment JavaScript ngay trên dòng mới có nhắc tới thẻ
 url của Django; Django vẫn đọc thẻ đó dù nó nằm trong comment JavaScript, và mọi trang trả 500
 cho tới khi viết lại câu comment. Bộ test bắt được ngay.
+
+L-37 phát hiện ngày 04/11/2026, khi thử P-41 và P-42 trên host bằng Chrome thật. Phần P-41 chạy
+xong thì tới lượt chat, nhưng cả câu đầu ở `/vi/` lẫn ở `/en/` đều nhận 500. Lúc đầu tưởng script
+đọc sai câu trả lời; log Render cho thấy Gemini báo quá tải, còn Grocerly thì chưa kịp trả lời
+gì. Code đã có câu báo lỗi cho trường hợp này từ TLCN, nhưng chưa lần nào chạy tới được, vì
+thư viện tự gọi lại lâu hơn thời hạn của gunicorn. Bộ test không thấy được, vì Gemini giả lập
+ném lỗi ngay lập tức.
+
+L-38 lộ ra cũng trong lượt đó, khi Gemini đã ổn trở lại. Kịch bản thử viết câu thứ hai "chỉ lấy
+10 quả thôi" để có ca 10 đơn vị mà đỡ tốn một lượt tìm; hóa ra chính câu sửa số lượng đó mới là
+chỗ hỏng. Test với Gemini giả lập không bắt được, vì mock trả đúng mã sản phẩm ở mọi lượt.
