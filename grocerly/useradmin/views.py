@@ -165,8 +165,10 @@ def orders(request):
     return render(request, "useradmin/orders.html", context)
 
 @admin_required
-def order_detail(request, id):
-    order = CartOrder.objects.get(id=id)
+def order_detail(request, oid):
+    # Gọi đơn bằng oid như trang của khách (L-32, D-047), không bằng khóa chính số.
+    # Mã đơn không có thì trả 404, không để .get() ném lỗi 500 (L-44).
+    order = get_object_or_404(CartOrder, oid=oid)
     order_items = CartOrderItem.objects.filter(order=order)
     context = {
         'order':order,
@@ -185,7 +187,8 @@ NEXT_STATUS = {
 
 @admin_required
 def change_order_status(request, oid):
-    order = CartOrder.objects.get(oid=oid)
+    # Mã đơn không có (link cũ, gõ sai) thì trả 404, không để .get() ném lỗi 500 (L-39).
+    order = get_object_or_404(CartOrder, oid=oid)
     if request.method == "POST":
         status = request.POST.get("status")
 
@@ -193,7 +196,7 @@ def change_order_status(request, oid):
         # không phải trạng thái, bấm Save mà chưa chọn gì thì không đổi gì cả.
         if status not in dict(STATUS_CHOICES):
             messages.error(request, "Please choose an order status")
-            return redirect("useradmin:order_detail", order.id)
+            return redirect("useradmin:order_detail", order.oid)
 
         # Đơn chỉ đi tới, mỗi lần một bước, hoặc bị hủy khi chưa giao xong (SRS
         # §6.1, UC-20; D-032, D-033). Lùi, nhảy cóc hay gửi lại trạng thái đang có
@@ -201,7 +204,7 @@ def change_order_status(request, oid):
         # tập rỗng, tức là không đổi được nữa.
         if status not in NEXT_STATUS.get(order.product_status, set()):
             messages.error(request, f"An order that is {order.product_status} cannot change to {status}")
-            return redirect("useradmin:order_detail", order.id)
+            return redirect("useradmin:order_detail", order.oid)
 
         # Hàng rời kho thì trừ tồn kho. Qua được điều kiện trên nghĩa là đơn đang ở
         # 'processing'; đơn đã 'shipped' thì không quay lại nhánh này được nữa.
@@ -227,7 +230,7 @@ def change_order_status(request, oid):
         order.product_status = status
         order.save()
     
-    return redirect("useradmin:order_detail", order.id)
+    return redirect("useradmin:order_detail", order.oid)
 
 @admin_required
 def shop_page(request):

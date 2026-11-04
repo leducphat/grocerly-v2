@@ -246,7 +246,7 @@ def test_order_list_shows_the_status_label_not_the_stored_value(
 
 def test_order_detail_offers_cancelled_in_the_status_list(staff_client, order_with_item):
     response = staff_client.get(
-        reverse("useradmin:order_detail", args=[order_with_item.id])
+        reverse("useradmin:order_detail", args=[order_with_item.oid])
     )
 
     page = response.content.decode()
@@ -328,12 +328,46 @@ def test_stock_update_without_csrf_token_is_rejected(staff, product):
     assert product.stock_count == 10
 
 
-@pytest.mark.xfail(reason="L-39: change_order_status uses .get(oid), an unknown oid answers 500")
 @pytest.mark.parametrize("method", ["get", "post"])
 def test_status_change_of_unknown_order_answers_404(staff_client, method):
-    # Like L-32 on the customer side: a mistyped or old link is "not found", not a crash.
+    # L-39. Like L-32 on the customer side: a mistyped or old link is "not found", not a crash.
     url = reverse("useradmin:change_order_status", args=["khongcodon"])
 
     response = getattr(staff_client, method)(url, {"status": "shipped"})
 
     assert response.status_code == 404
+
+
+# ---------- the staff order page names the order by oid (L-44) ----------
+# CLAUDE.md §7: URLs use the ShortUUID, not the primary key. The customer's order
+# page moved to oid with L-32 (D-047); the staff page still took the number.
+
+
+def test_order_detail_is_opened_by_oid(staff_client, order_with_item):
+    response = staff_client.get(reverse("useradmin:order_detail", args=[order_with_item.oid]))
+
+    assert response.status_code == 200
+    assert response.context["order"] == order_with_item
+
+
+@pytest.mark.parametrize("unknown", ["khongcodon", "999999"])
+def test_order_detail_of_unknown_order_answers_404(staff_client, unknown):
+    # A word made .get(id=...) raise ValueError, a number DoesNotExist; both were 500.
+    response = staff_client.get(reverse("useradmin:order_detail", args=[unknown]))
+
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize("page_name", ["useradmin:orders", "useradmin:dashboard"])
+def test_order_lists_link_to_each_order_by_oid(staff_client, order_with_item, page_name):
+    page = staff_client.get(reverse(page_name)).content.decode()
+
+    assert reverse("useradmin:order_detail", args=[order_with_item.oid]) in page
+
+
+def test_rejected_status_change_goes_back_to_the_order_by_oid(staff_client, order_with_item):
+    url = reverse("useradmin:change_order_status", args=[order_with_item.oid])
+
+    response = staff_client.post(url, {"status": ""})  # nothing chosen
+
+    assert response.url == reverse("useradmin:order_detail", args=[order_with_item.oid])
