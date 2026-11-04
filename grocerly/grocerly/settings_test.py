@@ -43,6 +43,14 @@ VNPAY_HASH_SECRET = "test-vnpay-hash-secret"
 VNPAY_PAYMENT_URL = "https://vnpay.test/paymentv2/vpcpay.html"
 VNPAY_API_URL = ""
 
+# Mail never reaches Brevo (L-43): the key copied from .env is dropped, and
+# pytest-django collects sent mail in an in-memory outbox. Tests of the Brevo
+# backend set a fake key and fake Brevo's answer themselves (userauths/tests).
+BREVO_API_KEY = ""
+ANYMAIL = {"BREVO_API_KEY": "", "REQUESTS_TIMEOUT": 10}
+EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+DEFAULT_FROM_EMAIL = "Grocerly <shop@example.com>"
+
 # store_api/views.py reads GEMINI_API_KEY when it is first imported. Blanking it
 # here means a test can never send a message to the real Gemini API; tests that
 # need the assistant replace the model with a fake (store_api/tests).

@@ -262,7 +262,9 @@ django-admin compilemessages            # biên dịch .po -> .mo
 
 `DJANGO_SECRET_KEY`, `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS`, `DATABASE_URL` (hoặc
 nhóm `POSTGRES_*`), `USE_CLOUDINARY`, `CLOUDINARY_URL`, `GEMINI_API_KEY`,
-`VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `VNPAY_PAYMENT_URL`, `VNPAY_API_URL`.
+`VNPAY_TMN_CODE`, `VNPAY_HASH_SECRET`, `VNPAY_PAYMENT_URL`, `VNPAY_API_URL`,
+`BREVO_API_KEY`, `DEFAULT_FROM_EMAIL` (thư đặt lại mật khẩu; không có key thì thư
+chỉ in ra console - D-050).
 
 Không có `DATABASE_URL` lẫn `POSTGRES_DB` thì Django tự lùi về SQLite cục bộ.
 

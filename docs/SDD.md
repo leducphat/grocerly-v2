@@ -108,6 +108,7 @@ phẩm · Quản lý Đơn hàng
 | Giao diện quản trị | django-jazzmin |
 | Trí tuệ nhân tạo | Google Gemini API (function calling) |
 | Thanh toán | VNPay (Sandbox) + COD |
+| Gửi thư | Brevo qua API HTTPS, bằng thư viện django-anymail, vì gói free của Render chặn cổng SMTP. Có `BREVO_API_KEY` thì gửi thật, không có thì in thư ra console. Hiện chỉ có thư đặt lại mật khẩu; Brevo không trả lời trong 10 giây hay từ chối thì lỗi ghi vào log, khách vẫn thấy trang đã gửi (D-050) |
 | Triển khai | Render (web service chạy `gunicorn`), tự build bằng `build.sh` (D-034); luồng deploy ở §3.2 |
 | CI/CD | GitHub Actions, sáu chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, quét thư viện có lỗ hổng trong `requirements.txt` bằng pip-audit (D-052), deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036). Riêng workflow `health.yml` gọi `/api/v1/health/` mỗi giờ, host không trả lời đúng thì run đỏ và GitHub gửi thư (D-053) |
 | Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; logger `core` in cảnh báo của cửa hàng, hiện có một loại là số tiền VNPay báo khác giá đơn (L-34); xem và tìm ở trang Logs của Render (D-038) |

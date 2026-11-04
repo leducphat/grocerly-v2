@@ -17,6 +17,8 @@ from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 from django.utils.translation import gettext_lazy as _
 
+from .mail import pick_email_backend
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -65,6 +67,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'taggit',
     'rest_framework',
+    'anymail',
 
     # Custom apps
     'core',
@@ -265,17 +268,19 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-# EMAIL SETTINGS
-# For development/testing: Print emails to the console instead of sending real ones
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# For Production (Uncomment and configure .env variables to use Gmail SMTP)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') # Your Gmail address
-# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') # App Password
+# EMAIL SETTINGS (L-43, D-050)
+# With BREVO_API_KEY set, mail goes out through Brevo's HTTPS API; without it,
+# mail is printed to the console. See grocerly/mail.py.
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+EMAIL_BACKEND = pick_email_backend(BREVO_API_KEY)
+ANYMAIL = {
+    'BREVO_API_KEY': BREVO_API_KEY,
+    # Give up on Brevo after 10 seconds, well before gunicorn stops the request
+    # at 30 seconds (the same reason as the Gemini time limit, D-051).
+    'REQUESTS_TIMEOUT': 10,
+}
+# The sender verified in Brevo, for example "Grocerly <address>".
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
 
 
 # Logging (D-038)
