@@ -54,9 +54,9 @@
   `CartOrder.oid` là ShortUUID, dùng trong URL thay cho khóa chính số.
   `Product.sku` cũng là ShortUUID nhưng chỉ in ra làm mã sản phẩm trên trang chi
   tiết, không URL nào dùng. Chi tiết đơn của khách chuyển sang `oid` ngày
-  04/11/2026 (L-32, D-047). Còn hai URL dùng khóa chính số: chi tiết đơn ở trang
-  nhân viên, và `ajax-add-review/<int:p_id>/` (tên tham số là `p_id` nhưng nhận
-  khóa chính).
+  04/11/2026 (L-32, D-047), chi tiết đơn ở trang nhân viên cũng vậy cùng ngày
+  (L-44). Còn một URL dùng khóa chính số: `ajax-add-review/<int:p_id>/` (tên tham
+  số là `p_id` nhưng nhận khóa chính).
 - **Tiền tệ:** `DecimalField(max_digits=20, decimal_places=2)`, đơn vị VND.
 - **Xóa mềm:** `core_category`, `core_vendor`, `core_product`, `core_coupon` mang
   cặp cờ `is_deleted` / `deleted_at`. `delete()` của bốn model này chỉ bật cờ, ở cả

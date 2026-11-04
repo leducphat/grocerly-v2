@@ -11,7 +11,7 @@ from django.test import Client
 from django.urls import reverse
 from django.utils import translation
 
-from core.models import Category, Product, ProductReview, Vendor
+from core.models import Category, Product, ProductImage, ProductReview, Vendor
 
 pytestmark = pytest.mark.django_db
 
@@ -185,6 +185,69 @@ def test_product_left_without_category_can_be_repaired_on_the_edit_page(staff_cl
     assert opened.status_code == 200
     stocked_product.refresh_from_db()
     assert (stocked_product.category, stocked_product.vendor) == (category, vendor)
+
+
+# ---------- Deleting extra images on the edit page (UC-19, CN-21) ----------
+# The edit page has a hidden "delete_images" checkbox under each extra image; the
+# x button ticks it. edit_product deletes the ticked ids after the form is saved.
+
+
+def images_of(product):
+    return set(ProductImage.objects.filter(product=product).values_list("id", flat=True))
+
+
+def test_edit_page_offers_a_delete_box_for_each_extra_image(staff_client, stocked_product):
+    first = ProductImage.objects.create(product=stocked_product)
+    second = ProductImage.objects.create(product=stocked_product)
+
+    page = staff_client.get(reverse(EDIT_URL, args=[stocked_product.p_id])).content.decode()
+
+    for image in (first, second):
+        assert f'name="delete_images" value="{image.id}"' in page
+
+
+def test_edit_product_deletes_the_chosen_image_and_keeps_the_others(staff_client, stocked_product, category, vendor):
+    chosen = ProductImage.objects.create(product=stocked_product)
+    kept = ProductImage.objects.create(product=stocked_product)
+    url = reverse(EDIT_URL, args=[stocked_product.p_id])
+
+    response = staff_client.post(url, product_form(category, vendor, delete_images=[chosen.id]))
+
+    assert response.url == reverse("useradmin:dashboard-products")
+    assert images_of(stocked_product) == {kept.id}
+
+
+def test_edit_product_does_not_delete_an_image_of_another_product(staff_client, stocked_product, category, vendor):
+    # A tampered form may send any id; only this product's own images may go.
+    other = Product.objects.create(title="Ổi ruột đỏ", category=category, vendor=vendor, price=Decimal("20000.00"))
+    other_image = ProductImage.objects.create(product=other)
+    url = reverse(EDIT_URL, args=[stocked_product.p_id])
+
+    staff_client.post(url, product_form(category, vendor, delete_images=[other_image.id]))
+
+    assert images_of(other) == {other_image.id}
+
+
+def test_edit_product_ignores_image_ids_that_are_not_numbers(staff_client, stocked_product, category, vendor):
+    # An empty or non-numeric value used to raise ValueError in the id__in filter.
+    kept = ProductImage.objects.create(product=stocked_product)
+    url = reverse(EDIT_URL, args=[stocked_product.p_id])
+
+    response = staff_client.post(url, product_form(category, vendor, delete_images=["", "abc", "1 OR 1=1"]))
+
+    assert response.url == reverse("useradmin:dashboard-products")
+    assert images_of(stocked_product) == {kept.id}
+
+
+def test_rejected_edit_form_deletes_no_image(staff_client, stocked_product, category, vendor):
+    # Nothing of a rejected form is saved, the ticked images included.
+    image = ProductImage.objects.create(product=stocked_product)
+    url = reverse(EDIT_URL, args=[stocked_product.p_id])
+
+    response = staff_client.post(url, product_form(category, vendor, category="", delete_images=[image.id]))
+
+    assert response.status_code == 200
+    assert images_of(stocked_product) == {image.id}
 
 
 # ---------- Deleting a product (L-28, L-29, D-041) ----------

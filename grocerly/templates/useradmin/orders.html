@@ -67,7 +67,7 @@
                                     <td><span class="badge alert-danger">Chưa thanh toán</span></td>
                                 {% endif %}
                                 <td>
-                                    <a href="{% url 'useradmin:order_detail' c.id %}" class="btn btn-md rounded font-sm">Xem chi tiết</a>
+                                    <a href="{% url 'useradmin:order_detail' c.oid %}" class="btn btn-md rounded font-sm">Xem chi tiết</a>
                                 </td>
                             </tr>
                         {% endfor %}

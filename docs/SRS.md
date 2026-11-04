@@ -293,12 +293,16 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-13:** khách chỉ mở được chi tiết đơn của chính mình. URL gọi đơn bằng mã đơn
   (`oid`), không bằng số thứ tự; đơn không có hoặc của khách khác thì trang trả 404
   (L-32, D-047). Lịch sử đơn không kèm chức năng đặt địa chỉ mặc định (L-33, D-047).
+- **UC-20:** trang nhân viên cũng gọi đơn bằng `oid`, ở cả trang chi tiết đơn lẫn
+  trang đổi trạng thái; mã đơn không có thì trang trả 404 (L-39, L-44, D-047).
 - **UC-07:** link trên trang giữ ngôn ngữ đang xem, kể cả link sản phẩm trong giỏ
   mini dựng bằng JavaScript; khách vào thẳng trang `/en/` bấm sang sản phẩm vẫn ở
   trang tiếng Anh (L-35).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
+  Trong Django admin, cả đơn lẫn dòng đơn đều không có nút xóa hay lệnh xóa hàng
+  loạt, và yêu cầu xóa gửi thẳng bị từ chối (L-40).
 - **UC-26:** doanh thu, doanh thu theo tháng và số sản phẩm đã bán chỉ tính đơn đã
   thanh toán và không bị hủy. Đơn VNPay đã trả tiền rồi bị hủy vẫn nằm trong danh
   sách đơn nhưng không còn được cộng vào doanh thu (D-033).

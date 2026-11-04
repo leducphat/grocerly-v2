@@ -73,12 +73,20 @@ class CartOrderItemInline(admin.TabularInline):
     extra = 0
     fields = ['invoice_no', 'item', 'quantity', 'price', 'total', 'product_status']
     readonly_fields = ['invoice_no', 'item', 'quantity', 'price', 'total', 'product_status']
+    can_delete = False  # no "Delete" box on the lines of an order (L-40, UC-25)
 
 class CartOrderAdmin(admin.ModelAdmin):
     list_display = ['customer_type', 'user', 'email', 'payment_method', 'price', 'paid_status', 'order_date', 'product_status', 'oid_link']
     list_filter = ['paid_status', 'payment_method', 'product_status', 'order_date']
     search_fields = ['oid', 'email', 'full_name', 'phone', 'user__email', 'user__username']
     inlines = [CartOrderItemInline]
+
+    def has_delete_permission(self, request, obj=None):
+        # Orders are kept for the accounts, so the admin may not delete one for good
+        # (UC-25, SRS §6.1). False hides the Delete button and the "Delete selected"
+        # action, and Django answers 403 to a delete request sent anyway (L-40).
+        # A cancelled order keeps its row with the status 'cancelled' (D-033).
+        return False
 
     def customer_type(self, obj):
         return "Registered" if obj.user else "Guest"
@@ -101,6 +109,11 @@ class CartOrderItemsAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('order', 'order__user')
+
+    def has_delete_permission(self, request, obj=None):
+        # An order line is part of the order: deleting it would change an order that
+        # must stay as it was paid (L-40, UC-25), same rule as CartOrderAdmin.
+        return False
 
     def order_oid(self, obj):
         return obj.order.oid
