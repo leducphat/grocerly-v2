@@ -59,7 +59,7 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 |---|---|---|---|
 | CN-01 | Đăng ký tài khoản bằng email | UC-01 | Có |
 | CN-02 | Đăng nhập, đăng xuất | UC-02, UC-10 | Có |
-| CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Lệch (L-43) |
+| CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Có |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
@@ -107,9 +107,10 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 04/11/2026 có 28 `Có` và 2 `Lệch`: CN-03 (L-43), CN-23 (L-45). Lỗi còn
-mở khác là L-24, không làm chức năng nào lệch đặc tả vì chưa xảy ra khi host chạy một
-worker. CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43).
+**Tổng: 30 chức năng**, ngày 04/11/2026 có 29 `Có` và 1 `Lệch`: CN-23 (L-45). Lỗi còn
+mở khác là L-24, L-46, L-47, không làm chức năng nào lệch đặc tả: L-24 chưa xảy ra khi host
+chạy một worker, L-46 và L-47 là cách hiển thị. CN-19 và CN-28 về `Có` sau khi sửa L-41 và
+L-40 (P-43); CN-03 về `Có` sau khi sửa L-43 (P-44).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
