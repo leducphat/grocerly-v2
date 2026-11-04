@@ -3,10 +3,10 @@
 # Runs on every push to develop/main and on every pull request into main.
 # The test jobs never read grocerly/.env or reach a real service: Django runs
 # with grocerly.settings_test (in-memory SQLite, fake VNPay secret, no Gemini
-# key). Lint and static analysis (ruff D-029, jscpd D-031) and the secret scan
-# (D-030) run as their own jobs. The deploy job (P-11, D-034, D-036) is the only
-# one that reaches a real service, and it runs only on a push to main, after
-# every other job has passed.
+# key). Lint and static analysis (ruff D-029, jscpd D-031), the secret scan
+# (D-030) and the dependency audit (pip-audit, D-052) run as their own jobs.
+# The deploy job (P-11, D-034, D-036) is the only one that reaches a real
+# service, and it runs only on a push to main, after every other job has passed.
 
 name: CI
 
@@ -127,6 +127,50 @@ jobs:
           path: gitleaks-report.json
           if-no-files-found: ignore
 
+  dependency-audit:
+    name: Dependency audit (pip-audit)
+    runs-on: ubuntu-latest
+    # A stuck download can hang pip with no error; stop the job instead.
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: grocerly
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # The version is read from requirements-dev.txt, like ruff and jscpd.
+      - name: Install pip-audit
+        run: pip install "$(grep '^pip-audit==' requirements-dev.txt)"
+
+      # D-052: requirements.txt is what the host installs (build.sh). pip-audit
+      # resolves it in a throwaway virtualenv, so the packages it pulls in are
+      # checked too, and looks each one up in the PyPI advisory database. The
+      # step fails when any of them has a known vulnerability. With no finding
+      # pip-audit writes no file, only "No known vulnerabilities found".
+      - name: Audit requirements.txt
+        id: audit
+        run: |
+          pip-audit -r requirements.txt --progress-spinner off \
+            --format markdown --output pip-audit.md
+
+      # When pip-audit found something, its table goes to the log and to the
+      # run summary.
+      - name: Write audit result to the run summary
+        if: always()
+        run: |
+          echo "## Dependency audit" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.audit.outcome }}" = "success" ]; then
+            echo "pip-audit: no known vulnerabilities in requirements.txt" >> "$GITHUB_STEP_SUMMARY"
+          elif [ -s pip-audit.md ]; then
+            tee -a "$GITHUB_STEP_SUMMARY" < pip-audit.md
+          else
+            echo "pip-audit did not finish, see the job log" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
   test:
     name: Build, check and test
     runs-on: ubuntu-latest
@@ -188,7 +232,7 @@ jobs:
     # environment on GitHub only accepts main and holds the deploy hook, so no
     # other job can read it, and every run of this job is listed as a deployment.
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [twin-files, lint, secret-scan, test]
+    needs: [twin-files, lint, secret-scan, dependency-audit, test]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:

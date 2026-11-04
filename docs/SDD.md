@@ -109,7 +109,7 @@ phẩm · Quản lý Đơn hàng
 | Trí tuệ nhân tạo | Google Gemini API (function calling) |
 | Thanh toán | VNPay (Sandbox) + COD |
 | Triển khai | Render (web service chạy `gunicorn`), tự build bằng `build.sh` (D-034); luồng deploy ở §3.2 |
-| CI/CD | GitHub Actions, năm chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036) |
+| CI/CD | GitHub Actions, sáu chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, quét thư viện có lỗ hổng trong `requirements.txt` bằng pip-audit (D-052), deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036). Riêng workflow `health.yml` gọi `/api/v1/health/` mỗi giờ, host không trả lời đúng thì run đỏ và GitHub gửi thư (D-053) |
 | Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; logger `core` in cảnh báo của cửa hàng, hiện có một loại là số tiền VNPay báo khác giá đơn (L-34); xem và tìm ở trang Logs của Render (D-038) |
 | CSDL đám mây | Neon (Serverless Postgres) |
 | Lưu trữ media | Cloudinary (CDN) |
@@ -133,8 +133,9 @@ Một tin nhắn đi qua các công cụ này thế nào mô tả ở §4.2.
 ### 3.2 Triển khai
 
 Mã nguồn đi từ máy sinh viên lên `develop`, vào `main` qua PR (D-016). Mỗi lần
-push hay mở PR, GitHub Actions chạy bốn job kiểm tra; job `deploy` chỉ chạy khi
-`main` có commit mới và bốn job kia xanh. Deploy hook chỉ mang mã commit: Render
+push hay mở PR, GitHub Actions chạy năm job kiểm tra; job `deploy` chỉ chạy khi
+`main` có commit mới và năm job kia xanh, kể cả job quét thư viện có lỗ hổng
+(D-052). Deploy hook chỉ mang mã commit: Render
 tự lấy commit đó từ GitHub, chạy `build.sh` rồi mới chuyển sang server mới, nên job
 `deploy` hỏi `/api/v1/health/` mỗi 20 giây, tối đa 15 phút, tới khi thấy đúng commit
 (D-036). Khách đi qua VNPay bằng trình duyệt rồi quay về `vnpay_return`, còn IPN thì
