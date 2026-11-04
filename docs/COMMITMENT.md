@@ -93,7 +93,7 @@ doanh số thật.*
 | CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
 | CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Có |
 | CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | Có |
-| CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Có |
+| CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Lệch (L-45) |
 
 ### 2.4 Quản trị viên — Django admin
 
@@ -107,7 +107,7 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 04/11/2026 có 29 `Có` và 1 `Lệch`: CN-03 (L-43). Lỗi còn
+**Tổng: 30 chức năng**, ngày 04/11/2026 có 28 `Có` và 2 `Lệch`: CN-03 (L-43), CN-23 (L-45). Lỗi còn
 mở khác là L-24, không làm chức năng nào lệch đặc tả vì chưa xảy ra khi host chạy một
 worker. CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
