@@ -275,8 +275,9 @@ BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
 EMAIL_BACKEND = pick_email_backend(BREVO_API_KEY)
 ANYMAIL = {
     'BREVO_API_KEY': BREVO_API_KEY,
-    # Give up on Brevo after 10 seconds, well before gunicorn stops the request
-    # at 30 seconds (the same reason as the Gemini time limit, D-051).
+    # Wait at most 10 seconds to connect to Brevo and 10 more for its answer,
+    # so a slow Brevo cannot hold the request until gunicorn stops it at 30
+    # seconds (the same reason as the Gemini time limit, D-051).
     'REQUESTS_TIMEOUT': 10,
 }
 # The sender verified in Brevo, for example "Grocerly <address>".
