@@ -2312,7 +2312,7 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 ## D-050 · Thư đặt lại mật khẩu gửi qua API HTTP của dịch vụ thư, dùng django-anymail
 
 - **Ngày:** 04/11/2026
-- **Trạng thái:** Đã chốt, chưa làm
+- **Trạng thái:** Đã chốt; làm ở local 04/11/2026, chờ thử trên host
 
 **Bối cảnh.** L-43: `settings.py` đặt cứng `EMAIL_BACKEND` là console, nên thư đặt lại mật khẩu (CN-03) chỉ in ra log của server. Sinh viên chọn gửi thư thật thay vì bỏ chức năng khỏi cam kết. Kiểm ngày 04/11/2026: host `grocerly-v2` chạy gói free của Render, và từ 26/09/2025 Render chặn kết nối ra cổng SMTP 25, 465, 587 với mọi web service gói free. Vậy cách gửi qua SMTP, như phần comment sẵn có trong `settings.py`, không chạy được trên host.
 
@@ -2330,6 +2330,14 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Thêm `django-anymail` vào `requirements.txt`; thêm biến môi trường của dịch vụ thư và `DEFAULT_FROM_EMAIL` vào `.env.example`, `CLAUDE.md` và `AGENTS.md` §10, SDD; đặt biến trên Render.
 - Dịch vụ thư thường đòi xác minh địa chỉ hay tên miền gửi. Grocerly chưa có tên miền riêng, nên phải chọn dịch vụ cho gửi từ một địa chỉ đã xác minh.
 - Test kiểm phần chọn backend theo biến môi trường; việc thư tới được hộp thư thì thử tay trên host.
+
+**Cài đặt (04/11/2026).** Dịch vụ là Brevo, gói free 300 thư/ngày. Resend, Mailgun và MailerSend cũng có gói free nhưng chưa xác minh tên miền thì chỉ gửi được tới địa chỉ của chính chủ tài khoản hay vài địa chỉ khai trước; SendGrid không còn gói free. Brevo gửi được tới khách thật từ một địa chỉ người gửi đã xác minh.
+
+- Địa chỉ gửi là thư trường của sinh viên. Brevo cảnh báo DKIM để mặc định và tên miền không có DMARC, vì sinh viên không quản DNS của `hcmute.edu.vn`. Địa chỉ Gmail còn kém hơn: Brevo ghi "Freemail domain is not recommended" và tên miền gmail.com không bao giờ xác thực được. Thư có thể vào spam; thử trên host phải xem thư tới hộp chính hay hộp spam. Hết cảnh báo chỉ có cách dùng một tên miền tự quản DNS, chưa làm. Gửi thử từ local cùng ngày: thư tới Gmail vào hộp thư đến, Brevo tự đổi địa chỉ người gửi sang tên miền `brevosend.com` của họ và để địa chỉ trả lời là thư trường; đủ dùng cho KLTN.
+- API key chỉ có quyền gửi thư giao dịch (Restricted, "Transactional email"), hết hạn sau một năm, và tự hết hạn nếu 90 ngày không gửi thư nào. Demo lại sau thời gian dài mà thư không đi thì kiểm key trước.
+- Không bật chặn IP lạ của Brevo: phải khai cả IP gửi ra của Render (dải dùng chung) lẫn IP máy làm việc, khai thiếu là thư không đi mà khách không biết. Key chỉ nằm trong `.env` (gitignore) và biến môi trường của Render, gitleaks quét lịch sử Git mỗi lần CI chạy; lộ key thì xóa và tạo key mới.
+- Lời gọi Brevo có hạn (`ANYMAIL["REQUESTS_TIMEOUT"] = 10`), cùng lý do với D-051: `requests` tính 10 giây cho bước kết nối và 10 giây cho bước chờ trả lời, tệ nhất khoảng 20 giây, vẫn dưới mốc 30 giây của gunicorn. Review PR #22 chỉ ra câu cũ ghi gọn là "10 giây" chưa đúng. Brevo quá hạn hay từ chối thì `PasswordResetForm` của Django ghi lỗi vào log và khách vẫn thấy trang đã gửi.
+- Phần chọn backend nằm trong `grocerly/mail.py` thay vì viết thẳng trong `settings.py`, để test gọi được hàm đó: `settings.py` chép `.env` vào biến môi trường, nên test không đổi được key bằng biến môi trường.
 
 ## D-051 · Mỗi lời gọi Gemini có thời hạn 20 giây và không tự gọi lại
 

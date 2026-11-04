@@ -128,7 +128,7 @@ KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN
 
 | Mã | Yêu cầu |
 |---|---|
-| FR-C-01 | Đăng nhập, đăng xuất, đổi mật khẩu, quản lý hồ sơ cá nhân (Avatar, Bio) |
+| FR-C-01 | Đăng nhập, đăng xuất, đổi mật khẩu, quên mật khẩu (link đặt lại gửi tới email đã đăng ký, dùng được một lần; email chưa đăng ký thì trang trả lời giống hệt), quản lý hồ sơ cá nhân (Avatar, Bio) |
 | FR-C-02 | Thêm sản phẩm yêu thích; thêm vào giỏ hàng, cập nhật số lượng, xóa khỏi giỏ |
 | FR-C-03 | Nhờ Trợ lý ảo AI thêm hàng vào giỏ tự động và hướng dẫn thanh toán |
 | FR-C-04 | Đặt hàng, áp dụng mã khuyến mãi còn hiệu lực; thanh toán trực tuyến (VNPay) hoặc COD |
