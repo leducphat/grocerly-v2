@@ -176,12 +176,11 @@ def test_django_admin_restore_action_brings_back_the_products_of_a_vendor(superu
     assert Product.objects.filter(pk=vendor_product.pk).exists()
 
 
-@pytest.mark.xfail(reason="L-36: the bulk soft-delete action of the admin skips Vendor.soft_delete, products stay on sale")
 @pytest.mark.parametrize("action", ["soft_delete_selected", "delete_selected"])
 def test_django_admin_bulk_delete_of_a_vendor_hides_their_products(superuser_client, vendor_product, vendor, action):
-    # Both actions of the vendor list run a single UPDATE on the vendors, so the
-    # cascade in Vendor.soft_delete never runs, unlike the Delete button of one vendor.
-    # The products stay on sale while their vendor page answers 404.
+    # L-36. Both actions of the vendor list used to run a single UPDATE on the vendors,
+    # so the cascade in Vendor.soft_delete never ran and the products stayed on sale
+    # while their vendor page answered 404. Now each vendor goes through soft_delete().
     superuser_client.post(
         reverse("admin:core_vendor_changelist"),
         {"action": action, "_selected_action": [vendor.pk], "post": "yes"},

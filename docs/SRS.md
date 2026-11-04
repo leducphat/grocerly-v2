@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 02/11/2026 |
+| Cập nhật | 04/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -231,7 +231,9 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lúc đó. Giá đơn đổi sau khi khách đã mở trang VNPay (thêm hàng ở tab khác, áp mã
   giảm giá) thì đơn giữ nguyên *chưa thanh toán*, khách về trang thanh toán thất bại
   kèm lời nhắc liên hệ cửa hàng, và vẫn trả lại được đúng giá đơn. Khoản đã trả
-  nhân viên đối chiếu với VNPay và xử lý ngoài hệ thống (L-22, D-040).
+  nhân viên đối chiếu với VNPay và xử lý ngoài hệ thống (L-22, D-040). Mỗi lần lệch,
+  ở trang quay về hay ở lời báo IPN, máy chủ ghi một dòng cảnh báo vào log kèm mã
+  đơn và hai số tiền, để nhân viên tra được khi khách gọi tới (L-34).
 - **UC-14:** chỉ đánh giá được sản phẩm đã nhận — khách có đơn chứa sản phẩm ấy ở
   trạng thái `Shipped` hoặc `Delivered` — và mỗi khách chỉ đánh giá một lần cho
   một sản phẩm. Chưa đủ điều kiện thì biểu mẫu không hiện, và máy chủ từ chối cả
@@ -260,6 +262,8 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   wishlist. Trang của sản phẩm, danh mục hay nhà cung cấp đã xóa trả 404, không trả lỗi
   máy chủ; khách bấm yêu thích sản phẩm vừa bị xóa thì được báo sản phẩm không còn bán
   (L-28, D-041).
+- **FR-A-02:** xóa mềm một nhà cung cấp thì sản phẩm của họ ẩn theo, dù xóa từng nhà
+  cung cấp hay chọn nhiều rồi xóa hàng loạt trong Django admin (L-36, D-041).
 - **UC-20:** **không có thao tác xóa đơn hàng** — lịch sử giao dịch phải được giữ
   lại; đơn đã `Delivered` hoặc `Cancelled` không đổi được trạng thái. Máy chủ chỉ
   nhận đúng bốn trạng thái `Processing`, `Shipped`, `Delivered`, `Cancelled`; giá
@@ -286,6 +290,12 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   lưu trong database: `processing` là Đang xử lý / Processing, `shipped` là Đang
   giao hàng / Shipping, `delivered` là Đã giao / Delivered, `cancelled` là Đã hủy /
   Cancelled (D-033).
+- **UC-13:** khách chỉ mở được chi tiết đơn của chính mình. URL gọi đơn bằng mã đơn
+  (`oid`), không bằng số thứ tự; đơn không có hoặc của khách khác thì trang trả 404
+  (L-32, D-047). Lịch sử đơn không kèm chức năng đặt địa chỉ mặc định (L-33, D-047).
+- **UC-07:** link trên trang giữ ngôn ngữ đang xem, kể cả link sản phẩm trong giỏ
+  mini dựng bằng JavaScript; khách vào thẳng trang `/en/` bấm sang sản phẩm vẫn ở
+  trang tiếng Anh (L-35).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.

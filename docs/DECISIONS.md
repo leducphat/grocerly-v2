@@ -2240,6 +2240,26 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Sơ đồ không có lịch sử Git. Mỗi lần đổi luồng trong code, sơ đồ trong báo cáo phải sửa tay theo.
 - Kiểm sơ đồ khớp code (TC2.1) dựa trên báo cáo và SDD, không dựa trên repo.
 
+## D-047 · Chi tiết đơn mở bằng `oid`; bỏ "đặt địa chỉ mặc định" khỏi CN-14
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Hai lỗi của P-41 có hơn một cách sửa. L-32: `order_detail` lấy đơn bằng `.get()` theo khóa chính số, đơn của khách khác hay số không có thì trang trả 500, và URL `/dashboard/order/<int:id>/` trái quy ước ShortUUID (`CLAUDE.md` §7). L-33: `make_address_default` đổi địa chỉ mặc định bằng GET, cùng họ với L-19, nhưng trang tài khoản không có nút nào gọi nó và không chỗ nào trong code đọc địa chỉ mặc định, kể cả trang thanh toán. CN-14 vẫn cam kết chức năng này.
+
+**Phương án đã cân nhắc**
+1. *L-32: chỉ đổi sang `get_object_or_404`, giữ id số* - hết 500, ít thay đổi nhất, nhưng số đơn kế tiếp vẫn đoán được và URL vẫn khác các trang thanh toán.
+2. *L-33: làm giao diện* - thêm danh sách địa chỉ và nút đặt mặc định ở trang tài khoản, chuyển view sang POST có CSRF. Là thêm chức năng, trái D-008, và địa chỉ mặc định vẫn chưa được dùng ở đâu, nên phải làm thêm cả phần trang thanh toán đọc nó.
+
+**Quyết định.** L-32: URL đổi thành `/dashboard/order/<oid>/`, view dùng `get_object_or_404(CartOrder, user=request.user, oid=oid)`. L-33: bỏ "đặt địa chỉ mặc định" khỏi CN-14, gỡ route `make-default-address`, view `make_address_default` và đoạn JavaScript chờ nút `.make-default-address` trong `core/dashboard.html`. Sinh viên chọn cả hai ngày 04/11/2026.
+
+**Lý do.** `oid` là cách các trang thanh toán và VNPay đã gọi đơn, nên một đơn chỉ còn một kiểu định danh trên URL. Với L-33, khách chưa bao giờ làm được việc này qua giao diện, nên gỡ đi không bớt của ai thứ gì; sửa cam kết cho đúng sản phẩm rẻ hơn và dễ bảo vệ hơn làm một chức năng không có chỗ dùng.
+
+**Hệ quả.**
+- Link cũ dạng `/dashboard/order/12/` giờ trả 404. Chỉ trang tài khoản dựng link này, và nó đã đổi theo.
+- Cột `Address.status` vẫn còn trong model, không migration nào đổi. Nếu sau này trang thanh toán cần địa chỉ mặc định, đó là chức năng mới, thuộc "hướng phát triển mở rộng".
+- Test L-33 gọi thẳng `/vi/make-default-address/` và chờ 404, vì `reverse()` không còn biết tên route.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

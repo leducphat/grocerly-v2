@@ -790,7 +790,10 @@
                 productIds.forEach(function(productId) {
                     const item = cartData[productId];
                     const title = escapeHtml(item.title);
-                    const productUrl = `/products/${escapeHtml(item.pid)}/`;
+                    // The url tag carries the language prefix of the page (/vi/ or /en/).
+                    // A bare /products/... link was sent to Vietnamese when the guest
+                    // had no language cookie yet (L-35).
+                    const productUrl = '{% url "core:product-detail" "PID" %}'.replace('PID', escapeHtml(item.pid));
                     html += `
                         <li>
                             <div class="shopping-cart-img">

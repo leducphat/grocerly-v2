@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Tách từ [`SRS.md`](SRS.md) Mục 7–9 ngày 11/09/2026 (P-07, D-011); nội dung gốc chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 02/11/2026 |
+| Cập nhật | 04/11/2026 |
 
 > **Phạm vi của tài liệu này.** SDD trả lời câu hỏi *hệ thống được xây như thế
 > nào*: mô hình dữ liệu, giao diện, công nghệ và thiết kế các thành phần. Còn *hệ
@@ -53,17 +53,19 @@
 - **Định danh công khai:** `Category.c_id`, `Vendor.v_id`, `Product.p_id`,
   `CartOrder.oid` là ShortUUID, dùng trong URL thay cho khóa chính số.
   `Product.sku` cũng là ShortUUID nhưng chỉ in ra làm mã sản phẩm trên trang chi
-  tiết, không URL nào dùng. Còn ba URL dùng khóa chính số: chi tiết đơn của khách
-  (L-32), chi tiết đơn ở trang nhân viên, và `ajax-add-review/<int:p_id>/` (tên
-  tham số là `p_id` nhưng nhận khóa chính).
+  tiết, không URL nào dùng. Chi tiết đơn của khách chuyển sang `oid` ngày
+  04/11/2026 (L-32, D-047). Còn hai URL dùng khóa chính số: chi tiết đơn ở trang
+  nhân viên, và `ajax-add-review/<int:p_id>/` (tên tham số là `p_id` nhưng nhận
+  khóa chính).
 - **Tiền tệ:** `DecimalField(max_digits=20, decimal_places=2)`, đơn vị VND.
 - **Xóa mềm:** `core_category`, `core_vendor`, `core_product`, `core_coupon` mang
   cặp cờ `is_deleted` / `deleted_at`. `delete()` của bốn model này chỉ bật cờ, ở cả
   một dòng lẫn QuerySet; xóa hẳn phải gọi `hard_delete()` và không màn hình nào gọi
   nó (D-041). Khóa ngoại vẫn đọc được dòng đã xóa, nên chỗ nào đi từ khóa ngoại tới
-  sản phẩm phải tự lọc: wishlist đi qua `wishlist_of()`. Xóa từng nhà cung cấp
-  một thì sản phẩm của họ bị xóa mềm theo; lệnh xóa hàng loạt trong Django admin
-  chưa làm vậy (L-36).
+  sản phẩm phải tự lọc: wishlist đi qua `wishlist_of()`. Xóa nhà cung cấp thì sản
+  phẩm của họ bị xóa mềm theo, kể cả hai lệnh xóa hàng loạt trong Django admin:
+  `SoftDeleteAdminMixin` gọi `soft_delete()` từng dòng thay cho một câu `UPDATE`
+  (L-36).
 - **Trạng thái sản phẩm:** `draft | disabled | in_review | rejected | published`.
 
 ### 1.2 Trạng thái đơn hàng
@@ -108,7 +110,7 @@ phẩm · Quản lý Đơn hàng
 | Thanh toán | VNPay (Sandbox) + COD |
 | Triển khai | Render (web service chạy `gunicorn`), tự build bằng `build.sh` (D-034); luồng deploy ở §3.2 |
 | CI/CD | GitHub Actions, năm chặng: build (cài thư viện, `manage.py check`, kiểm migration), lint và phân tích tĩnh, test kèm độ phủ, quét secret, deploy. Chặng deploy chỉ chạy khi `main` có commit mới: gọi deploy hook của Render rồi chờ tới khi `/api/v1/health/` trả đúng commit vừa test (D-019, D-034, D-036) |
-| Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; xem và tìm ở trang Logs của Render (D-038) |
+| Log ứng dụng | Logger `django` in ra stderr cả khi `DEBUG` tắt: lỗi 500 kèm traceback, 404 và 403 một dòng; logger `core` in cảnh báo của cửa hàng, hiện có một loại là số tiền VNPay báo khác giá đơn (L-34); xem và tìm ở trang Logs của Render (D-038) |
 | CSDL đám mây | Neon (Serverless Postgres) |
 | Lưu trữ media | Cloudinary (CDN) |
 

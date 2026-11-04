@@ -21,11 +21,18 @@ class SoftDeleteAdminMixin:
         return self.model.all_objects.get_queryset()
 
     def soft_delete_selected(self, request, queryset):
-        count = queryset.filter(is_deleted=False).update(
-            is_deleted=True,
-            deleted_at=__import__('django.utils.timezone', fromlist=['now']).now()
-        )
-        self.message_user(request, f"{count} item(s) soft-deleted.")
+        # One at a time, so that Vendor.soft_delete() also hides the products of the
+        # vendor; update() would skip it and leave them on sale (L-36).
+        rows = queryset.filter(is_deleted=False)
+        for row in rows:
+            row.soft_delete()
+        self.message_user(request, f"{len(rows)} item(s) soft-deleted.")
+
+    def delete_queryset(self, request, queryset):
+        # Django's own "Delete selected" action ends here and calls queryset.delete(),
+        # which SoftDeleteQuerySet turns into one UPDATE: same gap as above (L-36).
+        for row in queryset:
+            row.soft_delete()
 
     soft_delete_selected.short_description = "Soft delete selected items"
 

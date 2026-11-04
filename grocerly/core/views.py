@@ -28,6 +28,11 @@ from userauths.models import ContactUs, Profile
 
 
 import re
+import logging
+
+# Goes to the Render log through LOGGING in settings.py (D-038).
+logger = logging.getLogger(__name__)
+
 
 def safe_float(val, default=0.0):
     try:
@@ -615,6 +620,18 @@ def _vnpay_amount(order):
     return str(int(order.price) * 100)
 
 
+def _log_wrong_vnpay_amount(view_name, order, vnpay_amount):
+    """Write a warning for a VNPay reply whose amount is not the order total (L-34).
+
+    The order stays unpaid, so this line is the only trace of the payment in
+    Grocerly. Both amounts are in VNPay's form (VND x 100).
+    """
+    logger.warning(
+        "%s: VNPay amount does not match order %s: VNPay sent %s, the order expects %s",
+        view_name, order.oid, vnpay_amount, _vnpay_amount(order),
+    )
+
+
 @login_required
 def vnpay_payment(request, oid):
     order = _get_checkout_order_or_none(request, oid)
@@ -683,6 +700,9 @@ def vnpay_return(request):
                     # payment would still mark the order paid here (L-22, D-040).
                     # The cart and the pending order stay, so the total can be paid.
                     if inputData.get('vnp_Amount') != _vnpay_amount(order):
+                        # The money VNPay took is recorded nowhere else in Grocerly,
+                        # so staff look for this line when the customer calls (L-34).
+                        _log_wrong_vnpay_amount("vnpay_return", order, inputData.get('vnp_Amount'))
                         messages.error(request, _("The amount paid does not match this order, so it has not been confirmed. Please contact the store."))
                         return redirect("core:payment-failed")
 
@@ -724,6 +744,7 @@ def vnpay_ipn(request):
             try:
                 order = CartOrder.objects.get(oid=order_id)
                 if amount != _vnpay_amount(order):
+                    _log_wrong_vnpay_amount("vnpay_ipn", order, amount)
                     return JsonResponse({'RspCode': '04', 'Message': 'Invalid amount'})
                     
                 if order.paid_status:
@@ -896,24 +917,16 @@ def customer_dashboard(request):
 
 
 @login_required
-def order_detail(request, id):
-    order = CartOrder.objects.get(user=request.user, id=id)
+def order_detail(request, oid):
+    # By oid, as the checkout pages do: the old numeric id let anyone guess the next
+    # order. An order that is not there, or belongs to another customer, is 404 (L-32).
+    order = get_object_or_404(CartOrder, user=request.user, oid=oid)
     order_items = CartOrderItem.objects.filter(order=order)
 
     context = {
         "order_items": order_items,
     }
     return render(request, 'core/order-detail.html', context)
-
-
-# ======================== Address ========================
-
-@login_required
-def make_address_default(request):
-    id = request.GET['id']
-    Address.objects.filter(user=request.user).update(status=False)
-    Address.objects.filter(id=id, user=request.user).update(status=True)
-    return JsonResponse({"boolean": True})
 
 
 # ======================== Wishlist ========================

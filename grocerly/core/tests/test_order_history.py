@@ -58,27 +58,24 @@ def other_customer(django_user_model, password):
 def test_customer_reads_the_detail_of_their_own_order(customer_client, shipped_order):
     order = shipped_order()
 
-    response = customer_client.get(reverse("core:order-detail", args=[order.id]))
+    response = customer_client.get(reverse("core:order-detail", args=[order.oid]))
 
     assert response.status_code == 200
     assert "Cà rốt Đà Lạt" in response.content.decode()
 
 
-@pytest.mark.xfail(reason="L-32: order_detail uses .get(), another customer's order raises DoesNotExist (500)")
 def test_detail_of_another_customers_order_answers_404(customer_client, shipped_order, other_customer):
-    # The order id in the URL is a plain number, so the next one is easy to guess.
-    # The query already filters by user, so nothing leaks; the page should say
-    # "not found" instead of crashing.
+    # L-32. The query filters by user, so nothing leaked even before; the page used
+    # to crash with a 500 instead of saying "not found".
     order = shipped_order(user=other_customer)
 
-    response = customer_client.get(reverse("core:order-detail", args=[order.id]))
+    response = customer_client.get(reverse("core:order-detail", args=[order.oid]))
 
     assert response.status_code == 404
 
 
-@pytest.mark.xfail(reason="L-32: order_detail uses .get(), an unknown order id raises DoesNotExist (500)")
 def test_detail_of_unknown_order_answers_404(customer_client):
-    response = customer_client.get(reverse("core:order-detail", args=[999999]))
+    response = customer_client.get(reverse("core:order-detail", args=["nosuchorder"]))
 
     assert response.status_code == 404
 
@@ -86,15 +83,17 @@ def test_detail_of_unknown_order_answers_404(customer_client):
 # ---------- Default address (L-33) ----------
 
 
-@pytest.mark.xfail(reason="L-33: make_address_default changes the default address on a GET request")
 def test_get_request_does_not_change_the_default_address(customer_client, customer):
-    # A link on another site sends a GET with the session cookie (SameSite=Lax),
-    # the same hole L-19 closed for the cart.
+    # L-33. A link on another site sends a GET with the session cookie (SameSite=Lax),
+    # the same hole L-19 closed for the cart. The route had no button on any page, so
+    # it was removed (D-047); the path is written out because reverse() no longer
+    # knows it.
     old_default = Address.objects.create(user=customer, address="1 Võ Văn Ngân", status=True)
     other = Address.objects.create(user=customer, address="2 Lê Văn Việt", status=False)
 
-    customer_client.get(reverse("core:make-default-address"), {"id": other.id})
+    response = customer_client.get("/vi/make-default-address/", {"id": other.id})
 
+    assert response.status_code == 404
     old_default.refresh_from_db()
     other.refresh_from_db()
     assert old_default.status is True
