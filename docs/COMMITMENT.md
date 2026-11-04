@@ -80,7 +80,7 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | CN-16 | Hỏi đáp, tư vấn bằng ngôn ngữ tự nhiên | UC-15 | Có |
 | CN-17 | AI tìm sản phẩm còn hàng theo nhu cầu | UC-16 | Có |
 | CN-18 | AI đề xuất thêm vào giỏ — chỉ thêm khi người dùng xác nhận | UC-17 | Có |
-| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Lệch (L-41) |
+| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Có |
 
 *Công cụ `get_bestsellers` (gợi ý sản phẩm "nổi bật") vẫn còn trong mã nguồn nhưng
 **không thuộc cam kết**: nó chỉ lấy sản phẩm gắn cờ `featured` thủ công, không tính
@@ -107,10 +107,10 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 04/11/2026 có 27 `Có` và 3 `Lệch`: CN-03 (L-43), CN-19
-(L-41), CN-28 (L-40). Năm lỗi còn mở khác không làm chức năng nào lệch đặc tả: L-24
-chưa xảy ra khi host chạy một worker; L-37, L-38, L-39, L-42 chỉ hỏng ở ca ngoài luồng
-chính (Gemini quá tải, khách sửa số lượng, mã đơn lạ, câu tìm có chữ thừa).
+**Tổng: 30 chức năng**, ngày 04/11/2026 có 28 `Có` và 2 `Lệch`: CN-03 (L-43), CN-28
+(L-40). Hai lỗi còn mở khác không làm chức năng nào lệch đặc tả: L-24 chưa xảy ra khi
+host chạy một worker; L-39 chỉ hỏng khi nhân viên mở trang đổi trạng thái bằng mã đơn
+không có. CN-19 về `Có` sau khi sửa L-41 (P-43).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;

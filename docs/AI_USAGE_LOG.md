@@ -100,12 +100,13 @@ dòng phải khớp với một commit có thật.
 | 04/11/2026 | Claude Code (Opus 5.5) | P-42: kiểm soát trợ lý AI đặt hàng, phần (a), (b), (c) | Làm P-42. | `store_api/views.py`: ngưỡng `LARGE_QTY = 10`, đơn giá và thành tiền trong câu xác nhận, `choose_product` khi lần tìm ra từ hai sản phẩm, bỏ `float` ở giá gửi Gemini; nút chọn trong khung chat `base.html`; năm chuỗi vi/en, `.mo`. SRS §6.2 (AC-17.1 → AC-17.5), D-048, SDD §4.2, PLAN (P-42, P-12, Tuần 8, §6 dòng 27). 14 test, 1 e2e. Lỗi #56. 315 passed, 26 e2e passed, 86%, ruff, jscpd 0,75% | SV duyệt ngưỡng 10 chỉ kiểm ở máy chủ, giá ghi trong câu xác nhận, chọn bằng nút | commit chứa dòng này |
 | 04/11/2026 | Claude Code (Opus 5.5) | Thử P-41, P-42 trên host | Test P-41 và P-42 trên host bằng Playwright. | Script Playwright ngoài repo: chụp số liệu, tạo và dọn dữ liệu thử, chạy Chrome thật với tài khoản demo, đọc log Render. Kết quả vào PLAN (P-41, P-42, Tuần 8); L-37, L-38 vào ISSUES | SV chỉ chỗ lấy tài khoản thử, duyệt ca VNPay sandbox, duyệt ghi L-37, L-38 | commit chứa dòng này |
 | 04/11/2026 | Claude Code (Opus 5.5) | Ghi L-39 → L-43 | Ghi các lỗi còn lại vào ISSUES. Ghi hướng sửa đã chọn cho L-42, L-43. | Kiểm lại trong code năm lỗi chưa có mã; năm dòng ISSUES kèm ghi chú đợt phát hiện. Năm ca `xfail` (`useradmin/tests/test_orders.py`, `core/tests/test_order_admin.py` mới, `store_api/tests/test_ai_chat.py`), chuyển fixture `superuser_client` sang `core/tests/conftest.py`, test UC-18 có sẵn thêm một món vào giỏ. COMMITMENT §2 (CN-03, CN-19, CN-28 `Lệch`), PLAN (P-12, P-24, P-40, §3, Tuần 8). D-049, D-050; kiểm gói Render, thấy SMTP bị chặn. 315 passed, 5 xfailed, ruff, jscpd 0,75% | SV chọn hướng (a) cho L-42 và L-43, chọn gửi thư qua API HTTP bằng django-anymail | commit chứa dòng này |
+| 04/11/2026 | Claude Code (Opus 5.5) | P-43 làn 1: trợ lý AI, L-37, L-38, L-41, L-42 | Làm Làn 1: L-37, L-38, L-41, L-42. | `store_api/views.py`: `GEMINI_TIMEOUT`, `ask_gemini` cho mọi lời gọi Gemini, câu xác nhận kèm `hidden_context`, nhánh thanh toán xem giỏ, docstring `search_products`. 7 test (1 qua `ChatSession` thật), gỡ `xfail` L-41, sửa 3 test có sẵn. D-051, SRS §6.1, SDD §4.2, ISSUES, COMMITMENT (CN-19), PLAN (P-43, P-12, Tuần 8, §6 dòng 28). Lỗi #57. 323 passed, 4 xfailed, 26 e2e passed, ruff, jscpd 0,77% | SV duyệt trước: 20 giây không gọi lại, giỏ trống báo như lỗi công cụ, không chuỗi dịch mới, câu xác nhận kèm `hidden_context` | commit chứa dòng này |
 
 ---
 
 ## 2. Lỗi / ảo giác của AI đã phát hiện
 
-Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **56**, trong đó 40 do AI tự phát hiện, 15 do SV phát hiện và 1 do CI báo đỏ (#50).
+Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. Hiện có: **57**, trong đó 41 do AI tự phát hiện, 15 do SV phát hiện và 1 do CI báo đỏ (#50).
 
 | # | Ngày | Lỗi | Nguyên nhân | Ai phát hiện | Commit sửa |
 |---|---|---|---|---|---|
@@ -165,8 +166,9 @@ Mức 5 cần **≥ 5 mục** kèm phân tích nguyên nhân và commit sửa. H
 | 54 | 02/11/2026 | Sáu bản nháp sơ đồ do AI vẽ có 24 chỗ sai hoặc thiếu so với code. Ví dụ: ghi `Product.sku` dùng trên URL, chép từ SDD cũ; vẽ việc xóa `pending_order_oid` là vô điều kiện; gộp `start_chat` vào lời gọi tới Gemini; mũi tên "needs" giữa các job CI vẽ ngược chiều | Agent vẽ dựa vào câu chữ của SDD, SRS cũ và tên hàm hơn là đọc từng nhánh code; vài chỗ là hiểu sai ký hiệu của Mermaid | AI, lượt kiểm thứ hai mở lại code cho từng sơ đồ | sửa trước khi đưa vào SDD |
 | 55 | 04/11/2026 | Bản sửa L-35 do AI viết làm mọi trang cửa hàng trả 500: comment JavaScript ngay trên dòng mới trong `base.html` có chữ `{% url %}` | AI coi comment JavaScript là chỗ an toàn để viết gì cũng được, quên rằng Django dựng template trước, đọc mọi thẻ `{% %}` bất kể nó nằm trong comment của ngôn ngữ nào | AI, khi bộ test `test_order_history.py` đỏ với `TemplateSyntaxError` | sửa trước khi commit |
 | 56 | 04/11/2026 | Test trình duyệt cho nút chọn sản phẩm do AI viết chờ chữ "2x Cà rốt baby" xuất hiện trong khung chat để biết giỏ đã trả lời. Chữ trên nút cũng có cụm đó, nên điều kiện chờ đúng ngay từ trước khi bấm và các câu kiểm sau có thể chạy trước khi giỏ đổi | AI chọn chuỗi chờ theo câu báo mong đợi mà không xét những chữ khác đã có trên màn hình lúc bắt đầu chờ | AI, khi đọc lại test trước lần chạy đầu | sửa trước khi commit |
+| 57 | 04/11/2026 | Ràng buộc mới AI viết cho UC-15 trong SRS khi sửa L-37 ghi rằng lúc Gemini chậm thì "các trang khác của cửa hàng không phải chờ theo". Sai: host chạy một worker `sync`, nên trong lúc chờ Gemini (tới 20 giây) mọi request khác vẫn xếp hàng; bản sửa chỉ làm worker không bị giết | AI chép giả định ở cột "Đặc tả nói" của L-37 thành yêu cầu, không đối chiếu với cấu hình host đã ghi ở L-24 (một worker) | AI, khi đọc lại SRS ngay sau khi viết | sửa trước khi commit |
 
-**Ghi chú khi bảo vệ:** mười lăm trong năm mươi sáu mục trên do sinh viên phát hiện, không phải
+**Ghi chú khi bảo vệ:** mười lăm trong năm mươi bảy mục trên do sinh viên phát hiện, không phải
 AI tự sửa. Đó là điểm cần nói thẳng — nó cho thấy vai trò kiểm soát nằm ở người,
 đúng tinh thần TC2.3.
 

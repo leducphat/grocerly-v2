@@ -164,13 +164,18 @@ theo đúng thứ tự kiểm trong code: `99`, `97`, `01`, `04`, `02`, `00`.
 
 Mỗi tin nhắn là một request `POST /api/v1/chat/` mang theo lịch sử lưu ở
 `sessionStorage`; server không lưu hội thoại. `ai_chat` cho Gemini gọi tối đa ba
-công cụ nối nhau trong một tin nhắn (L-30). Tìm kiếm chạy ngay trên server, còn
+công cụ nối nhau trong một tin nhắn (L-30). Mọi lời gọi Gemini, cả tin nhắn lẫn từng
+câu trả lời công cụ, đi qua `ask_gemini`: thời hạn 20 giây, không tự gọi lại (D-051).
+Quá hạn hay Gemini báo quá tải thì lỗi rơi vào câu báo trục trặc kết nối. Tìm kiếm
+chạy ngay trên server, còn
 `request_add_to_cart` chỉ kiểm sản phẩm, tồn kho và số đã có trong giỏ (`cart_problem`)
 rồi trả một đề nghị, giỏ chưa đổi gì. Đề nghị có hai dạng (D-048):
 
 - `action: confirm_add_cart` kèm một `product`: câu hỏi xác nhận do server viết, có
   đơn giá và thành tiền tính từ giá trong database. Quá `LARGE_QTY` (10) đơn vị thì
-  câu mở đầu bằng lời hỏi lại và nút ghi đúng con số.
+  câu mở đầu bằng lời hỏi lại và nút ghi đúng con số. Tin nhắn có lần tìm thì kết
+  quả tìm đi kèm trong `hidden_context`, để khách sửa số lượng ở tin nhắn sau mà
+  Gemini vẫn có mã sản phẩm (L-38).
 - `action: choose_product` kèm `choices`: lần `search_products` gần nhất trong cùng
   tin nhắn ra từ hai sản phẩm trở lên thêm được số lượng đó, nên server bỏ sản phẩm
   Gemini chọn và đưa cả danh sách cho khách. Kết quả tìm vẫn về `hidden_context` để
@@ -182,6 +187,10 @@ Mỗi đề nghị (`product` hay một phần tử của `choices`) có `id`, `
 thì mọi nút của câu trả lời ấy tắt. Giỏ chỉ đổi khi khách bấm: khung chat gọi
 `/add-to-cart/` giống nút Add ở trang sản phẩm, nên giá và tồn kho vẫn đi qua
 `_refresh_cart`, và câu báo sau đó đọc số lượng giỏ thật sự giữ (D-044).
+
+`request_checkout` chỉ trả `action: confirm_checkout`, tức nút dẫn tới giỏ hàng để
+thanh toán, khi giỏ trong session có hàng. Giỏ trống thì Gemini nhận lỗi công cụ
+`The cart is empty` và nhắc khách chọn hàng (L-41).
 
 ---
 

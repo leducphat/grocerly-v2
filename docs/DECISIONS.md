@@ -2293,7 +2293,7 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 ## D-049 · Trợ lý AI tìm bằng chữ chính của tên hàng; hàm tìm vẫn đòi đủ mọi chữ
 
 - **Ngày:** 04/11/2026
-- **Trạng thái:** Đã chốt, chưa làm
+- **Trạng thái:** Đã chốt
 
 **Bối cảnh.** L-42: `find_products` giữ sản phẩm mà tên có đủ mọi chữ của câu tìm. Khách hỏi "bò" hay "beef", Gemini tìm "thịt bò", nên "Đùi bò 150g" không ra. Hàm tìm không sai: câu tìm có chữ thừa.
 
@@ -2330,6 +2330,28 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 - Thêm `django-anymail` vào `requirements.txt`; thêm biến môi trường của dịch vụ thư và `DEFAULT_FROM_EMAIL` vào `.env.example`, `CLAUDE.md` và `AGENTS.md` §10, SDD; đặt biến trên Render.
 - Dịch vụ thư thường đòi xác minh địa chỉ hay tên miền gửi. Grocerly chưa có tên miền riêng, nên phải chọn dịch vụ cho gửi từ một địa chỉ đã xác minh.
 - Test kiểm phần chọn backend theo biến môi trường; việc thư tới được hộp thư thì thử tay trên host.
+
+## D-051 · Mỗi lời gọi Gemini có thời hạn 20 giây và không tự gọi lại
+
+- **Ngày:** 04/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-37: `_chat_reply` gọi `chat.send_message` không kèm tùy chọn nào, nên thư viện dùng mặc định của `google-ai-generativelanguage`: chờ một lời gọi tới 600 giây, và khi Gemini báo 503 (quá tải) thì tự gọi lại, cũng trong tối đa 600 giây. Host chạy gunicorn với thời hạn mặc định 30 giây và một worker `sync`. Ngày 04/11/2026 Gemini quá tải, gunicorn giết worker trước khi nhánh `except` kịp trả câu "trục trặc kết nối", khung chat nhận 500 rỗng sau khoảng 31 giây.
+
+**Phương án đã cân nhắc**
+1. *Mỗi lời gọi có thời hạn 20 giây, không gọi lại* (`request_options={"timeout": 20, "retry": None}`). Lỗi rơi vào câu báo có sẵn, khách tự gửi lại.
+2. *Thời hạn ngắn hơn và cho gọi lại một hai lần* trong tổng thời gian dưới 30 giây, bằng một đối tượng `Retry` có giới hạn. Khách đỡ phải gửi lại khi Gemini chỉ quá tải thoáng qua, nhưng thêm một cấu hình phải giải thích, và lúc Gemini quá tải thật thì lần gọi lại cũng hỏng.
+3. *Tăng thời hạn của gunicorn* trong lệnh chạy trên Render (`--timeout 120`). Không sửa code, nhưng với một worker thì cả cửa hàng chờ theo một tin nhắn tới hai phút, và khách vẫn nhận lỗi, chỉ là muộn hơn.
+4. *Một thời hạn chung cho cả tin nhắn*, chia dần cho các lời gọi nối nhau. Chặt hơn phương án 1 khi một tin nhắn gọi Gemini nhiều lần, nhưng phải tính thời gian còn lại trước mỗi lời gọi.
+
+**Quyết định.** Phương án 1, sinh viên chọn ngày 04/11/2026. Hằng `GEMINI_TIMEOUT = 20` và hàm `ask_gemini` trong `store_api/views.py`; mọi lời gọi `send_message` đi qua hàm này. Không thêm chuỗi dịch, câu "trục trặc kết nối" đã có đủ hai bản.
+
+**Lý do.** Cách đơn giản nhất chặn được đúng lỗi đã thấy trên host. 20 giây chừa khoảng 10 giây trước mốc 30 giây của gunicorn cho phần còn lại của request. Không gọi lại vì ngày 04/11/2026 Gemini báo quá tải suốt hai lượt thử liền nhau; gọi lại trong cùng request chỉ làm khách chờ lâu hơn rồi vẫn nhận lỗi.
+
+**Hệ quả.**
+- Gemini quá tải thì khách nhận câu báo lỗi ngay thay vì chờ 30 giây rồi nhận 500, và worker không bị giết. Host vẫn một worker, nên trong lúc chờ Gemini các request khác vẫn xếp hàng, tối đa 20 giây mỗi lời gọi.
+- Thời hạn tính cho từng lời gọi. Một tin nhắn gọi Gemini tối đa bốn lần (tin nhắn và ba câu trả lời công cụ), nên nếu lần nào cũng chậm mà vẫn dưới 20 giây thì tổng vẫn có thể quá 30 giây. Chưa thấy ca này trên host; gặp thì chuyển sang phương án 4.
+- Test với Gemini giả lập chỉ kiểm được mọi lời gọi mang đúng tùy chọn, vì mock nhận mọi tham số. Thêm một test dùng `ChatSession` thật của thư viện, chỉ thay client bên dưới, để kiểm tùy chọn tới được lời gọi xuống Gemini. Việc `retry=None` tắt gọi lại là hành vi của `google-api-core` (bỏ qua decorator `None`), đọc trong mã của bản thư viện đang ghim; nâng `google-generativeai` thì đọc lại.
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
