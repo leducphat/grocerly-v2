@@ -59,7 +59,7 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 |---|---|---|---|
 | CN-01 | Đăng ký tài khoản bằng email | UC-01 | Có |
 | CN-02 | Đăng nhập, đăng xuất | UC-02, UC-10 | Có |
-| CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Có |
+| CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Lệch (L-43) |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
@@ -103,12 +103,14 @@ doanh số thật.*
 | CN-25 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản | UC-22 | Có |
 | CN-26 | Quản lý danh mục: thêm, sửa, xóa mềm và khôi phục | UC-23 | Có |
 | CN-27 | Quản lý toàn bộ sản phẩm: đổi trạng thái hiển thị, xóa mềm và khôi phục | UC-24 | Có |
-| CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Có |
+| CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Lệch (L-40) |
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 04/11/2026 cả 30 đều `Có`. Lỗi duy nhất còn mở, L-24,
-không làm chức năng nào lệch đặc tả vì chưa xảy ra khi host chạy một worker.
+**Tổng: 30 chức năng**, ngày 04/11/2026 có 28 `Có` và 2 `Lệch`: CN-03 (L-43), CN-28
+(L-40). Hai lỗi còn mở khác không làm chức năng nào lệch đặc tả: L-24 chưa xảy ra khi
+host chạy một worker; L-39 chỉ hỏng khi nhân viên mở trang đổi trạng thái bằng mã đơn
+không có. CN-19 về `Có` sau khi sửa L-41 (P-43).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;

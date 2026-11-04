@@ -10,9 +10,12 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
+import google.generativeai as genai
 import pytest
 from django.urls import reverse
 from django.utils import translation
+from google.api_core.exceptions import DeadlineExceeded, ServiceUnavailable
+from google.generativeai import protos
 
 from core.models import Product
 from store_api import views
@@ -82,6 +85,13 @@ def test_search_tool_tells_gemini_to_search_in_vietnamese():
     # found nothing. Gemini reads the docstring as the tool description; whether
     # it then translates can only be checked against the real Gemini.
     assert "Product titles are in Vietnamese" in views.search_products.__doc__
+
+
+def test_search_tool_tells_gemini_to_leave_out_general_words():
+    # L-42, D-049: Gemini searched "thịt bò" and missed "Đùi bò 150g", because the
+    # search needs every word. Like L-31, only the description Gemini reads can be
+    # checked here; whether Gemini follows it is measured with the real Gemini.
+    assert "leave out general words" in views.search_products.__doc__
 
 
 def test_search_tool_finds_nothing_for_an_english_name(product):
@@ -250,13 +260,43 @@ def test_ai_search_answer_keeps_results_for_the_next_message(client, product, ge
     assert second_message[0]["function_response"]["response"]["result"][0]["title"] == product.title
 
 
-def test_ai_checkout_request_sends_user_to_checkout(client, gemini_chat):
+def test_ai_checkout_request_sends_user_to_checkout(client, product, gemini_chat):
     # UC-18
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})
     gemini_chat.send_message.side_effect = [gemini_reply(tool="request_checkout")]
 
     response = ask(client, "Thanh toán giúp mình")
 
     assert response.json()["action"] == "confirm_checkout"
+
+
+def test_ai_checkout_with_an_empty_cart_does_not_offer_checkout(client, gemini_chat):
+    # UC-18, SRS §6.1, L-41: an empty cart makes the assistant ask for items first.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_checkout"),
+        gemini_reply("Giỏ của bạn đang trống, bạn muốn mua gì nào?"),
+    ]
+
+    response = ask(client, "Thanh toán giúp mình")
+
+    assert response.json() == {"reply": "Giỏ của bạn đang trống, bạn muốn mua gì nào?"}
+    # Gemini is told why, so it can say so.
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {"error": "The cart is empty"}
+
+
+def test_ai_checkout_after_the_last_item_was_removed_does_not_offer_checkout(client, product, gemini_chat):
+    # L-41, the boundary: the session still holds a cart, but nothing is in it.
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})
+    client.post(reverse("core:delete-from-cart"), {"id": product.id})
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_checkout"),
+        gemini_reply("Giỏ của bạn đang trống, bạn muốn mua gì nào?"),
+    ]
+
+    response = ask(client, "Thanh toán giúp mình")
+
+    assert "action" not in response.json()
 
 
 def test_chat_over_gemini_quota_asks_user_to_retry_later(client, gemini_chat):
@@ -316,7 +356,8 @@ def test_chat_sends_new_message_to_gemini_only_once(client, gemini_chat):
 
     gemini_history = views.model.start_chat.call_args.kwargs["history"]
     assert gemini_history == [{"role": "model", "parts": ["Bạn muốn mua mấy thùng?"]}]
-    gemini_chat.send_message.assert_called_once_with("2")
+    gemini_chat.send_message.assert_called_once()
+    assert gemini_chat.send_message.call_args.args == ("2",)
 
 
 @pytest.mark.parametrize("history", [{"role": "user"}, 5])
@@ -453,7 +494,8 @@ def test_quota_message_is_in_english_on_the_english_site(client, gemini_chat):
     assert "Please wait **12 seconds**" in response.json()["reply"]
 
 
-def test_chat_with_unknown_language_answers_in_vietnamese(client, gemini_chat):
+def test_chat_with_unknown_language_answers_in_vietnamese(client, product, gemini_chat):
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})  # L-41
     gemini_chat.send_message.side_effect = [gemini_reply(tool="request_checkout")]
 
     response = ask(client, "Thanh toán giúp mình", language="fr")
@@ -461,8 +503,9 @@ def test_chat_with_unknown_language_answers_in_vietnamese(client, gemini_chat):
     assert response.json()["reply"].startswith("Bạn có thể xem lại")
 
 
-def test_chat_with_language_that_is_not_text_answers_in_vietnamese(client, gemini_chat):
+def test_chat_with_language_that_is_not_text_answers_in_vietnamese(client, product, gemini_chat):
     # The request body is the browser's to write; a list here must not crash.
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})  # L-41
     gemini_chat.send_message.side_effect = [gemini_reply(tool="request_checkout")]
 
     response = ask(client, "Thanh toán giúp mình", language=["en"])
@@ -614,6 +657,17 @@ def test_choices_stay_in_the_history_for_an_answer_in_words(client, product, bab
     assert baby_carrot.p_id in body["hidden_context"]
 
 
+def test_confirm_question_keeps_the_search_results_for_a_changed_quantity(client, product, gemini_chat):
+    # L-38: "sorry, only 10" comes in the next message. Without the search results
+    # in the history Gemini had only the product name and guessed the id.
+    propose(gemini_chat, product, 2, search="cà rốt")
+
+    body = ask(client, "Tìm cà rốt rồi thêm 2 cái vào giỏ").json()
+
+    assert body["action"] == "confirm_add_cart"
+    assert product.p_id in body["hidden_context"]
+
+
 def test_choices_leave_out_products_that_cannot_take_the_quantity(client, product, baby_carrot, gemini_chat):
     # AC-17.3: with 1 baby carrot left, only one product can take 2, so there is
     # nothing to choose between.
@@ -665,3 +719,62 @@ def test_a_pick_from_an_earlier_message_is_not_questioned(client, product, baby_
 
     assert body["action"] == "confirm_add_cart"
     assert body["product"]["pid"] == baby_carrot.p_id
+
+
+# ---------- Gemini slow or overloaded (UC-15, L-37, D-051) ----------
+
+
+def test_every_gemini_call_gives_up_after_20_seconds_without_retrying(client, product, gemini_chat):
+    # L-37: on a 503 the library retried by itself for up to 600 s, so gunicorn
+    # (30 s) killed the worker before the "connection trouble" answer. Four calls
+    # cover the four places that talk to Gemini: the message itself, then the
+    # answers to get_bestsellers, search_products and request_add_to_cart.
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="get_bestsellers"),
+        gemini_reply(tool="search_products", query="cà rốt"),
+        gemini_reply(tool="request_add_to_cart", product_url_id="khongtontai", qty=1),
+        gemini_reply("Xin lỗi, mình không tìm thấy sản phẩm này."),
+    ]
+
+    ask(client, "Thêm món bán chạy nhất vào giỏ giúp mình")
+
+    calls = gemini_chat.send_message.call_args_list
+    assert len(calls) == 4
+    assert [c.kwargs.get("request_options") for c in calls] == [{"timeout": 20, "retry": None}] * 4
+
+
+def test_deadline_reaches_the_gemini_client_through_the_real_library():
+    # L-37: the mocked chat above accepts any argument at all. Here the chat
+    # session is the library's own and only the client under it is fake, so a
+    # library version that dropped request_options would show up. retry=None is
+    # what turns the retry off: google-api-core skips a decorator that is None.
+    real_model = genai.GenerativeModel("gemini-test")
+    real_model._client = MagicMock()
+    real_model._client.generate_content.return_value = protos.GenerateContentResponse(
+        candidates=[protos.Candidate(
+            content=protos.Content(role="model", parts=[protos.Part(text="Chào bạn")]),
+            finish_reason=protos.Candidate.FinishReason.STOP,
+        )]
+    )
+
+    reply = views.ask_gemini(real_model.start_chat(), "Xin chào")
+
+    assert reply.text == "Chào bạn"
+    assert real_model._client.generate_content.call_args.kwargs == {"timeout": 20, "retry": None}
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        ServiceUnavailable("This model is currently experiencing high demand."),
+        DeadlineExceeded("Deadline Exceeded"),  # what the 20 s deadline raises
+    ],
+)
+def test_gemini_overloaded_or_too_slow_answers_connection_trouble(client, gemini_chat, error):
+    # L-37: both errors now reach the answer that was written for them.
+    gemini_chat.send_message.side_effect = error
+
+    response = ask(client, "Xin chào")
+
+    assert response.status_code == 200
+    assert response.json() == {"reply": "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"}

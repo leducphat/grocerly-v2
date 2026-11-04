@@ -320,10 +320,20 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   tiếng Anh thì AI dịch tên hàng sang tiếng Việt rồi mới tìm, nên hỏi "watermelon" vẫn
   ra dưa hấu (L-31). Ô tìm kiếm thường của cửa hàng không dịch: ở trang `/en/` vẫn
   phải gõ tên tiếng Việt.
+- **UC-16:** AI tìm bằng chữ chính của tên hàng, không thêm chữ chung như "thịt",
+  "rau", "trái", vì cửa hàng chỉ ra sản phẩm có đủ mọi chữ của câu tìm. Hỏi "có bán
+  bò không" thì AI tìm "bò" và ra "Đùi bò 150g" (L-42, D-049).
+- **UC-17:** khách sửa số lượng ngay sau câu hỏi xác nhận ("chỉ lấy 10 thôi") thì AI
+  vẫn biết đó là sản phẩm nào: kết quả tìm của tin nhắn trước đi kèm câu hỏi xác
+  nhận, như với danh sách chọn ở AC-17.3 (L-38).
 - **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
   báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
   tự sinh không thuộc ràng buộc này (L-15, D-035).
-- **UC-18:** giỏ trống → AI nhắc thêm hàng trước khi thanh toán.
+- **UC-15:** Gemini quá tải hay không trả lời trong 20 giây thì khung chat nhận câu
+  báo trục trặc kết nối chứ không nhận lỗi máy chủ, và khách gửi lại được (L-37,
+  D-051).
+- **UC-18:** giỏ trống, kể cả giỏ vừa bị xóa hết hàng, thì AI nhắc thêm hàng chứ
+  không đưa nút thanh toán (L-41).
 
 > **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được,
 > trừ UC-17 (§6.2). Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem

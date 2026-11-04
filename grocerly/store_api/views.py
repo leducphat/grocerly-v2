@@ -56,10 +56,14 @@ def search_products(query: str) -> list[dict]:
     Call this whenever the user asks about product availability, price, details, or stock.
     Product titles are in Vietnamese, so write the query in Vietnamese: translate
     product names from any other language first (e.g. "watermelon" -> "dưa hấu").
+    A product is found only if its title holds every word of the query, so use
+    just the main words of the product name and leave out general words such as
+    "thịt", "rau" or "trái" (e.g. "beef" -> "bò", not "thịt bò").
     Returns a list of matching products.
     """
     # Gemini reads this docstring as the tool description. The search below
-    # only matches words in the title, so an English query found nothing (L-31).
+    # only matches words in the title, so an English query found nothing (L-31),
+    # and neither did a query with one word too many (L-42, D-049).
     return search_results(find_products(query))
 
 
@@ -182,16 +186,22 @@ def large_qty_warning(qty):
     return str(_("%(qty)s is more than usual, please check the quantity.")) % {'qty': qty} + " "
 
 
-def confirm_add_cart(p, qty):
-    """Ask the customer to confirm one product (AC-17.1, AC-17.2)."""
+def confirm_add_cart(p, qty, hidden_context=None):
+    """Ask the customer to confirm one product (AC-17.1, AC-17.2).
+    The search results of this message go back with the question, as with
+    choose_product: the customer may change the quantity in the next message
+    ("sorry, only 10"), and Gemini still needs the product id then (L-38)."""
     values = money_text(p, qty)
     question = str(_("Would you like to add **%(qty)sx %(title)s** to your cart?")) % values
     price = str(_("Unit price %(price)s ₫, total **%(total)s ₫**.")) % values
-    return {
+    reply = {
         "reply": f"{large_qty_warning(qty)}{question} {price}",
         "action": "confirm_add_cart",
         "product": proposal(p, qty),
     }
+    if hidden_context:
+        reply["hidden_context"] = hidden_context
+    return reply
 
 
 def choose_product(choices, qty, hidden_context):
@@ -233,6 +243,19 @@ try:
 except Exception as e:
     model = None
     print(f"Failed to initialize Gemini Model: {e}")
+
+
+# How long one call to Gemini may take (L-37, D-051). By default the library
+# waits up to 600 s and calls again by itself after a 503 "high demand", but
+# gunicorn kills the request at 30 s, before the `except` below can answer.
+# So each call gets 20 s and no retry; a slow or overloaded Gemini then ends in
+# the "connection trouble" answer, and the customer can simply send again.
+GEMINI_TIMEOUT = 20
+
+
+def ask_gemini(chat, content):
+    """Send one message to Gemini, giving up after GEMINI_TIMEOUT seconds."""
+    return chat.send_message(content, request_options={"timeout": GEMINI_TIMEOUT, "retry": None})
 
 @api_view(['POST'])
 def ai_chat(request):
@@ -278,7 +301,7 @@ def _chat_reply(request):
         # Initialize chat with history (disabling automatic function calling)
         chat = model.start_chat(history=formatted_history)
         
-        response = chat.send_message(user_message)
+        response = ask_gemini(chat, user_message)
         hidden_context = None
         # Products the latest search of this message found. Several of them
         # and Gemini goes straight to the cart: the customer picks (AC-17.3).
@@ -321,9 +344,9 @@ def _chat_reply(request):
                     choices = [c for c in found if cart_problem(c, qty, cart) is None]
                     if len(choices) >= 2:
                         return Response(choose_product(choices, qty, hidden_context))
-                    return Response(confirm_add_cart(p, qty))
+                    return Response(confirm_add_cart(p, qty, hidden_context))
 
-                response = chat.send_message([{
+                response = ask_gemini(chat, [{
                     "function_response": {
                         "name": name,
                         "response": {"error": tool_error}
@@ -332,6 +355,17 @@ def _chat_reply(request):
                 continue
 
             elif name == "request_checkout":
+                # An empty cart has nothing to pay for (UC-18). Gemini is told,
+                # like it is told about a product out of stock, and asks the
+                # customer to pick something first (L-41).
+                if not request.session.get('cart_data_obj'):
+                    response = ask_gemini(chat, [{
+                        "function_response": {
+                            "name": name,
+                            "response": {"error": "The cart is empty"}
+                        }
+                    }])
+                    continue
                 return Response({
                     "reply": str(_("You can review your items and complete your order at the checkout page.")),
                     "action": "confirm_checkout"
@@ -345,7 +379,7 @@ def _chat_reply(request):
                 found = find_products(args.get('query', ''))
                 results = search_results(found)
                 hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Search Results: {results})"
-                response = chat.send_message([{
+                response = ask_gemini(chat, [{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
@@ -356,7 +390,7 @@ def _chat_reply(request):
             elif name == "get_bestsellers":
                 results = get_bestsellers()
                 hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Bestsellers: {results})"
-                response = chat.send_message([{
+                response = ask_gemini(chat, [{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
