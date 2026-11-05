@@ -20,14 +20,6 @@
                                 <h3 class="mb-0">{% trans "Edit Profile" %}</h3>
                             </div>
                             <div class="card-body">
-                                {% if messages %}
-                                <div class="mb-3">
-                                    {% for message in messages %}
-                                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-
                                 <div class="text-center mb-4">
                                     {% if profile.image %}
                                     <img src="{{ profile.image.url }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="Profile Image">
@@ -42,22 +34,27 @@
                                         <div class="form-group col-md-6">
                                             <label>Full Name</label>
                                             <input type="text" class="form-control" name="full_name" value="{% if form.full_name.value %}{{ form.full_name.value }}{% else %}{{ profile.user.username }}{% endif %}" placeholder="Full Name">
+                                            {% include "partials/field_errors.html" with field=form.full_name %}
                                         </div>
                                         <div class="form-group col-md-6">
                                             <label>Phone</label>
                                             <input type="text" class="form-control" name="phone" value="{{ form.phone.value|default_if_none:'' }}" placeholder="{% trans 'Phone' %}">
+                                            {% include "partials/field_errors.html" with field=form.phone %}
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label>Bio</label>
                                             <input type="text" class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" placeholder="Bio">
+                                            {% include "partials/field_errors.html" with field=form.bio %}
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label>{% trans "Address" %}</label>
                                             <input type="text" class="form-control" name="address" value="{{ form.address.value|default_if_none:'' }}" placeholder="{% trans 'Address' %}">
+                                            {% include "partials/field_errors.html" with field=form.address %}
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label>{% trans "Profile Image" %}</label>
                                             <input type="file" class="form-control" name="image" accept="image/*">
+                                            {% include "partials/field_errors.html" with field=form.image %}
                                         </div>
                                         <div class="col-md-12 mt-3 d-flex justify-content-between">
                                             <div>

@@ -40,3 +40,19 @@ def test_contact_form_without_csrf_token_is_rejected():
 
     assert response.status_code == 403
     assert not ContactUs.objects.exists()
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"full_name": "", "email": "", "phone": "", "subject": "", "message": ""},
+        {"email": "abc"},
+        {"subject": "x" * (ContactUs._meta.get_field("subject").max_length + 1)},
+    ],
+    ids=["all-empty", "not-an-email", "subject-longer-than-its-column"],
+)
+def test_contact_form_rejects_wrong_data_and_stores_nothing(client, change):
+    response = client.post(reverse("core:ajax-contact-form"), {**MESSAGE, **change})
+
+    assert response.json()["data"]["bool"] is False
+    assert ContactUs.objects.count() == 0

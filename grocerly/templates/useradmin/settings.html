@@ -19,7 +19,7 @@
                                     <div class="row gx-3">
                                         <div class="col-12 mb-3">
                                             <label class="form-label">Full Name</label>
-                                            <input class="form-control" name="full_name" type="text" value="{{request.user.profile.full_name}}" placeholder="Enter full name" />
+                                            <input class="form-control" name="full_name" type="text" value="{{ form.full_name.value|default_if_none:'' }}" placeholder="Enter full name" />{% include "partials/field_errors.html" with field=form.full_name %}
                                         </div>
                                         <div class="col-6 mb-3">
                                             <label class="form-label">Email</label>
@@ -27,19 +27,19 @@
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Mobile</label>
-                                            <input class="form-control" name="phone" value="{{request.user.profile.phone}}" type="text" placeholder="+123 456 7890" />
+                                            <input class="form-control" name="phone" value="{{ form.phone.value|default_if_none:'' }}" type="text" placeholder="+123 456 7890" />{% include "partials/field_errors.html" with field=form.phone %}
                                         </div>
                                          <div class="col-lg-12 mb-3">
                                             <label class="form-label">Bio</label>
-                                            <input class="form-control" name="bio" value="{{request.user.profile.bio}}" type="text" placeholder="Type here" />
+                                            <input class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.bio %}
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Address</label>
-                                            <input class="form-control" name="address" value="{{request.user.profile.address}}" type="text" placeholder="Type here" />
+                                            <input class="form-control" name="address" value="{{ form.address.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.address %}
                                         </div>
                                         <div class="col-lg-6 mb-3">
                                             <label class="form-label">Country</label>
-                                            <input class="form-control" name="country" value="{{request.user.profile.country}}" type="text" placeholder="Type here" />
+                                            <input class="form-control" name="country" value="{{ form.country.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.country %}
                                         </div>
                                     </div>
                                 </div>
@@ -53,7 +53,7 @@
                                         {% endif %}
                                             
                                         <figcaption>
-                                            <input type="file" class="form-control-file" name="image">
+                                            <input type="file" class="form-control-file" name="image">{% include "partials/field_errors.html" with field=form.image %}
                                         </figcaption>
                                     </figure>
                                 </aside>

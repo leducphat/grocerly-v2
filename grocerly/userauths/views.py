@@ -4,7 +4,8 @@ from django.contrib.auth import login, authenticate
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from userauths.models import User, Profile
+from django.utils.translation import gettext as _
+from userauths.models import Profile
 
 # User = settings.AUTH_USER_MODEL
 
@@ -40,35 +41,30 @@ def login_view(request):
             return redirect('useradmin:dashboard')
         return redirect('core:index')
     
+    email = ''
     if request.method == 'POST':
-        email = request.POST.get('email')
-        password = request.POST.get('password')
+        email = request.POST.get('email', '')
+        password = request.POST.get('password', '')
 
-        try:
-            user = User.objects.get(email=email)
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back {user.username}!')
-                
-                if user.is_superuser:
-                    return redirect('/admin/')
-                elif user.is_staff:
-                    return redirect('useradmin:dashboard')
-                else:
-                    return redirect('core:index')
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+            messages.success(request, f'Welcome back {user.username}!')
+
+            if user.is_superuser:
+                return redirect('/admin/')
+            elif user.is_staff:
+                return redirect('useradmin:dashboard')
             else:
-                messages.warning(request, 'User does not exist. Please try again.')
+                return redirect('core:index')
 
-        except User.DoesNotExist:
-            messages.warning(request, f'User with email {email} does not exist.')
-        
+        # One message whatever was wrong, and not the email typed: the page does not
+        # tell a stranger which emails have an account (L-52, D-054).
+        messages.warning(request, _('Wrong email or password.'))
 
-
-    
-
+    # The email box keeps what was typed, so a typo in the password costs one box.
     context = {
-
+        'email': email,
     }
 
     return render(request, 'userauths/sign-in.html', context)

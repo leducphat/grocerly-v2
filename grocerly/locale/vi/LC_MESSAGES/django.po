@@ -994,3 +994,11 @@ msgstr "Có nhiều sản phẩm khớp với yêu cầu. Bạn bấm vào sản
 #, python-format
 msgid "Add %(qty)sx %(title)s - %(total)s ₫"
 msgstr "Thêm %(qty)sx %(title)s - %(total)s ₫"
+
+#: userauths/views.py
+msgid "Wrong email or password."
+msgstr "Email hoặc mật khẩu không đúng."
+
+#: core/views.py
+msgid "Thank you! Your review has been added."
+msgstr "Cảm ơn bạn! Đánh giá đã được ghi nhận."

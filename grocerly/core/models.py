@@ -289,7 +289,8 @@ class CartOrder(models.Model):
     email = models.CharField(max_length=100, null=True, blank=True)
     phone = models.CharField(max_length=100, null=True, blank=True)
 
-    address = models.CharField(max_length=100, null=True, blank=True)
+    # 255, not 100: a real Vietnamese address is often longer than 100 (L-50, D-055).
+    address = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)

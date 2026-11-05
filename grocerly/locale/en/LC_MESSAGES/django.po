@@ -570,3 +570,11 @@ msgstr ""
 #, python-format
 msgid "Add %(qty)sx %(title)s - %(total)s ₫"
 msgstr ""
+
+#: userauths/views.py
+msgid "Wrong email or password."
+msgstr ""
+
+#: core/views.py
+msgid "Thank you! Your review has been added."
+msgstr ""

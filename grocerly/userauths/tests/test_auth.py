@@ -141,3 +141,42 @@ def test_staff_opening_the_storefront_is_sent_to_store_dashboard(client, django_
 
     assert response.status_code == 302
     assert response.url == reverse("useradmin:dashboard")
+
+
+# ---------- how the sign-up page shows an error (L-46) ----------
+
+
+def test_sign_up_error_is_shown_in_red_under_the_box_it_belongs_to(client, password, error_under_box):
+    response = client.post(reverse("userauths:sign-up"), sign_up_data("abc", password, "Mat-khau-khac#2026"))
+
+    page = response.content.decode()
+    errors = response.context["form"].errors
+    assert error_under_box(page, "email", errors["email"][0])
+    assert error_under_box(page, "password2", errors["password2"][0])
+    # The customer never sees the technical name of a box.
+    assert "<li>password2" not in page
+
+
+# ---------- what a failed sign-in says (L-52) ----------
+
+
+def sign_in_attempt(client, email, password):
+    """The messages and the page that a sign-in with these values gives back."""
+    response = client.post(reverse("userauths:sign-in"), {"email": email, "password": password})
+    return [str(m) for m in response.context["messages"]], response.content.decode()
+
+
+def test_failed_sign_in_gives_one_message_whatever_was_wrong(client, customer):
+    wrong_password, _ = sign_in_attempt(client, customer.email, "sai-mat-khau")
+    unknown_email, _ = sign_in_attempt(client, "khongco@example.com", "sai-mat-khau")
+    nothing_typed, _ = sign_in_attempt(client, "", "")
+
+    assert len(wrong_password) == 1
+    assert wrong_password == unknown_email == nothing_typed
+    assert "khongco@example.com" not in unknown_email[0]
+
+
+def test_failed_sign_in_keeps_the_email_in_its_box(client, customer):
+    _, page = sign_in_attempt(client, customer.email, "sai-mat-khau")
+
+    assert f'value="{customer.email}"' in page

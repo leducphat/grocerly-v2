@@ -40,9 +40,9 @@
                         <div class="text">
                             <h6 class="mb-1">Customer</h6>
                             <p class="mb-1">
-                                {{order.full_name}} <br />
-                                {{order.email}} <br />
-                                {{order.phone}}
+                                {{ order.full_name|default_if_none:'' }} <br />
+                                {{ order.email|default_if_none:'' }} <br />
+                                {{ order.phone|default_if_none:'' }}
                             </p>
                         </div>
                     </article>
@@ -56,7 +56,7 @@
                         <div class="text">
                             <h6 class="mb-1">Order info</h6>
                             <p class="mb-1">
-                                Shipping Method: {{order.shipping_method}} <br />
+                                Shipping Method: {{ order.shipping_method|default_if_none:'' }} <br />
                                 Order Id: #{{order.oid}} <br>
                                 Order Status: {{order.get_product_status_display}} <br>
                                 Payment Status: {% if order.paid_status == True %} Paid {% else %} Not Paid {% endif %} 
@@ -73,10 +73,10 @@
                         <div class="text">
                             <h6 class="mb-1">Deliver to</h6>
                             <p class="mb-1">
-                                Address: {{order.address}} <br />
-                                City: {{order.city}} <br />
-                                State: {{order.state}} <br />
-                                Country: {{order.country}}
+                                Address: {{ order.address|default_if_none:'' }} <br />
+                                City: {{ order.city|default_if_none:'' }} <br />
+                                State: {{ order.state|default_if_none:'' }} <br />
+                                Country: {{ order.country|default_if_none:'' }}
                             </p>
                         </div>
                     </article>

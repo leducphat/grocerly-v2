@@ -949,9 +949,22 @@
             });
         });
 
+        // The errors the server sent back for an AJAX form, in red under each box
+        // (D-054), the way partials/field_errors.html shows them on other pages.
+        // `errors` is Django's form.errors: {"box name": ["message", ...]}.
+        function showFieldErrors(form, errors){
+            form.find(".field-error").remove();
+            $.each(errors, function(name, messages){
+                let box = form.find("[name='" + name + "']");
+                let note = $("<div class='text-danger mt-1 field-error'></div>").text(messages.join(" "));
+                box.length ? box.after(note) : form.prepend(note);
+            });
+        }
+
         // Contact Form AJAX
         $(document).on("submit", "form#contact-form-ajax", function(e){
             e.preventDefault();
+            let form = $(this);
             
             let full_name = $("#full_name").val();
             let email = $("#email").val();
@@ -983,11 +996,47 @@
                         $(".contact_us_p").hide();
                     }
                 },
-                error: function(){
-                    alert(CHAT_TEXT.networkError);
+                // 400 with the errors of each box (L-50); anything else is the network.
+                error: function(xhr){
+                    let answer = xhr.responseJSON;
+                    if(answer && answer.data && answer.data.errors){
+                        showFieldErrors(form, answer.data.errors);
+                    } else {
+                        alert(CHAT_TEXT.networkError);
+                    }
                 },
                 complete: function(){
                     submit_button.prop("disabled", false);
+                }
+            });
+        });
+
+        // Review form AJAX (L-49). The form posts to an endpoint that answers JSON;
+        // without this the browser left the product page and showed that JSON.
+        $(document).on("submit", "form#commentForm", function(e){
+            e.preventDefault();
+            let form = $(this);
+            $.ajax({
+                url: form.attr("action"),
+                type: "POST",
+                data: form.serialize(),
+                dataType: "json",
+                success: function(response){
+                    form.find(".field-error").remove();
+                    $("#review-res").text(response.message);
+                    form.hide();
+                },
+                // 400: errors of each box; 403: one message (not bought yet, or
+                // reviewed already, UC-14).
+                error: function(xhr){
+                    let answer = xhr.responseJSON;
+                    if(answer && answer.errors){
+                        showFieldErrors(form, answer.errors);
+                    } else if(answer && answer.message){
+                        $("#review-res").text(answer.message);
+                    } else {
+                        alert(CHAT_TEXT.networkError);
+                    }
                 }
             });
         });

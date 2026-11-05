@@ -9,6 +9,8 @@ docs/ISSUES.md). The staff may also cancel an order that is not delivered
 yet; `cancelled` is final too (D-033).
 """
 
+import re
+
 import pytest
 from django.test import Client
 from django.urls import reverse
@@ -371,3 +373,10 @@ def test_rejected_status_change_goes_back_to_the_order_by_oid(staff_client, orde
     response = staff_client.post(url, {"status": ""})  # nothing chosen
 
     assert response.url == reverse("useradmin:order_detail", args=[order_with_item.oid])
+
+
+def test_order_detail_does_not_print_none_for_a_missing_city_or_country(staff_client, order_with_item):
+    # order_with_item has an address but no city, state or country.
+    page = staff_client.get(reverse("useradmin:order_detail", args=[order_with_item.oid])).content.decode()
+
+    assert not re.search(r"\bNone\b", page)

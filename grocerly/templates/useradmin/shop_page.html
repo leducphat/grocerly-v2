@@ -22,9 +22,9 @@
                     </div>
                 </div>
                 <div class="col-xl col-lg">
-                    <h3>{{request.user.profile.full_name}}</h3>
+                    <h3>{{ request.user.profile.full_name|default_if_none:'' }}</h3>
                     <p class="mt-0 mb-0">{{request.user.email}}</p>
-                    <p class="mt-0 mb-0">{{request.user.profile.bio}}</p>
+                    <p class="mt-0 mb-0">{{ request.user.profile.bio|default_if_none:'' }}</p>
                 </div>
             </div>
             <!-- card-body.// -->
@@ -42,16 +42,16 @@
                 <div class="col-sm-6 col-lg-4 col-xl-3">
                     <h6>Bio Data</h6>
                     <p>
-                        {{request.user.profile.full_name}} <br />
+                        {{ request.user.profile.full_name|default_if_none:'' }} <br />
                         {{request.user.email}} <br />
-                        {{request.user.profile.phone}}
+                        {{ request.user.profile.phone|default_if_none:'' }}
                     </p>
                 </div>
                 <div class="col-sm-6 col-lg-4 col-xl-3">
                     <h6>{% trans "Address" %} & Location</h6>
                     <p>
-                        Address: {{request.user.profile.address}} <br />
-                        Country: {{request.user.profile.country}} <br />
+                        Address: {{ request.user.profile.address|default_if_none:'' }} <br />
+                        Country: {{ request.user.profile.country|default_if_none:'' }} <br />
                     </p>
                 </div>
             </div>

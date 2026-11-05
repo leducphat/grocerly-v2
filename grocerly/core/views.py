@@ -23,8 +23,8 @@ from core.models import (
     Category, Vendor, Product, ProductReview,
     CartOrder, CartOrderItem, Wishlist, Address, Coupon, wishlist_of,
 )
-from core.forms import ProductReviewForm
-from userauths.models import ContactUs, Profile
+from core.forms import CheckoutInfoForm, ContactForm, ProductReviewForm
+from userauths.models import Profile
 
 
 import re
@@ -263,6 +263,8 @@ def ajax_add_review(request, p_id):
 
     return JsonResponse({
         'bool': True,
+        # Shown on the product page by the script of partials/base.html (L-49).
+        'message': _("Thank you! Your review has been added."),
         'context': context,
         'average_reviews': average_reviews,
     })
@@ -435,15 +437,29 @@ def cart_view(request):
         return redirect("core:index")
 
 
+def _checkout_info_page(request, form, cart_total_amount):
+    """The shipping information page, with `form` either filled from the profile or
+    sent back with its errors (L-50)."""
+    return render(request, 'core/checkout-info.html', {
+        'cart_data': request.session['cart_data_obj'],
+        'totalcartitems': len(request.session['cart_data_obj']),
+        'cart_total_amount': cart_total_amount,
+        'form': form,
+    })
+
+
 @login_required
 def checkout_info_view(request):
     cart_total_amount = _refresh_cart(request)
     if request.session.get('cart_data_obj'):
-        return render(request, 'core/checkout-info.html', {
-            'cart_data': request.session['cart_data_obj'],
-            'totalcartitems': len(request.session['cart_data_obj']),
-            'cart_total_amount': cart_total_amount,
+        profile = request.user.profile
+        form = CheckoutInfoForm(initial={
+            'full_name': profile.full_name or request.user.username.title(),
+            'email': request.user.email,
+            'mobile': profile.phone or '',
+            'address': profile.address or '',
         })
+        return _checkout_info_page(request, form, cart_total_amount)
     else:
         pending_order = _get_pending_order_from_session(request)
         if pending_order:
@@ -532,24 +548,26 @@ def _get_checkout_order_or_none(request, oid):
 @login_required
 def save_checkout_info(request):
     if request.method == "POST":
-        full_name = request.POST.get("full_name")
-        email = request.POST.get("email")
-        mobile = request.POST.get("mobile")
-        address = request.POST.get("address")
-        city = request.POST.get("city")
-        state = request.POST.get("state")
-        country = request.POST.get("country")
-
-        if not full_name or not email or not address:
-            messages.error(request, "Please provide Full Name, Email, and Address to continue.")
-            return redirect("core:checkout-info")
-
         # The order total comes from the database, not from the prices the
         # browser put in the cart (L-6).
         total_amount = _refresh_cart(request)
         cart_data = request.session.get('cart_data_obj')
 
+        # CheckoutInfoForm checks the required boxes, the email and the length of
+        # each value, so nothing longer than its column reaches the database (L-50).
+        form = CheckoutInfoForm(request.POST)
+        if cart_data and not form.is_valid():
+            return _checkout_info_page(request, form, total_amount)
+
         if cart_data:
+            full_name = form.cleaned_data["full_name"]
+            email = form.cleaned_data["email"]
+            mobile = form.cleaned_data["mobile"]
+            address = form.cleaned_data["address"]
+            city = form.cleaned_data["city"]
+            state = form.cleaned_data["state"]
+            country = form.cleaned_data["country"]
+
             order = _get_pending_order_from_session(request)
 
             if order:
@@ -997,20 +1015,12 @@ def contact(request):
 
 @require_POST
 def ajax_contact_form(request):
-    full_name = request.POST.get('full_name')
-    email = request.POST.get('email')
-    phone = request.POST.get('phone')
-    subject = request.POST.get('subject')
-    message = request.POST.get('message')
+    # ContactForm checks the required boxes, the email and each length (L-50).
+    form = ContactForm(request.POST)
+    if not form.is_valid():
+        return JsonResponse({"data": {"bool": False, "errors": form.errors}}, status=400)
 
-    ContactUs.objects.create(
-        full_name=full_name,
-        email=email,
-        phone=phone,
-        subject=subject,
-        message=message,
-    )
-
+    form.save()
     data = {
         "bool": True,
         "message": "Message Sent Successfully"

@@ -72,3 +72,14 @@ def test_saving_the_profile_changes_no_other_customer(customer_client, customer,
     other = Profile.objects.get(user=other_customer)
     assert (other.full_name, other.phone) == ("Lê Văn C", "0987654321")
     assert Profile.objects.get(full_name="Trần Thị B").user == customer
+
+
+def test_rejected_profile_shows_the_error_under_its_box(customer_client, customer, error_under_box):
+    too_long = "x" * (Profile._meta.get_field("full_name").max_length + 1)
+
+    response = customer_client.post(reverse(PROFILE_URL), new_profile(full_name=too_long))
+
+    assert response.status_code == 200  # the form again, nothing saved
+    assert Profile.objects.get(user=customer).full_name != too_long
+    message = response.context["form"].errors["full_name"][0]
+    assert error_under_box(response.content.decode(), "full_name", message)

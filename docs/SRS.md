@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 04/11/2026 |
+| Cập nhật | 05/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -251,6 +251,22 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-19:** sản phẩm phải có danh mục và nhà cung cấp. Nhân viên để trống một trong
   hai ở form thêm hoặc sửa thì máy chủ từ chối và báo ô còn thiếu; hệ thống không tự
   chọn hộ (L-27, D-039).
+- **Mọi form:** dữ liệu sai thì máy chủ từ chối, không lưu gì, và trang hiện câu lỗi ngay
+  dưới ô nhập sai, chữ đỏ, cùng ngôn ngữ với trang. Ô đã gõ giữ nguyên, trừ ô mật khẩu.
+  Không chuỗi nào dài hơn cột của database được gửi xuống database (L-46, L-48, L-50,
+  D-054, D-055).
+- **UC-02:** đăng nhập không được, vì sai mật khẩu, email chưa đăng ký hay để trống, đều
+  ra một câu chung "Email hoặc mật khẩu không đúng", không in lại email vừa gõ; ô email
+  giữ chữ đã gõ (L-52).
+- **UC-08:** form liên hệ bắt buộc họ tên, email đúng định dạng và nội dung; số điện thoại
+  và tiêu đề không bắt buộc (L-50).
+- **UC-09:** thông tin giao hàng bắt buộc họ tên, email đúng định dạng và địa chỉ; địa chỉ
+  dài tới 255 ký tự (L-50, D-055).
+- **UC-14:** gửi đánh giá xong khách vẫn ở trang sản phẩm và thấy câu báo; đánh giá bị
+  từ chối thì câu lỗi hiện ngay trên trang (L-49).
+- **UC-19:** giá bán, giá cũ và số lượng trong kho không được âm (L-53).
+- **Đổi mật khẩu nhân viên (CN-23):** cùng quy tắc với trang của khách: ô che chữ, mật
+  khẩu mới phải qua bộ kiểm mật khẩu của Django, đổi xong vẫn đăng nhập (L-51).
 - **UC-03, UC-19:** sản phẩm còn sót lại không có danh mục hay nhà cung cấp vẫn bán
   bình thường, thẻ sản phẩm chỉ bỏ link tương ứng. Một dòng dữ liệu thiếu không được
   làm hỏng trang của các sản phẩm khác (L-27, D-039).

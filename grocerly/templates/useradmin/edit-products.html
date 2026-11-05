@@ -50,22 +50,16 @@
                             </div>
                             <div class="card-body">
                                 
-                                {% if form.errors %}
-                                    
-                                
-                                <div class="alert alert-danger">
-                                    <strong>{{ form.errors }}</strong>
-                                </div>
-                                {% endif %}
+                                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
                                     {% csrf_token %}
                                     <div class="mb-4">
                                         <label for="product_name" class="form-label">Product title</label>
-                                        {{form.title}}
+                                        {{form.title}}{% include "partials/field_errors.html" with field=form.title %}
                                         <!-- <input type="text" placeholder="Type here" class="form-control" id="product_name" /> -->
                                     </div>
                                     <div class="mb-4">
                                         <label class="form-label">Full description</label>
-                                        {{form.description}}
+                                        {{form.description}}{% include "partials/field_errors.html" with field=form.description %}
 
                                         <!-- <textarea placeholder="Type here" class="form-control" rows="4"></textarea> -->
                                     </div>
@@ -74,7 +68,7 @@
                                             <div class="mb-4">
                                                 <label class="form-label">Selling price</label>
                                                 <div class="row gx-2">
-                                        {{form.price}}
+                                        {{form.price}}{% include "partials/field_errors.html" with field=form.price %}
 
                                                     <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                                 </div>
@@ -83,7 +77,7 @@
                                         <div class="col-lg-4">
                                             <div class="mb-4">
                                                 <label class="form-label">Old price</label>
-                                        {{form.old_price}}
+                                        {{form.old_price}}{% include "partials/field_errors.html" with field=form.old_price %}
 
                                                 <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                             </div>
@@ -99,19 +93,19 @@
 
                                     <div class="mb-4">
                                         <label class="form-label">Stock</label>
-                                        {{form.stock_count}}
+                                        {{form.stock_count}}{% include "partials/field_errors.html" with field=form.stock_count %}
                                         <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
                                     </div>
 
                                     <div class="mb-4">
                                         <label class="form-label">Life of Product</label>
-                                        {{form.expiry_period}}
+                                        {{form.expiry_period}}{% include "partials/field_errors.html" with field=form.expiry_period %}
                                         <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
                                     </div>
 
                                     <div class="mb-4">
                                         <label class="form-label">Tags</label>
-                                        {{form.tags}}
+                                        {{form.tags}}{% include "partials/field_errors.html" with field=form.tags %}
                                         <small class="text-muted">Seperate tag using comma</small>
                                         <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
                                     </div>
@@ -119,12 +113,12 @@
                                     <div class="mb-4 custom_select">
                                           <label class="form-label">{% trans "Vendor" %}</label>
                                           <br>
-                                          {{form.vendor}}
+                                          {{form.vendor}}{% include "partials/field_errors.html" with field=form.vendor %}
                                     </div>
                                     <div class="mb-4 custom_select">
                                           <label class="form-label">Category</label>
                                           <br>
-                                          {{form.category}}
+                                          {{form.category}}{% include "partials/field_errors.html" with field=form.category %}
                                     </div>
                                     
 
@@ -148,7 +142,7 @@
                                     <img src="{% static 'assets2/imgs/theme/upload.svg' %}" alt="" />
                                     {% endif %}
                                     <!-- <input class="form-control" type="file" /> -->
-                                    {{form.image}}
+                                    {{form.image}}{% include "partials/field_errors.html" with field=form.image %}
                                     
                                     <label class="form-label text-start d-block mt-4">Additional Images</label>
                                     <input class="form-control mb-4" type="file" name="additional_images" id="additional_images" multiple />

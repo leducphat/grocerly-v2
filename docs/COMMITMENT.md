@@ -93,7 +93,7 @@ doanh số thật.*
 | CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
 | CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Có |
 | CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | Có |
-| CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Lệch (L-45) |
+| CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Có |
 
 ### 2.4 Quản trị viên — Django admin
 
@@ -107,10 +107,12 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 04/11/2026 có 29 `Có` và 1 `Lệch`: CN-23 (L-45). Lỗi còn
-mở khác là L-24, L-46, L-47, không làm chức năng nào lệch đặc tả: L-24 chưa xảy ra khi host
-chạy một worker, L-46 và L-47 là cách hiển thị. CN-19 và CN-28 về `Có` sau khi sửa L-41 và
-L-40 (P-43); CN-03 về `Có` sau khi sửa L-43 (P-44).
+**Tổng: 30 chức năng**, ngày 05/11/2026 có 30 `Có`. Lượt rà form ngày 05/11/2026 (P-45)
+làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, L-53); sửa ở
+local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
+đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
+nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
+về `Có` sau khi sửa L-43 (P-44).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;

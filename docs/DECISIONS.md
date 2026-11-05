@@ -2408,6 +2408,46 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - Host hỏng thì chậm nhất khoảng một giờ sau mới có thư.
 - Mỗi lần chạy đánh thức host, nên người vào trang ngay sau đó không phải chờ khởi động.
 
+## D-054 · Lỗi của form in dưới từng ô bằng một template con dùng chung
+
+- **Ngày:** 05/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Lượt rà form của P-45 thấy năm trang báo lỗi theo bốn kiểu khác nhau: `{{ form.as_p }}` không màu ở trang đặt mật khẩu mới, nguyên `{{ form.errors }}` kèm tên kỹ thuật của ô ở đầu trang đăng ký và trang thêm, sửa sản phẩm, không báo gì ở trang hồ sơ (L-46, L-48). Chỉ trang đổi mật khẩu của khách in lỗi đỏ dưới từng ô. Đăng nhập thì có câu báo, nhưng câu sai (L-52).
+
+**Phương án đã cân nhắc**
+1. *Một template con `partials/field_errors.html`*, nhận một ô của form và in lỗi của ô đó trong khối `text-danger`; trang nào cũng gọi nó ngay dưới mỗi ô.
+2. *Chép vòng lặp `{% for field in form %}` của trang đổi mật khẩu sang từng trang.* Ít file hơn, nhưng mỗi trang có bố cục riêng (hai cột, ô chọn có plugin), vòng lặp chung không giữ được bố cục đó, và đoạn chép làm tỉ lệ trùng lặp tăng.
+
+**Quyết định.** Phương án 1, sinh viên chọn ngày 05/11/2026. Khối `{{ form.errors }}` ở đầu form bỏ đi, chỉ giữ lỗi chung của cả form (`non_field_errors`). Trang đặt mật khẩu mới bỏ `as_p`, in từng ô như trang đổi mật khẩu của khách. Đăng nhập thất bại vì bất cứ lý do gì đều ra một câu chung, và ô email giữ chữ đã gõ.
+
+**Lý do.** Một chỗ quyết định lỗi trông thế nào, mỗi trang chỉ thêm một dòng `include` dưới ô, bố cục sẵn có không đổi. Kiểu chữ đỏ lấy từ trang đã có trong project, không thêm CSS. Câu chung khi đăng nhập không cho người lạ biết email nào đã có tài khoản; trang đăng ký vẫn báo email trùng, nên việc dò không bịt hết được, nhưng trang đăng nhập không còn là chỗ dò dễ nhất.
+
+**Hệ quả.**
+- Form gửi bằng AJAX (liên hệ, đánh giá) không qua template, nên JavaScript tự đặt câu lỗi dưới ô, cùng lớp `text-danger`.
+- Test kiểm vị trí lỗi bằng fixture `error_under_box` trong `grocerly/conftest.py`: câu lỗi nằm sau ô của nó, trước ô kế tiếp, trong khối `text-danger`.
+
+## D-055 · Các form tự đọc `request.POST` chuyển sang Django Form; cột địa chỉ đơn hàng nới lên 255
+
+- **Ngày:** 05/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Bốn view lấy thẳng `request.POST` rồi lưu (L-45, L-50, L-51): form liên hệ, thông tin giao hàng, hồ sơ nhân viên, đổi mật khẩu nhân viên. Không view nào kiểm độ dài hay định dạng. SQLite trên máy và trong test lưu được chuỗi dài hơn cột, PostgreSQL trên host thì không, nên lỗi chỉ lộ ra trên host. Cột `CartOrder.address` dài 100 ký tự, trong khi địa chỉ dùng lúc rà, một địa chỉ thật ở Thủ Đức, đã dài 104.
+
+**Phương án đã cân nhắc**
+1. *Django Form cho cả bốn chỗ*, độ dài lấy từ cột của model; trang đổi mật khẩu nhân viên dùng `PasswordChangeForm` như trang của khách. Thêm migration nới `CartOrder.address` lên 255.
+2. *Như 1 nhưng giữ cột 100*: địa chỉ dài hơn thì báo lỗi để khách viết gọn lại.
+3. *Viết `if` kiểm trống, email, độ dài ngay trong từng view.* Ít thay đổi nhất, nhưng mỗi view tự chép lại việc Django Form đã làm sẵn, và độ dài vẫn phải gõ tay cho khớp cột.
+
+**Quyết định.** Phương án 1, sinh viên chọn ngày 05/11/2026. `ContactForm` và `CheckoutInfoForm` đặt ở `core/forms.py`, `StaffProfileForm` và `StaffPasswordChangeForm` ở `useradmin/forms.py`. Form liên hệ bắt buộc họ tên, email, nội dung; thông tin giao hàng bắt buộc họ tên, email, địa chỉ như trước. Giá, giá cũ và tồn kho trong `AddProductForm` thành ô số không âm (L-53).
+
+**Lý do.** Django Form vốn kiểm trống, định dạng email và độ dài, và đem câu lỗi đã có bản dịch tới đúng ô; đó cũng là cách các trang khác trong project đã làm (`ProfileForm`, `AddProductForm`). Lấy độ dài từ cột thì form và database không lệch nhau khi cột đổi. Nới cột vì bắt khách viết gọn địa chỉ giao hàng là đẩy lỗi của hệ thống sang khách.
+
+**Hệ quả.**
+- Một migration cho `core` (`CartOrder.address` 100 lên 255). Đổi kiểu cột trên PostgreSQL là thao tác nhanh với bảng nhỏ như hiện tại.
+- Đổi mật khẩu nhân viên xong thì phiên được cập nhật (`update_session_auth_hash`), nhân viên ở lại trang.
+- Form liên hệ bị từ chối thì API trả 400 kèm lỗi từng ô; JavaScript in lỗi dưới ô.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

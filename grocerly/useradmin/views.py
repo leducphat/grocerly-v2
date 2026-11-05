@@ -3,11 +3,11 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth import update_session_auth_hash
 
 from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, STATUS_CHOICES
 from userauths.models import Profile, User
-from useradmin.forms import AddProductForm
+from useradmin.forms import AddProductForm, StaffPasswordChangeForm, StaffProfileForm
 from useradmin.decorators import admin_required
 
 import datetime
@@ -257,51 +257,32 @@ def reviews(request):
 def settings(request):
     profile = Profile.objects.get(user=request.user)
 
-    if request.method == "POST":
-        image = request.FILES.get("image")
-        full_name = request.POST.get("full_name")
-        phone = request.POST.get("phone")
-        bio = request.POST.get("bio")
-        address = request.POST.get("address")
-        country = request.POST.get("country")
-        
-        if image is not None:
-            profile.image = image
-        profile.full_name = full_name
-        profile.phone = phone
-        profile.bio = bio
-        profile.address = address
-        profile.country = country
-
-        profile.save()
+    # StaffProfileForm checks each box against its column and saves an empty box as
+    # empty, so neither a long value nor the word "None" reaches the database
+    # (L-45, L-50, D-055).
+    form = StaffProfileForm(request.POST or None, request.FILES or None, instance=profile)
+    if request.method == "POST" and form.is_valid():
+        form.save()
         messages.success(request, "Profile Updated Successfully")
         return redirect("useradmin:settings")
-    
+
     context = {
-        'profile':profile,
+        'profile': profile,
+        'form': form,
     }
     return render(request, "useradmin/settings.html", context)
 
 @admin_required
 def change_password(request):
-    user = request.user
+    # Django's PasswordChangeForm, as on the customer's page: the old password is
+    # checked, the new one goes through AUTH_PASSWORD_VALIDATORS (L-51, D-055).
+    form = StaffPasswordChangeForm(user=request.user, data=request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        # Changing the password ends every session of the user unless this one is
+        # updated; without it the staff was signed out right after saving (L-51).
+        update_session_auth_hash(request, user)
+        messages.success(request, "Password Changed Successfully")
+        return redirect("useradmin:change_password")
 
-    if request.method == "POST":
-        old_password = request.POST.get("old_password")
-        new_password = request.POST.get("new_password")
-        confirm_new_password = request.POST.get("confirm_new_password")
-
-        if confirm_new_password != new_password:
-            messages.error(request, "Confirm Password and New Password Does Not Match")
-            return redirect("useradmin:change_password")
-        
-        if check_password(old_password, user.password):
-            user.set_password(new_password)
-            user.save()
-            messages.success(request, "Password Changed Successfully")
-            return redirect("useradmin:change_password")
-        else:
-            messages.error(request, "Old password is not correct")
-            return redirect("useradmin:change_password")
-    
-    return render(request, "useradmin/change_password.html")
+    return render(request, "useradmin/change_password.html", {"form": form})
