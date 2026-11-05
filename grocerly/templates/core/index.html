@@ -13,23 +13,14 @@
                                         <h1 class="display-2 mb-40">
                                             {% trans "Don’t miss amazing<br /> grocery deals" %}
                                         </h1>
-                                        <p class="mb-65">{% trans "Sign up for the daily newsletter" %}</p>
-                                        <form class="form-subcriber d-flex">
-                                            <input type="email" placeholder="{% trans 'Your email address' %}" />
-                                            <button class="btn" type="submit">{% trans "Subscribe" %}</button>
-                                        </form>
                                     </div>
                                 </div>
                                 <div class="single-hero-slider single-animation-wrap" style="background-image: url({% static 'assets/imgs/slider/slider-2.png' %})">
                                     <div class="slider-content">
                                         <h1 class="display-2 mb-40">
-                                            {% trans "Fresh Vegetables<br /> Big discount" %}
+                                            {% trans "Fresh vegetables<br /> from local suppliers" %}
                                         </h1>
-                                        <p class="mb-65">{% trans "Save up to 50% off on your first order" %}</p>
-                                        <form class="form-subcriber d-flex">
-                                            <input type="email" placeholder="{% trans 'Your email address' %}" />
-                                            <button class="btn" type="submit">{% trans "Subscribe" %}</button>
-                                        </form>
+                                        <p class="mb-65">{% trans "Tell the AI assistant what you need, it fills your cart" %}</p>
                                     </div>
                                 </div>
                             </div>
@@ -66,14 +57,14 @@
                                                     </a>
                                                 </div>
                                                 <div class="product-action-1">
-                                                    <a aria-label="Add To Wishlist" class="action-btn add-to-wishlist" href="#" data-product-id="{{ p.id }}">
+                                                    <a aria-label="{% trans 'Add to wishlist' %}" class="action-btn add-to-wishlist" href="#" data-product-id="{{ p.id }}">
                                                         {% if p.id in wishlist_product_ids %}
                                                         <i class="fi-rs-heart text-danger"></i>
                                                         {% else %}
                                                         <i class="fi-rs-heart"></i>
                                                         {% endif %}
                                                     </a>
-                                                    <a aria-label="Quick view" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
+                                                    <a aria-label="{% trans 'Quick view' %}" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
                                                 </div>
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                     <span class="hot">-{{ p.get_percentage }}%</span>
@@ -87,14 +78,12 @@
                                                 </div>
                                                 <h2><a href="{% url 'core:product-detail' p.p_id %}">{{ p.title }}</a></h2>
                                                 <div class="product-rate-cover">
-                                                    <div class="product-rate d-inline-block">
-                                                        <div class="product-rating" style="width: 90%"></div>
-                                                    </div>
-                                                    <span class="font-small ml-5 text-muted"> (4.0)</span>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <span class="font-small ml-5 text-muted"> ({{ p.reviews.all.count }})</span>
                                                 </div>
                                                 <div>
                                                     {% if p.vendor %}
-                                                    <span class="font-small text-muted">By <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
+                                                    <span class="font-small text-muted">{% trans "By" %} <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
                                                     {% endif %}
                                                 </div>
                                                 <div class="product-card-bottom">
@@ -129,14 +118,14 @@
                                                     </a>
                                                 </div>
                                                 <div class="product-action-1">
-                                                    <a aria-label="Add To Wishlist" class="action-btn add-to-wishlist" href="#" data-product-id="{{ p.id }}">
+                                                    <a aria-label="{% trans 'Add to wishlist' %}" class="action-btn add-to-wishlist" href="#" data-product-id="{{ p.id }}">
                                                         {% if p.id in wishlist_product_ids %}
                                                         <i class="fi-rs-heart text-danger"></i>
                                                         {% else %}
                                                         <i class="fi-rs-heart"></i>
                                                         {% endif %}
                                                     </a>
-                                                    <a aria-label="Quick view" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
+                                                    <a aria-label="{% trans 'Quick view' %}" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
                                                 </div>
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                     <span class="hot">-{{ p.get_percentage }}%</span>
@@ -148,14 +137,12 @@
                                                 </div>
                                                 <h2><a href="{% url 'core:product-detail' p.p_id %}">{{ p.title }}</a></h2>
                                                 <div class="product-rate-cover">
-                                                    <div class="product-rate d-inline-block">
-                                                        <div class="product-rating" style="width: 90%"></div>
-                                                    </div>
-                                                    <span class="font-small ml-5 text-muted"> (4.0)</span>
+                                                    <i class="fas fa-star text-warning"></i>
+                                                    <span class="font-small ml-5 text-muted"> ({{ p.reviews.all.count }})</span>
                                                 </div>
                                                 <div>
                                                     {% if p.vendor %}
-                                                    <span class="font-small text-muted">By <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
+                                                    <span class="font-small text-muted">{% trans "By" %} <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
                                                     {% endif %}
                                                 </div>
                                                 <div class="product-card-bottom">
@@ -200,20 +187,15 @@
                                         </div>
                                     </div>
                                     <div class="product-content-wrap">
-                                        <div class="deals-countdown-wrap">
-                                            <div class="deals-countdown" data-countdown="2026/04/25 00:00:00"></div>
-                                        </div>
                                         <div class="deals-content">
                                             <h2><a href="{% url 'core:product-detail' p.p_id %}">{{ p.title|truncatechars:40 }}</a></h2>
                                             <div class="product-rate-cover">
-                                                <div class="product-rate d-inline-block">
-                                                    <div class="product-rating" style="width: 90%"></div>
-                                                </div>
-                                                <span class="font-small ml-5 text-muted"> (4.0)</span>
+                                                <i class="fas fa-star text-warning"></i>
+                                                <span class="font-small ml-5 text-muted"> ({{ p.reviews.all.count }})</span>
                                             </div>
                                             <div>
                                                 {% if p.vendor %}
-                                                <span class="font-small text-muted">By <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
+                                                <span class="font-small text-muted">{% trans "By" %} <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
                                                 {% endif %}
                                             </div>
                                             <div class="product-card-bottom">
@@ -224,7 +206,7 @@
                                                 <div class="add-cart">
                                                     <input type="hidden" value="1" class="product-quantity-{{ p.id }}">
                                                     <input type="hidden" class="product-id-{{ p.id }}" value="{{ p.id }}">
-                                                    <button class="add add-to-cart-btn" data-index="{{ p.id }}" style="border: none;"><i class="fi-rs-shopping-cart mr-5"></i>Add</button>
+                                                    <button class="add add-to-cart-btn" data-index="{{ p.id }}" style="border: none;"><i class="fi-rs-shopping-cart mr-5"></i>{% trans "Add" %}</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -255,7 +237,7 @@
                                         <h4>
                                             {% trans "Make your Breakfast" %}<br /> {% trans "Healthy and Easy" %}
                                         </h4>
-                                        <a href="shop-grid-right.html" class="btn btn-xs">Shop Now <i class="fi-rs-arrow-small-right"></i></a>
+                                        <a href="{% url 'core:product-list' %}" class="btn btn-xs">{% trans "Shop Now" %} <i class="fi-rs-arrow-small-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -264,7 +246,7 @@
                                     <img src="{% static 'assets/imgs/banner/banner-3.png' %}" alt="" />
                                     <div class="banner-text">
                                         <h4>{% trans "The best Organic" %} <br />{% trans "Products Online" %}</h4>
-                                        <a href="shop-grid-right.html" class="btn btn-xs">Shop Now <i class="fi-rs-arrow-small-right"></i></a>
+                                        <a href="{% url 'core:product-list' %}" class="btn btn-xs">{% trans "Shop Now" %} <i class="fi-rs-arrow-small-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -295,21 +277,9 @@
                             <div class="content pt-10">
                                 <h5><a href="{% url 'core:product-detail' p.p_id %}">{{ p.title|truncatechars:20 }}</a></h5>
                                 <p class="price mb-0 mt-5">{{ p.price|vnd }} ₫</p>
-                                <div class="product-rate">
-                                    <div class="product-rating" style="width: 90%"></div>
-                                </div>
                             </div>
                         </div>
                         {% endfor %}
-                    </div>
-                    <div class="banner-img wow fadeIn mb-lg-0 animated d-lg-block d-none">
-                        <img src="{% static 'assets/imgs/banner/banner-11.png' %}" alt="" />
-                        <div class="banner-text">
-                            <span>{% trans "Organic" %}</span>
-                            <h4>
-                                {% trans "Save 17%" %} <br /> {% trans "on" %} <span class="text-brand">{% trans "Organic" %}</span><br /> {% trans "Juice" %}
-                            </h4>
-                        </div>
                     </div>
                 </div>
             </div>

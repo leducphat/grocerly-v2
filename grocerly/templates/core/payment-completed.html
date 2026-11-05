@@ -1,33 +1,30 @@
 ﻿{% extends 'partials/base.html' %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
 <div class="page-header breadcrumb-wrap">
     <div class="container">
         <div class="breadcrumb">
-            <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-            <span></span> <a href="{% url 'core:cart' %}">Cart</a>
-            <span></span> <a href="{% url 'core:checkout-info' %}">Checkout Info</a>
-            <span></span> <a href="{% url 'core:checkout' order.oid %}">Checkout</a>
-            <span></span> Payment
+            <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
+            <span></span> <a href="{% url 'core:cart' %}">{% trans "Cart" %}</a>
+            <span></span> <a href="{% url 'core:checkout-info' %}">{% trans "Checkout Info" %}</a>
+            <span></span> <a href="{% url 'core:checkout' order.oid %}">{% trans "Checkout" %}</a>
+            <span></span> {% trans "Payment Result" %}
         </div>
     </div>
 </div>
 <div class="row justify-content-center pt-lg-4 text-center" style="margin-bottom: 200px; margin-top: 100px;">
     <div class="col-lg-5 col-md-7 col-sm-9">
         {% if order.payment_method == 'cod' %}
-        <h1 class="display-404 py-lg-3">Order Placed</h1>
-        <h2 class="h3 mb-4">Your COD order has been placed successfully. Pay on delivery. Order Id #{{ order.oid }}</h2>
+        <h1 class="display-404 py-lg-3">{% trans "Order Placed" %}</h1>
+        <h2 class="h3 mb-4">{% blocktrans trimmed with oid=order.oid %}Your COD order has been placed successfully. Pay on delivery. Order Id #{{ oid }}{% endblocktrans %}</h2>
         {% else %}
-        <h1 class="display-404 py-lg-3">Payment Completed</h1>
-        <h2 class="h3 mb-4">Your order has been successfully placed. Order Id #{{ order.oid }}</h2>
+        <h1 class="display-404 py-lg-3">{% trans "Payment Completed" %}</h1>
+        <h2 class="h3 mb-4">{% blocktrans trimmed with oid=order.oid %}Your order has been successfully placed. Order Id #{{ oid }}{% endblocktrans %}</h2>
         {% endif %}
         <p class="fs-md mb-4">
-            <a href="{% url 'core:index' %}">Continue Shopping</a> |
-            <a href="#">Contact us</a> if you have any issue or question
+            <a href="{% url 'core:index' %}">{% trans "Continue Shopping" %}</a> |
+            {% url 'core:contact' as contact_url %}{% blocktrans trimmed %}<a href="{{ contact_url }}">Contact us</a> if you have any issue or question{% endblocktrans %}
         </p>
     </div>
 </div>
 {% endblock content %}
-
-
-

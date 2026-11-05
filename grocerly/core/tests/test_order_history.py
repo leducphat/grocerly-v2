@@ -10,7 +10,7 @@ import pytest
 from django.urls import reverse
 from django.utils import translation
 
-from core.models import Address
+from core.models import Address, CartOrder
 
 pytestmark = pytest.mark.django_db
 
@@ -98,3 +98,15 @@ def test_get_request_does_not_change_the_default_address(customer_client, custom
     other.refresh_from_db()
     assert old_default.status is True
     assert other.status is False
+
+
+def test_dashboard_chart_counts_only_the_customers_own_orders(customer_client, order, django_user_model):
+    """L-59: the monthly chart of a customer's dashboard counted every order of the
+    shop, so each customer saw how much the whole shop sells."""
+    stranger = django_user_model.objects.create_user(email="khac@example.com", username="khac", password="x")
+    for _ in range(2):
+        CartOrder.objects.create(user=stranger, price=order.price, full_name="Trần B", address="2 Lê Lợi")
+
+    response = customer_client.get(reverse("core:dashboard"))
+
+    assert response.context["total_orders"] == [1]

@@ -105,9 +105,10 @@ def test_complete_product_keeps_its_vendor_and_category_links(client, complete_p
     page = client.get(reverse(url_name, args=args), params).content.decode()
 
     # The menu and the sidebar link to categories and vendors too, so these two
-    # checks look for the markup of the card, not just for the URL.
+    # checks look for the markup of the card, not just for the URL. The word before
+    # the vendor link is translated ("By" / "Bởi"), so the second check skips it.
     assert re.search(rf'class="product-category">\s*<a href="{category_url}"', page)
-    assert f'By <a href="{vendor_url}"' in page
+    assert re.search(rf'text-muted">[^<]+<a href="{vendor_url}"', page)
 
 
 def test_home_page_keeps_the_links_on_every_block_of_cards(client, complete_product):
@@ -119,7 +120,7 @@ def test_home_page_keeps_the_links_on_every_block_of_cards(client, complete_prod
     page = client.get(reverse("core:index")).content.decode()
 
     assert len(re.findall(rf'class="product-category">\s*<a href="{category_url}"', page)) == 2  # deals show none
-    assert page.count(f'By <a href="{vendor_url}"') == 3
+    assert len(re.findall(rf'text-muted">[^<]+<a href="{vendor_url}"', page)) == 3
 
 
 def test_product_list_keeps_the_vendor_link_on_the_deal_card(client, complete_product):

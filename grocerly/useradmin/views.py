@@ -4,6 +4,8 @@ from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
+from django.utils.dates import MONTHS
+from django.utils.translation import gettext as _
 
 from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, STATUS_CHOICES
 from userauths.models import Profile, User
@@ -33,7 +35,6 @@ def dashboard(request):
     monthly_revenue = revenue_orders().filter(order_date__month=this_month).aggregate(price=Sum("price"))
 
     from django.db.models.functions import ExtractMonth
-    import calendar
 
     revenue_data = revenue_orders().annotate(
         month=ExtractMonth("order_date")
@@ -43,7 +44,8 @@ def dashboard(request):
     rev_total = []
     for i in revenue_data:
         if i["month"]:
-            rev_month.append(calendar.month_name[i["month"]])
+            # Django's month names, in the language of the page (vi: "Tháng 11").
+            rev_month.append(str(MONTHS[i["month"]]))
             rev_total.append(float(i["total_revenue"]))
 
     context = {
@@ -195,7 +197,7 @@ def change_order_status(request, oid):
         # Chỉ nhận bốn trạng thái của STATUS_CHOICES. Ô chọn có sẵn một dòng nhắc
         # không phải trạng thái, bấm Save mà chưa chọn gì thì không đổi gì cả.
         if status not in dict(STATUS_CHOICES):
-            messages.error(request, "Please choose an order status")
+            messages.error(request, _("Please choose an order status."))
             return redirect("useradmin:order_detail", order.oid)
 
         # Đơn chỉ đi tới, mỗi lần một bước, hoặc bị hủy khi chưa giao xong (SRS
@@ -203,7 +205,11 @@ def change_order_status(request, oid):
         # đều bị từ chối. Đơn đã giao và đơn đã hủy không có trong bảng nên nhận về
         # tập rỗng, tức là không đổi được nữa.
         if status not in NEXT_STATUS.get(order.product_status, set()):
-            messages.error(request, f"An order that is {order.product_status} cannot change to {status}")
+            # The translated labels of STATUS_CHOICES, not the stored values (D-033).
+            messages.error(request, _('This order cannot go from "%(current)s" to "%(new)s".') % {
+                "current": order.get_product_status_display(),
+                "new": dict(STATUS_CHOICES)[status],
+            })
             return redirect("useradmin:order_detail", order.oid)
 
         # Hàng rời kho thì trừ tồn kho. Qua được điều kiện trên nghĩa là đơn đang ở
@@ -226,7 +232,7 @@ def change_order_status(request, oid):
         if status == 'delivered' and order.payment_method == 'cod':
             order.paid_status = True
                     
-        messages.success(request, f"Order status changed to {status}")
+        messages.success(request, _("Order status changed to %(status)s.") % {"status": dict(STATUS_CHOICES)[status]})
         order.product_status = status
         order.save()
     
@@ -263,7 +269,7 @@ def settings(request):
     form = StaffProfileForm(request.POST or None, request.FILES or None, instance=profile)
     if request.method == "POST" and form.is_valid():
         form.save()
-        messages.success(request, "Profile Updated Successfully")
+        messages.success(request, _("Profile Updated Successfully."))
         return redirect("useradmin:settings")
 
     context = {
@@ -282,7 +288,7 @@ def change_password(request):
         # Changing the password ends every session of the user unless this one is
         # updated; without it the staff was signed out right after saving (L-51).
         update_session_auth_hash(request, user)
-        messages.success(request, "Password Changed Successfully")
+        messages.success(request, _("Your password has been changed."))
         return redirect("useradmin:change_password")
 
     return render(request, "useradmin/change_password.html", {"form": form})

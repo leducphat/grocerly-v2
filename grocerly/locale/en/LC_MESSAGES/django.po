@@ -1,20 +1,74 @@
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Grocerly\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-20 10:00+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2026-11-05 12:00+0700\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-msgid "404 - Không tìm thấy trang | Grocerly"
+msgid "%(counter)s category"
+msgid_plural "%(counter)s categories"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%(counter)s product"
+msgid_plural "%(counter)s products"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%(product)s is out of stock and has been removed from your cart."
+msgstr ""
+
+msgid "%(qty)s is more than usual, please check the quantity."
+msgstr ""
+
+msgid "%(rating)s star"
+msgid_plural "%(rating)s stars"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "(%(counter)s review)"
+msgid_plural "(%(counter)s reviews)"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1. Create an account"
+msgstr ""
+
+msgid "2. Find your products"
+msgstr ""
+
+msgid "3. Check your cart"
+msgstr ""
+
+msgid "4. Enter delivery details"
+msgstr ""
+
+msgid "404 - Page not found | Grocerly"
+msgstr ""
+
+msgid "5. Pay"
+msgstr ""
+
+msgid "6. Follow your order"
+msgstr ""
+
+msgid ""
+"<a href=\"%(contact_url)s\">Contact us</a> if you have any issue or question"
+msgstr ""
+
+msgid "A discount coupon is entered at checkout and counts once per order."
 msgstr ""
 
 msgid "About"
+msgstr ""
+
+msgid "About Grocerly"
 msgstr ""
 
 msgid "About Us"
@@ -23,16 +77,52 @@ msgstr ""
 msgid "Account"
 msgstr ""
 
+msgid "Action"
+msgstr ""
+
 msgid "Actions"
+msgstr ""
+
+msgid "Actual revenue"
+msgstr ""
+
+msgid "Actual revenue this month"
 msgstr ""
 
 msgid "Add"
 msgstr ""
 
-msgid "Add Address"
+msgid "Add %(qty)sx %(title)s - %(total)s ₫"
+msgstr ""
+
+msgid "Add a review"
+msgstr ""
+
+msgid "Add new product"
+msgstr ""
+
+msgid "Add product"
+msgstr ""
+
+msgid "Add to cart"
+msgstr ""
+
+msgid "Add to wishlist"
+msgstr ""
+
+msgid "Additional images"
 msgstr ""
 
 msgid "Address"
+msgstr ""
+
+msgid "Address Added Successfully."
+msgstr ""
+
+msgid "Address:"
+msgstr ""
+
+msgid "AI shopping assistant"
 msgstr ""
 
 msgid "All"
@@ -44,19 +134,67 @@ msgstr ""
 msgid "All Deals"
 msgstr ""
 
+msgid "All rights reserved"
+msgstr ""
+
 msgid "All Vendors"
+msgstr ""
+
+msgid "Already have an account?"
+msgstr ""
+
+msgid ""
+"An item that sold out or was taken off sale while it sat in your cart is "
+"removed from the cart."
+msgstr ""
+
+msgid "An overview of your store's business"
+msgstr ""
+
+msgid "Apply"
 msgstr ""
 
 msgid "Apply Price"
 msgstr ""
 
-msgid "Avg. Rating"
+msgid ""
+"Ask about a product, an order or a payment, or tell us what could work "
+"better. The shop staff read every message and answer by email."
+msgstr ""
+
+msgid "Ask the AI assistant to find products for you"
+msgstr ""
+
+msgid "Assistant is thinking..."
+msgstr ""
+
+msgid "Avatar"
+msgstr ""
+
+msgid "Back to Home"
+msgstr ""
+
+msgid "Back to Login"
+msgstr ""
+
+msgid "Basic information"
+msgstr ""
+
+msgid "Bio"
 msgstr ""
 
 msgid "Browse"
 msgstr ""
 
-msgid "Butter and Margarine"
+msgid ""
+"Browse the categories, search by name, or ask the AI assistant at the bottom "
+"of the page, for example “I need 2 kg of carrots”. The assistant can add the "
+"product to your cart for you."
+msgstr ""
+
+msgid ""
+"Buying on Grocerly takes a few minutes. Here is the whole way, from finding a"
+" product to receiving it."
 msgstr ""
 
 msgid "By"
@@ -74,10 +212,20 @@ msgstr ""
 msgid "By Vendors"
 msgstr ""
 
-msgid "Careers"
+msgid "Cancel"
+msgstr ""
+
+msgctxt "order status"
+msgid "Cancelled"
 msgstr ""
 
 msgid "Cart"
+msgstr ""
+
+msgid "Cash on Delivery"
+msgstr ""
+
+msgid "Cash on Delivery (COD)"
 msgstr ""
 
 msgid "Categories"
@@ -86,25 +234,117 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
+msgid "Change"
+msgstr ""
+
+msgid "Change order status"
+msgstr ""
+
+msgid "Change Password"
+msgstr ""
+
+msgid "Change password"
+msgstr ""
+
+msgid "Changes and questions"
+msgstr ""
+
 msgid "Checkout"
 msgstr ""
 
-msgid "Cheese"
+msgid "Checkout Info"
+msgstr ""
+
+msgid "Checkout Information"
+msgstr ""
+
+msgid "Checkout session not found. Please continue from checkout info."
+msgstr ""
+
+msgid ""
+"Choose VNPay to pay online by card or banking app, or choose cash on delivery"
+" and pay when the order arrives."
+msgstr ""
+
+msgid "City"
+msgstr ""
+
+msgid "Clean with Our"
+msgstr ""
+
+msgid "Comment"
 msgstr ""
 
 msgid "Company"
 msgstr ""
 
-msgid "Compare products"
+msgid "Confirm Password"
 msgstr ""
 
 msgid "Contact"
 msgstr ""
 
+msgid "Contact details"
+msgstr ""
+
+msgid "Contact form"
+msgstr ""
+
+msgid "Contact Information"
+msgstr ""
+
+msgid "Contact Seller:"
+msgstr ""
+
 msgid "Contact Us"
 msgstr ""
 
-msgid "Cảm ơn bạn đã kiên nhẫn chờ đợi!"
+msgid "Contact us"
+msgstr ""
+
+msgid "Continue Shopping"
+msgstr ""
+
+msgid "Continue To Payment"
+msgstr ""
+
+msgid "Cookies"
+msgstr ""
+
+msgid "Could not update the stock."
+msgstr ""
+
+msgid "Country"
+msgstr ""
+
+msgid "Coupon Activated"
+msgstr ""
+
+msgid "Coupon already activated"
+msgstr ""
+
+msgid "Coupon Does Not Exist"
+msgstr ""
+
+msgid "Create an Account"
+msgstr ""
+
+msgid "Create here"
+msgstr ""
+
+msgid "Create product"
+msgstr ""
+
+msgid "Customer"
+msgstr ""
+
+msgid "Customer name"
+msgstr ""
+
+msgid "Customer questions & answers"
+msgstr ""
+
+msgid "Customer reviews"
 msgstr ""
 
 msgid "Dashboard"
@@ -119,22 +359,110 @@ msgstr ""
 msgid "Deals Of The Day"
 msgstr ""
 
-msgid "Delivery Information"
+msgid "Delete"
+msgstr ""
+
+msgid "Delete this product?"
+msgstr ""
+
+msgid "Deliver to"
+msgstr ""
+
+msgctxt "order status"
+msgid "Delivered"
+msgstr ""
+
+msgid "Delivery"
+msgstr ""
+
+msgid "Delivery and cancellation"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Details of order #%(oid)s"
+msgstr ""
+
+msgid "Disabled"
 msgstr ""
 
 msgid "Discount"
 msgstr ""
 
+msgid "Discount coupons"
+msgstr ""
+
+msgid "Don't have an account?"
+msgstr ""
+
 msgid "Don’t miss amazing<br /> grocery deals"
+msgstr ""
+
+msgid "Draft"
+msgstr ""
+
+msgid "Drop Us a Line"
+msgstr ""
+
+msgid "e.g. 0901 234 567"
+msgstr ""
+
+msgid "e.g. 6 months"
+msgstr ""
+
+msgid "e.g. Store in a cool, dry place"
+msgstr ""
+
+msgid "e.g. vegetables, organic"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit product"
 msgstr ""
 
 msgid "Edit Profile"
 msgstr ""
 
-msgid "Eggs Substitutes"
+msgid "Email"
 msgstr ""
 
-msgid "Featured"
+msgid "Email Sent"
+msgstr ""
+
+msgid "Email:"
+msgstr ""
+
+msgid "Emails"
+msgstr ""
+
+msgid "Empty message"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "Enter a code at checkout"
+msgstr ""
+
+msgid "Enter Coupon Code..."
+msgstr ""
+
+msgid "Enter your email address to reset your password."
+msgstr ""
+
+msgid "Error:"
+msgstr ""
+
+msgid "Everyday Fresh &"
+msgstr ""
+
+msgid "Expiry period:"
 msgstr ""
 
 msgid "Filter"
@@ -143,25 +471,168 @@ msgstr ""
 msgid "Filters"
 msgstr ""
 
-msgid "Fresh Vegetables<br /> Big discount"
+msgid "Find products by category, by name, or by asking the AI assistant."
 msgstr ""
 
-msgid "From your account dashboard you can easily check &amp; view your"
+msgid "Find products by chat"
+msgstr ""
+
+msgid "Follow every order in your account"
+msgstr ""
+
+msgid ""
+"Follow every order in your account and review the products you received."
+msgstr ""
+
+msgid "For an order, add its order number so the staff can find it quickly."
+msgstr ""
+
+msgid "Forgot Password"
+msgstr ""
+
+msgid "Forgot password?"
+msgstr ""
+
+msgid "Fresh groceries"
+msgstr ""
+
+msgid "Fresh vegetables<br /> from local suppliers"
+msgstr ""
+
+msgid "From local suppliers"
+msgstr ""
+
+msgid ""
+"From your account dashboard you can check your recent orders in the Orders "
+"tab, edit your <a href=\"%(profile_url)s\">account details</a> and change "
+"your <a href=\"%(password_url)s\">password</a>."
 msgstr ""
 
 msgid "From:"
 msgstr ""
 
-msgid "Hello"
+msgid "Full Name"
 msgstr ""
 
-msgid "Help Ticket"
+msgid ""
+"Give your full name, email, phone number and delivery address. If you have a "
+"discount coupon, enter it on the next page."
+msgstr ""
+
+msgid "Go back"
+msgstr ""
+
+msgid "Go to Dashboard"
+msgstr ""
+
+msgid "Go to the admin site"
+msgstr ""
+
+msgid ""
+"Graduation thesis, Faculty of Information Technology, HCMC University of "
+"Technology and Engineering"
+msgstr ""
+
+msgid "Grand total"
+msgstr ""
+
+msgid "Grocerly - Store dashboard"
+msgstr ""
+
+msgid "Grocerly Assistant"
+msgstr ""
+
+msgid ""
+"Grocerly is an online grocery shop built as a graduation thesis at HCMC "
+"University of Technology and Engineering. This page explains what the shop "
+"keeps about you, why, and who else sees it."
+msgstr ""
+
+msgid ""
+"Grocerly is an online grocery shop with an AI assistant: you can tell it what"
+" you need in your own words, and it finds the products, adds them to your "
+"cart and takes you to checkout."
+msgstr ""
+
+msgid ""
+"Grocerly is the graduation thesis of Le Duc Phat, Software Engineering, "
+"Faculty of Information Technology, HCMC University of Technology and "
+"Engineering, supervised by Hoang Van Dung."
+msgstr ""
+
+msgid ""
+"HCMC University of Technology and Engineering, 1 Vo Van Ngan Street, Thu Duc "
+"Ward, Ho Chi Minh City"
+msgstr ""
+
+msgid "Healthy and Easy"
+msgstr ""
+
+msgid "Hello %(name)s!"
+msgstr ""
+
+msgid ""
+"Hi! I'm your Grocerly Assistant. I can help you find products, check prices, "
+"and more!"
 msgstr ""
 
 msgid "Home"
 msgstr ""
 
+msgid "How can we help you?"
+msgstr ""
+
+msgid "How many are in stock?"
+msgstr ""
+
+msgid "I am having trouble connecting. Please try again later!"
+msgstr ""
+
+msgid ""
+"If you don't receive an email, please make sure you've entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+
+msgid "Image"
+msgstr ""
+
+msgid "Images"
+msgstr ""
+
+msgid "In Review"
+msgstr ""
+
+msgid "In Stock"
+msgstr ""
+
+msgid "Ingredients"
+msgstr ""
+
+msgid "Invalid security signature."
+msgstr ""
+
+msgid "Invoice"
+msgstr ""
+
 msgid "Items"
+msgstr ""
+
+msgid "Items sold"
+msgstr ""
+
+msgid "Keywords (tags)"
+msgstr ""
+
+msgid "Last updated: 5 November 2026"
+msgstr ""
+
+msgid "Latest orders"
+msgstr ""
+
+msgid "Let us know how we can help you"
+msgstr ""
+
+msgid "Log in"
 msgstr ""
 
 msgid "Log In / Sign Up"
@@ -173,25 +644,37 @@ msgstr ""
 msgid "Logout"
 msgstr ""
 
-msgid "Make Default"
+msgid "Main image"
 msgstr ""
 
-msgid "Marmalades"
+msgid "Make your Breakfast"
+msgstr ""
+
+msgid "Manage all orders here"
+msgstr ""
+
+msgid "Manage all product reviews"
+msgstr ""
+
+msgid "Manage all your products here"
 msgstr ""
 
 msgid "Max Price"
 msgstr ""
 
-msgid "Milk & Flavoured Milk"
+msgid "Message"
+msgstr ""
+
+msgid "Message Sent Successfully"
 msgstr ""
 
 msgid "Min Price"
 msgstr ""
 
-msgid "My Account"
+msgid "Mobile"
 msgstr ""
 
-msgid "My Address"
+msgid "My Account"
 msgstr ""
 
 msgid "My Profile"
@@ -203,10 +686,19 @@ msgstr ""
 msgid "My Wishlist"
 msgstr ""
 
-msgid "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"
-msgstr "I am having trouble connecting. Please try again later!"
+msgid "Name"
+msgstr ""
 
-msgid "Need help? Call Us:"
+msgid "Need help?"
+msgstr ""
+
+msgid "needs from our shop"
+msgstr ""
+
+msgid "New products"
+msgstr ""
+
+msgid "No actual revenue yet (no order has been paid)."
 msgstr ""
 
 msgid "No categories yet"
@@ -215,7 +707,28 @@ msgstr ""
 msgid "No deals available right now."
 msgstr ""
 
+msgid "No description yet."
+msgstr ""
+
+msgid "No items in this order."
+msgstr ""
+
 msgid "No orders yet."
+msgstr ""
+
+msgid "No products found matching \"%(query)s\"."
+msgstr ""
+
+msgid "No products found with this tag."
+msgstr ""
+
+msgid "No products found."
+msgstr ""
+
+msgid "No reviews yet. Be the first to review this product!"
+msgstr ""
+
+msgid "No search term"
 msgstr ""
 
 msgid "No tags yet"
@@ -224,16 +737,101 @@ msgstr ""
 msgid "No vendors yet"
 msgstr ""
 
+msgid "Not given"
+msgstr ""
+
+msgid "Not paid"
+msgstr ""
+
 msgid "Not verified"
 msgstr ""
 
-msgid "Oops! Trang này không tồn tại"
+msgid "Note:"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
+msgid "Old price"
+msgstr ""
+
+msgid "Old price (VND)"
+msgstr ""
+
+msgid "Online"
+msgstr ""
+
+msgid ""
+"Online payments go through VNPay. You type your card or bank details on "
+"VNPay's page, not on Grocerly, so the shop never sees or stores them. "
+"Grocerly only keeps what VNPay sends back: whether the payment succeeded."
+msgstr ""
+
+msgid ""
+"Only %(stock)s of %(product)s left in stock, so your cart now holds "
+"%(stock)s."
+msgstr ""
+
+msgid ""
+"Only the shop staff, to handle your orders and messages. Your data is not "
+"sold or given to anyone else, apart from the services named on this page that"
+" the shop needs in order to work."
+msgstr ""
+
+msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
+msgstr ""
+
+msgid ""
+"Open the cart to change quantities or remove items. A quantity cannot go "
+"above what is in stock."
+msgstr ""
+
+msgid "Or cash on delivery"
 msgstr ""
 
 msgid "Order"
 msgstr ""
 
+msgid "Order Detail"
+msgstr ""
+
+msgid "Order details"
+msgstr ""
+
+msgid "Order ID"
+msgstr ""
+
+msgid "Order information"
+msgstr ""
+
+msgid "Order Items"
+msgstr ""
+
+msgid "Order list"
+msgstr ""
+
+msgid "Order not found. Please start checkout again."
+msgstr ""
+
+msgid "Order Placed"
+msgstr ""
+
+msgid "Order placed with Cash on Delivery."
+msgstr ""
+
+msgid "Order status"
+msgstr ""
+
+msgid "Order status changed to %(status)s."
+msgstr ""
+
+msgid "Order Summary"
+msgstr ""
+
 msgid "Order Tracking"
+msgstr ""
+
+msgid "Order tracking"
 msgstr ""
 
 msgid "Orders"
@@ -242,10 +840,89 @@ msgstr ""
 msgid "Our location"
 msgstr ""
 
+msgid "out of 5.0"
+msgstr ""
+
+msgid "Out of Stock"
+msgstr ""
+
 msgid "Pages"
 msgstr ""
 
+msgid "Paid"
+msgstr ""
+
 msgid "Paid Status"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Password Changed"
+msgstr ""
+
+msgid "Password Changed Successfully"
+msgstr ""
+
+msgid "Password Changed!"
+msgstr ""
+
+msgid "Password Reset Sent"
+msgstr ""
+
+msgid "Pay online through VNPay or in cash on delivery, with discount coupons."
+msgstr ""
+
+msgid "Pay online with VNPay or cash on delivery"
+msgstr ""
+
+msgid "Pay with VNPay"
+msgstr ""
+
+msgid "Payment"
+msgstr ""
+
+msgid "Payment Completed"
+msgstr ""
+
+msgid "Payment Failed"
+msgstr ""
+
+msgid "Payment Result"
+msgstr ""
+
+msgid "Payment status"
+msgstr ""
+
+msgid "Phone"
+msgstr ""
+
+msgid "Please choose a category."
+msgstr ""
+
+msgid "Please choose a vendor."
+msgstr ""
+
+msgid "Please choose an order status."
+msgstr ""
+
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+msgid "Please sign in to add products to your wishlist."
+msgstr ""
+
+msgid "Please sign in to use your wishlist."
 msgstr ""
 
 msgid "Popular"
@@ -254,43 +931,137 @@ msgstr ""
 msgid "Popular Products"
 msgstr ""
 
-msgid "Price: High to Low"
+msgid "Price"
 msgstr ""
 
-msgid "Price: Low to High"
+msgid "Price:"
+msgstr ""
+
+msgid "Prices and orders"
+msgstr ""
+
+msgid ""
+"Prices are in Vietnamese dong (VND). The price you pay is the one the shop "
+"holds when you place the order, not a price saved in your browser."
 msgstr ""
 
 msgid "Privacy Policy"
 msgstr ""
 
-msgid "Proceed To CheckOut"
+msgid "Proceed to Checkout"
+msgstr ""
+
+msgctxt "order status"
+msgid "Processing"
 msgstr ""
 
 msgid "Product"
 msgstr ""
 
+msgid "Product description"
+msgstr ""
+
+msgid "Product list"
+msgstr ""
+
+msgid "Product name"
+msgstr ""
+
+msgid "Product not found."
+msgstr ""
+
+msgid "Products"
+msgstr ""
+
+msgid ""
+"Products in this list: <span class=\"text-brand\" id=\"wishlist-item-"
+"count\">%(count)s</span>"
+msgstr ""
+
+msgid "Products Online"
+msgstr ""
+
+msgid "Products you added"
+msgstr ""
+
 msgid "Profile"
+msgstr ""
+
+msgid "Profile Image"
+msgstr ""
+
+msgid "Profile settings"
+msgstr ""
+
+msgid "Profile Updated Successfully."
+msgstr ""
+
+msgid "Published"
 msgstr ""
 
 msgid "Purchase Guide"
 msgstr ""
 
+msgid "Qty"
+msgstr ""
+
+msgid "Qty:"
+msgstr ""
+
 msgid "Quantity"
+msgstr ""
+
+msgid ""
+"Questions and ideas are welcome through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+
+msgid "Quick view"
+msgstr ""
+
+msgid "Rating"
 msgstr ""
 
 msgid "Register"
 msgstr ""
 
-msgid "Release Date"
+msgid "Rejected"
+msgstr ""
+
+msgid "Related products"
 msgstr ""
 
 msgid "Remove"
 msgstr ""
 
-msgid "Save Address"
+msgid "Request New Link"
 msgstr ""
 
-msgid "Save up to 50% off on your first order"
+msgid "Reset Password"
+msgstr ""
+
+msgid "Revenue (VND)"
+msgstr ""
+
+msgid "Revenue by month"
+msgstr ""
+
+msgid "Reviews"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Save changes"
+msgstr ""
+
+msgid "Save new password"
+msgstr ""
+
+msgid "Saved"
+msgstr ""
+
+msgid "Search"
 msgstr ""
 
 msgid "Search for items..."
@@ -299,22 +1070,53 @@ msgstr ""
 msgid "Search for items…"
 msgstr ""
 
+msgid "Selling price"
+msgstr ""
+
+msgid "Selling price (VND)"
+msgstr ""
+
+msgid "Send message"
+msgstr ""
+
+msgid "Separate keywords with commas"
+msgstr ""
+
+msgid "Set New Password"
+msgstr ""
+
 msgid "Setting"
 msgstr ""
 
+msgid "Several products match. Tap the one you want to add to your cart:"
+msgstr ""
+
+msgid "Shelf life"
+msgstr ""
+
+msgid "Shipping"
+msgstr ""
+
+msgctxt "order status"
 msgid "Shipping"
 msgstr ""
 
 msgid "Shipping Details"
 msgstr ""
 
+msgid "Shipping method"
+msgstr ""
+
 msgid "Shop"
 msgstr ""
 
-msgid "Show more..."
+msgid "Shop by Categories"
 msgstr ""
 
-msgid "Show:"
+msgid "Shop Now"
+msgstr ""
+
+msgid "Show more..."
 msgstr ""
 
 msgid "Sign In"
@@ -326,31 +1128,102 @@ msgstr ""
 msgid "Sign out"
 msgstr ""
 
-msgid "Sign up for the daily newsletter"
+msgid "Sign Up"
 msgstr ""
 
-msgid "Sort by:"
+msgid ""
+"Sign up with your email address and a password. You can look around without "
+"an account, but you need one to check out."
 msgstr ""
 
-msgid "Sour Cream and Dips"
+msgid "Since %(year)s"
+msgstr ""
+
+msgid "SKU:"
+msgstr ""
+
+msgid ""
+"Something unclear? Write to us through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+
+msgid "Something went wrong, please try again."
+msgstr ""
+
+msgid "Something went wrong. Please sign in or try again."
+msgstr ""
+
+msgid ""
+"Sorry, I could not finish that in one go. Could you tell me one step at a "
+"time?"
+msgstr ""
+
+msgid "Sorry, network error occurred."
+msgstr ""
+
+msgid "Sorry, this page does not exist"
+msgstr ""
+
+msgid "Sorry, {title} has just sold out and was not added to your cart."
+msgstr ""
+
+msgid "star"
+msgstr ""
+
+msgid "Start Your Daily Shopping with"
+msgstr ""
+
+msgid "State"
 msgstr ""
 
 msgid "Status"
 msgstr ""
 
-msgid "Subscribe"
+msgid "Status:"
+msgstr ""
+
+msgid "Stay home & get your daily"
+msgstr ""
+
+msgid "Stock quantity"
+msgstr ""
+
+msgid "Stock Status"
+msgstr ""
+
+msgid "Storage:"
+msgstr ""
+
+msgid "Store page"
+msgstr ""
+
+msgid "Subject"
+msgstr ""
+
+msgid "Submit &amp; Register"
+msgstr ""
+
+msgid "Submit Review"
 msgstr ""
 
 msgid "Subtotal"
 msgstr ""
 
-msgid "Support Center"
+msgid "Super Value Deals - Save more with coupons"
+msgstr ""
+
+msgid ""
+"System Error: Gemini API Key is missing or invalid. Please configure it in "
+".env."
+msgstr ""
+
+msgid "Tags:"
 msgstr ""
 
 msgid "Tax"
 msgstr ""
 
-msgid "Tea & Kombucha"
+msgid "Tell the AI assistant what you need, it fills your cart"
 msgstr ""
 
 msgid "Terms & Conditions"
@@ -359,16 +1232,103 @@ msgstr ""
 msgid "Terms of Service"
 msgstr ""
 
-msgid "There are"
+msgid "Thank you for your patience!"
 msgstr ""
 
-msgid "This feature is currently under development and will be available soon."
+msgid "Thank you! Your review has been added."
+msgstr ""
+
+msgid "Thanks for using our site!"
+msgstr ""
+
+msgid "The %(site_name)s team"
+msgstr ""
+
+msgid "The AI assistant"
+msgstr ""
+
+msgid ""
+"The amount paid does not match this order, so it has not been confirmed. "
+"Please contact the store."
+msgstr ""
+
+msgid ""
+"The assistant helps you find products and fill your cart, and it can be "
+"wrong. Check the product, the quantity and the price in your cart before you "
+"pay."
+msgstr ""
+
+msgid "The best Organic"
+msgstr ""
+
+msgid ""
+"The Grocerly team is building this feature and it will be available soon."
+msgstr ""
+
+msgid ""
+"The link you followed may have been removed, renamed, or is temporarily "
+"unavailable."
+msgstr ""
+
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used. Please request a new password reset."
+msgstr ""
+
+msgid ""
+"The reviews you write, the products you keep in your wishlist, and the "
+"messages you send through the contact form."
+msgstr ""
+
+msgid ""
+"The shop sells products from several suppliers. Each product page names its "
+"supplier, and the supplier list shows everyone the shop buys from."
+msgstr ""
+
+msgid ""
+"The shop uses only the cookies it needs to work: one keeps you signed in and "
+"holds your cart, one remembers the language you chose, and one protects the "
+"forms against requests from other sites. There are no advertising or tracking"
+" cookies."
+msgstr ""
+
+msgid "There is <span class=\"text-brand\">%(counter)s</span> product in your cart"
+msgid_plural ""
+"There are <span class=\"text-brand\">%(counter)s</span> products in your cart"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid ""
+"These terms apply when you use Grocerly. Grocerly is a graduation thesis "
+"project at HCMC University of Technology and Engineering. By creating an "
+"account or placing an order you accept them."
+msgstr ""
+
+msgid ""
+"These terms may change; the date at the top of this page shows the last "
+"change. Questions about them are welcome through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+
+msgid "This order cannot go from \"%(current)s\" to \"%(new)s\"."
+msgstr ""
+
+msgid "This order does not exist."
+msgstr ""
+
+msgid "This order has already been paid."
+msgstr ""
+
+msgid "This order has been cancelled."
+msgstr ""
+
+msgid "This order has not been paid yet. Please complete the payment."
+msgstr ""
+
+msgid "This product is no longer available."
 msgstr ""
 
 msgid "Title"
-msgstr ""
-
-msgid "Tiếp Tục Mua Sắm"
 msgstr ""
 
 msgid "To:"
@@ -377,13 +1337,45 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
+msgid "Total:"
+msgstr ""
+
 msgid "Track My Order"
 msgstr ""
 
-msgid "Tính năng này đang được đội ngũ Grocerly xây dựng và sẽ sớm ra mắt trong thời gian tới."
+msgid "Type your message..."
+msgstr ""
+
+msgid "Under Development"
 msgstr ""
 
 msgid "Unit Price"
+msgstr ""
+
+msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
+msgstr ""
+
+msgid "Unverified Address"
+msgstr ""
+
+msgid "Update product"
+msgstr ""
+
+msgid "Update Profile"
+msgstr ""
+
+msgid ""
+"Use an email address you can read. It is the only way to reset a forgotten "
+"password."
+msgstr ""
+
+msgid "Use the site in Vietnamese or English."
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Vendor"
 msgstr ""
 
 msgid "Vendor Dashboard"
@@ -395,6 +1387,12 @@ msgstr ""
 msgid "Verified"
 msgstr ""
 
+msgid "Verified Address"
+msgstr ""
+
+msgid "Vietnamese"
+msgstr ""
+
 msgid "View"
 msgstr ""
 
@@ -404,177 +1402,243 @@ msgstr ""
 msgid "View cart"
 msgstr ""
 
-msgid "Về Trang Chủ"
+msgid "View details"
 msgstr ""
 
-msgid "We found"
+msgid "View vendor"
+msgstr ""
+
+msgid "VNPay payment failed. Error code: %(code)s"
+msgstr ""
+
+msgid "VNPay payment successful!"
+msgstr ""
+
+msgid "We found <strong class=\"text-brand\">%(counter)s</strong> item for you!"
+msgid_plural ""
+"We found <strong class=\"text-brand\">%(counter)s</strong> items for you!"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "We have <strong class=\"text-brand\">%(counter)s</strong> vendor"
+msgid_plural "We have <strong class=\"text-brand\">%(counter)s</strong> vendors"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid ""
+"We've emailed you instructions for setting your password, if an account "
+"exists with the email you entered. You should receive them shortly."
+msgstr ""
+
+msgid "Weight or volume (e.g. 1kg, 500ml)"
+msgstr ""
+
+msgid "Welcome back %(name)s!"
+msgstr ""
+
+msgid "Welcome, %(name)s! Your account has been created successfully!"
+msgstr ""
+
+msgid "What we keep"
+msgstr ""
+
+msgid "What you can do here"
+msgstr ""
+
+msgid ""
+"What you type in the chat window is sent to Google's Gemini service, which "
+"writes the reply. Please do not type personal details such as your phone "
+"number or address into the chat."
+msgstr ""
+
+msgid ""
+"When you ask to reset your password, the email is sent through the Brevo "
+"email service. Grocerly does not send newsletters or advertising."
+msgstr ""
+
+msgid "Who made it"
+msgstr ""
+
+msgid "Who sees your data"
 msgstr ""
 
 msgid "Wishlist"
 msgstr ""
 
-msgid "Your Cart"
-msgstr ""
-
-msgid "Your Location"
-msgstr ""
-
-msgid "Your Orders"
-msgstr ""
-
-msgid "Your cart is empty"
-msgstr ""
-
-msgid "Your email address"
-msgstr ""
-
-msgid "and"
-msgstr ""
-
-msgid "edit your password and account details."
-msgstr ""
-
-msgid "items for you!"
-msgstr ""
-
-msgid "manage your"
-msgstr ""
-
-msgid "products in your cart"
-msgstr ""
-
-msgid "recent orders"
-msgstr ""
-
-msgid "shipping and billing addresses"
-msgstr ""
-
-msgid "Đang Phát Triển"
-msgstr ""
-
-msgid "Đường link bạn truy cập có thể đã bị xóa, đổi tên, hoặc tạm thời không khả dụng."
-msgstr ""
-
-msgid "← Quay về Trang Chủ"
-msgstr ""
-
-msgid "⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi **%(wait_seconds)s giây** rồi thử lại nhé!"
-msgstr "⏳ The AI assistant is paused by its free usage limit. Please wait **%(wait_seconds)s seconds** and try again!"
-
-msgid "⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 giây rồi thử lại nhé!"
-msgstr "⏳ The AI assistant is paused by its free usage limit. Please wait about 30 seconds and try again!"
-
-# --- Order status (D-033) ---
-# The context keeps these apart from "Shipping" above, which is the shipping fee.
-
-msgctxt "order status"
-msgid "Processing"
-msgstr ""
-
-msgctxt "order status"
-msgid "Shipping"
-msgstr ""
-
-msgctxt "order status"
-msgid "Delivered"
-msgstr ""
-
-msgctxt "order status"
-msgid "Cancelled"
-msgstr ""
-
-msgid "This order has been cancelled."
-msgstr ""
-
-# --- AI chat window (L-13 to L-15, D-035) ---
-
-msgid "System Error: Gemini API Key is missing or invalid. Please configure it in .env."
-msgstr ""
-
-#, python-format
 msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
 msgstr ""
 
-msgid "You can review your items and complete your order at the checkout page."
+msgid "Wrong email or password."
 msgstr ""
 
-msgid "Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!"
-msgstr ""
-
-msgid "Assistant is thinking..."
-msgstr ""
-
-msgid "Type your message..."
+msgid "Yes, add %(qty)s to cart"
 msgstr ""
 
 msgid "Yes, Add to Cart"
 msgstr ""
 
-msgid "Proceed to Checkout"
-msgstr ""
-
 msgid "Yes, please add it."
 msgstr ""
 
-msgid "✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, or look for something else?"
+msgid "You are already signed in."
 msgstr ""
 
-msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
+msgid "You are not authorized to access this page."
 msgstr ""
 
-msgid "Sorry, {title} has just sold out and was not added to your cart."
+msgid ""
+"You can change your profile at any time from your account. To have your "
+"account deleted, or to ask about this policy, write to us through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
 msgstr ""
 
-msgid "Error:"
+msgid ""
+"You can follow each order in your account: processing, shipping, delivered. "
+"The shop may cancel an order it cannot deliver; the order then shows as "
+"cancelled in your account."
 msgstr ""
 
-msgid "Sorry, network error occurred."
+msgid "You can only review a product you have received."
 msgstr ""
 
-msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
-msgstr "🛑 The AI assistant has used up its free quota (500 messages a day). Please come back tomorrow!"
-
-msgid "Please choose a vendor."
+msgid ""
+"You can pay online through VNPay or in cash when the order arrives. An online"
+" order counts as paid only once VNPay confirms the payment. If the amount "
+"VNPay reports does not match the order, the order stays unpaid; write to us "
+"through the <a href=\"%(contact_url)s\">contact page</a> and the staff will "
+"check the payment with VNPay."
 msgstr ""
 
-msgid "Please choose a category."
+msgid ""
+"You can review a product once it has been shipped to you, one review per "
+"product. Keep reviews about the product; the shop may remove reviews that "
+"insult people or have nothing to do with the product."
 msgstr ""
 
-msgid "The amount paid does not match this order, so it has not been confirmed. Please contact the store."
+msgid "You can review your items and complete your order at the checkout page."
 msgstr ""
 
-msgid "Delete this product?"
+msgid "You have a pending checkout. Please complete payment."
 msgstr ""
 
-msgid "This product is no longer available."
+msgid "You have already reviewed this product."
 msgstr ""
 
-msgid "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
+msgid "You have been signed out."
 msgstr ""
 
-#, python-format
-msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
+msgid ""
+"You need an account to place an order. Keep your password to yourself: orders"
+" placed from your account count as yours."
 msgstr ""
 
-#, python-format
-msgid "%(qty)s is more than usual, please check the quantity."
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
 msgstr ""
 
-#, python-format
-msgid "Yes, add %(qty)s to cart"
+msgid "Your account"
 msgstr ""
 
-msgid "Several products match. Tap the one you want to add to your cart:"
+msgid ""
+"Your account lists every order and its status: processing, shipping, "
+"delivered. Once an order has been shipped to you, you can review its "
+"products."
 msgstr ""
 
-#, python-format
-msgid "Add %(qty)sx %(title)s - %(total)s ₫"
+msgid ""
+"Your account: email address, user name and password. The password is stored "
+"only as a hash, never as readable text."
 msgstr ""
 
-#: userauths/views.py
-msgid "Wrong email or password."
+msgid "Your Cart"
 msgstr ""
 
-#: core/views.py
-msgid "Thank you! Your review has been added."
+msgid "Your cart is empty"
+msgstr ""
+
+msgid "Your choices"
+msgstr ""
+
+msgid ""
+"Your COD order has been placed successfully. Pay on delivery. Order Id "
+"#%(oid)s"
+msgstr ""
+
+msgid "Your Email"
+msgstr ""
+
+msgid "Your Email *"
+msgstr ""
+
+msgid "Your email address will not be published. Required fields are marked *"
+msgstr ""
+
+msgid "Your order could not be placed, try again."
+msgstr ""
+
+msgid "Your order has been successfully placed. Order Id #%(oid)s"
+msgstr ""
+
+msgid "Your Orders"
+msgstr ""
+
+msgid ""
+"Your orders: the name, email, phone number and delivery address you enter at "
+"checkout, the products, the prices and whether the order is paid."
+msgstr ""
+
+msgid "Your password *"
+msgstr ""
+
+msgid "Your password has been changed."
+msgstr ""
+
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr ""
+
+msgid "Your password has been successfully changed."
+msgstr ""
+
+msgid ""
+"Your personal data will be used to support your experience throughout this "
+"website, to manage access to your account, and for other purposes described "
+"in our privacy policy"
+msgstr ""
+
+msgid "Your Phone"
+msgstr ""
+
+msgid ""
+"Your profile, if you fill it in: full name, phone number, address, a short "
+"bio and a photo."
+msgstr ""
+
+msgid "Your username, in case you’ve forgotten:"
+msgstr ""
+
+msgid "Your Wishlist"
+msgstr ""
+
+msgid "Your wishlist is empty."
+msgstr ""
+
+msgid ""
+"⏳ The AI assistant is paused by its free usage limit. Please wait "
+"**%(wait_seconds)s seconds** and try again!"
+msgstr ""
+
+msgid ""
+"⏳ The AI assistant is paused by its free usage limit. Please wait about 30 "
+"seconds and try again!"
+msgstr ""
+
+msgid ""
+"✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, "
+"or look for something else?"
+msgstr ""
+
+msgid ""
+"🛑 The AI assistant has used up its free quota (500 messages a day). Please "
+"come back tomorrow!"
 msgstr ""

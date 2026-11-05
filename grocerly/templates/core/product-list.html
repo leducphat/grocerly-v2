@@ -121,47 +121,7 @@
                 <div class="col-12">
                     <div class="shop-product-fillter">
                         <div class="totall-product">
-                            <p>{% trans "We found" %} <strong class="text-brand">{{ product_count }}</strong> {% trans "items for you!" %}</p>
-                        </div>
-                        <div class="sort-by-product-area">
-                            <div class="sort-by-cover mr-10">
-                                <div class="sort-by-product-wrap">
-                                    <div class="sort-by">
-                                        <span><i class="fi-rs-apps"></i>{% trans "Show:" %}</span>
-                                    </div>
-                                    <div class="sort-by-dropdown-wrap">
-                                        <span> 50 <i class="fi-rs-angle-small-down"></i></span>
-                                    </div>
-                                </div>
-                                <div class="sort-by-dropdown">
-                                    <ul>
-                                        <li><a class="active" href="#">50</a></li>
-                                        <li><a href="#">100</a></li>
-                                        <li><a href="#">150</a></li>
-                                        <li><a href="#">200</a></li>
-                                        <li><a href="#">{% trans "All" %}</a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="sort-by-cover">
-                                <div class="sort-by-product-wrap">
-                                    <div class="sort-by">
-                                        <span><i class="fi-rs-apps-sort"></i>{% trans "Sort by:" %}</span>
-                                    </div>
-                                    <div class="sort-by-dropdown-wrap">
-                                        <span> {% trans "Featured" %} <i class="fi-rs-angle-small-down"></i></span>
-                                    </div>
-                                </div>
-                                <div class="sort-by-dropdown">
-                                    <ul>
-                                        <li><a class="active" href="#">{% trans "Featured" %}</a></li>
-                                        <li><a href="#">{% trans "Price: Low to High" %}</a></li>
-                                        <li><a href="#">{% trans "Price: High to Low" %}</a></li>
-                                        <li><a href="#">{% trans "Release Date" %}</a></li>
-                                        <li><a href="#">{% trans "Avg. Rating" %}</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+                            <p>{% blocktrans trimmed count counter=product_count %}We found <strong class="text-brand">{{ counter }}</strong> item for you!{% plural %}We found <strong class="text-brand">{{ counter }}</strong> items for you!{% endblocktrans %}</p>
                         </div>
                     </div>
                     <div class="row product-grid" id="filtered-product-grid">

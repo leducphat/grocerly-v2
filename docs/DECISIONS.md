@@ -2448,6 +2448,28 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - Đổi mật khẩu nhân viên xong thì phiên được cập nhật (`update_session_auth_hash`), nhân viên ở lại trang.
 - Form liên hệ bị từ chối thì API trả 400 kèm lỗi từng ô; JavaScript in lỗi dưới ô.
 
+## D-056 · Msgid luôn là câu tiếng Anh; test so chữ của cùng một trang ở `/vi/` và `/en/`; nội dung mẫu của theme thay bằng nội dung thật
+
+- **Ngày:** 05/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** Lượt rà của P-46 đếm 437 chuỗi tiếng Anh trên các trang `/vi/` và 58 chuỗi tiếng Việt trên các trang `/en/`, do năm nguyên nhân (L-47, L-55 → L-58). Một phần chuỗi viết thẳng trong template, một phần đã bọc `trans` nhưng msgid lại là câu tiếng Việt, nên trang `/en/` hiện tiếng Việt vì `locale/en` để `msgstr` rỗng. Máy làm việc không có GNU gettext, `makemessages` không chạy, nên không ai thấy chuỗi nào thiếu bản dịch. Các trang chính sách, điều khoản, hướng dẫn mua, giới thiệu, liên hệ và chân trang vẫn là văn mẫu của theme Nest.
+
+**Phương án đã cân nhắc**
+1. *Test so hai bản của cùng một trang.* Test client mở 43 trang ở `/vi/` và `/en/`, lấy chữ nhìn thấy bằng `html.parser`; chữ giống hệt nhau ở hai bản là chữ chưa dịch, trừ tên riêng và dữ liệu. Thêm test đọc mã nguồn: chuỗi nào đánh dấu dịch cũng có bản tiếng Việt và msgid không chứa chữ tiếng Việt.
+2. *Chỉ kiểm vài chuỗi đã biết.* Ít code hơn, nhưng một chuỗi mới quên bọc sẽ không bị bắt.
+3. Về msgid: *giữ msgid tiếng Việt và dịch ngược sang `locale/en`.* Ít sửa code hơn, nhưng project có hai quy ước, và `CLAUDE.md` §7 đã ghi code viết tiếng Anh.
+4. Về các trang nội dung: *bỏ hẳn trang* hay *viết lại ngắn, đúng thực tế*.
+
+**Quyết định.** Sinh viên chọn ngày 05/11/2026: phương án 1 cho test; msgid luôn là câu tiếng Anh, `locale/en` để `msgstr` rỗng; không bỏ trang nào, bốn trang được viết lại bằng nội dung ngắn đúng với những gì Grocerly làm; chân trang và trang liên hệ ghi địa chỉ Trường Đại học Công nghệ Kỹ thuật TP. Hồ Chí Minh và email sinh viên, không ghi số điện thoại; phần trang trí giả của theme được gỡ, một số chỗ thay bằng dữ liệu thật (danh mục thật ở cột bên, số đánh giá thật, mã đơn thật).
+
+**Lý do.** So hai bản của một trang là cách đã dùng để đếm lỗi bằng Playwright, nay chạy trong bộ test thường nên CI chặn được lỗi tái phát. Hàm `marked_strings()` của test dùng `templatize()` của Django, đúng hàm `makemessages` dùng, nên test thay được `makemessages` trên máy không có gettext. Một quy ước msgid thì test kiểm được bằng một luật. Nội dung trang phải đúng với hệ thống vì người dùng thật sẽ đọc nó ở đợt thực nghiệm Tuần 11.
+
+**Hệ quả.**
+- File test: `grocerly/tests/test_i18n.py`. Tên riêng nằm trong danh sách `SAME_IN_BOTH` của test; thêm tên riêng mới thì thêm vào đó.
+- `.po` được dựng lại theo thứ tự msgid, bỏ các mục không còn dùng. Bản dịch tiếng Việt cho vài câu của Django mà catalog của Django thiếu nằm trong `locale/vi` của project, vì `LOCALE_PATHS` được ưu tiên hơn catalog của Django (L-57).
+- Câu trả lời của trợ lý AI do Gemini tự viết không thuộc ràng buộc này (UC-15, D-035); các câu gửi cho Gemini làm kết quả công cụ cũng không cần dịch. Chuỗi `Message` trả cho VNPay ở IPN là giao thức, giữ nguyên.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

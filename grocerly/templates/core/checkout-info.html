@@ -16,7 +16,7 @@
                 <div class="col-lg-8 mb-40">
                     <h1 class="heading-2 mb-10">{% trans "Checkout Information" %}</h1>
                     <div class="d-flex justify-content-between">
-                        <h6 class="text-body">{% trans "There are" %} <span class="text-brand">{{ totalcartitems }}</span> {% trans "products in your cart" %}</h6>
+                        <h6 class="text-body">{% blocktrans trimmed count counter=totalcartitems %}There is <span class="text-brand">{{ counter }}</span> product in your cart{% plural %}There are <span class="text-brand">{{ counter }}</span> products in your cart{% endblocktrans %}</h6>
                     </div>
                     {% if not request.user.is_authenticated %}
                     <p class="text-muted mb-0 mt-2">{% trans "Already have an account?" %} <a href="{% url 'userauths:sign-in' %}">{% trans "Sign in" %}</a></p>
@@ -41,17 +41,17 @@
                                 <tbody>
                                     {% for product_id, item in cart_data.items %}
                                     <tr class="pt-30">
-                                        <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="#"></td>
+                                        <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="{{ item.title }}"></td>
                                         <td class="product-des product-name">
                                             <h6 class="mb-5"><a class="product-name mb-10 text-heading" href="{% url 'core:product-detail' item.pid %}">{{ item.title }}</a></h6>
                                         </td>
-                                        <td class="price" data-title="Price">
+                                        <td class="price" data-title="{% trans 'Unit Price' %}">
                                             <h4 class="text-body">{{ item.price|vnd }} ₫</h4>
                                         </td>
-                                        <td class="text-center detail-info" data-title="Stock">
+                                        <td class="text-center detail-info" data-title="{% trans 'Quantity' %}">
                                             <div class="mr-15"><span>{{ item.qty }}</span></div>
                                         </td>
-                                        <td class="price" data-title="Price">
+                                        <td class="price" data-title="{% trans 'Subtotal' %}">
                                             <h4 class="text-brand">{{ item.price|mul:item.qty|vnd }} ₫</h4>
                                         </td>
                                     </tr>
@@ -61,7 +61,7 @@
                         </div>
 
                         <div class="row mt-4">
-                            <h4 class="mb-30">{% trans "Bio Data" %}</h4>
+                            <h4 class="mb-30">{% trans "Contact Information" %}</h4>
                             <div class="row">
                                 <div class="form-group col-lg-12">
                                     <label>{% trans "Full Name" %}</label>

@@ -1,9 +1,10 @@
 {% load static i18n %}
+{% get_current_language as LANGUAGE_CODE %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8" />
-    <title>{% trans "404 - Không tìm thấy trang | Grocerly" %}</title>
+    <title>{% trans "404 - Page not found | Grocerly" %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/imgs/theme/favicon.svg' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
@@ -63,15 +64,15 @@
 <body>
     <div class="error-page">
         <div>
-            <a href="/">
+            <a href="{% url 'core:index' %}">
                 <img src="{% static 'assets/imgs/theme/logo.png' %}" alt="Grocerly" style="max-width: 180px; margin-bottom: 40px;" />
             </a>
             <div class="error-code">404</div>
-            <h1 class="error-title">{% trans "Oops! Trang này không tồn tại" %}</h1>
+            <h1 class="error-title">{% trans "Sorry, this page does not exist" %}</h1>
             <p class="error-desc">
-                {% trans "Đường link bạn truy cập có thể đã bị xóa, đổi tên, hoặc tạm thời không khả dụng." %}
+                {% trans "The link you followed may have been removed, renamed, or is temporarily unavailable." %}
             </p>
-            <a href="/" class="btn-back">{% trans "← Quay về Trang Chủ" %}</a>
+            <a href="{% url 'core:index' %}" class="btn-back">← {% trans "Back to Home" %}</a>
         </div>
     </div>
 </body>

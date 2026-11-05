@@ -1,11 +1,14 @@
 {% load currency_filters i18n %}
-
+{% comment %}
+The cart page (core/cart.html) includes this template, and update_cart /
+delete_item_from_cart send it back after each change, so the page keeps the
+same shape before and after an update.
+{% endcomment %}
 <main class="main" id="cart-list">
     <div class="page-header breadcrumb-wrap">
         <div class="container">
             <div class="breadcrumb">
-                <a href="/" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
-                <span></span> {% trans "Shop" %}
+                <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
                 <span></span> {% trans "Cart" %}
             </div>
         </div>
@@ -15,7 +18,7 @@
             <div class="col-lg-8 mb-40">
                 <h1 class="heading-2 mb-10">{% trans "Your Cart" %}</h1>
                 <div class="d-flex justify-content-between">
-                    <h6 class="text-body">{% trans "There are" %} <span class="text-brand">{{ totalcartitems }}</span> {% trans "products in your cart" %}</h6>
+                    <h6 class="text-body">{% blocktrans trimmed count counter=totalcartitems %}There is <span class="text-brand">{{ counter }}</span> product in your cart{% plural %}There are <span class="text-brand">{{ counter }}</span> products in your cart{% endblocktrans %}</h6>
                 </div>
             </div>
         </div>
@@ -36,23 +39,23 @@
                         <tbody>
                             {% for product_id, item in cart_data.items %}
                             <tr class="pt-30">
-                                <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="#"></td>
+                                <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="{{ item.title }}"></td>
                                 <td class="product-des product-name">
                                     <h6 class="mb-5"><a class="product-name mb-10 text-heading" href="{% url 'core:product-detail' item.pid %}">{{ item.title }}</a></h6>
                                 </td>
-                                <td class="price" data-title="{% trans 'Price' %}">
+                                <td class="price" data-title="{% trans 'Unit Price' %}">
                                     <h4 class="text-body">{{ item.price|vnd }} ₫</h4>
                                 </td>
-                                <td class="text-center detail-info" data-title="{% trans 'Stock' %}">
+                                <td class="text-center detail-info" data-title="{% trans 'Quantity' %}">
                                     <div class="mr-15">
                                         <input type="number" placeholder="{% trans 'Qty' %}" class="w-25 product-qty-{{ product_id }} cart-qty-input" data-product="{{ product_id }}" value="{{ item.qty }}" min="1">
                                     </div>
                                 </td>
-                                <td class="price" data-title="{% trans 'Price' %}">
+                                <td class="price" data-title="{% trans 'Subtotal' %}">
                                     <h4 class="text-brand">{{ item.price|mul:item.qty|vnd }} ₫</h4>
                                 </td>
                                 <td class="action text-center" data-title="{% trans 'Remove' %}">
-                                    <button style="border: none; background: none;" class="text-body delete-product" data-product="{{ product_id }}"><i class="fi-rs-trash"></i></button>
+                                    <button style="border: none; background: none;" class="text-body delete-product" data-product="{{ product_id }}" title="{% trans 'Remove' %}"><i class="fi-rs-trash"></i></button>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -63,34 +66,30 @@
             <div class="col-lg-4">
                 <div class="border p-md-4 cart-totals ml-30">
                     <div class="table-responsive">
-                        <table class="table no-border">
-                            <tbody>
-                                <tr>
-                                    <td class="cart_total_label"><h6 class="text-muted">{% trans "Subtotal" %}</h6></td>
-                                    <td class="cart_total_amount"><h4 class="text-brand text-end">{{ cart_total_amount|vnd }} ₫</h4></td>
-                                </tr>
-                                <tr>
-                                    <td scope="col" colspan="2"><div class="divider-2 mt-10 mb-10"></div></td>
-                                </tr>
-                                <tr>
-                                    <td class="cart_total_label"><h6 class="text-muted">{% trans "Shipping" %}</h6></td>
-                                    <td class="cart_total_amount"><h5 class="text-heading text-end">{% trans "Free" %}</h5></td>
-                                </tr>
-                                <tr>
-                                    <td class="cart_total_label"><h6 class="text-muted">{% trans "Total" %}</h6></td>
-                                    <td class="cart_total_amount"><h4 class="text-brand text-end">{{ cart_total_amount|vnd }} ₫</h4></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <p class="fw-bold">{% trans "Tax" %}</p>
+                                <p>0 ₫</p>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <p class="fw-bold">{% trans "Shipping" %}</p>
+                                <p>0 ₫</p>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <p class="fw-bold">{% trans "Discount" %}</p>
+                                <p>0 ₫</p>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <p class="fw-bold">{% trans "Total" %}</p>
+                                <p>{{ cart_total_amount|vnd }} ₫</p>
+                            </div>
+                        </div>
                     </div>
                     {% if totalcartitems %}
-                    <a href="{% url 'core:checkout-info' %}" class="btn mb-20 w-100">{% trans "Proceed To CheckOut" %}<i class="fi-rs-sign-out ml-15"></i></a>
+                    <a href="{% url 'core:checkout-info' %}" class="btn mb-20 w-100">{% trans "Proceed to Checkout" %}<i class="fi-rs-sign-out ml-15"></i></a>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </main>
-
-
-

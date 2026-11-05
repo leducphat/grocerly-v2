@@ -12,10 +12,10 @@ from django.conf import settings
 from django.core import serializers
 from taggit.models import Tag
 
-import calendar
 from decimal import Decimal
 from core.vnpay import vnpay
 from django.utils import timezone
+from django.utils.dates import MONTHS
 from django.utils.translation import gettext_lazy as _
 from zoneinfo import ZoneInfo
 
@@ -234,13 +234,13 @@ def ajax_add_review(request, p_id):
     # ai cũng gửi thẳng POST tới đây được nên máy chủ phải tự kiểm tra lại.
     if not has_received_product(user, product):
         return JsonResponse(
-            {'bool': False, 'message': "You can only review a product you have received"},
+            {'bool': False, 'message': _("You can only review a product you have received.")},
             status=403,
         )
 
     if ProductReview.objects.filter(user=user, product=product).exists():
         return JsonResponse(
-            {'bool': False, 'message': "You have already reviewed this product"},
+            {'bool': False, 'message': _("You have already reviewed this product.")},
             status=403,
         )
 
@@ -359,7 +359,8 @@ def _refresh_cart(request):
         if stock <= 0:
             messages.warning(
                 request,
-                f"{product.title} is out of stock and has been removed from your cart."
+                _("%(product)s is out of stock and has been removed from your cart.")
+                % {"product": product.title},
             )
             del cart_data[p_id]
             continue
@@ -369,8 +370,8 @@ def _refresh_cart(request):
         if qty > stock:
             messages.warning(
                 request,
-                f"Only {stock} of {product.title} left in stock, "
-                f"so your cart now holds {stock}."
+                _("Only %(stock)s of %(product)s left in stock, so your cart now holds %(stock)s.")
+                % {"stock": stock, "product": product.title},
             )
             qty = stock
 
@@ -388,7 +389,7 @@ def _refresh_cart(request):
 def add_to_cart(request):
     product = Product.objects.filter(id=safe_int(request.POST.get('id'), 0)).first()
     if product is None:
-        return JsonResponse({'error': "Product not found"}, status=404)
+        return JsonResponse({'error': _("Product not found.")}, status=404)
 
     # The request only says which product and how many of it; everything the cart
     # line shows is read from the database.
@@ -433,7 +434,7 @@ def cart_view(request):
             'cart_total_amount': cart_total_amount,
         })
     else:
-        messages.warning(request, "Your cart is empty")
+        messages.warning(request, _("Your cart is empty"))
         return redirect("core:index")
 
 
@@ -463,10 +464,10 @@ def checkout_info_view(request):
     else:
         pending_order = _get_pending_order_from_session(request)
         if pending_order:
-            messages.info(request, "You have a pending checkout. Please complete payment.")
+            messages.info(request, _("You have a pending checkout. Please complete payment."))
             return redirect('core:checkout', pending_order.oid)
 
-        messages.warning(request, "Your cart is empty")
+        messages.warning(request, _("Your cart is empty"))
         return redirect("core:index")
 
 
@@ -654,7 +655,7 @@ def _log_wrong_vnpay_amount(view_name, order, vnpay_amount):
 def vnpay_payment(request, oid):
     order = _get_checkout_order_or_none(request, oid)
     if not order:
-        messages.warning(request, "Order not found. Please start checkout again.")
+        messages.warning(request, _("Order not found. Please start checkout again."))
         return redirect("core:checkout-info")
 
     # D-033: a cancelled order is closed, so it cannot be paid for any more.
@@ -663,7 +664,7 @@ def vnpay_payment(request, oid):
         return redirect("core:dashboard")
 
     if order.paid_status:
-        messages.info(request, "This order has already been paid.")
+        messages.info(request, _("This order has already been paid."))
         return redirect("core:payment-completed", order.oid)
 
     # Only the payment method is written here. The delivery status belongs to the
@@ -734,16 +735,16 @@ def vnpay_return(request):
                     if pending_oid and str(order.oid) == str(pending_oid):
                         del request.session['pending_order_oid']
                         
-                    messages.success(request, "Thanh toán VNPay thành công!")
+                    messages.success(request, _("VNPay payment successful!"))
                     return redirect("core:payment-completed", order.oid)
                 except CartOrder.DoesNotExist:
-                    messages.error(request, "Đơn hàng không tồn tại.")
+                    messages.error(request, _("This order does not exist."))
                     return redirect("core:index")
             else:
-                messages.error(request, f"Lỗi thanh toán VNPay. Mã lỗi: {vnp_ResponseCode}")
+                messages.error(request, _("VNPay payment failed. Error code: %(code)s") % {"code": vnp_ResponseCode})
                 return redirect("core:payment-failed")
         else:
-            messages.error(request, "Sai chữ ký bảo mật (Invalid signature).")
+            messages.error(request, _("Invalid security signature."))
             return redirect("core:payment-failed")
     return redirect("core:index")
 
@@ -788,7 +789,7 @@ def place_cod_order(request, oid):
 
     order = _get_checkout_order_or_none(request, oid)
     if not order:
-        messages.warning(request, "Order not found. Please start checkout again.")
+        messages.warning(request, _("Order not found. Please start checkout again."))
         return redirect("core:checkout-info")
 
     # D-033: a cancelled order is closed, so it cannot be placed again.
@@ -797,7 +798,7 @@ def place_cod_order(request, oid):
         return redirect("core:dashboard")
 
     if order.paid_status:
-        messages.info(request, "This order has already been paid.")
+        messages.info(request, _("This order has already been paid."))
         return redirect("core:payment-completed", order.oid)
 
     # As in vnpay_payment: the payment method only, never the delivery status (L-12).
@@ -807,7 +808,7 @@ def place_cod_order(request, oid):
     if 'cart_data_obj' in request.session:
         del request.session['cart_data_obj']
 
-    messages.success(request, "Order placed with Cash on Delivery.")
+    messages.success(request, _("Order placed with Cash on Delivery."))
     return redirect("core:payment-completed", order.oid)
 
 
@@ -815,7 +816,7 @@ def place_cod_order(request, oid):
 def checkout(request, oid):
     order = _get_checkout_order_or_none(request, oid)
     if not order:
-        messages.warning(request, "Checkout session not found. Please continue from checkout info.")
+        messages.warning(request, _("Checkout session not found. Please continue from checkout info."))
         return redirect("core:checkout-info")
 
     order_items = CartOrderItem.objects.filter(order=order)
@@ -826,7 +827,7 @@ def checkout(request, oid):
         return redirect("core:dashboard")
 
     if order.paid_status:
-        messages.info(request, "This order has already been paid.")
+        messages.info(request, _("This order has already been paid."))
         return redirect("core:payment-completed", order.oid)
 
     if request.method == "POST":
@@ -834,7 +835,7 @@ def checkout(request, oid):
         coupon = Coupon.objects.filter(code=code, active=True).first()
         if coupon:
             if coupon in order.coupons.all():
-                messages.warning(request, "Coupon already activated")
+                messages.warning(request, _("Coupon already activated"))
                 return redirect("core:checkout", order.oid)
             else:
                 discount = order.price * coupon.discount / 100
@@ -842,10 +843,10 @@ def checkout(request, oid):
                 order.price -= discount
                 order.saved += discount
                 order.save()
-                messages.success(request, "Coupon Activated")
+                messages.success(request, _("Coupon Activated"))
                 return redirect("core:checkout", order.oid)
         else:
-            messages.error(request, "Coupon Does Not Exist")
+            messages.error(request, _("Coupon Does Not Exist"))
 
     context = {
         'order': order,
@@ -858,7 +859,7 @@ def checkout(request, oid):
 def payment_completed_view(request, oid):
     order = _get_checkout_order_or_none(request, oid)
     if not order:
-        messages.warning(request, "Order not found. Please start checkout again.")
+        messages.warning(request, _("Order not found. Please start checkout again."))
         return redirect("core:checkout-info")
 
     # L-8: this page only displays the order. An online order becomes paid in
@@ -866,7 +867,7 @@ def payment_completed_view(request, oid):
     # URL by hand must not confirm a payment that never happened - and must not
     # show "Payment Completed" for an order VNPay has not confirmed.
     if order.payment_method == 'online' and not order.paid_status:
-        messages.warning(request, "This order has not been paid yet. Please complete the payment.")
+        messages.warning(request, _("This order has not been paid yet. Please complete the payment."))
         return redirect("core:checkout", order.oid)
 
     if 'cart_data_obj' in request.session:
@@ -898,14 +899,17 @@ def customer_dashboard(request):
     orders_list = CartOrder.objects.filter(user=request.user).order_by("-id")
     address = Address.objects.filter(user=request.user)
 
-    # Monthly order chart data
-    orders = CartOrder.objects.annotate(
+    # Monthly order chart data: the customer's own orders only - counting every
+    # order of the shop showed each customer how much the whole shop sells.
+    orders = CartOrder.objects.filter(user=request.user).annotate(
         month=ExtractMonth("order_date")
     ).values("month").annotate(count=Count("id")).values("month", "count")
     month = []
     total_orders = []
     for i in orders:
-        month.append(calendar.month_name[i["month"]])
+        # MONTHS holds Django's translated month names ("Tháng 1" on /vi/);
+        # calendar.month_name is always English.
+        month.append(str(MONTHS[i["month"]]))
         total_orders.append(i["count"])
 
     # Handle new address creation
@@ -918,7 +922,7 @@ def customer_dashboard(request):
             address=new_address,
             mobile=mobile,
         )
-        messages.success(request, "Address Added Successfully.")
+        messages.success(request, _("Address Added Successfully."))
         return redirect("core:dashboard")
 
     user_profile = Profile.objects.get(user=request.user)
@@ -960,7 +964,7 @@ def wishlist_view(request):
 @require_POST
 def add_to_wishlist(request):
     if not request.user.is_authenticated:
-        return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để thêm vào Wishlist!"})
+        return JsonResponse({"bool": False, "error": _("Please sign in to add products to your wishlist.")})
 
     # A page opened before staff deleted the product still shows its heart (L-28).
     product = Product.objects.filter(id=safe_int(request.POST.get('id'), 0)).first()
@@ -988,7 +992,7 @@ def add_to_wishlist(request):
 @require_POST
 def remove_wishlist(request):
     if not request.user.is_authenticated:
-        return JsonResponse({"bool": False, "error": "Vui lòng đăng nhập để sử dụng Wishlist!"})
+        return JsonResponse({"bool": False, "error": _("Please sign in to use your wishlist.")})
 
     pid = request.POST.get('id')
     try:
@@ -1023,7 +1027,7 @@ def ajax_contact_form(request):
     form.save()
     data = {
         "bool": True,
-        "message": "Message Sent Successfully"
+        "message": _("Message Sent Successfully")
     }
     return JsonResponse({"data": data})
 

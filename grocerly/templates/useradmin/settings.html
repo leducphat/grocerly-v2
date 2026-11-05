@@ -1,11 +1,12 @@
 {% extends 'useradmin/base.html' %}
+{% load i18n %}
 {% load static %}
 {% load humanize %}
 {% block content %}  
 
 <section class="content-main">
     <div class="content-header">
-        <h2 class="content-title">Profile setting</h2>
+        <h2 class="content-title">{% trans "Profile settings" %}</h2>
     </div>
     <div class="card">
         <div class="card-body">
@@ -18,28 +19,28 @@
                                 <div class="col-lg-8">
                                     <div class="row gx-3">
                                         <div class="col-12 mb-3">
-                                            <label class="form-label">Full Name</label>
-                                            <input class="form-control" name="full_name" type="text" value="{{ form.full_name.value|default_if_none:'' }}" placeholder="Enter full name" />{% include "partials/field_errors.html" with field=form.full_name %}
+                                            <label class="form-label">{% trans "Full Name" %}</label>
+                                            <input class="form-control" name="full_name" type="text" value="{{ form.full_name.value|default_if_none:'' }}" placeholder="{% trans 'Full Name' %}" />{% include "partials/field_errors.html" with field=form.full_name %}
                                         </div>
                                         <div class="col-6 mb-3">
-                                            <label class="form-label">Email</label>
-                                            <input class="form-control bg-light" name="email" value="{{request.user.email}}" readonly type="text" placeholder="Type here" />
+                                            <label class="form-label">{% trans "Email" %}</label>
+                                            <input class="form-control bg-light" name="email" value="{{request.user.email}}" readonly type="text" />
                                         </div>
                                         <div class="col-lg-6 mb-3">
-                                            <label class="form-label">Mobile</label>
-                                            <input class="form-control" name="phone" value="{{ form.phone.value|default_if_none:'' }}" type="text" placeholder="+123 456 7890" />{% include "partials/field_errors.html" with field=form.phone %}
+                                            <label class="form-label">{% trans "Mobile" %}</label>
+                                            <input class="form-control" name="phone" value="{{ form.phone.value|default_if_none:'' }}" type="text" placeholder="{% trans 'e.g. 0901 234 567' %}" />{% include "partials/field_errors.html" with field=form.phone %}
                                         </div>
                                          <div class="col-lg-12 mb-3">
-                                            <label class="form-label">Bio</label>
-                                            <input class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.bio %}
+                                            <label class="form-label">{% trans "Bio" %}</label>
+                                            <input class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" type="text" />{% include "partials/field_errors.html" with field=form.bio %}
                                         </div>
                                         <div class="col-lg-6 mb-3">
-                                            <label class="form-label">Address</label>
-                                            <input class="form-control" name="address" value="{{ form.address.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.address %}
+                                            <label class="form-label">{% trans "Address" %}</label>
+                                            <input class="form-control" name="address" value="{{ form.address.value|default_if_none:'' }}" type="text" />{% include "partials/field_errors.html" with field=form.address %}
                                         </div>
                                         <div class="col-lg-6 mb-3">
-                                            <label class="form-label">Country</label>
-                                            <input class="form-control" name="country" value="{{ form.country.value|default_if_none:'' }}" type="text" placeholder="Type here" />{% include "partials/field_errors.html" with field=form.country %}
+                                            <label class="form-label">{% trans "Country" %}</label>
+                                            <input class="form-control" name="country" value="{{ form.country.value|default_if_none:'' }}" type="text" />{% include "partials/field_errors.html" with field=form.country %}
                                         </div>
                                     </div>
                                 </div>
@@ -47,9 +48,9 @@
                                     <figure class="text-lg-center">
                                         
                                         {% if profile.image %}
-                                            <img class="img-lg mb-3 img-avatar" src="{{profile.image.url}}" alt="User Photo" />
+                                            <img class="img-lg mb-3 img-avatar" src="{{profile.image.url}}" alt="{% trans 'Avatar' %}" />
                                         {% else %}
-                                            <img class="img-lg mb-3 img-avatar" src="https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2281862025.jpg" alt="User Photo" />
+                                            <img class="img-lg mb-3 img-avatar" src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" alt="{% trans 'Avatar' %}" />
                                         {% endif %}
                                             
                                         <figcaption>
@@ -59,7 +60,7 @@
                                 </aside>
                             </div>
                             <br />
-                            <button class="btn btn-primary" type="submit">Save changes</button>
+                            <button class="btn btn-primary" type="submit">{% trans "Save changes" %}</button>
                         </form>
                     </section>
                 </div>

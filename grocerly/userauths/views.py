@@ -17,7 +17,7 @@ def register_view(request):
         if form.is_valid():
             new_user = form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Welcome, {username}! Your account has been created successfully!')
+            messages.success(request, _('Welcome, %(name)s! Your account has been created successfully!') % {'name': username})
             new_user = authenticate(username=form.cleaned_data['email'],
                                     password=form.cleaned_data['password1'])
             login(request, new_user)
@@ -34,7 +34,7 @@ def register_view(request):
 
 def login_view(request):
     if request.user.is_authenticated:
-        messages.warning(request, 'You are already logged in!')
+        messages.warning(request, _('You are already signed in.'))
         if request.user.is_superuser:
             return redirect('/admin/')
         elif request.user.is_staff:
@@ -49,7 +49,7 @@ def login_view(request):
         user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, f'Welcome back {user.username}!')
+            messages.success(request, _('Welcome back %(name)s!') % {'name': user.username})
 
             if user.is_superuser:
                 return redirect('/admin/')
@@ -72,7 +72,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    messages.success(request, 'You have been logged out successfully.')
+    messages.success(request, _('You have been signed out.'))
     return redirect('userauths:sign-in')
 
 
@@ -85,7 +85,7 @@ def profile_update(request):
             new_form = form.save(commit=False)
             new_form.user = request.user
             new_form.save()
-            messages.success(request, "Profile Updated Successfully.")
+            messages.success(request, _("Profile Updated Successfully."))
             return redirect("core:dashboard")
     else:
         form = ProfileForm(instance=profile)

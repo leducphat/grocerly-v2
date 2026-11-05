@@ -314,6 +314,17 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-07:** link trên trang giữ ngôn ngữ đang xem, kể cả link sản phẩm trong giỏ
   mini dựng bằng JavaScript; khách vào thẳng trang `/en/` bấm sang sản phẩm vẫn ở
   trang tiếng Anh (L-35).
+- **Mọi UC có giao diện:** một trang chỉ dùng một ngôn ngữ. Trang `/vi/` không còn
+  chữ tiếng Anh, trang `/en/` không còn chữ tiếng Việt, kể cả thông báo sau khi bấm
+  nút, câu lỗi của form (cả câu lỗi do Django viết), câu JavaScript hiện ra và câu
+  trả lời JSON mà trang in ra. Tên riêng và dữ liệu (tên sản phẩm, nhà cung cấp,
+  khách) giữ nguyên như đã nhập (L-47, L-55 → L-57, D-056).
+- **Mọi UC có giao diện:** trang chỉ hiện nội dung thật của Grocerly, không còn nội
+  dung mẫu của theme (cửa hàng, người, sản phẩm, số điện thoại giả, Lorem ipsum).
+  Không có form nào gửi về `#`. Trang chính sách bảo mật, điều khoản, hướng dẫn mua
+  hàng và giới thiệu chỉ mô tả những gì hệ thống làm thật. Cửa hàng chưa có địa chỉ
+  riêng nên chân trang và trang liên hệ ghi địa chỉ của trường và email của sinh viên
+  (L-58, D-056).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.

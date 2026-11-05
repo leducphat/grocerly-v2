@@ -253,7 +253,7 @@ def test_order_detail_offers_cancelled_in_the_status_list(staff_client, order_wi
 
     page = response.content.decode()
     assert '<option value="cancelled">Đã hủy</option>' in page
-    assert "Order Status: Đang xử lý" in page
+    assert "Trạng thái đơn hàng: Đang xử lý" in page  # label and value both translated
 
 
 def test_shipping_order_deducts_stock_of_product_renamed_after_the_order(
@@ -380,3 +380,11 @@ def test_order_detail_does_not_print_none_for_a_missing_city_or_country(staff_cl
     page = staff_client.get(reverse("useradmin:order_detail", args=[order_with_item.oid])).content.decode()
 
     assert not re.search(r"\bNone\b", page)
+
+
+def test_order_detail_shows_the_quantity_of_each_line(staff_client, order_with_item):
+    """L-60: the quantity column read a field that does not exist (`qty`) and was
+    always empty; order_with_item holds 3 units."""
+    response = staff_client.get(reverse("useradmin:order_detail", args=[order_with_item.oid]))
+
+    assert "<td>3</td>" in response.content.decode()
