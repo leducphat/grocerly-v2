@@ -32,7 +32,9 @@ from django.urls import reverse
 from django.utils import translation
 from django.utils.translation.template import templatize
 
+from core.forms import ProductReviewForm
 from core.models import CartOrder, CartOrderItem, ProductReview
+from useradmin.forms import AddProductForm
 
 BASE_DIR = Path(settings.BASE_DIR)
 APPS = ["core", "userauths", "useradmin", "store_api", "grocerly"]
@@ -221,6 +223,27 @@ def test_field_errors_from_django_are_in_vietnamese(check, value):
         check(value)
 
     assert VIETNAMESE.search(error.value.messages[0])
+
+
+@pytest.mark.xfail(reason="L-64: Django's vi catalog puts a space before the full stop")
+def test_minimum_value_error_has_no_space_before_the_full_stop():
+    """L-64: a negative price on the staff product form. Django's vi catalog writes
+    "lớn hơn hoặc bằng với 0 ." with a space before the full stop."""
+    with translation.override("vi"), pytest.raises(ValidationError) as error:
+        AddProductForm.base_fields["price"].clean("-5")
+
+    assert " ." not in error.value.messages[0]
+
+
+@pytest.mark.xfail(reason="L-62: the review box placeholder is not marked for translation")
+def test_review_box_placeholder_is_in_the_language_of_the_page():
+    """L-62, UC-14: the review form sits in a tab hidden on load and shows only to a
+    customer who received the product, so the page comparison below never reads it.
+    The box itself, rendered for a /vi/ page, must not hold the English placeholder."""
+    with translation.override("vi"):
+        box = str(ProductReviewForm()["review"])
+
+    assert "Write your review" not in box
 
 
 # --- pages: the visible text at /vi/ against /en/ -------------------------------------

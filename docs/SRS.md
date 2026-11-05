@@ -159,17 +159,25 @@ KLTN tập trung làm chắc phần cốt lõi đã có — xem [`PLAN.md`](PLAN
 
 ## 5. Yêu cầu phi chức năng
 
-| Mã | Nhóm | Yêu cầu |
-|---|---|---|
-| NFR-01 | **UI/UX** | Giao diện đáp ứng (responsive), hiển thị đúng và ổn định trên mọi kích thước màn hình |
-| NFR-02 | **Hiệu năng** | Xử lý được lượng lớn truy cập đồng thời; thời gian phản hồi từ máy chủ nhanh, không làm gián đoạn trải nghiệm |
-| NFR-03 | **Bảo mật** | Mật khẩu bắt buộc mã hóa trước khi lưu; giao dịch thanh toán qua kênh mã hóa SSL/TLS; có cơ chế ngăn chặn SQL Injection và XSS |
-| NFR-04 | **Khả năng mở rộng & bảo trì** | Mã nguồn tổ chức theo kiến trúc MVT của Django, thiết kế thành module rời rạc để dễ bảo trì, gỡ lỗi, nâng cấp |
+TLCN chỉ có bốn NFR mô tả định tính ("phản hồi nhanh", "chịu được lượng lớn truy
+cập"). Ngày 05/11/2026 ba NFR được gắn một ngưỡng đo được và một cách đo lặp lại
+được: hiệu năng, bảo mật, bảo trì (D-057, P-21). NFR-01 về giao diện bỏ cùng ngày:
+câu "hiển thị đúng và ổn định trên mọi kích thước màn hình" không có ngưỡng đo được.
+Mã NFR-02 → NFR-04 giữ nguyên vì `ISSUES.md` đã dẫn tới chúng. Ngưỡng là đề xuất, chốt cùng bản cam kết với GVHD
+([`COMMITMENT.md`](COMMITMENT.md) §5.2).
 
-> ⚠️ **Ghi chú cho KLTN:** bốn NFR trên là mô tả định tính. Rubric KLTN yêu cầu
-> **≥ 5 yêu cầu phi chức năng có ràng buộc định lượng** để đạt Mức 5 ở TC2.1.
-> Việc định lượng hóa được theo dõi ở [`PLAN.md`](PLAN.md) (P-21); khi chốt cùng
-> GVHD thì sửa thẳng bảng trên và ghi lần sửa vào `PLAN.md` §6.
+| Mã | Nhóm | Yêu cầu và ngưỡng | Cách đo | Số đo 05/11/2026 |
+|---|---|---|---|---|
+| NFR-02 | **Hiệu năng** | Khi host đang chạy, 95% request tới mỗi trang chính trả về trong ≤ 3 giây. Tính thời gian máy chủ trả xong mã HTML của trang, không tính ảnh, CSS, JavaScript tải sau đó | Mỗi trang 20 request nối tiếp bằng `curl` từ máy ở TP.HCM, ghi thời gian tới khi nhận xong mã HTML, lấy mốc mà 95% request nhanh hơn. Năm trang: trang chủ, danh sách, chi tiết sản phẩm, tìm kiếm, danh mục | **Đạt** ở cả năm trang. Trang chậm nhất là trang chủ: 95% request xong trong 1,14 giây. Trang nhanh nhất là tìm kiếm: 0,53 giây. 100 request, không request nào lỗi |
+| NFR-03 | **Bảo mật** | (a) Mật khẩu không lưu bản gốc mà lưu dạng băm PBKDF2-SHA256 với 1.000.000 vòng lặp; mật khẩu mới phải có ≥ 8 ký tự. (b) 100% request `http://` được chuyển sang `https://`. (c) Ở mỗi lần chạy CI: 0 secret lộ trong lịch sử Git, 0 thư viện có lỗ hổng đã biết | (a) Bộ băm mặc định của Django 5.2 và `AUTH_PASSWORD_VALIDATORS` trong `settings.py`. (b) `curl` tới địa chỉ `http://`. (c) Job `secret-scan` (gitleaks) và `dependency-audit` (pip-audit) của CI | **Đạt** cả ba. (b) Host trả 301 sang `https://`. (c) Lần CI gần nhất: gitleaks tìm ra 0 secret, pip-audit tìm ra 0 lỗ hổng |
+| NFR-04 | **Bảo trì** | 0 lỗi lint, tỉ lệ dòng trùng lặp của mã Python ≤ 3%, độ phủ dòng lệnh của bộ test ≥ 70% | `ruff check`, `jscpd` và `pytest --cov` ở mỗi lần chạy CI. Lint và trùng lặp tính theo phạm vi ở [`COMMITMENT.md`](COMMITMENT.md) §5.1; độ phủ tính trên bốn app `core`, `userauths`, `useradmin`, `store_api`, không tính migration và test (`.coveragerc`) | **Đạt.** 0 lỗi lint, trùng lặp 0,66% số dòng, độ phủ 92% |
+
+Hai điều không cam kết, có ghi lý do ở D-057. Thứ nhất, NFR-02 không tính lần đầu
+sau khi host ngủ: gói miễn phí của Render tắt máy khi không có request trong 15 phút,
+và request đánh thức nó mất khoảng 50 giây (đo được 48,7 giây ngày 05/11/2026). Thứ
+hai, không có ngưỡng số người dùng đồng thời: host chạy một worker xử lý lần lượt
+từng request, nên số này phụ thuộc gói host chứ không phụ thuộc mã nguồn (xem L-24
+về các chỗ chưa an toàn khi tăng worker).
 
 ---
 

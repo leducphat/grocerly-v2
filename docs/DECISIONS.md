@@ -2470,6 +2470,29 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - `.po` được dựng lại theo thứ tự msgid, bỏ các mục không còn dùng. Bản dịch tiếng Việt cho vài câu của Django mà catalog của Django thiếu nằm trong `locale/vi` của project, vì `LOCALE_PATHS` được ưu tiên hơn catalog của Django (L-57).
 - Câu trả lời của trợ lý AI do Gemini tự viết không thuộc ràng buộc này (UC-15, D-035); các câu gửi cho Gemini làm kết quả công cụ cũng không cần dịch. Chuỗi `Message` trả cho VNPay ở IPN là giao thức, giữ nguyên.
 
+## D-057 · Ba NFR có ngưỡng đo được (hiệu năng, bảo mật, bảo trì), đo trên host đang chạy
+
+- **Ngày:** 05/11/2026
+- **Trạng thái:** Đã chốt (sinh viên); ngưỡng trình GVHD cùng bản cam kết, P-03
+
+**Bối cảnh.** Bốn NFR của TLCN chỉ mô tả định tính. Rubric cần ít nhất ba NFR có ràng buộc định lượng cho Mức 4 của TC2.1, năm cho Mức 5 (P-21). Sinh viên nhắm Mức 4. Host KLTN chạy gói miễn phí của Render: một instance, một worker `sync`, tắt máy khi không có request trong 15 phút. Mọi ngưỡng phải đo lại được lúc bảo vệ, bằng công cụ đã có trong project, và sinh viên phải giải thích được từng con số khi hội đồng hỏi.
+
+**Phương án đã cân nhắc**
+1. *Năm NFR có ngưỡng*: thêm giao diện (không có thanh cuộn ngang ở ba bề rộng màn hình, đo bằng Playwright) và thời gian trả lời của trợ lý AI (đo bằng Gemini thật). Đủ Mức 5, nhưng hai NFR này khó bảo vệ: lần đo đầu ra 25/27 lượt đạt vì một trang dư 12 px (L-65), nên ngưỡng phải là tỉ lệ phần trăm lượt đạt, mà hội đồng dễ hỏi "vậy trang nào được phép vỡ"; còn thời gian trả lời của AI chỉ đo được 8 câu trước khi Gemini bản miễn phí chặn, và phụ thuộc dịch vụ bên ngoài.
+2. *Ba NFR có ngưỡng: hiệu năng, bảo mật, bảo trì.* Đúng ngưỡng Mức 4. Bảo mật và bảo trì lấy số từ cấu hình và từ các job CI đã chạy ở mỗi lần push; hiệu năng đo bằng `curl`.
+3. Về cách đo hiệu năng: *trên host thật, từ máy ở TP.HCM* hay *bằng test client của Django ở local*. Local lặp lại được trong CI, nhưng không có mạng, không có Neon, nên con số không nói gì về trải nghiệm thật.
+4. *Thử tải nhiều người dùng cùng lúc* (Locust hay k6) để ra ngưỡng số người dùng đồng thời. Với một worker xử lý lần lượt, kết quả chỉ đo giới hạn của gói host; thử tải lên host thật cũng làm chậm host trong lúc đo.
+5. Về ngưỡng hiệu năng: *thời gian trung bình* hay *phân vị 95* (mốc mà 95% request nhanh hơn). Trung bình che mất các request chậm; phân vị 95 vẫn đọc được với 20 mẫu mỗi trang.
+
+**Quyết định.** Sinh viên chọn phương án 2 ngày 05/11/2026: NFR-02, NFR-03, NFR-04 có ngưỡng; bỏ NFR-01 về giao diện, vì câu "hiển thị đúng trên mọi kích thước màn hình" của TLCN không đo được và giữ dạng mô tả thì vẫn là một chỗ bị hỏi; bỏ NFR về trợ lý AI, vì ràng buộc của UC-15 ở SRS §6.1 đã nói Gemini lỗi thì khách nhận câu báo chứ không nhận lỗi máy chủ. Hiệu năng đo trên host thật, phân vị 95, ngưỡng 3 giây, chỉ tính mã HTML máy chủ trả về, không tính ảnh, CSS, JavaScript, vì đó là phần code của project quyết định. Ngưỡng nới rộng hơn số đo ngày 05/11/2026 chừng 2,5 lần (ở trang chủ, trang chậm nhất, 95% request xong trong 1,14 giây), vì mạng dao động theo giờ; sinh viên chọn 3 giây thay cho 2 giây đề xuất ban đầu. NFR-03 chỉ giữ ba ý dễ kiểm nhất: mật khẩu băm, HTTPS, hai lượt quét của CI; ý về CSRF bỏ vì có ngoại lệ ở IPN của VNPay, phải giải thích dài. Lần đầu sau khi host ngủ không tính. Không đặt ngưỡng số người dùng đồng thời.
+
+**Lý do.** Ít NFR hơn thì ít chỗ hội đồng chọn để hỏi hơn, mà ba NFR còn lại đều dựa trên thứ kiểm lại được ngay tại buổi bảo vệ: một lệnh `curl`, một dòng cấu hình, một lần chạy CI. Đổi lại không còn khoảng dư: hội đồng không công nhận một NFR thì TC2.1 xuống Mức 3 ở tiêu chí này.
+
+**Hệ quả.**
+- SRS §5 còn ba NFR, mỗi NFR có cột cách đo và cột số đo; đo lại trước khi bảo vệ. Mã NFR-02 → NFR-04 không đánh lại, vì ISSUES (L-20, L-26, L-29) đã dẫn tới NFR-03.
+- Lần đo bề rộng trang lúc cân nhắc phương án 1 thấy trang danh sách sản phẩm có thanh cuộn ngang (L-65), ghi vào ISSUES, sửa ở P-47. Số đo thời gian trả lời của trợ lý AI ngày 05/11/2026 (8 câu, chậm nhất 5,6 giây) giữ trong nhật ký AI, không đưa vào SRS.
+- Lần đánh thức host khoảng 50 giây là hạn chế của gói miễn phí, ghi ở SRS §5; workflow health mỗi giờ (D-053) không giữ host thức.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
