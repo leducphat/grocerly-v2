@@ -170,7 +170,7 @@
                     <section class="section-padding pb-5">
                         <div class="section-title">
                             <h3 class="">{% trans "Deals Of The Day" %}</h3>
-                            <a class="show-all" href="{% url 'core:coming-soon' %}">
+                            <a class="show-all" href="{% url 'core:product-list' %}">
                                 {% trans "All Deals" %}
                                 <i class="fi-rs-angle-right"></i>
                             </a>
@@ -226,7 +226,7 @@
                                         <h4>
                                             {% trans "Everyday Fresh &" %} <br />{% trans "Clean with Our" %}<br /> {% trans "Products" %}
                                         </h4>
-                                        <a href="{% url 'core:coming-soon' %}" class="btn btn-xs">{% trans "Shop Now" %} <i class="fi-rs-arrow-small-right"></i></a>
+                                        <a href="{% url 'core:product-list' %}" class="btn btn-xs">{% trans "Shop Now" %} <i class="fi-rs-arrow-small-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +245,7 @@
                                 <div class="banner-img mb-sm-0">
                                     <img src="{% static 'assets/imgs/banner/banner-3.png' %}" alt="" />
                                     <div class="banner-text">
-                                        <h4>{% trans "The best Organic" %} <br />{% trans "Products Online" %}</h4>
+                                        <h4>{% trans "The best organic<br /> products online" %}</h4>
                                         <a href="{% url 'core:product-list' %}" class="btn btn-xs">{% trans "Shop Now" %} <i class="fi-rs-arrow-small-right"></i></a>
                                     </div>
                                 </div>
@@ -289,7 +289,7 @@
                 <div class="section-title">
                     <div class="title">
                         <h3>{% trans "Shop by Categories" %}</h3>
-                        <a class="show-all" href="{% url 'core:coming-soon' %}">
+                        <a class="show-all" href="{% url 'core:category-list' %}">
                             {% trans "All Categories" %}
                             <i class="fi-rs-angle-right"></i>
                         </a>

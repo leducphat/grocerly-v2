@@ -38,7 +38,7 @@ def dashboard(request):
 
     revenue_data = revenue_orders().annotate(
         month=ExtractMonth("order_date")
-    ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue")
+    ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue").order_by("month")
     
     rev_month = []
     rev_total = []

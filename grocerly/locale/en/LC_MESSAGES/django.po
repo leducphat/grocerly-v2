@@ -978,9 +978,6 @@ msgid ""
 "count\">%(count)s</span>"
 msgstr ""
 
-msgid "Products Online"
-msgstr ""
-
 msgid "Products you added"
 msgstr ""
 
@@ -1258,7 +1255,7 @@ msgid ""
 "pay."
 msgstr ""
 
-msgid "The best Organic"
+msgid "The best organic<br /> products online"
 msgstr ""
 
 msgid ""

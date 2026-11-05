@@ -23,7 +23,7 @@
                                     {% if profile.image %}
                                     <img src="{{ profile.image.url }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="{% trans 'Profile Image' %}">
                                     {% else %}
-                                    <img src="https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="{% trans 'Profile Image' %}">
+                                    <img src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="{% trans 'Profile Image' %}">
                                     {% endif %}
                                 </div>
 

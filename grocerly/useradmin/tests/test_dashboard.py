@@ -67,3 +67,15 @@ def test_shop_page_revenue_and_items_sold_leave_out_cancelled_orders(staff_clien
 
     assert response.context["revenue"]["price"] == Decimal("75000.00")
     assert response.context["total_sales"]["qty"] == 3  # the 2 cancelled units are not sold
+
+
+def test_shop_page_links_each_product_to_its_edit_page(staff_client, staff, product):
+    """Review of PR #23: the store page linked products to the customer product page,
+    which RestrictStaffMiddleware sends staff away from; it links to the edit page."""
+    product.user = staff
+    product.save()
+
+    page = staff_client.get(reverse("useradmin:shop_page")).content.decode()
+
+    assert reverse("useradmin:dashboard-edit-products", args=[product.p_id]) in page
+    assert reverse("core:product-detail", args=[product.p_id]) not in page

@@ -903,7 +903,7 @@ def customer_dashboard(request):
     # order of the shop showed each customer how much the whole shop sells.
     orders = CartOrder.objects.filter(user=request.user).annotate(
         month=ExtractMonth("order_date")
-    ).values("month").annotate(count=Count("id")).values("month", "count")
+    ).values("month").annotate(count=Count("id")).values("month", "count").order_by("month")
     month = []
     total_orders = []
     for i in orders:

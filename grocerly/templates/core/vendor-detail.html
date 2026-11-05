@@ -20,7 +20,7 @@
                         <div class="product-category">
                             <span class="text-muted">{% blocktrans trimmed with year=vendor.date|date:"Y" %}Since {{ year }}{% endblocktrans %}</span>
                         </div>
-                        <h3 class="mb-5 text-white"><a href="{% url 'core:coming-soon' %}" class="text-white">{{vendor.name}}</a></h3>
+                        <h3 class="mb-5 text-white">{{ vendor.name }}</h3>
                         <div class="row">
                             <div class="col-lg-4">
                                 <div class="vendor-des mb-15">

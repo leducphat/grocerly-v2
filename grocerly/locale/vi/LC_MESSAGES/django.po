@@ -1031,9 +1031,6 @@ msgstr ""
 "Số sản phẩm trong danh sách: <span class=\"text-brand\" id=\"wishlist-item-"
 "count\">%(count)s</span>"
 
-msgid "Products Online"
-msgstr "Tốt nhất trực tuyến"
-
 msgid "Products you added"
 msgstr "Sản phẩm bạn đã thêm"
 
@@ -1326,8 +1323,8 @@ msgstr ""
 "Trợ lý giúp bạn tìm sản phẩm và thêm vào giỏ, và trợ lý có thể sai. Hãy kiểm "
 "tra sản phẩm, số lượng và giá trong giỏ trước khi thanh toán."
 
-msgid "The best Organic"
-msgstr "Sản phẩm hữu cơ"
+msgid "The best organic<br /> products online"
+msgstr "Sản phẩm hữu cơ<br /> tốt nhất trực tuyến"
 
 msgid ""
 "The Grocerly team is building this feature and it will be available soon."
