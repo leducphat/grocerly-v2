@@ -1,22 +1,74 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: Grocerly\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-05-20 10:00+0000\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"PO-Revision-Date: 2026-11-05 12:00+0700\n"
 "Language: vi\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
-msgid "404 - Không tìm thấy trang | Grocerly"
+msgid "%(counter)s category"
+msgid_plural "%(counter)s categories"
+msgstr[0] "%(counter)s danh mục"
+
+msgid "%(counter)s product"
+msgid_plural "%(counter)s products"
+msgstr[0] "%(counter)s sản phẩm"
+
+msgid "%(product)s is out of stock and has been removed from your cart."
+msgstr "%(product)s đã hết hàng nên đã được bỏ khỏi giỏ hàng."
+
+msgid "%(qty)s is more than usual, please check the quantity."
+msgstr "%(qty)s là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé."
+
+msgid "%(rating)s star"
+msgid_plural "%(rating)s stars"
+msgstr[0] "%(rating)s sao"
+
+msgid "(%(counter)s review)"
+msgid_plural "(%(counter)s reviews)"
+msgstr[0] "(%(counter)s đánh giá)"
+
+msgid "1. Create an account"
+msgstr "1. Tạo tài khoản"
+
+msgid "2. Find your products"
+msgstr "2. Tìm sản phẩm"
+
+msgid "3. Check your cart"
+msgstr "3. Kiểm tra giỏ hàng"
+
+msgid "4. Enter delivery details"
+msgstr "4. Nhập thông tin giao hàng"
+
+msgid "404 - Page not found | Grocerly"
 msgstr "404 - Không tìm thấy trang | Grocerly"
+
+msgid "5. Pay"
+msgstr "5. Thanh toán"
+
+msgid "6. Follow your order"
+msgstr "6. Theo dõi đơn hàng"
+
+msgid ""
+"<a href=\"%(contact_url)s\">Contact us</a> if you have any issue or question"
+msgstr ""
+"<a href=\"%(contact_url)s\">Liên hệ với chúng tôi</a> nếu bạn có thắc mắc "
+"hoặc cần hỗ trợ"
+
+msgid "A discount coupon is entered at checkout and counts once per order."
+msgstr ""
+"Mã giảm giá được nhập ở bước thanh toán và chỉ tính một lần cho mỗi đơn."
 
 msgid "About"
 msgstr "Giới thiệu"
+
+msgid "About Grocerly"
+msgstr "Về Grocerly"
 
 msgid "About Us"
 msgstr "Về chúng tôi"
@@ -24,17 +76,53 @@ msgstr "Về chúng tôi"
 msgid "Account"
 msgstr "Tài khoản"
 
+msgid "Action"
+msgstr "Thao tác"
+
 msgid "Actions"
 msgstr "Hành động"
+
+msgid "Actual revenue"
+msgstr "Doanh thu thực tế"
+
+msgid "Actual revenue this month"
+msgstr "Doanh thu thực tế tháng này"
 
 msgid "Add"
 msgstr "Thêm"
 
-msgid "Add Address"
-msgstr "Thêm địa chỉ"
+msgid "Add %(qty)sx %(title)s - %(total)s ₫"
+msgstr "Thêm %(qty)sx %(title)s - %(total)s ₫"
+
+msgid "Add a review"
+msgstr "Thêm đánh giá"
+
+msgid "Add new product"
+msgstr "Thêm sản phẩm mới"
+
+msgid "Add product"
+msgstr "Thêm sản phẩm"
+
+msgid "Add to cart"
+msgstr "Thêm vào giỏ"
+
+msgid "Add to wishlist"
+msgstr "Thêm vào yêu thích"
+
+msgid "Additional images"
+msgstr "Ảnh phụ"
 
 msgid "Address"
 msgstr "Địa chỉ"
+
+msgid "Address Added Successfully."
+msgstr "Đã thêm địa chỉ."
+
+msgid "Address:"
+msgstr "Địa chỉ:"
+
+msgid "AI shopping assistant"
+msgstr "Trợ lý mua sắm AI"
 
 msgid "All"
 msgstr "Tất cả"
@@ -45,20 +133,76 @@ msgstr "Tất cả danh mục"
 msgid "All Deals"
 msgstr "Tất cả khuyến mãi"
 
+msgid "All rights reserved"
+msgstr "Bảo lưu mọi quyền"
+
 msgid "All Vendors"
-msgstr "Tất cả nhà bán"
+msgstr "Tất cả nhà cung cấp"
+
+msgid "Already have an account?"
+msgstr "Bạn đã có tài khoản?"
+
+msgid ""
+"An item that sold out or was taken off sale while it sat in your cart is "
+"removed from the cart."
+msgstr ""
+"Sản phẩm đã hết hàng hoặc ngừng bán trong lúc còn nằm trong giỏ sẽ bị bỏ khỏi"
+" giỏ."
+
+msgid "An overview of your store's business"
+msgstr "Toàn bộ dữ liệu về hoạt động kinh doanh của bạn"
+
+msgid "Apply"
+msgstr "Áp dụng"
 
 msgid "Apply Price"
 msgstr "Áp dụng giá"
 
-msgid "Avg. Rating"
-msgstr "Đánh giá TB"
+msgid ""
+"Ask about a product, an order or a payment, or tell us what could work "
+"better. The shop staff read every message and answer by email."
+msgstr ""
+"Hỏi về sản phẩm, đơn hàng hay thanh toán, hoặc cho chúng tôi biết chỗ nào nên"
+" làm tốt hơn. Nhân viên cửa hàng đọc mọi tin nhắn và trả lời qua email."
+
+msgid "Ask the AI assistant to find products for you"
+msgstr "Nhờ trợ lý AI tìm sản phẩm giúp bạn"
+
+msgid "Assistant is thinking..."
+msgstr "Trợ lý đang trả lời..."
+
+msgid "Avatar"
+msgstr "Ảnh đại diện"
+
+msgid "Back to Home"
+msgstr "Về trang chủ"
+
+msgid "Back to Login"
+msgstr "Quay lại đăng nhập"
+
+msgid "Basic information"
+msgstr "Thông tin cơ bản"
+
+msgid "Bio"
+msgstr "Giới thiệu"
 
 msgid "Browse"
 msgstr "Duyệt"
 
-msgid "Butter and Margarine"
-msgstr "Bơ và Bơ thực vật"
+msgid ""
+"Browse the categories, search by name, or ask the AI assistant at the bottom "
+"of the page, for example “I need 2 kg of carrots”. The assistant can add the "
+"product to your cart for you."
+msgstr ""
+"Xem theo danh mục, tìm theo tên, hoặc hỏi trợ lý AI ở góc dưới trang, ví dụ "
+"“cho mình 2 kg cà rốt”. Trợ lý có thể thêm sản phẩm vào giỏ giúp bạn."
+
+msgid ""
+"Buying on Grocerly takes a few minutes. Here is the whole way, from finding a"
+" product to receiving it."
+msgstr ""
+"Mua hàng trên Grocerly chỉ mất vài phút. Dưới đây là cả quá trình, từ lúc tìm"
+" sản phẩm tới lúc nhận hàng."
 
 msgid "By"
 msgstr "Bởi"
@@ -73,13 +217,23 @@ msgid "By Tags"
 msgstr "Theo thẻ"
 
 msgid "By Vendors"
-msgstr "Theo nhà bán"
+msgstr "Theo nhà cung cấp"
 
-msgid "Careers"
-msgstr "Tuyển dụng"
+msgid "Cancel"
+msgstr "Hủy"
+
+msgctxt "order status"
+msgid "Cancelled"
+msgstr "Đã hủy"
 
 msgid "Cart"
 msgstr "Giỏ hàng"
+
+msgid "Cash on Delivery"
+msgstr "Thanh toán khi nhận hàng"
+
+msgid "Cash on Delivery (COD)"
+msgstr "Thanh toán khi nhận hàng (COD)"
 
 msgid "Categories"
 msgstr "Danh mục"
@@ -87,26 +241,122 @@ msgstr "Danh mục"
 msgid "Category"
 msgstr "Danh mục"
 
+msgid "Change"
+msgstr "Thay đổi"
+
+msgid "Change order status"
+msgstr "Đổi trạng thái đơn hàng"
+
+msgid "Change Password"
+msgstr "Đổi mật khẩu"
+
+msgid "Change password"
+msgstr "Đổi mật khẩu"
+
+msgid "Changes and questions"
+msgstr "Thay đổi và câu hỏi"
+
 msgid "Checkout"
 msgstr "Thanh toán"
 
-msgid "Cheese"
-msgstr "Phô mai"
+msgid "Checkout Info"
+msgstr "Thông tin thanh toán"
+
+msgid "Checkout Information"
+msgstr "Thông tin thanh toán"
+
+msgid "Checkout session not found. Please continue from checkout info."
+msgstr ""
+"Không tìm thấy phiên thanh toán. Vui lòng tiếp tục từ trang thông tin giao "
+"hàng."
+
+msgid ""
+"Choose VNPay to pay online by card or banking app, or choose cash on delivery"
+" and pay when the order arrives."
+msgstr ""
+"Chọn VNPay để trả trực tuyến bằng thẻ hoặc ứng dụng ngân hàng, hoặc chọn "
+"thanh toán khi nhận hàng và trả tiền lúc nhận."
+
+msgid "City"
+msgstr "Tỉnh/Thành phố"
+
+msgid "Clean with Our"
+msgstr "Sạch sẽ với"
+
+msgid "Comment"
+msgstr "Nhận xét"
 
 msgid "Company"
 msgstr "Công ty"
 
-msgid "Compare products"
-msgstr "So sánh sản phẩm"
+msgid "Confirm Password"
+msgstr "Xác nhận mật khẩu"
 
 msgid "Contact"
 msgstr "Liên hệ"
 
+msgid "Contact details"
+msgstr "Thông tin liên hệ"
+
+msgid "Contact form"
+msgstr "Biểu mẫu liên hệ"
+
+msgid "Contact Information"
+msgstr "Thông tin liên hệ"
+
+msgid "Contact Seller:"
+msgstr "Liên hệ người bán:"
+
 msgid "Contact Us"
 msgstr "Liên hệ với chúng tôi"
 
-msgid "Cảm ơn bạn đã kiên nhẫn chờ đợi!"
-msgstr "Cảm ơn bạn đã kiên nhẫn chờ đợi!"
+msgid "Contact us"
+msgstr "Liên hệ với chúng tôi"
+
+msgid "Continue Shopping"
+msgstr "Tiếp tục mua sắm"
+
+msgid "Continue To Payment"
+msgstr "Tiếp tục thanh toán"
+
+msgid "Cookies"
+msgstr "Cookie"
+
+msgid "Could not update the stock."
+msgstr "Không cập nhật được tồn kho."
+
+msgid "Country"
+msgstr "Quốc gia"
+
+msgid "Coupon Activated"
+msgstr "Đã áp dụng mã giảm giá"
+
+msgid "Coupon already activated"
+msgstr "Mã giảm giá này đã được áp dụng"
+
+msgid "Coupon Does Not Exist"
+msgstr "Mã giảm giá không tồn tại"
+
+msgid "Create an Account"
+msgstr "Tạo tài khoản mới"
+
+msgid "Create here"
+msgstr "Đăng ký tại đây"
+
+msgid "Create product"
+msgstr "Tạo sản phẩm"
+
+msgid "Customer"
+msgstr "Khách hàng"
+
+msgid "Customer name"
+msgstr "Tên khách hàng"
+
+msgid "Customer questions & answers"
+msgstr "Câu hỏi & trả lời từ khách hàng"
+
+msgid "Customer reviews"
+msgstr "Đánh giá của khách hàng"
 
 msgid "Dashboard"
 msgstr "Bảng điều khiển"
@@ -120,23 +370,111 @@ msgstr "Khuyến mãi"
 msgid "Deals Of The Day"
 msgstr "Khuyến mãi trong ngày"
 
-msgid "Delivery Information"
-msgstr "Thông tin giao hàng"
+msgid "Delete"
+msgstr "Xóa"
+
+msgid "Delete this product?"
+msgstr "Xóa sản phẩm này?"
+
+msgid "Deliver to"
+msgstr "Giao đến"
+
+msgctxt "order status"
+msgid "Delivered"
+msgstr "Đã giao"
+
+msgid "Delivery"
+msgstr "Giao hàng"
+
+msgid "Delivery and cancellation"
+msgstr "Giao hàng và hủy đơn"
+
+msgid "Description"
+msgstr "Mô tả"
+
+msgid "Details"
+msgstr "Chi tiết"
+
+msgid "Details of order #%(oid)s"
+msgstr "Chi tiết đơn hàng #%(oid)s"
+
+msgid "Disabled"
+msgstr "Đã ẩn"
 
 msgid "Discount"
 msgstr "Giảm giá"
 
+msgid "Discount coupons"
+msgstr "Mã giảm giá"
+
+msgid "Don't have an account?"
+msgstr "Bạn chưa có tài khoản?"
+
 msgid "Don’t miss amazing<br /> grocery deals"
 msgstr "Đừng bỏ lỡ<br /> siêu khuyến mãi"
+
+msgid "Draft"
+msgstr "Bản nháp"
+
+msgid "Drop Us a Line"
+msgstr "Để lại lời nhắn"
+
+msgid "e.g. 0901 234 567"
+msgstr "Ví dụ: 0901 234 567"
+
+msgid "e.g. 6 months"
+msgstr "Ví dụ: 6 tháng"
+
+msgid "e.g. Store in a cool, dry place"
+msgstr "Ví dụ: Bảo quản nơi khô ráo, thoáng mát"
+
+msgid "e.g. vegetables, organic"
+msgstr "Ví dụ: rau củ, hữu cơ"
+
+msgid "Edit"
+msgstr "Sửa"
+
+msgid "Edit product"
+msgstr "Sửa sản phẩm"
 
 msgid "Edit Profile"
 msgstr "Sửa hồ sơ"
 
-msgid "Eggs Substitutes"
-msgstr "Trứng và sản phẩm thay thế"
+msgid "Email"
+msgstr "Email"
 
-msgid "Featured"
-msgstr "Nổi bật"
+msgid "Email Sent"
+msgstr "Đã gửi email"
+
+msgid "Email:"
+msgstr "Email:"
+
+msgid "Emails"
+msgstr "Email"
+
+msgid "Empty message"
+msgstr "Tin nhắn trống"
+
+msgid "English"
+msgstr "Tiếng Anh"
+
+msgid "Enter a code at checkout"
+msgstr "Nhập mã khi thanh toán"
+
+msgid "Enter Coupon Code..."
+msgstr "Nhập mã giảm giá..."
+
+msgid "Enter your email address to reset your password."
+msgstr "Nhập địa chỉ email để đặt lại mật khẩu."
+
+msgid "Error:"
+msgstr "Lỗi:"
+
+msgid "Everyday Fresh &"
+msgstr "Tươi mới mỗi ngày &"
+
+msgid "Expiry period:"
+msgstr "Hạn sử dụng:"
 
 msgid "Filter"
 msgstr "Lọc"
@@ -144,26 +482,191 @@ msgstr "Lọc"
 msgid "Filters"
 msgstr "Bộ lọc"
 
-msgid "Fresh Vegetables<br /> Big discount"
-msgstr "Rau củ tươi<br /> Giảm giá sốc"
+msgid "Find products by category, by name, or by asking the AI assistant."
+msgstr "Tìm sản phẩm theo danh mục, theo tên hoặc bằng cách hỏi trợ lý AI."
 
-msgid "From your account dashboard you can easily check &amp; view your"
-msgstr "Từ bảng điều khiển, bạn có thể dễ dàng kiểm tra &amp; xem"
+msgid "Find products by chat"
+msgstr "Tìm sản phẩm bằng trò chuyện"
+
+msgid "Follow every order in your account"
+msgstr "Theo dõi mọi đơn hàng trong tài khoản"
+
+msgid ""
+"Follow every order in your account and review the products you received."
+msgstr "Theo dõi mọi đơn hàng trong tài khoản và đánh giá sản phẩm đã nhận."
+
+msgid "For an order, add its order number so the staff can find it quickly."
+msgstr "Nếu hỏi về đơn hàng, hãy ghi kèm mã đơn để nhân viên tra nhanh hơn."
+
+msgid "Forgot Password"
+msgstr "Quên mật khẩu"
+
+msgid "Forgot password?"
+msgstr "Quên mật khẩu?"
+
+msgid "Fresh groceries"
+msgstr "Thực phẩm tươi"
+
+msgid "Fresh vegetables<br /> from local suppliers"
+msgstr "Rau củ tươi<br /> từ các nhà cung cấp trong nước"
+
+msgid "From local suppliers"
+msgstr "Từ các nhà cung cấp trong nước"
+
+msgid ""
+"From your account dashboard you can check your recent orders in the Orders "
+"tab, edit your <a href=\"%(profile_url)s\">account details</a> and change "
+"your <a href=\"%(password_url)s\">password</a>."
+msgstr ""
+"Tại trang tài khoản, bạn có thể xem các đơn hàng gần đây ở thẻ Đơn hàng, sửa "
+"<a href=\"%(profile_url)s\">thông tin tài khoản</a> và đổi <a "
+"href=\"%(password_url)s\">mật khẩu</a>."
 
 msgid "From:"
 msgstr "Từ:"
 
-msgid "Hello"
-msgstr "Xin chào"
+msgid "Full Name"
+msgstr "Họ và tên"
 
-msgid "Help Ticket"
-msgstr "Gửi hỗ trợ"
+msgid ""
+"Give your full name, email, phone number and delivery address. If you have a "
+"discount coupon, enter it on the next page."
+msgstr ""
+"Điền họ tên, email, số điện thoại và địa chỉ giao hàng. Nếu có mã giảm giá, "
+"nhập ở trang tiếp theo."
+
+msgid "Go back"
+msgstr "Quay lại"
+
+msgid "Go to Dashboard"
+msgstr "Về trang tài khoản"
+
+msgid "Go to the admin site"
+msgstr "Về trang Admin"
+
+msgid ""
+"Graduation thesis, Faculty of Information Technology, HCMC University of "
+"Technology and Engineering"
+msgstr ""
+"Khóa luận tốt nghiệp, Khoa Công nghệ Thông tin, Trường Đại học Công nghệ Kỹ "
+"thuật TP. Hồ Chí Minh"
+
+msgid "Grand total"
+msgstr "Tổng thanh toán"
+
+msgid "Grocerly - Store dashboard"
+msgstr "Grocerly - Trang quản lý cửa hàng"
+
+msgid "Grocerly Assistant"
+msgstr "Trợ lý Grocerly"
+
+msgid ""
+"Grocerly is an online grocery shop built as a graduation thesis at HCMC "
+"University of Technology and Engineering. This page explains what the shop "
+"keeps about you, why, and who else sees it."
+msgstr ""
+"Grocerly là cửa hàng thực phẩm trực tuyến, được xây dựng trong khóa luận tốt "
+"nghiệp tại Trường Đại học Công nghệ Kỹ thuật TP. Hồ Chí Minh. Trang này cho "
+"biết cửa hàng lưu những gì về bạn, để làm gì, và những ai khác được thấy."
+
+msgid ""
+"Grocerly is an online grocery shop with an AI assistant: you can tell it what"
+" you need in your own words, and it finds the products, adds them to your "
+"cart and takes you to checkout."
+msgstr ""
+"Grocerly là cửa hàng thực phẩm trực tuyến có trợ lý AI: bạn nói điều mình cần"
+" bằng lời của mình, trợ lý tìm sản phẩm, thêm vào giỏ và dẫn bạn tới bước "
+"thanh toán."
+
+msgid ""
+"Grocerly is the graduation thesis of Le Duc Phat, Software Engineering, "
+"Faculty of Information Technology, HCMC University of Technology and "
+"Engineering, supervised by Hoang Van Dung."
+msgstr ""
+"Grocerly là khóa luận tốt nghiệp của Lê Đức Phát, ngành Công nghệ Phần mềm, "
+"Khoa Công nghệ Thông tin, Trường Đại học Công nghệ Kỹ thuật TP. Hồ Chí Minh, "
+"giảng viên hướng dẫn Hoàng Văn Dũng."
+
+msgid ""
+"HCMC University of Technology and Engineering, 1 Vo Van Ngan Street, Thu Duc "
+"Ward, Ho Chi Minh City"
+msgstr ""
+"Trường Đại học Công nghệ Kỹ thuật TP. Hồ Chí Minh, Số 1 Võ Văn Ngân, phường "
+"Thủ Đức, TP. Hồ Chí Minh"
+
+msgid "Healthy and Easy"
+msgstr "Lành mạnh và Dễ dàng"
+
+msgid "Hello %(name)s!"
+msgstr "Xin chào %(name)s!"
+
+msgid ""
+"Hi! I'm your Grocerly Assistant. I can help you find products, check prices, "
+"and more!"
+msgstr ""
+"Xin chào! Mình là trợ lý của Grocerly. Mình có thể giúp bạn tìm sản phẩm, xem"
+" giá và nhiều việc khác!"
 
 msgid "Home"
 msgstr "Trang chủ"
 
+msgid "How can we help you?"
+msgstr "Chúng tôi có thể giúp gì cho bạn?"
+
+msgid "How many are in stock?"
+msgstr "Còn bao nhiêu trong kho?"
+
+msgid "I am having trouble connecting. Please try again later!"
+msgstr "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"
+
+msgid ""
+"If you don't receive an email, please make sure you've entered the address "
+"you registered with, and check your spam folder."
+msgstr ""
+"Nếu không nhận được email, hãy kiểm tra lại địa chỉ bạn đã dùng để đăng ký và"
+" xem cả thư mục thư rác."
+
+msgid "Image"
+msgstr "Hình ảnh"
+
+msgid "Images"
+msgstr "Hình ảnh"
+
+msgid "In Review"
+msgstr "Đang duyệt"
+
+msgid "In Stock"
+msgstr "Còn hàng"
+
+msgid "Ingredients"
+msgstr "Thành phần"
+
+msgid "Invalid security signature."
+msgstr "Sai chữ ký bảo mật."
+
+msgid "Invoice"
+msgstr "Hóa đơn"
+
 msgid "Items"
 msgstr "Sản phẩm"
+
+msgid "Items sold"
+msgstr "Số sản phẩm đã bán"
+
+msgid "Keywords (tags)"
+msgstr "Từ khóa (tags)"
+
+msgid "Last updated: 5 November 2026"
+msgstr "Cập nhật lần cuối: 05/11/2026"
+
+msgid "Latest orders"
+msgstr "Đơn hàng mới nhất"
+
+msgid "Let us know how we can help you"
+msgstr "Hãy cho chúng tôi biết bạn cần hỗ trợ gì"
+
+msgid "Log in"
+msgstr "Đăng nhập"
 
 msgid "Log In / Sign Up"
 msgstr "Đăng nhập / Đăng ký"
@@ -174,26 +677,38 @@ msgstr "Đăng nhập"
 msgid "Logout"
 msgstr "Đăng xuất"
 
-msgid "Make Default"
-msgstr "Đặt làm mặc định"
+msgid "Main image"
+msgstr "Ảnh chính"
 
-msgid "Marmalades"
-msgstr "Mứt"
+msgid "Make your Breakfast"
+msgstr "Bữa sáng của bạn"
+
+msgid "Manage all orders here"
+msgstr "Quản lý tất cả đơn hàng tại đây"
+
+msgid "Manage all product reviews"
+msgstr "Quản lý tất cả đánh giá sản phẩm"
+
+msgid "Manage all your products here"
+msgstr "Quản lý tất cả sản phẩm tại đây"
 
 msgid "Max Price"
 msgstr "Giá cao nhất"
 
-msgid "Milk & Flavoured Milk"
-msgstr "Sữa & Sữa tươi"
+msgid "Message"
+msgstr "Nội dung"
+
+msgid "Message Sent Successfully"
+msgstr "Đã gửi tin nhắn"
 
 msgid "Min Price"
 msgstr "Giá thấp nhất"
 
+msgid "Mobile"
+msgstr "Số điện thoại"
+
 msgid "My Account"
 msgstr "Tài khoản"
-
-msgid "My Address"
-msgstr "Địa chỉ của tôi"
 
 msgid "My Profile"
 msgstr "Hồ sơ của tôi"
@@ -204,11 +719,22 @@ msgstr "Voucher của tôi"
 msgid "My Wishlist"
 msgstr "Danh sách yêu thích"
 
-msgid "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"
-msgstr "Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"
+msgid "Name"
+msgstr "Tên"
 
-msgid "Need help? Call Us:"
-msgstr "Cần hỗ trợ? Gọi ngay:"
+msgid "Need help?"
+msgstr "Cần hỗ trợ?"
+
+msgid "needs from our shop"
+msgstr "từ cửa hàng của chúng tôi"
+
+msgid "New products"
+msgstr "Sản phẩm mới"
+
+msgid "No actual revenue yet (no order has been paid)."
+msgstr ""
+"Chưa có dữ liệu doanh thu thực tế (chưa có đơn hàng nào thanh toán thành "
+"công)."
 
 msgid "No categories yet"
 msgstr "Chưa có danh mục"
@@ -216,25 +742,141 @@ msgstr "Chưa có danh mục"
 msgid "No deals available right now."
 msgstr "Hiện tại không có khuyến mãi nào."
 
+msgid "No description yet."
+msgstr "Chưa có mô tả."
+
+msgid "No items in this order."
+msgstr "Đơn hàng này không có sản phẩm nào."
+
 msgid "No orders yet."
 msgstr "Chưa có đơn hàng nào."
+
+msgid "No products found matching \"%(query)s\"."
+msgstr "Không tìm thấy sản phẩm nào khớp với \"%(query)s\"."
+
+msgid "No products found with this tag."
+msgstr "Chưa có sản phẩm nào gắn thẻ này."
+
+msgid "No products found."
+msgstr "Không tìm thấy sản phẩm nào."
+
+msgid "No reviews yet. Be the first to review this product!"
+msgstr "Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!"
+
+msgid "No search term"
+msgstr "Chưa nhập từ khóa tìm kiếm"
 
 msgid "No tags yet"
 msgstr "Chưa có thẻ"
 
 msgid "No vendors yet"
-msgstr "Chưa có nhà bán"
+msgstr "Chưa có nhà cung cấp"
+
+msgid "Not given"
+msgstr "Chưa có thông tin"
+
+msgid "Not paid"
+msgstr "Chưa thanh toán"
 
 msgid "Not verified"
 msgstr "Chưa xác thực"
 
-msgid "Oops! Trang này không tồn tại"
-msgstr "Oops! Trang này không tồn tại"
+msgid "Note:"
+msgstr "Lưu ý:"
+
+msgid "Off"
+msgstr "Giảm"
+
+msgid "Old price"
+msgstr "Giá cũ"
+
+msgid "Old price (VND)"
+msgstr "Giá cũ (VND)"
+
+msgid "Online"
+msgstr "Trực tuyến"
+
+msgid ""
+"Online payments go through VNPay. You type your card or bank details on "
+"VNPay's page, not on Grocerly, so the shop never sees or stores them. "
+"Grocerly only keeps what VNPay sends back: whether the payment succeeded."
+msgstr ""
+"Thanh toán trực tuyến đi qua VNPay. Bạn nhập thông tin thẻ hay tài khoản ngân"
+" hàng trên trang của VNPay, không phải trên Grocerly, nên cửa hàng không thấy"
+" và không lưu chúng. Grocerly chỉ lưu kết quả VNPay gửi về: thanh toán thành "
+"công hay không."
+
+msgid ""
+"Only %(stock)s of %(product)s left in stock, so your cart now holds "
+"%(stock)s."
+msgstr ""
+"%(product)s chỉ còn %(stock)s sản phẩm, giỏ hàng đã được chỉnh về %(stock)s."
+
+msgid ""
+"Only the shop staff, to handle your orders and messages. Your data is not "
+"sold or given to anyone else, apart from the services named on this page that"
+" the shop needs in order to work."
+msgstr ""
+"Chỉ nhân viên cửa hàng, để xử lý đơn hàng và tin nhắn của bạn. Dữ liệu của "
+"bạn không bị bán hay giao cho ai khác, ngoài các dịch vụ nêu trên trang này "
+"mà cửa hàng cần để hoạt động."
+
+msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
+msgstr "Kho chỉ còn {qty}, nên giỏ hàng của bạn có **{qty}x {title}**."
+
+msgid ""
+"Open the cart to change quantities or remove items. A quantity cannot go "
+"above what is in stock."
+msgstr ""
+"Mở giỏ hàng để đổi số lượng hoặc bỏ bớt sản phẩm. Số lượng không vượt quá số "
+"hàng còn trong kho."
+
+msgid "Or cash on delivery"
+msgstr "Hoặc trả tiền khi nhận hàng"
 
 msgid "Order"
 msgstr "Đơn hàng"
 
+msgid "Order Detail"
+msgstr "Chi tiết đơn hàng"
+
+msgid "Order details"
+msgstr "Chi tiết đơn hàng"
+
+msgid "Order ID"
+msgstr "Mã đơn"
+
+msgid "Order information"
+msgstr "Thông tin đơn hàng"
+
+msgid "Order Items"
+msgstr "Sản phẩm trong đơn"
+
+msgid "Order list"
+msgstr "Danh sách đơn hàng"
+
+msgid "Order not found. Please start checkout again."
+msgstr "Không tìm thấy đơn hàng. Vui lòng đặt hàng lại."
+
+msgid "Order Placed"
+msgstr "Đặt hàng thành công"
+
+msgid "Order placed with Cash on Delivery."
+msgstr "Đặt hàng thành công, bạn sẽ thanh toán khi nhận hàng."
+
+msgid "Order status"
+msgstr "Trạng thái đơn hàng"
+
+msgid "Order status changed to %(status)s."
+msgstr "Đã chuyển đơn hàng sang trạng thái %(status)s."
+
+msgid "Order Summary"
+msgstr "Tóm tắt đơn hàng"
+
 msgid "Order Tracking"
+msgstr "Theo dõi đơn hàng"
+
+msgid "Order tracking"
 msgstr "Theo dõi đơn hàng"
 
 msgid "Orders"
@@ -243,11 +885,94 @@ msgstr "Đơn hàng"
 msgid "Our location"
 msgstr "Vị trí của chúng tôi"
 
+msgid "out of 5.0"
+msgstr "trên 5.0"
+
+msgid "Out of Stock"
+msgstr "Hết hàng"
+
 msgid "Pages"
 msgstr "Trang"
 
+msgid "Paid"
+msgstr "Đã thanh toán"
+
 msgid "Paid Status"
 msgstr "Thanh toán"
+
+msgid "Password"
+msgstr "Mật khẩu"
+
+msgid "Password Changed"
+msgstr "Đã đổi mật khẩu"
+
+msgid "Password Changed Successfully"
+msgstr "Đổi mật khẩu thành công"
+
+msgid "Password Changed!"
+msgstr "Đã đổi mật khẩu!"
+
+msgid "Password Reset Sent"
+msgstr "Đã gửi email đặt lại mật khẩu"
+
+msgid "Pay online through VNPay or in cash on delivery, with discount coupons."
+msgstr ""
+"Thanh toán trực tuyến qua VNPay hoặc khi nhận hàng, dùng được mã giảm giá."
+
+msgid "Pay online with VNPay or cash on delivery"
+msgstr "Thanh toán trực tuyến qua VNPay hoặc khi nhận hàng"
+
+msgid "Pay with VNPay"
+msgstr "Thanh toán qua VNPay"
+
+msgid "Payment"
+msgstr "Thanh toán"
+
+msgid "Payment Completed"
+msgstr "Thanh toán thành công"
+
+msgid "Payment Failed"
+msgstr "Thanh toán thất bại"
+
+msgid "Payment Result"
+msgstr "Kết quả thanh toán"
+
+msgid "Payment status"
+msgstr "Trạng thái thanh toán"
+
+msgid "Phone"
+msgstr "Điện thoại"
+
+msgid "Please choose a category."
+msgstr "Vui lòng chọn danh mục."
+
+msgid "Please choose a vendor."
+msgstr "Vui lòng chọn nhà cung cấp."
+
+msgid "Please choose an order status."
+msgstr "Vui lòng chọn trạng thái đơn hàng."
+
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+"Vui lòng nhập mật khẩu mới hai lần để chúng tôi kiểm tra bạn đã gõ đúng."
+
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+"Để bảo mật, vui lòng nhập mật khẩu cũ, sau đó nhập mật khẩu mới hai lần để "
+"chúng tôi kiểm tra bạn đã gõ đúng."
+
+msgid "Please go to the following page and choose a new password:"
+msgstr "Vui lòng mở trang sau và chọn mật khẩu mới:"
+
+msgid "Please sign in to add products to your wishlist."
+msgstr "Vui lòng đăng nhập để thêm sản phẩm vào danh sách yêu thích."
+
+msgid "Please sign in to use your wishlist."
+msgstr "Vui lòng đăng nhập để dùng danh sách yêu thích."
 
 msgid "Popular"
 msgstr "Phổ biến"
@@ -255,44 +980,141 @@ msgstr "Phổ biến"
 msgid "Popular Products"
 msgstr "Sản phẩm phổ biến"
 
-msgid "Price: High to Low"
-msgstr "Giá: Cao đến Thấp"
+msgid "Price"
+msgstr "Giá"
 
-msgid "Price: Low to High"
-msgstr "Giá: Thấp đến Cao"
+msgid "Price:"
+msgstr "Giá:"
+
+msgid "Prices and orders"
+msgstr "Giá và đơn hàng"
+
+msgid ""
+"Prices are in Vietnamese dong (VND). The price you pay is the one the shop "
+"holds when you place the order, not a price saved in your browser."
+msgstr ""
+"Giá tính bằng đồng Việt Nam (VND). Giá bạn trả là giá cửa hàng đang có lúc "
+"bạn đặt hàng, không phải giá còn lưu trong trình duyệt."
 
 msgid "Privacy Policy"
 msgstr "Chính sách bảo mật"
 
-msgid "Proceed To CheckOut"
-msgstr "Tiến hành Thanh toán"
+msgid "Proceed to Checkout"
+msgstr "Tiến hành thanh toán"
+
+msgctxt "order status"
+msgid "Processing"
+msgstr "Đang xử lý"
 
 msgid "Product"
 msgstr "Sản phẩm"
 
+msgid "Product description"
+msgstr "Mô tả sản phẩm"
+
+msgid "Product list"
+msgstr "Danh sách sản phẩm"
+
+msgid "Product name"
+msgstr "Tên sản phẩm"
+
+msgid "Product not found."
+msgstr "Không tìm thấy sản phẩm."
+
+msgid "Products"
+msgstr "Sản phẩm"
+
+msgid ""
+"Products in this list: <span class=\"text-brand\" id=\"wishlist-item-"
+"count\">%(count)s</span>"
+msgstr ""
+"Số sản phẩm trong danh sách: <span class=\"text-brand\" id=\"wishlist-item-"
+"count\">%(count)s</span>"
+
+msgid "Products you added"
+msgstr "Sản phẩm bạn đã thêm"
+
 msgid "Profile"
 msgstr "Hồ sơ"
+
+msgid "Profile Image"
+msgstr "Ảnh đại diện"
+
+msgid "Profile settings"
+msgstr "Cài đặt hồ sơ"
+
+msgid "Profile Updated Successfully."
+msgstr "Cập nhật hồ sơ thành công."
+
+msgid "Published"
+msgstr "Đang bán"
 
 msgid "Purchase Guide"
 msgstr "Hướng dẫn mua hàng"
 
+msgid "Qty"
+msgstr "SL"
+
+msgid "Qty:"
+msgstr "SL:"
+
 msgid "Quantity"
 msgstr "Số lượng"
+
+msgid ""
+"Questions and ideas are welcome through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+"Mọi câu hỏi và góp ý xin gửi qua <a href=\"%(contact_url)s\">trang liên "
+"hệ</a>."
+
+msgid "Quick view"
+msgstr "Xem nhanh"
+
+msgid "Rating"
+msgstr "Đánh giá"
 
 msgid "Register"
 msgstr "Đăng ký"
 
-msgid "Release Date"
-msgstr "Ngày phát hành"
+msgid "Rejected"
+msgstr "Bị từ chối"
+
+msgid "Related products"
+msgstr "Sản phẩm liên quan"
 
 msgid "Remove"
 msgstr "Xóa"
 
-msgid "Save Address"
-msgstr "Lưu địa chỉ"
+msgid "Request New Link"
+msgstr "Yêu cầu liên kết mới"
 
-msgid "Save up to 50% off on your first order"
-msgstr "Giảm giá lên đến 50% cho đơn hàng đầu tiên"
+msgid "Reset Password"
+msgstr "Đặt lại mật khẩu"
+
+msgid "Revenue (VND)"
+msgstr "Doanh thu (VND)"
+
+msgid "Revenue by month"
+msgstr "Biểu đồ doanh thu theo tháng"
+
+msgid "Reviews"
+msgstr "Đánh giá"
+
+msgid "Save"
+msgstr "Lưu"
+
+msgid "Save changes"
+msgstr "Lưu thay đổi"
+
+msgid "Save new password"
+msgstr "Lưu mật khẩu mới"
+
+msgid "Saved"
+msgstr "Đã lưu"
+
+msgid "Search"
+msgstr "Tìm kiếm"
 
 msgid "Search for items..."
 msgstr "Tìm kiếm sản phẩm..."
@@ -300,23 +1122,55 @@ msgstr "Tìm kiếm sản phẩm..."
 msgid "Search for items…"
 msgstr "Tìm kiếm sản phẩm…"
 
+msgid "Selling price"
+msgstr "Giá bán"
+
+msgid "Selling price (VND)"
+msgstr "Giá bán (VND)"
+
+msgid "Send message"
+msgstr "Gửi tin nhắn"
+
+msgid "Separate keywords with commas"
+msgstr "Ngăn cách các từ khóa bằng dấu phẩy"
+
+msgid "Set New Password"
+msgstr "Đặt mật khẩu mới"
+
 msgid "Setting"
 msgstr "Cài đặt"
+
+msgid "Several products match. Tap the one you want to add to your cart:"
+msgstr ""
+"Có nhiều sản phẩm khớp với yêu cầu. Bạn bấm vào sản phẩm muốn thêm vào giỏ:"
+
+msgid "Shelf life"
+msgstr "Hạn sử dụng"
 
 msgid "Shipping"
 msgstr "Phí giao hàng"
 
+msgctxt "order status"
+msgid "Shipping"
+msgstr "Đang giao hàng"
+
 msgid "Shipping Details"
 msgstr "Chi tiết giao hàng"
+
+msgid "Shipping method"
+msgstr "Phương thức giao hàng"
 
 msgid "Shop"
 msgstr "Cửa hàng"
 
+msgid "Shop by Categories"
+msgstr "Mua sắm theo danh mục"
+
+msgid "Shop Now"
+msgstr "Mua ngay"
+
 msgid "Show more..."
 msgstr "Xem thêm..."
-
-msgid "Show:"
-msgstr "Hiển thị:"
 
 msgid "Sign In"
 msgstr "Đăng nhập"
@@ -327,32 +1181,111 @@ msgstr "Đăng nhập"
 msgid "Sign out"
 msgstr "Đăng xuất"
 
-msgid "Sign up for the daily newsletter"
-msgstr "Đăng ký nhận bản tin hàng ngày"
+msgid "Sign Up"
+msgstr "Đăng ký"
 
-msgid "Sort by:"
-msgstr "Sắp xếp theo:"
+msgid ""
+"Sign up with your email address and a password. You can look around without "
+"an account, but you need one to check out."
+msgstr ""
+"Đăng ký bằng email và mật khẩu. Bạn xem hàng được mà không cần tài khoản, "
+"nhưng cần tài khoản để thanh toán."
 
-msgid "Sour Cream and Dips"
-msgstr "Kem chua và Sốt chấm"
+msgid "Since %(year)s"
+msgstr "Từ năm %(year)s"
+
+msgid "SKU:"
+msgstr "Mã SP:"
+
+msgid ""
+"Something unclear? Write to us through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+"Còn chỗ nào chưa rõ? Hãy viết cho chúng tôi qua <a "
+"href=\"%(contact_url)s\">trang liên hệ</a>."
+
+msgid "Something went wrong, please try again."
+msgstr "Có lỗi xảy ra, vui lòng thử lại!"
+
+msgid "Something went wrong. Please sign in or try again."
+msgstr "Có lỗi xảy ra, vui lòng đăng nhập hoặc thử lại!"
+
+msgid ""
+"Sorry, I could not finish that in one go. Could you tell me one step at a "
+"time?"
+msgstr ""
+"Xin lỗi, mình chưa làm xong yêu cầu này trong một lượt. Bạn nói lần lượt từng"
+" bước giúp mình nhé?"
+
+msgid "Sorry, network error occurred."
+msgstr "Xin lỗi, kết nối mạng đang gặp sự cố."
+
+msgid "Sorry, this page does not exist"
+msgstr "Rất tiếc, trang này không tồn tại"
+
+msgid "Sorry, {title} has just sold out and was not added to your cart."
+msgstr "Xin lỗi, {title} vừa hết hàng nên chưa được thêm vào giỏ."
+
+msgid "star"
+msgstr "sao"
+
+msgid "Start Your Daily Shopping with"
+msgstr "Bắt đầu mua sắm hàng ngày cùng"
+
+msgid "State"
+msgstr "Quận/Huyện"
 
 msgid "Status"
 msgstr "Trạng thái"
 
-msgid "Subscribe"
-msgstr "Đăng ký"
+msgid "Status:"
+msgstr "Tình trạng:"
+
+msgid "Stay home & get your daily"
+msgstr "Ở nhà & nhận nhu yếu phẩm hàng ngày"
+
+msgid "Stock quantity"
+msgstr "Số lượng trong kho"
+
+msgid "Stock Status"
+msgstr "Tình trạng"
+
+msgid "Storage:"
+msgstr "Bảo quản:"
+
+msgid "Store page"
+msgstr "Trang cửa hàng"
+
+msgid "Subject"
+msgstr "Chủ đề"
+
+msgid "Submit &amp; Register"
+msgstr "Xác nhận &amp; Đăng ký"
+
+msgid "Submit Review"
+msgstr "Gửi đánh giá"
 
 msgid "Subtotal"
 msgstr "Thành tiền"
 
-msgid "Support Center"
-msgstr "Trung tâm hỗ trợ"
+msgid "Super Value Deals - Save more with coupons"
+msgstr "Siêu khuyến mãi - Tiết kiệm hơn với mã giảm giá"
+
+msgid ""
+"System Error: Gemini API Key is missing or invalid. Please configure it in "
+".env."
+msgstr ""
+"Lỗi hệ thống: thiếu Gemini API Key hoặc key không hợp lệ. Hãy cấu hình trong "
+".env."
+
+msgid "Tags:"
+msgstr "Thẻ:"
 
 msgid "Tax"
 msgstr "Thuế"
 
-msgid "Tea & Kombucha"
-msgstr "Trà & Kombucha"
+msgid "Tell the AI assistant what you need, it fills your cart"
+msgstr "Nói với trợ lý AI bạn cần gì, trợ lý sẽ thêm vào giỏ giúp bạn"
 
 msgid "Terms & Conditions"
 msgstr "Điều khoản & Điều kiện"
@@ -360,18 +1293,127 @@ msgstr "Điều khoản & Điều kiện"
 msgid "Terms of Service"
 msgstr "Điều khoản Dịch vụ"
 
-msgid "There are"
-msgstr "Có"
+msgid "Thank you for your patience!"
+msgstr "Cảm ơn bạn đã kiên nhẫn chờ đợi!"
+
+msgid "Thank you! Your review has been added."
+msgstr "Cảm ơn bạn! Đánh giá đã được ghi nhận."
+
+msgid "Thanks for using our site!"
+msgstr "Cảm ơn bạn đã sử dụng website của chúng tôi!"
+
+msgid "The %(site_name)s team"
+msgstr "Đội ngũ %(site_name)s"
+
+msgid "The AI assistant"
+msgstr "Trợ lý AI"
 
 msgid ""
-"This feature is currently under development and will be available soon."
-msgstr "Tính năng này hiện đang được phát triển và sẽ sớm ra mắt."
+"The amount paid does not match this order, so it has not been confirmed. "
+"Please contact the store."
+msgstr ""
+"Số tiền đã thanh toán không khớp với đơn hàng nên đơn chưa được xác nhận. Vui"
+" lòng liên hệ cửa hàng."
+
+msgid ""
+"The assistant helps you find products and fill your cart, and it can be "
+"wrong. Check the product, the quantity and the price in your cart before you "
+"pay."
+msgstr ""
+"Trợ lý giúp bạn tìm sản phẩm và thêm vào giỏ, và trợ lý có thể sai. Hãy kiểm "
+"tra sản phẩm, số lượng và giá trong giỏ trước khi thanh toán."
+
+msgid "The best organic<br /> products online"
+msgstr "Sản phẩm hữu cơ<br /> tốt nhất trực tuyến"
+
+msgid ""
+"The Grocerly team is building this feature and it will be available soon."
+msgstr ""
+"Tính năng này đang được đội ngũ Grocerly xây dựng và sẽ sớm ra mắt trong thời"
+" gian tới."
+
+msgid ""
+"The link you followed may have been removed, renamed, or is temporarily "
+"unavailable."
+msgstr ""
+"Đường link bạn truy cập có thể đã bị xóa, đổi tên, hoặc tạm thời không khả "
+"dụng."
+
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used. Please request a new password reset."
+msgstr ""
+"Liên kết đặt lại mật khẩu không hợp lệ, có thể vì đã được dùng rồi. Vui lòng "
+"yêu cầu đặt lại mật khẩu lần nữa."
+
+msgid ""
+"The reviews you write, the products you keep in your wishlist, and the "
+"messages you send through the contact form."
+msgstr ""
+"Các đánh giá bạn viết, sản phẩm trong danh sách yêu thích và tin nhắn bạn gửi"
+" qua form liên hệ."
+
+msgid ""
+"The shop sells products from several suppliers. Each product page names its "
+"supplier, and the supplier list shows everyone the shop buys from."
+msgstr ""
+"Cửa hàng bán sản phẩm của nhiều nhà cung cấp. Trang của mỗi sản phẩm ghi rõ "
+"nhà cung cấp, và danh sách nhà cung cấp cho biết cửa hàng nhập hàng từ những "
+"ai."
+
+msgid ""
+"The shop uses only the cookies it needs to work: one keeps you signed in and "
+"holds your cart, one remembers the language you chose, and one protects the "
+"forms against requests from other sites. There are no advertising or tracking"
+" cookies."
+msgstr ""
+"Cửa hàng chỉ dùng những cookie cần để chạy: một cookie giữ phiên đăng nhập và"
+" giỏ hàng, một cookie nhớ ngôn ngữ bạn chọn, một cookie bảo vệ các form khỏi "
+"yêu cầu gửi từ trang khác. Không có cookie quảng cáo hay theo dõi."
+
+msgid "There is <span class=\"text-brand\">%(counter)s</span> product in your cart"
+msgid_plural ""
+"There are <span class=\"text-brand\">%(counter)s</span> products in your cart"
+msgstr[0] ""
+"Có <span class=\"text-brand\">%(counter)s</span> sản phẩm trong giỏ hàng"
+
+msgid ""
+"These terms apply when you use Grocerly. Grocerly is a graduation thesis "
+"project at HCMC University of Technology and Engineering. By creating an "
+"account or placing an order you accept them."
+msgstr ""
+"Các điều khoản này áp dụng khi bạn dùng Grocerly. Grocerly là sản phẩm khóa "
+"luận tốt nghiệp tại Trường Đại học Công nghệ Kỹ thuật TP. Hồ Chí Minh. Khi "
+"tạo tài khoản hoặc đặt hàng, bạn đồng ý với các điều khoản này."
+
+msgid ""
+"These terms may change; the date at the top of this page shows the last "
+"change. Questions about them are welcome through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+"Các điều khoản này có thể thay đổi; ngày ở đầu trang cho biết lần sửa gần "
+"nhất. Mọi câu hỏi xin gửi qua <a href=\"%(contact_url)s\">trang liên hệ</a>."
+
+msgid "This order cannot go from \"%(current)s\" to \"%(new)s\"."
+msgstr "Không thể chuyển đơn hàng từ \"%(current)s\" sang \"%(new)s\"."
+
+msgid "This order does not exist."
+msgstr "Đơn hàng không tồn tại."
+
+msgid "This order has already been paid."
+msgstr "Đơn hàng này đã được thanh toán."
+
+msgid "This order has been cancelled."
+msgstr "Đơn hàng này đã bị hủy."
+
+msgid "This order has not been paid yet. Please complete the payment."
+msgstr "Đơn hàng này chưa được thanh toán. Vui lòng hoàn tất thanh toán."
+
+msgid "This product is no longer available."
+msgstr "Sản phẩm này không còn bán nữa."
 
 msgid "Title"
 msgstr "Tên sản phẩm"
-
-msgid "Tiếp Tục Mua Sắm"
-msgstr "Tiếp Tục Mua Sắm"
 
 msgid "To:"
 msgstr "Đến:"
@@ -379,27 +1421,62 @@ msgstr "Đến:"
 msgid "Total"
 msgstr "Tổng cộng"
 
+msgid "Total:"
+msgstr "Tổng cộng:"
+
 msgid "Track My Order"
 msgstr "Theo dõi đơn hàng của tôi"
 
-msgid ""
-"Tính năng này đang được đội ngũ Grocerly xây dựng và sẽ sớm ra mắt trong "
-"thời gian tới."
-msgstr ""
-"Tính năng này đang được đội ngũ Grocerly xây dựng và sẽ sớm ra mắt trong "
-"thời gian tới."
+msgid "Type your message..."
+msgstr "Nhập tin nhắn..."
+
+msgid "Under Development"
+msgstr "Đang phát triển"
 
 msgid "Unit Price"
 msgstr "Đơn giá"
 
+msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
+msgstr "Đơn giá %(price)s ₫, thành tiền **%(total)s ₫**."
+
+msgid "Unverified Address"
+msgstr "Địa chỉ chưa xác minh"
+
+msgid "Update product"
+msgstr "Cập nhật sản phẩm"
+
+msgid "Update Profile"
+msgstr "Cập nhật hồ sơ"
+
+msgid ""
+"Use an email address you can read. It is the only way to reset a forgotten "
+"password."
+msgstr ""
+"Dùng email mà bạn đọc được. Đó là cách duy nhất để đặt lại mật khẩu khi quên."
+
+msgid "Use the site in Vietnamese or English."
+msgstr "Dùng trang web bằng tiếng Việt hoặc tiếng Anh."
+
+msgid "Username"
+msgstr "Tên đăng nhập"
+
+msgid "Vendor"
+msgstr "Nhà cung cấp"
+
 msgid "Vendor Dashboard"
-msgstr "Trang quản trị Nhà bán"
+msgstr "Trang quản lý cửa hàng"
 
 msgid "Vendors"
-msgstr "Nhà bán"
+msgstr "Nhà cung cấp"
 
 msgid "Verified"
 msgstr "Đã xác thực"
+
+msgid "Verified Address"
+msgstr "Địa chỉ đã xác minh"
+
+msgid "Vietnamese"
+msgstr "Tiếng Việt"
 
 msgid "View"
 msgstr "Xem"
@@ -410,354 +1487,236 @@ msgstr "Xem giỏ hàng"
 msgid "View cart"
 msgstr "Xem giỏ hàng"
 
-msgid "Về Trang Chủ"
-msgstr "Về Trang Chủ"
+msgid "View details"
+msgstr "Xem chi tiết"
 
-msgid "We found"
-msgstr "Chúng tôi tìm thấy"
+msgid "View vendor"
+msgstr "Xem nhà cung cấp"
+
+msgid "VNPay payment failed. Error code: %(code)s"
+msgstr "Lỗi thanh toán VNPay. Mã lỗi: %(code)s"
+
+msgid "VNPay payment successful!"
+msgstr "Thanh toán VNPay thành công!"
+
+msgid "We found <strong class=\"text-brand\">%(counter)s</strong> item for you!"
+msgid_plural ""
+"We found <strong class=\"text-brand\">%(counter)s</strong> items for you!"
+msgstr[0] ""
+"Tìm thấy <strong class=\"text-brand\">%(counter)s</strong> sản phẩm cho bạn!"
+
+msgid "We have <strong class=\"text-brand\">%(counter)s</strong> vendor"
+msgid_plural "We have <strong class=\"text-brand\">%(counter)s</strong> vendors"
+msgstr[0] "Hiện có <strong class=\"text-brand\">%(counter)s</strong> nhà cung cấp"
+
+msgid ""
+"We've emailed you instructions for setting your password, if an account "
+"exists with the email you entered. You should receive them shortly."
+msgstr ""
+"Nếu email bạn nhập có tài khoản, chúng tôi đã gửi hướng dẫn đặt mật khẩu tới "
+"email đó. Bạn sẽ nhận được trong ít phút."
+
+msgid "Weight or volume (e.g. 1kg, 500ml)"
+msgstr "Khối lượng hoặc thể tích (ví dụ: 1kg, 500ml)"
+
+msgid "Welcome back %(name)s!"
+msgstr "Chào mừng %(name)s quay lại!"
+
+msgid "Welcome, %(name)s! Your account has been created successfully!"
+msgstr "Chào mừng %(name)s! Tài khoản của bạn đã được tạo thành công."
+
+msgid "What we keep"
+msgstr "Chúng tôi lưu những gì"
+
+msgid "What you can do here"
+msgstr "Bạn làm được gì ở đây"
+
+msgid ""
+"What you type in the chat window is sent to Google's Gemini service, which "
+"writes the reply. Please do not type personal details such as your phone "
+"number or address into the chat."
+msgstr ""
+"Những gì bạn gõ trong khung chat được gửi tới dịch vụ Gemini của Google để "
+"viết câu trả lời. Vui lòng không gõ thông tin cá nhân như số điện thoại hay "
+"địa chỉ vào khung chat."
+
+msgid ""
+"When you ask to reset your password, the email is sent through the Brevo "
+"email service. Grocerly does not send newsletters or advertising."
+msgstr ""
+"Khi bạn yêu cầu đặt lại mật khẩu, thư được gửi qua dịch vụ thư Brevo. "
+"Grocerly không gửi bản tin hay quảng cáo."
+
+msgid "Who made it"
+msgstr "Ai làm ra Grocerly"
+
+msgid "Who sees your data"
+msgstr "Ai được thấy dữ liệu của bạn"
 
 msgid "Wishlist"
 msgstr "Yêu thích"
 
+msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
+msgstr "Bạn có muốn thêm **%(qty)sx %(title)s** vào giỏ hàng không?"
+
+msgid "Wrong email or password."
+msgstr "Email hoặc mật khẩu không đúng."
+
+msgid "Yes, add %(qty)s to cart"
+msgstr "Đúng %(qty)s, thêm vào giỏ"
+
+msgid "Yes, Add to Cart"
+msgstr "Có, thêm vào giỏ"
+
+msgid "Yes, please add it."
+msgstr "Có, thêm giúp mình nhé."
+
+msgid "You are already signed in."
+msgstr "Bạn đã đăng nhập rồi."
+
+msgid "You are not authorized to access this page."
+msgstr "Bạn không có quyền truy cập trang này."
+
+msgid ""
+"You can change your profile at any time from your account. To have your "
+"account deleted, or to ask about this policy, write to us through the <a "
+"href=\"%(contact_url)s\">contact page</a>."
+msgstr ""
+"Bạn sửa được hồ sơ bất cứ lúc nào trong tài khoản. Muốn xóa tài khoản, hay có"
+" câu hỏi về chính sách này, hãy viết cho chúng tôi qua <a "
+"href=\"%(contact_url)s\">trang liên hệ</a>."
+
+msgid ""
+"You can follow each order in your account: processing, shipping, delivered. "
+"The shop may cancel an order it cannot deliver; the order then shows as "
+"cancelled in your account."
+msgstr ""
+"Bạn theo dõi được từng đơn trong tài khoản: đang xử lý, đang giao hàng, đã "
+"giao. Cửa hàng có thể hủy đơn không giao được; khi đó đơn hiện là đã hủy "
+"trong tài khoản của bạn."
+
+msgid "You can only review a product you have received."
+msgstr "Bạn chỉ có thể đánh giá sản phẩm đã nhận được."
+
+msgid ""
+"You can pay online through VNPay or in cash when the order arrives. An online"
+" order counts as paid only once VNPay confirms the payment. If the amount "
+"VNPay reports does not match the order, the order stays unpaid; write to us "
+"through the <a href=\"%(contact_url)s\">contact page</a> and the staff will "
+"check the payment with VNPay."
+msgstr ""
+"Bạn có thể thanh toán trực tuyến qua VNPay hoặc trả tiền mặt khi nhận hàng. "
+"Đơn trực tuyến chỉ được tính là đã thanh toán khi VNPay xác nhận. Nếu số tiền"
+" VNPay báo không khớp với đơn, đơn vẫn là chưa thanh toán; hãy viết cho chúng"
+" tôi qua <a href=\"%(contact_url)s\">trang liên hệ</a> để nhân viên đối chiếu"
+" với VNPay."
+
+msgid ""
+"You can review a product once it has been shipped to you, one review per "
+"product. Keep reviews about the product; the shop may remove reviews that "
+"insult people or have nothing to do with the product."
+msgstr ""
+"Bạn đánh giá được sản phẩm khi sản phẩm đã được giao cho bạn, mỗi sản phẩm "
+"một lần. Hãy viết về sản phẩm; cửa hàng có thể gỡ đánh giá xúc phạm người "
+"khác hoặc không liên quan tới sản phẩm."
+
+msgid "You can review your items and complete your order at the checkout page."
+msgstr "Bạn có thể xem lại giỏ hàng và hoàn tất đơn hàng ở trang thanh toán."
+
+msgid "You have a pending checkout. Please complete payment."
+msgstr "Bạn có một đơn hàng đang chờ thanh toán. Vui lòng hoàn tất thanh toán."
+
+msgid "You have already reviewed this product."
+msgstr "Bạn đã đánh giá sản phẩm này rồi."
+
+msgid "You have been signed out."
+msgstr "Bạn đã đăng xuất."
+
+msgid ""
+"You need an account to place an order. Keep your password to yourself: orders"
+" placed from your account count as yours."
+msgstr ""
+"Bạn cần tài khoản để đặt hàng. Hãy giữ kín mật khẩu: đơn đặt từ tài khoản của"
+" bạn được coi là của bạn."
+
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+"Bạn nhận được email này vì đã yêu cầu đặt lại mật khẩu cho tài khoản của bạn "
+"tại %(site_name)s."
+
+msgid "Your account"
+msgstr "Tài khoản"
+
+msgid ""
+"Your account lists every order and its status: processing, shipping, "
+"delivered. Once an order has been shipped to you, you can review its "
+"products."
+msgstr ""
+"Tài khoản của bạn liệt kê mọi đơn hàng cùng trạng thái: đang xử lý, đang giao"
+" hàng, đã giao. Khi đơn đã được giao cho bạn, bạn có thể đánh giá các sản "
+"phẩm trong đơn."
+
+msgid ""
+"Your account: email address, user name and password. The password is stored "
+"only as a hash, never as readable text."
+msgstr ""
+"Tài khoản: email, tên người dùng và mật khẩu. Mật khẩu chỉ được lưu dưới dạng"
+" mã băm, không bao giờ lưu dạng đọc được."
+
 msgid "Your Cart"
 msgstr "Giỏ hàng của bạn"
-
-msgid "Your Location"
-msgstr "Vị trí của bạn"
-
-msgid "Your Orders"
-msgstr "Đơn hàng của bạn"
 
 msgid "Your cart is empty"
 msgstr "Giỏ hàng của bạn đang trống"
 
-msgid "Your email address"
-msgstr "Địa chỉ email của bạn"
-
-msgid "and"
-msgstr "và"
-
-msgid "edit your password and account details."
-msgstr "sửa mật khẩu và chi tiết tài khoản."
-
-msgid "items for you!"
-msgstr "sản phẩm cho bạn!"
-
-msgid "manage your"
-msgstr "quản lý"
-
-msgid "products in your cart"
-msgstr "sản phẩm trong giỏ hàng"
-
-msgid "recent orders"
-msgstr "đơn hàng gần đây"
-
-msgid "shipping and billing addresses"
-msgstr "địa chỉ giao hàng và thanh toán"
-
-msgid "Đang Phát Triển"
-msgstr "Đang Phát Triển"
+msgid "Your choices"
+msgstr "Lựa chọn của bạn"
 
 msgid ""
-"Đường link bạn truy cập có thể đã bị xóa, đổi tên, hoặc tạm thời không khả "
-"dụng."
+"Your COD order has been placed successfully. Pay on delivery. Order Id "
+"#%(oid)s"
 msgstr ""
-"Đường link bạn truy cập có thể đã bị xóa, đổi tên, hoặc tạm thời không khả "
-"dụng."
+"Đơn hàng COD của bạn đã được đặt thành công. Vui lòng thanh toán khi nhận "
+"hàng. Mã đơn hàng #%(oid)s"
 
-msgid "← Quay về Trang Chủ"
-msgstr "← Quay về Trang Chủ"
+msgid "Your Email"
+msgstr "Email của bạn"
+
+msgid "Your Email *"
+msgstr "Email của bạn *"
+
+msgid "Your email address will not be published. Required fields are marked *"
+msgstr "Email của bạn sẽ được bảo mật. Bắt buộc điền các mục có dấu *"
+
+msgid "Your order could not be placed, try again."
+msgstr "Không thể đặt đơn hàng, vui lòng thử lại."
+
+msgid "Your order has been successfully placed. Order Id #%(oid)s"
+msgstr "Đơn hàng của bạn đã được đặt thành công. Mã đơn hàng #%(oid)s"
+
+msgid "Your Orders"
+msgstr "Đơn hàng của bạn"
 
 msgid ""
-"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi "
-"**%(wait_seconds)s giây** rồi thử lại nhé!"
+"Your orders: the name, email, phone number and delivery address you enter at "
+"checkout, the products, the prices and whether the order is paid."
 msgstr ""
-"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi "
-"**%(wait_seconds)s giây** rồi thử lại nhé!"
-
-msgid ""
-"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 "
-"giây rồi thử lại nhé!"
-msgstr ""
-"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 "
-"giây rồi thử lại nhé!"
-
-msgid "100% Secure delivery without contacting the courier"
-msgstr "Giao hàng an toàn 100% không cần tiếp xúc"
-
-msgid "Super Value Deals - Save more with coupons"
-msgstr "Siêu khuyến mãi - Tiết kiệm hơn với mã giảm giá"
-
-msgid "Trendy 25silver jewelry, save up 35% off today"
-msgstr "Trang sức bạc thời thượng, giảm đến 35% hôm nay"
-
-msgid "Shop Now"
-msgstr "Mua ngay"
-
-msgid "Everyday Fresh &"
-msgstr "Tươi mới mỗi ngày &"
-
-msgid "Clean with Our"
-msgstr "Sạch sẽ với"
-
-msgid "Products"
-msgstr "Sản phẩm"
-
-msgid "Make your Breakfast"
-msgstr "Bữa sáng của bạn"
-
-msgid "Healthy and Easy"
-msgstr "Lành mạnh và Dễ dàng"
-
-msgid "The best Organic"
-msgstr "Sản phẩm hữu cơ"
-
-msgid "Products Online"
-msgstr "Tốt nhất trực tuyến"
-
-msgid "Color"
-msgstr "Màu sắc"
-
-msgid "Red"
-msgstr "Đỏ"
-
-msgid "Green"
-msgstr "Xanh lá"
-
-msgid "Blue"
-msgstr "Xanh dương"
-
-msgid "Item Condition"
-msgstr "Tình trạng sản phẩm"
-
-msgid "New"
-msgstr "Mới"
-
-msgid "Refurbished"
-msgstr "Đã tân trang"
-
-msgid "Used"
-msgstr "Đã qua sử dụng"
-
-msgid "New products"
-msgstr "Sản phẩm mới"
-
-msgid "Organic"
-msgstr "Hữu cơ"
-
-msgid "Save 17%"
-msgstr "Tiết kiệm 17%"
-
-msgid "on"
-msgstr "cho"
-
-msgid "Juice"
-msgstr "Nước ép"
-
-msgid "Shop by Categories"
-msgstr "Mua sắm theo danh mục"
-
-msgid "Off"
-msgstr "Giảm"
-
-msgid "Add to cart"
-msgstr "Thêm vào giỏ"
-
-msgid "Type:"
-msgstr "Loại:"
-
-msgid "MFG:"
-msgstr "NSX:"
-
-msgid "Expiry period:"
-msgstr "Hạn sử dụng:"
-
-msgid "SKU:"
-msgstr "Mã SP:"
-
-msgid "Tags:"
-msgstr "Thẻ:"
-
-msgid "Item(s) In Stock"
-msgstr "sản phẩm còn hàng"
-
-msgid "Description"
-msgstr "Mô tả"
-
-msgid "Additional info"
-msgstr "Thông tin bổ sung"
-
-msgid "Reviews"
-msgstr "Đánh giá"
-
-msgid "Customer questions & answers"
-msgstr "Câu hỏi & trả lời từ khách hàng"
-
-msgid "No reviews yet. Be the first to review this product!"
-msgstr "Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá sản phẩm này!"
-
-msgid "Customer reviews"
-msgstr "Đánh giá của khách hàng"
-
-msgid "out of 5.0"
-msgstr "trên 5.0"
-
-msgid "star"
-msgstr "sao"
-
-msgid "How are ratings calculated?"
-msgstr "Đánh giá được tính như thế nào?"
-
-msgid "Add a review"
-msgstr "Thêm đánh giá"
-
-msgid "Submit Review"
-msgstr "Gửi đánh giá"
-
-msgid "Related products"
-msgstr "Sản phẩm liên quan"
-
-msgid "Delivery"
-msgstr "Giao hàng"
-
-msgid "Verified Address"
-msgstr "Địa chỉ đã xác minh"
-
-msgid "Unverified Address"
-msgstr "Địa chỉ chưa xác minh"
-
-msgid "Change"
-msgstr "Thay đổi"
-
-msgid "Return & Warranty"
-msgstr "Đổi trả & Bảo hành"
-
-msgid "Authentic"
-msgstr "Chính hãng"
-
-msgid "Day(s) Return"
-msgstr "ngày đổi trả"
-
-msgid "Month(s) Warranty"
-msgstr "tháng bảo hành"
-
-msgid "Rating"
-msgstr "Đánh giá"
-
-msgid "Ship on time"
-msgstr "Giao đúng hẹn"
-
-msgid "Chat response"
-msgstr "Phản hồi chat"
-
-msgid "Address:"
-msgstr "Địa chỉ:"
-
-msgid "Contact Seller:"
-msgstr "Liên hệ người bán:"
-
-msgid "Become a Vendor?"
-msgstr "Trở thành nhà bán?"
-
-msgid "Register now"
-msgstr "Đăng ký ngay"
-
-msgid "Filter by price"
-msgstr "Lọc theo giá"
-
-msgid "Stay home & get your daily"
-msgstr "Ở nhà & nhận nhu yếu phẩm hàng ngày"
-
-msgid "needs from our shop"
-msgstr "từ cửa hàng của chúng tôi"
-
-msgid "Start Your Daily Shopping with"
-msgstr "Bắt đầu mua sắm hàng ngày cùng"
-
-msgid "Best prices & offers"
-msgstr "Giá & ưu đãi tốt nhất"
-
-msgid "Orders 100k or more"
-msgstr "Đơn hàng từ 100k trở lên"
-
-msgid "Free delivery"
-msgstr "Giao hàng miễn phí"
-
-msgid "24/7 amazing services"
-msgstr "Dịch vụ tuyệt vời 24/7"
-
-msgid "Great daily deal"
-msgstr "Ưu đãi tuyệt vời mỗi ngày"
-
-msgid "When you sign up"
-msgstr "Khi bạn đăng ký"
-
-msgid "Wide assortment"
-msgstr "Đa dạng sản phẩm"
-
-msgid "Mega Discounts"
-msgstr "Siêu giảm giá"
-
-msgid "Easy returns"
-msgstr "Đổi trả dễ dàng"
-
-msgid "Within 30 days"
-msgstr "Trong vòng 30 ngày"
-
-# --- Auth Translations Added Automatically ---
-msgid "Username"
-msgstr "Tên đăng nhập"
-
-msgid "Email"
-msgstr "Email"
-
-msgid "Password"
-msgstr "Mật khẩu"
-
-msgid "Confirm Password"
-msgstr "Xác nhận mật khẩu"
-
-msgid "Full Name"
-msgstr "Họ và tên"
-
-msgid "Bio"
-msgstr "Giới thiệu"
-
-msgid "Phone"
-msgstr "Điện thoại"
-
-msgid "Don't have an account?"
-msgstr "Bạn chưa có tài khoản?"
-
-msgid "Create here"
-msgstr "Đăng ký tại đây"
-
-msgid "Username or Email *"
-msgstr "Tên đăng nhập hoặc Email *"
+"Đơn hàng: họ tên, email, số điện thoại và địa chỉ giao hàng bạn nhập khi "
+"thanh toán, các sản phẩm, giá tiền và đơn đã thanh toán hay chưa."
 
 msgid "Your password *"
 msgstr "Mật khẩu của bạn *"
 
-msgid "Remember me"
-msgstr "Ghi nhớ đăng nhập"
+msgid "Your password has been changed."
+msgstr "Đã đổi mật khẩu."
 
-msgid "Forgot password?"
-msgstr "Quên mật khẩu?"
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr "Mật khẩu của bạn đã được đặt. Bây giờ bạn có thể đăng nhập."
 
-msgid "Log in"
-msgstr "Đăng nhập"
-
-msgid "Create an Account"
-msgstr "Tạo tài khoản mới"
-
-msgid "Already have an account?"
-msgstr "Bạn đã có tài khoản?"
-
-msgid "Submit &amp; Register"
-msgstr "Xác nhận &amp; Đăng ký"
-
-msgid "Note:"
-msgstr "Lưu ý:"
+msgid "Your password has been successfully changed."
+msgstr "Mật khẩu của bạn đã được đổi thành công."
 
 msgid ""
 "Your personal data will be used to support your experience throughout this "
@@ -765,232 +1724,82 @@ msgid ""
 "in our privacy policy"
 msgstr ""
 "Dữ liệu cá nhân của bạn sẽ được sử dụng để hỗ trợ trải nghiệm của bạn trên "
-"toàn bộ trang web này, để quản lý quyền truy cập vào tài khoản của bạn và "
-"cho các mục đích khác được mô tả trong chính sách bảo mật của chúng tôi."
-
-msgid "Checkout Information"
-msgstr "Thông tin thanh toán"
-
-msgid "Guest Checkout Information"
-msgstr "Thông tin thanh toán khách"
-
-msgid "Bio Data"
-msgstr "Thông tin cá nhân"
-
-msgid "Mobile"
-msgstr "Số điện thoại"
-
-msgid "City"
-msgstr "Tỉnh/Thành phố"
-
-msgid "State"
-msgstr "Quận/Huyện"
-
-msgid "Country"
-msgstr "Quốc gia"
-
-msgid "Continue To Payment"
-msgstr "Tiếp tục thanh toán"
-
-msgid "Checkout Info"
-msgstr "Thông tin thanh toán"
-
-msgid "Qty:"
-msgstr "SL:"
-
-msgid "Price:"
-msgstr "Giá:"
-
-msgid "Total:"
-msgstr "Tổng cộng:"
-
-msgid "Order Summary"
-msgstr "Tóm tắt đơn hàng"
-
-msgid "Enter Coupon Code..."
-msgstr "Nhập mã giảm giá..."
-
-msgid "Apply"
-msgstr "Áp dụng"
-
-msgid "Pay With Stripe (Credit or Debit Card)"
-msgstr "Thanh toán thẻ tín dụng/ghi nợ (Stripe)"
-
-msgid "Place Order With Cash On Delivery (COD)"
-msgstr "Thanh toán khi nhận hàng (COD)"
-
-msgid "Name"
-msgstr "Tên"
-
-msgid "How can help you ?"
-msgstr "Chúng tôi có thể giúp gì cho bạn?"
-
-msgid "Let us know how we can help you"
-msgstr "Hãy cho chúng tôi biết bạn cần hỗ trợ gì"
-
-msgid "Visit Feedback"
-msgstr "Phản hồi chuyến thăm"
-
-msgid "Employer Services"
-msgstr "Dịch vụ nhà tuyển dụng"
-
-msgid "Billing Inquiries"
-msgstr "Thắc mắc thanh toán"
-
-msgid "General Inquiries"
-msgstr "Thắc mắc chung"
-
-msgid "Office"
-msgstr "Văn phòng"
-
-msgid "Studio"
-msgstr "Phòng thu"
-
-msgid "Contact form"
-msgstr "Biểu mẫu liên hệ"
-
-msgid "Drop Us a Line"
-msgstr "Để lại lời nhắn"
-
-msgid "Your email address will not be published. Required fields are marked *"
-msgstr "Email của bạn sẽ được bảo mật. Bắt buộc điền các mục có dấu *"
-
-msgid "First Name"
-msgstr "Tên"
-
-msgid "Your Email"
-msgstr "Email của bạn"
+"toàn bộ trang web này, để quản lý quyền truy cập vào tài khoản của bạn và cho"
+" các mục đích khác được mô tả trong chính sách bảo mật của chúng tôi."
 
 msgid "Your Phone"
 msgstr "Số điện thoại"
 
-msgid "Subject"
-msgstr "Chủ đề"
+msgid ""
+"Your profile, if you fill it in: full name, phone number, address, a short "
+"bio and a photo."
+msgstr ""
+"Hồ sơ, nếu bạn điền: họ tên, số điện thoại, địa chỉ, vài dòng giới thiệu và "
+"ảnh đại diện."
 
-msgid "Message"
-msgstr "Nội dung"
+msgid "Your username, in case you’ve forgotten:"
+msgstr "Tên đăng nhập của bạn, phòng khi bạn quên:"
 
-msgid "Send message"
-msgstr "Gửi tin nhắn"
+msgid "Your Wishlist"
+msgstr "Danh sách yêu thích của bạn"
 
-msgid "Welcome to Grocerly"
-msgstr "Chào mừng đến với Grocerly"
+msgid "Your wishlist is empty."
+msgstr "Danh sách yêu thích của bạn đang trống."
 
-msgid "Our performance"
-msgstr "Thành tích của chúng tôi"
+msgid ""
+"⏳ The AI assistant is paused by its free usage limit. Please wait "
+"**%(wait_seconds)s seconds** and try again!"
+msgstr ""
+"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi "
+"**%(wait_seconds)s giây** rồi thử lại nhé!"
 
-msgid "Your Partner for e-commerce grocery shop"
-msgstr "Đối tác đáng tin cậy cho tạp hóa trực tuyến"
+msgid ""
+"⏳ The AI assistant is paused by its free usage limit. Please wait about 30 "
+"seconds and try again!"
+msgstr ""
+"⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 giây"
+" rồi thử lại nhé!"
 
-msgid "Vendor"
-msgstr "Nhà cung cấp"
+msgid ""
+"✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, "
+"or look for something else?"
+msgstr ""
+"✅ Giỏ hàng của bạn đã có **{qty}x {title}**. Bạn có muốn **thanh toán** luôn "
+"không, hay tìm thêm món khác?"
 
-msgid "Customer questions &amp; answers"
-msgstr "Câu hỏi & trả lời của khách hàng"
+msgid ""
+"🛑 The AI assistant has used up its free quota (500 messages a day). Please "
+"come back tomorrow!"
+msgstr ""
+"🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui "
+"lòng quay lại vào ngày mai!"
 
-# --- Order status (D-033) ---
-# The context keeps these apart from "Shipping" above, which is the shipping fee.
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid "This password is too short. It must contain at least %d character."
+msgid_plural ""
+"This password is too short. It must contain at least %d characters."
+msgstr[0] "Mật khẩu quá ngắn. Mật khẩu phải có ít nhất %d ký tự."
 
-msgctxt "order status"
-msgid "Processing"
-msgstr "Đang xử lý"
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid "“%(value)s” value must be a decimal number."
+msgstr "“%(value)s” phải là một số thập phân."
 
-msgctxt "order status"
-msgid "Shipping"
-msgstr "Đang giao hàng"
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid "“%(value)s” value must be an integer."
+msgstr "“%(value)s” phải là một số nguyên."
 
-msgctxt "order status"
-msgid "Delivered"
-msgstr "Đã giao"
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid "“%(value)s” value must be a float."
+msgstr "“%(value)s” phải là một số thực."
 
-msgctxt "order status"
-msgid "Cancelled"
-msgstr "Đã hủy"
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid ""
+"File extension “%(extension)s” is not allowed. Allowed extensions are: "
+"%(allowed_extensions)s."
+msgstr ""
+"Không chấp nhận tệp đuôi “%(extension)s”. Các đuôi được chấp nhận: "
+"%(allowed_extensions)s."
 
-msgid "This order has been cancelled."
-msgstr "Đơn hàng này đã bị hủy."
-
-# --- AI chat window (L-13 to L-15, D-035) ---
-
-msgid "System Error: Gemini API Key is missing or invalid. Please configure it in .env."
-msgstr "Lỗi hệ thống: thiếu Gemini API Key hoặc key không hợp lệ. Hãy cấu hình trong .env."
-
-#, python-format
-msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
-msgstr "Bạn có muốn thêm **%(qty)sx %(title)s** vào giỏ hàng không?"
-
-msgid "You can review your items and complete your order at the checkout page."
-msgstr "Bạn có thể xem lại giỏ hàng và hoàn tất đơn hàng ở trang thanh toán."
-
-msgid "Hi! I'm your Grocerly Assistant. I can help you find products, check prices, and more!"
-msgstr "Xin chào! Mình là trợ lý của Grocerly. Mình có thể giúp bạn tìm sản phẩm, xem giá và nhiều việc khác!"
-
-msgid "Assistant is thinking..."
-msgstr "Trợ lý đang trả lời..."
-
-msgid "Type your message..."
-msgstr "Nhập tin nhắn..."
-
-msgid "Yes, Add to Cart"
-msgstr "Có, thêm vào giỏ"
-
-msgid "Proceed to Checkout"
-msgstr "Tiến hành thanh toán"
-
-msgid "Yes, please add it."
-msgstr "Có, thêm giúp mình nhé."
-
-msgid "✅ Your cart now has **{qty}x {title}**. Would you like to **check out** now, or look for something else?"
-msgstr "✅ Giỏ hàng của bạn đã có **{qty}x {title}**. Bạn có muốn **thanh toán** luôn không, hay tìm thêm món khác?"
-
-msgid "Only {qty} left in stock, so your cart now has **{qty}x {title}**."
-msgstr "Kho chỉ còn {qty}, nên giỏ hàng của bạn có **{qty}x {title}**."
-
-msgid "Sorry, {title} has just sold out and was not added to your cart."
-msgstr "Xin lỗi, {title} vừa hết hàng nên chưa được thêm vào giỏ."
-
-msgid "Error:"
-msgstr "Lỗi:"
-
-msgid "Sorry, network error occurred."
-msgstr "Xin lỗi, kết nối mạng đang gặp sự cố."
-
-msgid "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
-msgstr "🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"
-
-msgid "Please choose a vendor."
-msgstr "Vui lòng chọn nhà cung cấp."
-
-msgid "Please choose a category."
-msgstr "Vui lòng chọn danh mục."
-
-msgid "The amount paid does not match this order, so it has not been confirmed. Please contact the store."
-msgstr "Số tiền đã thanh toán không khớp với đơn hàng nên đơn chưa được xác nhận. Vui lòng liên hệ cửa hàng."
-
-msgid "Delete this product?"
-msgstr "Xóa sản phẩm này?"
-
-msgid "This product is no longer available."
-msgstr "Sản phẩm này không còn bán nữa."
-
-msgid "Sorry, I could not finish that in one go. Could you tell me one step at a time?"
-msgstr "Xin lỗi, mình chưa làm xong yêu cầu này trong một lượt. Bạn nói lần lượt từng bước giúp mình nhé?"
-
-#, python-format
-msgid "Unit price %(price)s ₫, total **%(total)s ₫**."
-msgstr "Đơn giá %(price)s ₫, thành tiền **%(total)s ₫**."
-
-#, python-format
-msgid "%(qty)s is more than usual, please check the quantity."
-msgstr "%(qty)s là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé."
-
-#, python-format
-msgid "Yes, add %(qty)s to cart"
-msgstr "Đúng %(qty)s, thêm vào giỏ"
-
-msgid "Several products match. Tap the one you want to add to your cart:"
-msgstr "Có nhiều sản phẩm khớp với yêu cầu. Bạn bấm vào sản phẩm muốn thêm vào giỏ:"
-
-#, python-format
-msgid "Add %(qty)sx %(title)s - %(total)s ₫"
-msgstr "Thêm %(qty)sx %(title)s - %(total)s ₫"
+#. Django's own msgid; its vi catalog lacks it (L-57)
+msgid "Null characters are not allowed."
+msgstr "Không được chứa ký tự rỗng (null)."

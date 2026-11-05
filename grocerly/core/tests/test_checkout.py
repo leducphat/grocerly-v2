@@ -7,6 +7,7 @@ from decimal import Decimal
 
 import pytest
 from django.urls import reverse
+from django.utils.html import escape
 
 from core.models import CartOrder, CartOrderItem, Coupon, Product
 
@@ -37,12 +38,17 @@ def test_checkout_requires_sign_in(client):
     assert response.url.startswith(reverse("userauths:sign-in"))
 
 
-def test_checkout_without_address_creates_no_order(customer_client, product, add_to_cart):
+def test_checkout_without_address_creates_no_order(customer_client, product, add_to_cart, error_under_box):
     add_to_cart(customer_client, product)
 
     response = submit_shipping_info(customer_client, {**SHIPPING_INFO, "address": ""})
 
-    assert response.url == reverse("core:checkout-info")
+    # The page comes back with the error under the address box and keeps what the
+    # customer typed; it used to redirect to an empty form (L-50, D-054).
+    assert response.status_code == 200
+    message = response.context["form"].errors["address"][0]
+    assert error_under_box(response.content.decode(), "address", message)
+    assert 'value="Nguyễn Văn A"' in response.content.decode()
     assert CartOrder.objects.count() == 0
 
 
@@ -277,3 +283,37 @@ def test_order_line_stays_when_its_product_is_erased(customer_client, product, a
 
     line = CartOrderItem.objects.get()
     assert (line.item, line.product) == ("Cà rốt Đà Lạt", None)
+
+
+# ---------- checking the shipping information (L-50) ----------
+
+
+def test_checkout_rejects_an_email_that_is_not_an_email(customer_client, product, add_to_cart):
+    add_to_cart(customer_client, product)
+
+    submit_shipping_info(customer_client, {**SHIPPING_INFO, "email": "abc"})
+
+    assert CartOrder.objects.count() == 0
+
+
+@pytest.mark.parametrize("field", ["full_name", "address", "city"])
+def test_checkout_never_sends_a_value_longer_than_its_column(customer_client, product, add_to_cart, field):
+    # SQLite stores a string longer than the column, PostgreSQL on the host refuses
+    # it and the page answers 500. So the rule is checked here, not the crash.
+    limit = CartOrder._meta.get_field(field).max_length
+    add_to_cart(customer_client, product)
+
+    submit_shipping_info(customer_client, {**SHIPPING_INFO, field: "x" * (limit + 1)})
+
+    assert all(len(getattr(order, field)) <= limit for order in CartOrder.objects.all())
+
+
+# ---------- messages are shown once (L-54) ----------
+
+
+def test_unknown_coupon_message_is_shown_once(customer_client, order):
+    response = apply_coupon(customer_client, order, "KHONGCO")
+
+    messages = [str(m) for m in response.context["messages"]]
+    assert len(messages) == 1
+    assert response.content.decode().count(escape(messages[0])) == 1

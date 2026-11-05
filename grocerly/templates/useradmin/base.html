@@ -1,10 +1,11 @@
 {% load static %}
 {% load i18n %}
 <!DOCTYPE html>
-<html lang="en">
+{% get_current_language as LANGUAGE_CODE %}
+<html lang="{{ LANGUAGE_CODE }}">
     <head>
         <meta charset="utf-8" />
-        <title>E-commerce Dashboard</title>
+        <title>{% trans "Grocerly - Store dashboard" %}</title>
         <meta http-equiv="x-ua-compatible" content="ie=edge" />
         <meta name="description" content="" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,7 +26,7 @@
         <aside class="navbar-aside" id="offcanvas_aside">
             <div class="aside-top">
                 <a href="/useradmin/" class="brand-wrap">
-                    <img src="https://clipground.com/images/ecommerce-logo-png-11.png" class="logo" alt="E-commerce Dashboard" />
+                    <img src="{% static 'assets/imgs/theme/logo.png' %}" class="logo" alt="Grocerly" />
                 </a>
                 <div>
                     <button class="btn btn-icon btn-aside-minimize"><i class="text-muted material-icons md-menu_open"></i></button>
@@ -36,39 +37,39 @@
                     <li class="menu-item {% if '/useradmin/dashboard/' in request.path %}active{% endif %}">
                         <a class="menu-link" href="/useradmin/">
                             <i class="icon material-icons md-home"></i>
-                            <span class="text">Bảng điều khiển</span>
+                            <span class="text">{% trans "Dashboard" %}</span>
                         </a>
                     </li>
                     <li class="menu-item {% if '/useradmin/products/' in request.path %}active{% endif %}">
                         <a class="menu-link" href="{% url 'useradmin:dashboard-products' %}">
                             <i class="icon material-icons md-shopping_bag"></i>
 
-                            <span class="text">Sản phẩm</span>
+                            <span class="text">{% trans "Products" %}</span>
                         </a>
                     </li>
                     <li class="menu-item {% if '/useradmin/orders/' in request.path %}active{% endif %}">
                         <a class="menu-link" href="{% url 'useradmin:orders' %}">
                             <i class="icon material-icons md-shopping_cart"></i>
-                            <span class="text">Đơn hàng</span>
+                            <span class="text">{% trans "Orders" %}</span>
                         </a>
                     </li>
                     <li class="menu-item">
                         <a class="menu-link" href="{% url 'useradmin:shop_page' %}">
                             <i class="icon material-icons md-store"></i>
-                            <span class="text">Trang Cửa Hàng</span>
+                            <span class="text">{% trans "Store page" %}</span>
                         </a>
                     </li>
                     <li class="menu-item ">
                         <a class="menu-link" href="{% url 'useradmin:dashboard-add-products' %}">
                             <i class="icon material-icons md-add_box"></i>
-                            <span class="text">Thêm Sản phẩm</span>
+                            <span class="text">{% trans "Add product" %}</span>
                         </a>
                     </li>
 
                     <li class="menu-item">
                         <a class="menu-link" href="{% url 'useradmin:reviews' %}">
                             <i class="icon material-icons md-comment"></i>
-                            <span class="text">Đánh giá</span>
+                            <span class="text">{% trans "Reviews" %}</span>
                         </a>
                     </li>
                 </ul>
@@ -77,20 +78,20 @@
                     <li class="menu-item">
                         <a class="menu-link" href="{% url 'useradmin:settings' %}">
                             <i class="icon material-icons md-settings"></i>
-                            <span class="text">Cài đặt Cửa hàng</span>
+                            <span class="text">{% trans "Profile settings" %}</span>
                         </a>
                     </li>
                     <li class="menu-item">
                         <a class="menu-link" href="{% url 'useradmin:change_password' %}">
                             <i class="icon material-icons md-lock"></i>
-                            <span class="text"> Đổi mật khẩu </span>
+                            <span class="text">{% trans "Change password" %}</span>
                         </a>
                     </li>
 
                     <li class="menu-item">
                         <a class="menu-link" href="{% url 'userauths:sign-out' %}">
                             <i class="icon material-icons md-arrow_forward"></i>
-                            <span class="text">Đăng xuất</span>
+                            <span class="text">{% trans "Sign out" %}</span>
                         </a>
                     </li>
                 </ul>
@@ -115,22 +116,22 @@
                             <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> 
                                 
                                 {% if request.user.profile.image %}
-                                <img class="img-xs rounded-circle" src="{{request.user.profile.image.url}}" alt="User" />
+                                <img class="img-xs rounded-circle" src="{{request.user.profile.image.url}}" alt="{% trans 'Avatar' %}" />
                                 {% else %}
-                                <img class="img-xs rounded-circle" src="https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2281862025.jpg" alt="User" />
+                                <img class="img-xs rounded-circle" src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" alt="{% trans 'Avatar' %}" />
 
                                 {% endif %}
                                     
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
-                                <a class="dropdown-item" href="#"><i class="material-icons md-perm_identity"></i>Cập nhật hồ sơ</a>
-                                <a class="dropdown-item" href="#"><i class="material-icons md-settings"></i>Cài đặt tài khoản</a>
+                                <a class="dropdown-item" href="{% url 'useradmin:settings' %}"><i class="material-icons md-perm_identity"></i>{% trans "Profile settings" %}</a>
+                                <a class="dropdown-item" href="{% url 'useradmin:change_password' %}"><i class="material-icons md-lock"></i>{% trans "Change password" %}</a>
                                 {% if request.user.is_superuser %}
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-primary" href="/admin/"><i class="material-icons md-admin_panel_settings"></i>Về trang Admin</a>
+                                <a class="dropdown-item text-primary" href="/admin/"><i class="material-icons md-admin_panel_settings"></i>{% trans "Go to the admin site" %}</a>
                                 {% endif %}
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item text-danger" href="{% url 'userauths:sign-out' %}"><i class="material-icons md-exit_to_app"></i>Đăng xuất</a>
+                                <a class="dropdown-item text-danger" href="{% url 'userauths:sign-out' %}"><i class="material-icons md-exit_to_app"></i>{% trans "Sign out" %}</a>
                             </div>
                         </li>
                     </ul>
@@ -170,13 +171,10 @@
             <footer class="main-footer font-xs">
                 <div class="row pb-30 pt-15">
                     <div class="col-sm-6">
-                        <script>
-                            document.write(new Date().getFullYear());
-                        </script>
-                        &copy; E-commerce - HTML Ecommerce Template .
+                        &copy; {% now "Y" %} Grocerly
                     </div>
                     <div class="col-sm-6">
-                        <div class="text-sm-end">All rights reserved</div>
+                        <div class="text-sm-end">{% trans "All rights reserved" %}</div>
                     </div>
                 </div>
             </footer>

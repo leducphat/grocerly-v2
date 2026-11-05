@@ -39,92 +39,72 @@
                 <div class="row">
                     <div class="col-9">
                         <div class="content-header">
-                            <h2 class="content-title">Edit Product</h2>
+                            <h2 class="content-title">{% trans "Edit product" %}</h2>
                         </div>
                     </div>
                     
                     <div class="col-lg-6">
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h4>Basic</h4>
+                                <h4>{% trans "Basic information" %}</h4>
                             </div>
                             <div class="card-body">
                                 
-                                {% if form.errors %}
-                                    
-                                
-                                <div class="alert alert-danger">
-                                    <strong>{{ form.errors }}</strong>
-                                </div>
-                                {% endif %}
+                                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
                                     {% csrf_token %}
                                     <div class="mb-4">
-                                        <label for="product_name" class="form-label">Product title</label>
-                                        {{form.title}}
-                                        <!-- <input type="text" placeholder="Type here" class="form-control" id="product_name" /> -->
+                                        <label for="product_name" class="form-label">{% trans "Product name" %}</label>
+                                        {{form.title}}{% include "partials/field_errors.html" with field=form.title %}
                                     </div>
                                     <div class="mb-4">
-                                        <label class="form-label">Full description</label>
-                                        {{form.description}}
+                                        <label class="form-label">{% trans "Description" %}</label>
+                                        {{form.description}}{% include "partials/field_errors.html" with field=form.description %}
 
-                                        <!-- <textarea placeholder="Type here" class="form-control" rows="4"></textarea> -->
                                     </div>
                                     <div class="row">
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-6">
                                             <div class="mb-4">
-                                                <label class="form-label">Selling price</label>
+                                                <label class="form-label">{% trans "Selling price (VND)" %}</label>
                                                 <div class="row gx-2">
-                                        {{form.price}}
+                                        {{form.price}}{% include "partials/field_errors.html" with field=form.price %}
 
-                                                    <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-6">
                                             <div class="mb-4">
-                                                <label class="form-label">Old price</label>
-                                        {{form.old_price}}
+                                                <label class="form-label">{% trans "Old price (VND)" %}</label>
+                                        {{form.old_price}}{% include "partials/field_errors.html" with field=form.old_price %}
 
-                                                <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
-                                        <label class="form-label">Currency</label>
-                                            <select class="form-select">
-                                                <option>VND</option>
-                                               
-                                            </select>
-                                        </div>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Stock</label>
-                                        {{form.stock_count}}
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Stock quantity" %}</label>
+                                        {{form.stock_count}}{% include "partials/field_errors.html" with field=form.stock_count %}
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Life of Product</label>
-                                        {{form.expiry_period}}
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Shelf life" %}</label>
+                                        {{form.expiry_period}}{% include "partials/field_errors.html" with field=form.expiry_period %}
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Tags</label>
-                                        {{form.tags}}
-                                        <small class="text-muted">Seperate tag using comma</small>
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Keywords (tags)" %}</label>
+                                        {{form.tags}}{% include "partials/field_errors.html" with field=form.tags %}
+                                        <small class="text-muted">{% trans "Separate keywords with commas" %}</small>
                                     </div>
 
                                     <div class="mb-4 custom_select">
                                           <label class="form-label">{% trans "Vendor" %}</label>
                                           <br>
-                                          {{form.vendor}}
+                                          {{form.vendor}}{% include "partials/field_errors.html" with field=form.vendor %}
                                     </div>
                                     <div class="mb-4 custom_select">
-                                          <label class="form-label">Category</label>
+                                          <label class="form-label">{% trans "Category" %}</label>
                                           <br>
-                                          {{form.category}}
+                                          {{form.category}}{% include "partials/field_errors.html" with field=form.category %}
                                     </div>
                                     
 
@@ -137,20 +117,19 @@
                     <div class="col-lg-3">
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h4>Media</h4>
+                                <h4>{% trans "Images" %}</h4>
                             </div>
                             <div class="card-body">
                                 <div class="input-upload">
-                                    <label class="form-label text-start d-block">Primary Image</label>
+                                    <label class="form-label text-start d-block">{% trans "Main image" %}</label>
                                     {% if product.image %}
                                     <img src="{{ product.image.url }}" alt="" />
                                     {% else %}
                                     <img src="{% static 'assets2/imgs/theme/upload.svg' %}" alt="" />
                                     {% endif %}
-                                    <!-- <input class="form-control" type="file" /> -->
-                                    {{form.image}}
+                                    {{form.image}}{% include "partials/field_errors.html" with field=form.image %}
                                     
-                                    <label class="form-label text-start d-block mt-4">Additional Images</label>
+                                    <label class="form-label text-start d-block mt-4">{% trans "Additional images" %}</label>
                                     <input class="form-control mb-4" type="file" name="additional_images" id="additional_images" multiple />
                                     
                                     <div id="image-preview-container" class="row mt-3"></div>
@@ -173,7 +152,7 @@
                         </div>
                         <!-- card end// -->
 
-                        <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">Update Product</button>
+                        <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">{% trans "Update product" %}</button>
                     </div>
                 </div>
                 </form>

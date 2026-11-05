@@ -3,6 +3,9 @@ The staff profile page /useradmin/settings/ (CN-23: the staff updates their own
 profile). SRS.md has no use case for it yet; UC-11 covers the customer's page.
 """
 
+import html
+import re
+
 import pytest
 from django.urls import reverse
 
@@ -67,3 +70,58 @@ def test_anonymous_visitor_cannot_use_the_staff_settings_page(client):
 
     assert response.url == reverse("userauths:sign-in")
     assert not Profile.objects.filter(full_name="Phạm Thị D").exists()
+
+
+# ---------- empty boxes (L-45) and too long values (L-50) ----------
+
+
+def boxes_on_page(page):
+    """name -> value of every text box of the page, what the browser sends back on Save."""
+    boxes = {}
+    for tag in re.findall(r"<input\b[^>]*>", page):
+        name = re.search(r'name="([^"]*)"', tag)
+        value = re.search(r'value="([^"]*)"', tag)
+        if name and 'type="file"' not in tag:
+            boxes[name.group(1)] = html.unescape(value.group(1)) if value else ""
+    return boxes
+
+
+@pytest.fixture
+def staff_with_empty_boxes(staff):
+    Profile.objects.filter(user=staff).update(
+        full_name="Phạm Thị D", phone=None, bio=None, address=None, country=None
+    )
+    return staff
+
+
+def test_settings_page_shows_empty_boxes_empty(staff_client, staff_with_empty_boxes):
+    page = staff_client.get(reverse(SETTINGS_URL)).content.decode()
+
+    assert 'value="None"' not in page
+
+
+def test_saving_the_page_as_shown_keeps_empty_boxes_empty(staff_client, staff_with_empty_boxes):
+    shown = boxes_on_page(staff_client.get(reverse(SETTINGS_URL)).content.decode())
+
+    staff_client.post(reverse(SETTINGS_URL), {**shown, "bio": "Quản lý kho"})
+
+    profile = Profile.objects.get(user=staff_with_empty_boxes)
+    assert (profile.full_name, profile.bio) == ("Phạm Thị D", "Quản lý kho")
+    assert "None" not in (profile.phone, profile.address, profile.country)
+
+
+def test_shop_page_does_not_print_none_for_a_missing_address(staff_client, staff_with_empty_boxes):
+    page = staff_client.get(reverse("useradmin:shop_page")).content.decode()
+
+    assert not re.search(r"\bNone\b", page)
+
+
+@pytest.mark.parametrize("field", ["full_name", "phone", "bio", "address", "country"])
+def test_too_long_value_never_reaches_the_database(staff_client, staff, field):
+    # SQLite stores a string longer than the column, PostgreSQL on the host refuses
+    # it and the page answers 500. So the rule is checked here, not the crash.
+    limit = Profile._meta.get_field(field).max_length
+
+    staff_client.post(reverse(SETTINGS_URL), new_profile(**{field: "x" * (limit + 1)}))
+
+    assert len(getattr(Profile.objects.get(user=staff), field) or "") <= limit

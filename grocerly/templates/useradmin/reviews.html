@@ -7,8 +7,8 @@
 <section class="content-main">
     <div class="content-header">
         <div>
-            <h2 class="content-title card-title">Reviews</h2>
-            <p>Manage all product reviews</p>
+            <h2 class="content-title card-title">{% trans "Reviews" %}</h2>
+            <p>{% trans "Manage all product reviews" %}</p>
         </div>
     </div>
     <div class="card mb-4">
@@ -17,11 +17,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>S/N</th>
-                            <th>Product</th>
-                            <th>Name</th>
-                            <th>Review</th>
-                            <th>Rating</th>
+                            <th>#</th>
+                            <th>{% trans "Product" %}</th>
+                            <th>{% trans "Customer" %}</th>
+                            <th>{% trans "Comment" %}</th>
+                            <th>{% trans "Rating" %}</th>
                             <th>{% trans "Date" %}</th>
                         </tr>
                     </thead>
@@ -33,8 +33,8 @@
                                 <td><b>{{r.product.title}}</b></td>
                                 <td>{{r.user.username|title}}</td>
                                 <td>{{r.review}}</td>
-                                <td>{{r.rating}} Stars</td>
-                                <td>{{r.date|date:"m M, Y"}}</td>
+                                <td>{% blocktrans trimmed count rating=r.rating %}{{ rating }} star{% plural %}{{ rating }} stars{% endblocktrans %}</td>
+                                <td>{{r.date|date:"d/m/Y"}}</td>
                             </tr>
                         {% endfor %}
 

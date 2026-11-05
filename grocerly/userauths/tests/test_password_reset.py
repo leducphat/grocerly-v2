@@ -164,3 +164,18 @@ def test_brevo_not_answering_is_logged_and_page_still_answers(client, customer, 
 
     assert response.status_code == 302
     assert f"Failed to send password reset email to {customer.pk}" in caplog.text
+
+
+# ---------- how the set-password page shows an error (L-46) ----------
+
+
+def test_set_password_error_is_shown_in_red_under_its_box(client, customer, mailoutbox, error_under_box):
+    request_reset(client, customer.email)
+    set_password_url = client.get(reset_link_path(mailoutbox[0].body), follow=True).redirect_chain[-1][0]
+
+    response = client.post(
+        set_password_url, {"new_password1": "Mat-khau-moi#2026", "new_password2": "Mat-khau-khac#2026"}
+    )
+
+    message = response.context["form"].errors["new_password2"][0]
+    assert error_under_box(response.content.decode(), "new_password2", message)

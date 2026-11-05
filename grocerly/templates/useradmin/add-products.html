@@ -39,92 +39,72 @@
                 <div class="row">
                     <div class="col-9">
                         <div class="content-header">
-                            <h2 class="content-title">Thêm sản phẩm mới</h2>
+                            <h2 class="content-title">{% trans "Add new product" %}</h2>
                         </div>
                     </div>
                     
                     <div class="col-lg-6">
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h4>Thông tin cơ bản</h4>
+                                <h4>{% trans "Basic information" %}</h4>
                             </div>
                             <div class="card-body">
                                 
-                                {% if form.errors %}
-                                    
-                                
-                                <div class="alert alert-danger">
-                                    <strong>{{ form.errors }}</strong>
-                                </div>
-                                {% endif %}
+                                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors|join:" " }}</div>{% endif %}
                                     {% csrf_token %}
                                     <div class="mb-4">
-                                        <label for="product_name" class="form-label">Tên sản phẩm</label>
-                                        {{form.title}}
-                                        <!-- <input type="text" placeholder="Type here" class="form-control" id="product_name" /> -->
+                                        <label for="product_name" class="form-label">{% trans "Product name" %}</label>
+                                        {{form.title}}{% include "partials/field_errors.html" with field=form.title %}
                                     </div>
                                     <div class="mb-4">
-                                        <label class="form-label">Mô tả chi tiết</label>
-                                        {{form.description}}
+                                        <label class="form-label">{% trans "Description" %}</label>
+                                        {{form.description}}{% include "partials/field_errors.html" with field=form.description %}
 
-                                        <!-- <textarea placeholder="Type here" class="form-control" rows="4"></textarea> -->
                                     </div>
                                     <div class="row">
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-6">
                                             <div class="mb-4">
-                                                <label class="form-label">Giá bán</label>
+                                                <label class="form-label">{% trans "Selling price (VND)" %}</label>
                                                 <div class="row gx-2">
-                                        {{form.price}}
+                                        {{form.price}}{% include "partials/field_errors.html" with field=form.price %}
 
-                                                    <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-4">
+                                        <div class="col-lg-6">
                                             <div class="mb-4">
-                                                <label class="form-label">Giá cũ</label>
-                                        {{form.old_price}}
+                                                <label class="form-label">{% trans "Old price (VND)" %}</label>
+                                        {{form.old_price}}{% include "partials/field_errors.html" with field=form.old_price %}
 
-                                                <!-- <input placeholder="$" type="text" class="form-control" /> -->
                                             </div>
-                                        </div>
-                                        <div class="col-lg-4">
-                                        <label class="form-label">Tiền tệ</label>
-                                            <select class="form-select">
-                                                <option>VND</option>
-                                               
-                                            </select>
                                         </div>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Số lượng trong kho</label>
-                                        {{form.stock_count}}
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Stock quantity" %}</label>
+                                        {{form.stock_count}}{% include "partials/field_errors.html" with field=form.stock_count %}
                                     </div>
 
                                     <div class="mb-4 custom_select">
                                           <label class="form-label">{% trans "Vendor" %}</label>
                                           <br>
-                                          {{form.vendor}}
+                                          {{form.vendor}}{% include "partials/field_errors.html" with field=form.vendor %}
                                     </div>
                                     <div class="mb-4 custom_select">
-                                          <label class="form-label">Danh mục</label>
+                                          <label class="form-label">{% trans "Category" %}</label>
                                           <br>
-                                          {{form.category}}
+                                          {{form.category}}{% include "partials/field_errors.html" with field=form.category %}
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Hạn sử dụng</label>
-                                        {{form.expiry_period}}
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Shelf life" %}</label>
+                                        {{form.expiry_period}}{% include "partials/field_errors.html" with field=form.expiry_period %}
                                     </div>
 
                                     <div class="mb-4">
-                                        <label class="form-label">Từ khóa (Tags)</label>
-                                        {{form.tags}}
-                                        <small class="text-muted">Ngăn cách các từ khóa bằng dấu phẩy</small>
-                                        <!-- <input type="text" placeholder="%" class="form-control" id="product_name" /> -->
+                                        <label class="form-label">{% trans "Keywords (tags)" %}</label>
+                                        {{form.tags}}{% include "partials/field_errors.html" with field=form.tags %}
+                                        <small class="text-muted">{% trans "Separate keywords with commas" %}</small>
                                     </div>
 
                             </div>
@@ -136,16 +116,15 @@
                     <div class="col-lg-3">
                         <div class="card mb-4">
                             <div class="card-header">
-                                <h4>Hình ảnh</h4>
+                                <h4>{% trans "Images" %}</h4>
                             </div>
                             <div class="card-body">
                                 <div class="input-upload">
-                                    <label class="form-label text-start d-block">Ảnh đại diện</label>
+                                    <label class="form-label text-start d-block">{% trans "Main image" %}</label>
                                     <img src="{% static 'assets2/imgs/theme/upload.svg' %}" alt="" />
-                                    <!-- <input class="form-control" type="file" /> -->
-                                    {{form.image}}
+                                    {{form.image}}{% include "partials/field_errors.html" with field=form.image %}
                                     
-                                    <label class="form-label text-start d-block mt-4">Ảnh phụ</label>
+                                    <label class="form-label text-start d-block mt-4">{% trans "Additional images" %}</label>
                                     <input class="form-control" type="file" name="additional_images" id="additional_images" multiple />
                                     
                                     <div id="image-preview-container" class="row mt-3"></div>
@@ -154,7 +133,7 @@
                         </div>
                         <!-- card end// -->
 
-                        <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">Tạo sản phẩm</button>
+                        <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">{% trans "Create product" %}</button>
                     </div>
                 </div>
                 </form>

@@ -195,7 +195,7 @@ def confirm_add_cart(p, qty, hidden_context=None):
     question = str(_("Would you like to add **%(qty)sx %(title)s** to your cart?")) % values
     price = str(_("Unit price %(price)s ₫, total **%(total)s ₫**.")) % values
     reply = {
-        "reply": f"{large_qty_warning(qty)}{question} {price}",
+        "reply": large_qty_warning(qty) + question + " " + price,
         "action": "confirm_add_cart",
         "product": proposal(p, qty),
     }
@@ -280,7 +280,7 @@ def _chat_reply(request):
     history_data = request.data.get('history', [])
 
     if not user_message:
-        return Response({"error": "Empty message"}, status=400)
+        return Response({"error": str(_("Empty message"))}, status=400)
 
     try:
         # `history` is what was said before `message`. The chat window used to
@@ -422,7 +422,7 @@ def _chat_reply(request):
         if "429" in error_msg or "Quota" in error_msg or "ResourceExhausted" in error_msg:
             if "PerDay" in error_msg:
                 return Response({
-                    "reply": str(_("🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui lòng quay lại vào ngày mai!"))
+                    "reply": str(_("🛑 The AI assistant has used up its free quota (500 messages a day). Please come back tomorrow!"))
                 }, status=200)
             
             # Try to extract the retry delay from Google's error response
@@ -433,12 +433,12 @@ def _chat_reply(request):
             if retry_match:
                 wait_seconds = int(float(retry_match.group(1)))
                 return Response({
-                    "reply": str(_("⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi **%(wait_seconds)s giây** rồi thử lại nhé!")) % {'wait_seconds': wait_seconds},
+                    "reply": str(_("⏳ The AI assistant is paused by its free usage limit. Please wait **%(wait_seconds)s seconds** and try again!")) % {'wait_seconds': wait_seconds},
                     "retry_after": wait_seconds
                 }, status=200)
             else:
                 return Response({
-                    "reply": str(_("⏳ Hệ thống AI đang tạm nghỉ do giới hạn miễn phí. Vui lòng đợi khoảng 30 giây rồi thử lại nhé!")),
+                    "reply": str(_("⏳ The AI assistant is paused by its free usage limit. Please wait about 30 seconds and try again!")),
                     "retry_after": 30
                 }, status=200)
-        return Response({"reply": str(_("Mình đang gặp trục trặc kết nối. Bạn thử lại sau nhé!"))}, status=200)
+        return Response({"reply": str(_("I am having trouble connecting. Please try again later!"))}, status=200)

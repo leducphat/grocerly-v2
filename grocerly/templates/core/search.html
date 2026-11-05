@@ -1,5 +1,5 @@
 {% extends 'partials/base.html' %}
-{% load static currency_filters %}
+{% load static currency_filters i18n %}
 {% block content %}
     <main class="main">
         <div class="page-header mt-30 mb-50">
@@ -10,11 +10,11 @@
                             {% if query %}
                             <h1 class="mb-15">{{ query }}</h1>
                             {% else %}
-                            <h3 class="mb-15">No Searched Item</h3>
+                            <h3 class="mb-15">{% trans "No search term" %}</h3>
                             {% endif %}
                             <div class="breadcrumb">
-                                <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-                                <span></span> Shop <span></span> {{ query }}
+                                <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
+                                <span></span> {% trans "Search" %} <span></span> {{ query }}
                             </div>
                         </div>
                     </div>
@@ -26,7 +26,7 @@
                 <div class="col-12">
                     <div class="shop-product-fillter">
                         <div class="totall-product">
-                            <p>We found <strong class="text-brand">{{ products.count }}</strong> item{{ products.count|pluralize }} for you!</p>
+                            <p>{% blocktrans trimmed count counter=products|length %}We found <strong class="text-brand">{{ counter }}</strong> item for you!{% plural %}We found <strong class="text-brand">{{ counter }}</strong> items for you!{% endblocktrans %}</p>
                         </div>
                     </div>
                     <div class="row product-grid">
@@ -41,7 +41,7 @@
                                       </a>
                                   </div>
                                   <div class="product-action-1">
-                                      <a aria-label="Quick view" href="{% url 'core:product-detail' p.p_id %}" class="action-btn"><i class="fi-rs-eye"></i></a>
+                                      <a aria-label="{% trans 'Quick view' %}" href="{% url 'core:product-detail' p.p_id %}" class="action-btn"><i class="fi-rs-eye"></i></a>
                                   </div>
                                   {% if p.get_percentage > 0 %}
                                   <div class="product-badges product-badges-position product-badges-mrg">
@@ -62,7 +62,7 @@
                                   </div>
                                   <div>
                                       {% if p.vendor %}
-                                      <span class="font-small text-muted">By <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
+                                      <span class="font-small text-muted">{% trans "By" %} <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
                                       {% endif %}
                                   </div>
                                   <div class="product-card-bottom">
@@ -71,7 +71,7 @@
                                           <span class="old-price">{{ p.old_price|vnd }} ₫</span>
                                       </div>
                                       <div class="add-cart">
-                                          <a class="add" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-shopping-cart mr-5"></i>Details</a>
+                                          <a class="add" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-shopping-cart mr-5"></i>{% trans "Details" %}</a>
                                       </div>
                                   </div>
                               </div>
@@ -79,7 +79,7 @@
                       </div>
                       {% empty %}
                       <div class="col-12">
-                          <p>No products found matching "{{ query }}".</p>
+                          <p>{% blocktrans trimmed %}No products found matching "{{ query }}".{% endblocktrans %}</p>
                       </div>
                       {% endfor %}
                     </div>

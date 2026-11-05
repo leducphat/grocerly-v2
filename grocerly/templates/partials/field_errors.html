@@ -1,0 +1,7 @@
+{% comment %}
+The errors of one form box, in red, right under the box (L-46, D-054).
+Use it just after the box: {% include "partials/field_errors.html" with field=form.email %}
+text-danger is the style the customer's change-password page already uses.
+{% endcomment %}{% if field.errors %}
+<div class="text-danger mt-1">{% for error in field.errors %}<div>{{ error }}</div>{% endfor %}</div>
+{% endif %}

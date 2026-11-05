@@ -1,4 +1,5 @@
 {% extends 'useradmin/base.html' %}
+{% load i18n %}
 {% load static currency_filters %}
 {% load humanize %}
 {% block content %}  
@@ -6,8 +7,8 @@
 <section class="content-main">
     <div class="content-header">
         <div>
-            <h2 class="content-title card-title">Order detail</h2>
-            <p>Details for Order ID: 3453012</p>
+            <h2 class="content-title card-title">{% trans "Order details" %}</h2>
+            <p>{% blocktrans trimmed with oid=order.oid %}Details of order #{{ oid }}{% endblocktrans %}</p>
         </div>
     </div>
     <div class="card">
@@ -15,17 +16,17 @@
             <div class="row align-items-center">
                 <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
                     <span> <i class="material-icons md-calendar_today"></i> <b>{{order.date}}</b> </span> <br />
-                    <small class="text-muted">Order ID: #{{order.oid}}</small>
+                    <small class="text-muted">{% trans "Order ID" %}: #{{order.oid}}</small>
                 </div>
                 <form method="POST" action="{% url 'useradmin:change_order_status' order.oid %}" class="col-lg-6 col-md-6 ms-auto text-md-end">
                     {% csrf_token %}
                     <select name="status" class="form-select d-inline-block mb-lg-0 mr-5 mw-200">
-                        <option value="" selected>Change Order Status</option>
+                        <option value="" selected>{% trans "Change order status" %}</option>
                         {% for value, label in status_choices %}
                         <option value="{{ value }}">{{ label }}</option>
                         {% endfor %}
                     </select>
-                    <button class="btn btn-primary" type="submit" >Save</button>
+                    <button class="btn btn-primary" type="submit" >{% trans "Save" %}</button>
                 </form>
             </div>
         </header>
@@ -38,11 +39,11 @@
                             <i class="text-primary material-icons md-person"></i>
                         </span>
                         <div class="text">
-                            <h6 class="mb-1">Customer</h6>
+                            <h6 class="mb-1">{% trans "Customer" %}</h6>
                             <p class="mb-1">
-                                {{order.full_name}} <br />
-                                {{order.email}} <br />
-                                {{order.phone}}
+                                {{ order.full_name|default_if_none:'' }} <br />
+                                {{ order.email|default_if_none:'' }} <br />
+                                {{ order.phone|default_if_none:'' }}
                             </p>
                         </div>
                     </article>
@@ -54,12 +55,12 @@
                             <i class="text-primary material-icons md-local_shipping"></i>
                         </span>
                         <div class="text">
-                            <h6 class="mb-1">Order info</h6>
+                            <h6 class="mb-1">{% trans "Order information" %}</h6>
                             <p class="mb-1">
-                                Shipping Method: {{order.shipping_method}} <br />
-                                Order Id: #{{order.oid}} <br>
-                                Order Status: {{order.get_product_status_display}} <br>
-                                Payment Status: {% if order.paid_status == True %} Paid {% else %} Not Paid {% endif %} 
+                                {% if order.shipping_method %}{% trans "Shipping method" %}: {{ order.shipping_method }} <br />{% endif %}
+                                {% trans "Order ID" %}: #{{order.oid}} <br>
+                                {% trans "Order status" %}: {{order.get_product_status_display}} <br>
+                                {% trans "Payment status" %}: {% if order.paid_status == True %}{% trans "Paid" %}{% else %}{% trans "Not paid" %}{% endif %}
                             </p>
                         </div>
                     </article>
@@ -71,12 +72,12 @@
                             <i class="text-primary material-icons md-place"></i>
                         </span>
                         <div class="text">
-                            <h6 class="mb-1">Deliver to</h6>
+                            <h6 class="mb-1">{% trans "Deliver to" %}</h6>
                             <p class="mb-1">
-                                Address: {{order.address}} <br />
-                                City: {{order.city}} <br />
-                                State: {{order.state}} <br />
-                                Country: {{order.country}}
+                                {% if order.address %}{% trans "Address" %}: {{ order.address }} <br />{% endif %}
+                                {% if order.city %}{% trans "City" %}: {{ order.city }} <br />{% endif %}
+                                {% if order.state %}{% trans "State" %}: {{ order.state }} <br />{% endif %}
+                                {% if order.country %}{% trans "Country" %}: {{ order.country }}{% endif %}
                             </p>
                         </div>
                     </article>
@@ -90,10 +91,10 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th width="40%">Product</th>
-                                    <th width="20%">Unit Price</th>
-                                    <th width="20%">Quantity</th>
-                                    <th width="20%" class="text-end">Total</th>
+                                    <th width="40%">{% trans "Product" %}</th>
+                                    <th width="20%">{% trans "Unit Price" %}</th>
+                                    <th width="20%">{% trans "Quantity" %}</th>
+                                    <th width="20%" class="text-end">{% trans "Total" %}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -101,15 +102,15 @@
                                 {% for o in order_items %}
                                     <tr>
                                         <td>
-                                            <a class="itemside" href="#">
+                                            <div class="itemside">
                                                 <div class="left">
-                                                    <img src="{{o.image}}" style="border-radius: 4px;" width="40" height="40" class="img-xs" alt="Item" />
+                                                    <img src="{{o.image}}" style="border-radius: 4px;" width="40" height="40" class="img-xs" alt="{{ o.item }}" />
                                                 </div>
                                                 <div class="info">{{o.item}}</div>
-                                            </a>
+                                            </div>
                                         </td>
                                         <td>{{ o.price|vnd }} ₫</td>
-                                        <td>{{ o.qty }}</td>
+                                        <td>{{ o.quantity }}</td>
                                         <td class="text-end">{{o.total|vnd}} ₫</td>
                                     </tr>
                                 {% endfor %}
@@ -119,29 +120,21 @@
                                     <td colspan="4">
                                         <article class="float-end">
                                             <dl class="dlist">
-                                                <dt>Tax:</dt>
-                                                <dd>$0</dd>
-                                            </dl>
-                                            <dl class="dlist">
-                                                <dt>Shipping cost:</dt>
-                                                <dd>$0</dd>
-                                            </dl>
-                                            <dl class="dlist">
-                                                <dt>Discount:</dt>
+                                                <dt>{% trans "Discount" %}:</dt>
                                                 <dd>{{ order.saved|vnd }} ₫</dd>
                                             </dl>
                                             <dl class="dlist">
-                                                <dt>Grand total:</dt>
+                                                <dt>{% trans "Grand total" %}:</dt>
                                                 <dd><b class="h5">{{order.price|vnd}} ₫</b></dd>
                                             </dl>
                                             <dl class="dlist">
-                                                <dt class="text-muted">Status:</dt>
+                                                <dt class="text-muted">{% trans "Payment status" %}:</dt>
                                                 <dd>
                                                     
                                                     {% if order.paid_status == True %}
-                                                        <span class="badge rounded-pill alert-success text-success">Paid</span>
+                                                        <span class="badge rounded-pill alert-success text-success">{% trans "Paid" %}</span>
                                                     {% else %}
-                                                        <span class="badge rounded-pill alert-danger text-danger">Not Paid</span>
+                                                        <span class="badge rounded-pill alert-danger text-danger">{% trans "Not paid" %}</span>
                                                     {% endif %}
                                                         
                                                 </dd>

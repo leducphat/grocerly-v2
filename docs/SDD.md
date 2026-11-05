@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Tách từ [`SRS.md`](SRS.md) Mục 7–9 ngày 11/09/2026 (P-07, D-011); nội dung gốc chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 04/11/2026 |
+| Cập nhật | 05/11/2026 |
 
 > **Phạm vi của tài liệu này.** SDD trả lời câu hỏi *hệ thống được xây như thế
 > nào*: mô hình dữ liệu, giao diện, công nghệ và thiết kế các thành phần. Còn *hệ
@@ -67,6 +67,12 @@
   `SoftDeleteAdminMixin` gọi `soft_delete()` từng dòng thay cho một câu `UPDATE`
   (L-36).
 - **Trạng thái sản phẩm:** `draft | disabled | in_review | rejected | published`.
+- **Dữ liệu từ form:** mọi form ghi vào database đi qua một Django Form, kể cả form gửi
+  bằng AJAX; độ dài mỗi ô lấy từ `max_length` của cột, vì SQLite trong test không kiểm
+  độ dài còn PostgreSQL trên host thì có (D-055). Form liên hệ, thông tin giao hàng ở
+  `core/forms.py`; hồ sơ và đổi mật khẩu nhân viên ở `useradmin/forms.py`.
+  `CartOrder.address` dài 255 ký tự từ migration `core/0009` (L-50). Lỗi của form in
+  dưới từng ô bằng `templates/partials/field_errors.html` (D-054).
 
 ### 1.2 Trạng thái đơn hàng
 

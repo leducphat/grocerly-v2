@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 04/11/2026 |
+| Cập nhật | 05/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -251,6 +251,22 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-19:** sản phẩm phải có danh mục và nhà cung cấp. Nhân viên để trống một trong
   hai ở form thêm hoặc sửa thì máy chủ từ chối và báo ô còn thiếu; hệ thống không tự
   chọn hộ (L-27, D-039).
+- **Mọi form:** dữ liệu sai thì máy chủ từ chối, không lưu gì, và trang hiện câu lỗi ngay
+  dưới ô nhập sai, chữ đỏ, cùng ngôn ngữ với trang. Ô đã gõ giữ nguyên, trừ ô mật khẩu.
+  Không chuỗi nào dài hơn cột của database được gửi xuống database (L-46, L-48, L-50,
+  D-054, D-055).
+- **UC-02:** đăng nhập không được, vì sai mật khẩu, email chưa đăng ký hay để trống, đều
+  ra một câu chung "Email hoặc mật khẩu không đúng", không in lại email vừa gõ; ô email
+  giữ chữ đã gõ (L-52).
+- **UC-08:** form liên hệ bắt buộc họ tên, email đúng định dạng và nội dung; số điện thoại
+  và tiêu đề không bắt buộc (L-50).
+- **UC-09:** thông tin giao hàng bắt buộc họ tên, email đúng định dạng và địa chỉ; địa chỉ
+  dài tới 255 ký tự (L-50, D-055).
+- **UC-14:** gửi đánh giá xong khách vẫn ở trang sản phẩm và thấy câu báo; đánh giá bị
+  từ chối thì câu lỗi hiện ngay trên trang (L-49).
+- **UC-19:** giá bán, giá cũ và số lượng trong kho không được âm (L-53).
+- **Đổi mật khẩu nhân viên (CN-23):** cùng quy tắc với trang của khách: ô che chữ, mật
+  khẩu mới phải qua bộ kiểm mật khẩu của Django, đổi xong vẫn đăng nhập (L-51).
 - **UC-03, UC-19:** sản phẩm còn sót lại không có danh mục hay nhà cung cấp vẫn bán
   bình thường, thẻ sản phẩm chỉ bỏ link tương ứng. Một dòng dữ liệu thiếu không được
   làm hỏng trang của các sản phẩm khác (L-27, D-039).
@@ -298,6 +314,17 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-07:** link trên trang giữ ngôn ngữ đang xem, kể cả link sản phẩm trong giỏ
   mini dựng bằng JavaScript; khách vào thẳng trang `/en/` bấm sang sản phẩm vẫn ở
   trang tiếng Anh (L-35).
+- **Mọi UC có giao diện:** một trang chỉ dùng một ngôn ngữ. Trang `/vi/` không còn
+  chữ tiếng Anh, trang `/en/` không còn chữ tiếng Việt, kể cả thông báo sau khi bấm
+  nút, câu lỗi của form (cả câu lỗi do Django viết), câu JavaScript hiện ra và câu
+  trả lời JSON mà trang in ra. Tên riêng và dữ liệu (tên sản phẩm, nhà cung cấp,
+  khách) giữ nguyên như đã nhập (L-47, L-55 → L-57, D-056).
+- **Mọi UC có giao diện:** trang chỉ hiện nội dung thật của Grocerly, không còn nội
+  dung mẫu của theme (cửa hàng, người, sản phẩm, số điện thoại giả, Lorem ipsum).
+  Không có form nào gửi về `#`. Trang chính sách bảo mật, điều khoản, hướng dẫn mua
+  hàng và giới thiệu chỉ mô tả những gì hệ thống làm thật. Cửa hàng chưa có địa chỉ
+  riêng nên chân trang và trang liên hệ ghi địa chỉ của trường và email của sinh viên
+  (L-58, D-056).
 - **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
   côi (Uncategorized).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.

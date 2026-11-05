@@ -1,13 +1,12 @@
 {% extends 'partials/base.html' %}
-{% load i18n %}
-{% load static %}
+{% load static i18n %}
 {% block content %}
     <main class="main pages">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
                 <div class="breadcrumb">
-                    <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-                    <span></span> <a href="{% url 'core:dashboard' %}">{% trans "Dashboard" %}</a> <span></span> Edit Profile
+                    <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
+                    <span></span> <a href="{% url 'core:dashboard' %}">{% trans "Dashboard" %}</a> <span></span> {% trans "Edit Profile" %}
                 </div>
             </div>
         </div>
@@ -20,19 +19,11 @@
                                 <h3 class="mb-0">{% trans "Edit Profile" %}</h3>
                             </div>
                             <div class="card-body">
-                                {% if messages %}
-                                <div class="mb-3">
-                                    {% for message in messages %}
-                                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-
                                 <div class="text-center mb-4">
                                     {% if profile.image %}
-                                    <img src="{{ profile.image.url }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="Profile Image">
+                                    <img src="{{ profile.image.url }}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="{% trans 'Profile Image' %}">
                                     {% else %}
-                                    <img src="https://t4.ftcdn.net/jpg/00/64/67/63/360_F_64676383_LdbmhiNM6Ypzb3FM4PPuFP9rHe7ri8Ju.jpg" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="Profile Image">
+                                    <img src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%;" alt="{% trans 'Profile Image' %}">
                                     {% endif %}
                                 </div>
 
@@ -40,24 +31,29 @@
                                     {% csrf_token %}
                                     <div class="row">
                                         <div class="form-group col-md-6">
-                                            <label>Full Name</label>
-                                            <input type="text" class="form-control" name="full_name" value="{% if form.full_name.value %}{{ form.full_name.value }}{% else %}{{ profile.user.username }}{% endif %}" placeholder="Full Name">
+                                            <label>{% trans "Full Name" %}</label>
+                                            <input type="text" class="form-control" name="full_name" value="{% if form.full_name.value %}{{ form.full_name.value }}{% else %}{{ profile.user.username }}{% endif %}" placeholder="{% trans 'Full Name' %}">
+                                            {% include "partials/field_errors.html" with field=form.full_name %}
                                         </div>
                                         <div class="form-group col-md-6">
-                                            <label>Phone</label>
+                                            <label>{% trans "Phone" %}</label>
                                             <input type="text" class="form-control" name="phone" value="{{ form.phone.value|default_if_none:'' }}" placeholder="{% trans 'Phone' %}">
+                                            {% include "partials/field_errors.html" with field=form.phone %}
                                         </div>
                                         <div class="form-group col-md-12">
-                                            <label>Bio</label>
-                                            <input type="text" class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" placeholder="Bio">
+                                            <label>{% trans "Bio" %}</label>
+                                            <input type="text" class="form-control" name="bio" value="{{ form.bio.value|default_if_none:'' }}" placeholder="{% trans 'Bio' %}">
+                                            {% include "partials/field_errors.html" with field=form.bio %}
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label>{% trans "Address" %}</label>
                                             <input type="text" class="form-control" name="address" value="{{ form.address.value|default_if_none:'' }}" placeholder="{% trans 'Address' %}">
+                                            {% include "partials/field_errors.html" with field=form.address %}
                                         </div>
                                         <div class="form-group col-md-12">
                                             <label>{% trans "Profile Image" %}</label>
                                             <input type="file" class="form-control" name="image" accept="image/*">
+                                            {% include "partials/field_errors.html" with field=form.image %}
                                         </div>
                                         <div class="col-md-12 mt-3 d-flex justify-content-between">
                                             <div>

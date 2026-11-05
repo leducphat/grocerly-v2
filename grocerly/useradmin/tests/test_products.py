@@ -403,3 +403,36 @@ def test_add_and_edit_forms_lock_their_button_on_submit(staff_client, stocked_pr
 
     assert "data-lock-on-submit>" in add_page
     assert "data-lock-on-submit>" in edit_page
+
+
+# ---------- where the errors are shown (L-46) and negative numbers (L-53) ----------
+
+
+def test_add_product_error_is_shown_in_red_under_its_box(staff_client, category, vendor, error_under_box):
+    response = staff_client.post(reverse(ADD_URL), product_form(category, vendor, title="", category=""))
+
+    page = response.content.decode()
+    errors = response.context["form"].errors
+    assert error_under_box(page, "title", errors["title"][0])
+    assert error_under_box(page, "category", errors["category"][0])
+    assert "<li>title" not in page
+
+
+@pytest.mark.parametrize("field", ["price", "old_price", "stock_count"])
+def test_add_product_rejects_a_negative_number(staff_client, category, vendor, field):
+    response = staff_client.post(reverse(ADD_URL), product_form(category, vendor, **{field: "-5"}))
+
+    assert Product.objects.count() == 0
+    assert field in response.context["form"].errors
+
+
+@pytest.mark.parametrize("field", ["price", "stock_count"])
+def test_edit_product_rejects_a_negative_number(staff_client, stocked_product, category, vendor, field):
+    before = getattr(stocked_product, field)
+
+    staff_client.post(
+        reverse(EDIT_URL, args=[stocked_product.p_id]), product_form(category, vendor, **{field: "-5"})
+    )
+
+    stocked_product.refresh_from_db()
+    assert getattr(stocked_product, field) == before

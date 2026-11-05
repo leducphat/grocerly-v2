@@ -4,6 +4,7 @@ from django.utils.html import format_html
 from userauths.models import User
 from taggit.managers import TaggableManager
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation import pgettext_lazy
 
 
@@ -19,16 +20,16 @@ STATUS_CHOICES = (
 )
 
 PAYMENT_METHOD_CHOICES = (
-    ('online', 'Online'),
-    ('cod', 'Cash on Delivery'),
+    ('online', _('Online')),
+    ('cod', _('Cash on Delivery')),
 )
 
 STATUS = (
-    ('draft', 'Draft'),
-    ('disabled', 'Disabled'),
-    ('in_review', 'In Review'),
-    ('rejected', 'Rejected'),
-    ('published', 'Published'),
+    ('draft', _('Draft')),
+    ('disabled', _('Disabled')),
+    ('in_review', _('In Review')),
+    ('rejected', _('Rejected')),
+    ('published', _('Published')),
 )
 
 RATING = (
@@ -167,10 +168,10 @@ class Vendor(SoftDeleteModel):
     name = models.CharField(max_length=100, default="Vendor Name")
     image = models.ImageField(upload_to=user_directory_path, default="vendors.jpg")
     cover_image = models.ImageField(upload_to=user_directory_path, default="vendors.jpg")
-    description = models.TextField(null=True, blank=True, default="No vendor's description available")
+    description = models.TextField(null=True, blank=True, default="")
 
-    address = models.CharField(max_length=100, default="123 Main Street")
-    contact = models.CharField(max_length=100, default="+123 (456) 789")
+    address = models.CharField(max_length=100, blank=True, default="")
+    contact = models.CharField(max_length=100, blank=True, default="")
     chat_resp_time = models.CharField(max_length=100, default="100")
     shipping_on_time = models.CharField(max_length=100, default="100")
     authentic_rating = models.CharField(max_length=100, default="100")
@@ -216,7 +217,7 @@ class Product(SoftDeleteModel):
 
     title = models.CharField(max_length=100, default="Product Title")
     image = models.ImageField(upload_to="products", default="products.jpg")
-    description = models.TextField(null=True, blank=True, default="No product's description available")
+    description = models.TextField(null=True, blank=True, default="")
 
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='products')
@@ -226,12 +227,12 @@ class Product(SoftDeleteModel):
     price = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
     old_price = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
 
-    specification = models.TextField(null=True, blank=True, default="No product's specification available")
+    specification = models.TextField(null=True, blank=True, default="")
     weight_volume = models.CharField(max_length=100, null=True, blank=True, default="1 kg")
-    ingredients = models.TextField(null=True, blank=True, default="Đang cập nhật")
+    ingredients = models.TextField(null=True, blank=True, default="")
     storage_instructions = models.CharField(max_length=255, null=True, blank=True, default="Bảo quản nơi khô ráo, thoáng mát")
     stock_count = models.IntegerField(default=0, null=True, blank=True)
-    expiry_period = models.CharField(max_length=100, null=True, blank=True, default="N/A")
+    expiry_period = models.CharField(max_length=100, null=True, blank=True, default="")
     tags = TaggableManager(blank=True)
 
     product_status = models.CharField(max_length=10, choices=STATUS, default='in_review')
@@ -289,7 +290,8 @@ class CartOrder(models.Model):
     email = models.CharField(max_length=100, null=True, blank=True)
     phone = models.CharField(max_length=100, null=True, blank=True)
 
-    address = models.CharField(max_length=100, null=True, blank=True)
+    # 255, not 100: a real Vietnamese address is often longer than 100 (L-50, D-055).
+    address = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     state = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)

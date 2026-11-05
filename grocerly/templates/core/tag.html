@@ -1,5 +1,5 @@
 {% extends 'partials/base.html' %}
-{% load static currency_filters %}
+{% load static currency_filters i18n %}
 {% block content %}
     <main class="main">
         <div class="page-header mt-30 mb-50">
@@ -9,8 +9,8 @@
                         <div class="col-xl-3">
                             <h1 class="mb-15">#{{ tag.name }}</h1>
                             <div class="breadcrumb">
-                                <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>Home</a>
-                                <span></span> Shop <span></span> {{ tag.name }}
+                                <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
+                                <span></span> <a href="{% url 'core:product-list' %}">{% trans "Shop" %}</a> <span></span> {{ tag.name }}
                             </div>
                         </div>
                     </div>
@@ -22,7 +22,7 @@
                 <div class="col-12">
                     <div class="shop-product-fillter">
                         <div class="totall-product">
-                            <p>We found <strong class="text-brand">{{ products.count }}</strong> item{{ products.count|pluralize }} for you!</p>
+                            <p>{% blocktrans trimmed count counter=products|length %}We found <strong class="text-brand">{{ counter }}</strong> item for you!{% plural %}We found <strong class="text-brand">{{ counter }}</strong> items for you!{% endblocktrans %}</p>
                         </div>
                     </div>
                     <div class="row product-grid">
@@ -37,8 +37,8 @@
                                         </a>
                                     </div>
                                     <div class="product-action-1">
-                                        <a aria-label="Quick view" class="action-btn small hover-up" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
-                                        <a aria-label="Add To Wishlist" class="action-btn small hover-up" href="#"><i class="fi-rs-heart"></i></a>
+                                        <a aria-label="{% trans 'Quick view' %}" class="action-btn small hover-up" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
+                                        <a aria-label="{% trans 'Add to wishlist' %}" class="action-btn small hover-up add-to-wishlist" href="#" data-product-id="{{ p.id }}"><i class="fi-rs-heart{% if p.id in wishlist_product_ids %} text-danger{% endif %}"></i></a>
                                     </div>
                                     <div class="product-badges product-badges-position product-badges-mrg">
                                         <span class="hot">-{{ p.get_percentage|floatformat:0 }}%</span>
@@ -57,7 +57,7 @@
                                     </div>
                                     <div>
                                         {% if p.vendor %}
-                                        <span class="font-small text-muted">By <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
+                                        <span class="font-small text-muted">{% trans "By" %} <a href="{% url 'core:vendor-detail' p.vendor.v_id %}">{{ p.vendor.name }}</a></span>
                                         {% endif %}
                                     </div>
                                     <div class="product-card-bottom">
@@ -71,7 +71,7 @@
                         </div>
                         {% empty %}
                         <div class="col-12">
-                            <p>No products found with this tag.</p>
+                            <p>{% trans "No products found with this tag." %}</p>
                         </div>
                         {% endfor %}
                     </div>

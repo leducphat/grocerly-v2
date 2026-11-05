@@ -8,10 +8,10 @@
     <div class="content-header">
         <div>
             <h2 class="content-title card-title">{% trans "Dashboard" %}</h2>
-            <p>Toàn bộ dữ liệu về hoạt động kinh doanh của bạn</p>
+            <p>{% trans "An overview of your store's business" %}</p>
         </div>
         <div>
-            <a href="{% url 'useradmin:dashboard-add-products' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Thêm sản phẩm</a>
+            <a href="{% url 'useradmin:dashboard-add-products' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>{% trans "Add product" %}</a>
         </div>
     </div>
     <div class="row">
@@ -20,7 +20,7 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Doanh thu thực tế</h6>
+                        <h6 class="mb-1 card-title">{% trans "Actual revenue" %}</h6>
                         <span>{{ revenue.price|default:0|vnd }} ₫</span>
                     </div>
                 </article>
@@ -42,7 +42,7 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Sản phẩm</h6>
+                        <h6 class="mb-1 card-title">{% trans "Products" %}</h6>
                         <span>{{all_products.count}}</span>
                     </div>
                 </article>
@@ -53,7 +53,7 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Doanh thu thực tế tháng này</h6>
+                        <h6 class="mb-1 card-title">{% trans "Actual revenue this month" %}</h6>
                         <span>{{ monthly_revenue.price|default:0|vnd }} ₫</span>
                     </div>
                 </article>
@@ -65,7 +65,7 @@
         <div class="col-xl-12 col-lg-12">
             <div class="card mb-4">
                 <article class="card-body">
-                    <h5 class="card-title">Biểu đồ doanh thu theo tháng</h5>
+                    <h5 class="card-title">{% trans "Revenue by month" %}</h5>
                     <canvas id="myChart" height="100px"></canvas>
                 </article>
             </div>
@@ -81,7 +81,7 @@
             let rev_total = {{ rev_total|safe }};
             
             if (rev_month.length === 0) {
-                ctx.parentElement.innerHTML = '<div class="text-center mt-5 mb-5"><i class="material-icons md-info text-muted" style="font-size: 48px;"></i><p class="text-muted mt-2">Chưa có dữ liệu doanh thu thực tế (chưa có đơn hàng nào thanh toán thành công).</p></div>';
+                ctx.parentElement.innerHTML = '<div class="text-center mt-5 mb-5"><i class="material-icons md-info text-muted" style="font-size: 48px;"></i><p class="text-muted mt-2">' + "{% trans 'No actual revenue yet (no order has been paid).' as t %}{{ t|escapejs }}" + '</p></div>';
                 return;
             }
 
@@ -90,7 +90,7 @@
                 data: {
                     labels: rev_month,
                     datasets: [{
-                        label: 'Doanh thu (VND)',
+                        label: "{% trans 'Revenue (VND)' as t %}{{ t|escapejs }}",
                         data: rev_total,
                         backgroundColor: 'rgba(54, 162, 235, 0.5)',
                         borderColor: 'rgba(54, 162, 235, 1)',
@@ -110,7 +110,7 @@
     
     <div class="card mb-4">
         <header class="card-header">
-            <h4 class="card-title">Đơn hàng mới nhất</h4>
+            <h4 class="card-title">{% trans "Latest orders" %}</h4>
         </header>
         <div class="card-body">
             <div class="table-responsive">
@@ -119,34 +119,34 @@
                         <thead class="table-light">
                             <tr>
                                 
-                                <th class="align-middle" scope="col">Mã đơn</th>
-                                <th class="align-middle" scope="col">Tên khách</th>
-                                <th class="align-middle" scope="col">Email</th>
-                                <th class="align-middle" scope="col">SĐT</th>
+                                <th class="align-middle" scope="col">{% trans "Order ID" %}</th>
+                                <th class="align-middle" scope="col">{% trans "Customer name" %}</th>
+                                <th class="align-middle" scope="col">{% trans "Email" %}</th>
+                                <th class="align-middle" scope="col">{% trans "Phone" %}</th>
                                 <th class="align-middle" scope="col">{% trans "Date" %}</th>
-                                <th class="align-middle" scope="col">Tổng tiền</th>
-                                <th class="align-middle" scope="col">Thanh toán</th>
-                                <th class="align-middle" scope="col">Chi tiết</th>
+                                <th class="align-middle" scope="col">{% trans "Total" %}</th>
+                                <th class="align-middle" scope="col">{% trans "Payment status" %}</th>
+                                <th class="align-middle" scope="col">{% trans "Details" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for l in latest_orders %}
                             <tr>
-                                <td><a href="#" class="fw-bold">#{{l.oid}}</a></td>
-                                <td>{{l.full_name|title}}</td>
-                                <td>{{l.email}}</td>
-                                <td>{{l.phone}}</td>
+                                <td><a href="{% url 'useradmin:order_detail' l.oid %}" class="fw-bold">#{{l.oid}}</a></td>
+                                <td>{{ l.full_name|default:"-"|title }}</td>
+                                <td>{{ l.email|default:"-" }}</td>
+                                <td>{{ l.phone|default:"-" }}</td>
                                 <td>{{l.order_date}}</td>
                                 <td>{{l.price|vnd}} ₫</td>
                                 <td>
                                     {% if l.paid_status == True %}
-                                    <span class="badge badge-pill badge-soft-success">Đã thanh toán</span>
+                                    <span class="badge badge-pill badge-soft-success">{% trans "Paid" %}</span>
                                     {% else %}
-                                    <span class="badge badge-pill badge-soft-danger">Chưa thanh toán</span>
+                                    <span class="badge badge-pill badge-soft-danger">{% trans "Not paid" %}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'useradmin:order_detail' l.oid %}" class="btn btn-xs"> Xem chi tiết</a>
+                                    <a href="{% url 'useradmin:order_detail' l.oid %}" class="btn btn-xs">{% trans "View details" %}</a>
                                 </td>
                             </tr>
                             {% endfor %}

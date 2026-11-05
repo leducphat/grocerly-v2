@@ -6,7 +6,7 @@
             <div class="container">
                 <div class="breadcrumb">
                     <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
-                    <span></span> {% trans "Pages" %} <span></span> {% trans "My Account" %}
+                    <span></span> {% trans "My Account" %}
                 </div>
             </div>
         </div>
@@ -90,12 +90,12 @@
                                     <div class="tab-pane fade" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h3 class="mb-0">{% trans "Hello" %} {{ request.user|title }}!</h3>
+                                                <h3 class="mb-0">{% blocktrans trimmed with name=request.user|title %}Hello {{ name }}!{% endblocktrans %}</h3>
                                             </div>
                                             <div class="card-body">
                                                 <p>
-                                                    {% trans "From your account dashboard you can easily check &amp; view your" %} <a href="#">{% trans "recent orders" %}</a>,<br />
-                                                    {% trans "manage your" %} <a href="#">{% trans "shipping and billing addresses" %}</a> {% trans "and" %} <a href="#">{% trans "edit your password and account details." %}</a>
+                                                    {% url 'userauths:profile-update' as profile_url %}{% url 'userauths:password_change' as password_url %}
+                                                    {% blocktrans trimmed %}From your account dashboard you can check your recent orders in the Orders tab, edit your <a href="{{ profile_url }}">account details</a> and change your <a href="{{ password_url }}">password</a>.{% endblocktrans %}
                                                 </p>
                                             </div>
                                             <div style="height: 500px; width: 100%; max-width: 800px; margin: 0 auto;">
@@ -167,7 +167,7 @@
         const data = {
           labels: labels,
           datasets: [{
-            label: 'Orders',
+            label: '{% trans "Orders" as orders_label %}{{ orders_label|escapejs }}',
             backgroundColor: 'rgb(59, 183, 126)',
             borderColor: 'rgb(59, 183, 126)',
             data: {{ total_orders|safe }}

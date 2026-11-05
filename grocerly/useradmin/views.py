@@ -3,11 +3,13 @@ from django.http import JsonResponse
 from django.db.models import Sum
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from django.contrib.auth.hashers import check_password
+from django.contrib.auth import update_session_auth_hash
+from django.utils.dates import MONTHS
+from django.utils.translation import gettext as _
 
 from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, STATUS_CHOICES
 from userauths.models import Profile, User
-from useradmin.forms import AddProductForm
+from useradmin.forms import AddProductForm, StaffPasswordChangeForm, StaffProfileForm
 from useradmin.decorators import admin_required
 
 import datetime
@@ -33,17 +35,17 @@ def dashboard(request):
     monthly_revenue = revenue_orders().filter(order_date__month=this_month).aggregate(price=Sum("price"))
 
     from django.db.models.functions import ExtractMonth
-    import calendar
 
     revenue_data = revenue_orders().annotate(
         month=ExtractMonth("order_date")
-    ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue")
+    ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue").order_by("month")
     
     rev_month = []
     rev_total = []
     for i in revenue_data:
         if i["month"]:
-            rev_month.append(calendar.month_name[i["month"]])
+            # Django's month names, in the language of the page (vi: "Tháng 11").
+            rev_month.append(str(MONTHS[i["month"]]))
             rev_total.append(float(i["total_revenue"]))
 
     context = {
@@ -195,7 +197,7 @@ def change_order_status(request, oid):
         # Chỉ nhận bốn trạng thái của STATUS_CHOICES. Ô chọn có sẵn một dòng nhắc
         # không phải trạng thái, bấm Save mà chưa chọn gì thì không đổi gì cả.
         if status not in dict(STATUS_CHOICES):
-            messages.error(request, "Please choose an order status")
+            messages.error(request, _("Please choose an order status."))
             return redirect("useradmin:order_detail", order.oid)
 
         # Đơn chỉ đi tới, mỗi lần một bước, hoặc bị hủy khi chưa giao xong (SRS
@@ -203,7 +205,11 @@ def change_order_status(request, oid):
         # đều bị từ chối. Đơn đã giao và đơn đã hủy không có trong bảng nên nhận về
         # tập rỗng, tức là không đổi được nữa.
         if status not in NEXT_STATUS.get(order.product_status, set()):
-            messages.error(request, f"An order that is {order.product_status} cannot change to {status}")
+            # The translated labels of STATUS_CHOICES, not the stored values (D-033).
+            messages.error(request, _('This order cannot go from "%(current)s" to "%(new)s".') % {
+                "current": order.get_product_status_display(),
+                "new": dict(STATUS_CHOICES)[status],
+            })
             return redirect("useradmin:order_detail", order.oid)
 
         # Hàng rời kho thì trừ tồn kho. Qua được điều kiện trên nghĩa là đơn đang ở
@@ -226,7 +232,7 @@ def change_order_status(request, oid):
         if status == 'delivered' and order.payment_method == 'cod':
             order.paid_status = True
                     
-        messages.success(request, f"Order status changed to {status}")
+        messages.success(request, _("Order status changed to %(status)s.") % {"status": dict(STATUS_CHOICES)[status]})
         order.product_status = status
         order.save()
     
@@ -257,51 +263,32 @@ def reviews(request):
 def settings(request):
     profile = Profile.objects.get(user=request.user)
 
-    if request.method == "POST":
-        image = request.FILES.get("image")
-        full_name = request.POST.get("full_name")
-        phone = request.POST.get("phone")
-        bio = request.POST.get("bio")
-        address = request.POST.get("address")
-        country = request.POST.get("country")
-        
-        if image is not None:
-            profile.image = image
-        profile.full_name = full_name
-        profile.phone = phone
-        profile.bio = bio
-        profile.address = address
-        profile.country = country
-
-        profile.save()
-        messages.success(request, "Profile Updated Successfully")
+    # StaffProfileForm checks each box against its column and saves an empty box as
+    # empty, so neither a long value nor the word "None" reaches the database
+    # (L-45, L-50, D-055).
+    form = StaffProfileForm(request.POST or None, request.FILES or None, instance=profile)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, _("Profile Updated Successfully."))
         return redirect("useradmin:settings")
-    
+
     context = {
-        'profile':profile,
+        'profile': profile,
+        'form': form,
     }
     return render(request, "useradmin/settings.html", context)
 
 @admin_required
 def change_password(request):
-    user = request.user
+    # Django's PasswordChangeForm, as on the customer's page: the old password is
+    # checked, the new one goes through AUTH_PASSWORD_VALIDATORS (L-51, D-055).
+    form = StaffPasswordChangeForm(user=request.user, data=request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        user = form.save()
+        # Changing the password ends every session of the user unless this one is
+        # updated; without it the staff was signed out right after saving (L-51).
+        update_session_auth_hash(request, user)
+        messages.success(request, _("Your password has been changed."))
+        return redirect("useradmin:change_password")
 
-    if request.method == "POST":
-        old_password = request.POST.get("old_password")
-        new_password = request.POST.get("new_password")
-        confirm_new_password = request.POST.get("confirm_new_password")
-
-        if confirm_new_password != new_password:
-            messages.error(request, "Confirm Password and New Password Does Not Match")
-            return redirect("useradmin:change_password")
-        
-        if check_password(old_password, user.password):
-            user.set_password(new_password)
-            user.save()
-            messages.success(request, "Password Changed Successfully")
-            return redirect("useradmin:change_password")
-        else:
-            messages.error(request, "Old password is not correct")
-            return redirect("useradmin:change_password")
-    
-    return render(request, "useradmin/change_password.html")
+    return render(request, "useradmin/change_password.html", {"form": form})

@@ -19,18 +19,6 @@
                 </div>
             </div>
 
-            {% if messages %}
-            <div class="row mb-3">
-                <div class="col-12">
-                    {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
 
             <div class="row">
                 <div class="col-lg-7">
@@ -40,7 +28,7 @@
                             <div class="card" style="max-width: 540px;">
                                 <div class="row g-0">
                                     <div class="col-sm-4">
-                                        <img src="{{ o.image }}" style="width: 100%; height: 100%; object-fit: cover;" class="rounded-start" alt="Card image" />
+                                        <img src="{{ o.image }}" style="width: 100%; height: 100%; object-fit: cover;" class="rounded-start" alt="{{ o.item }}" />
                                     </div>
                                     <div class="col-sm-8">
                                         <div class="card-body">
@@ -91,10 +79,10 @@
                         </div>
                     </div>
 
-                    <a href="{% url 'core:vnpay_payment' order.oid %}" class="btn w-100 mb-3" style="background-color: #005A9C; color: white;"><i class="fi-rs-credit-card mr-10"></i>{% trans "Thanh toán qua VNPay" %}</a>
+                    <a href="{% url 'core:vnpay_payment' order.oid %}" class="btn w-100 mb-3" style="background-color: #005A9C; color: white;"><i class="fi-rs-credit-card mr-10"></i>{% trans "Pay with VNPay" %}</a>
                     <form action="{% url 'core:place-cod-order' order.oid %}" method="POST" class="mb-3">
                         {% csrf_token %}
-                        <button type="submit" class="btn w-100" style="background-color: #3bb77e; color: white;"><i class="fi-rs-box mr-10"></i>{% trans "Thanh toán khi nhận hàng (COD)" %}</button>
+                        <button type="submit" class="btn w-100" style="background-color: #3bb77e; color: white;"><i class="fi-rs-box mr-10"></i>{% trans "Cash on Delivery (COD)" %}</button>
                     </form>
                 </div>
             </div>

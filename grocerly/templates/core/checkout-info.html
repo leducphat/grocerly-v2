@@ -16,7 +16,7 @@
                 <div class="col-lg-8 mb-40">
                     <h1 class="heading-2 mb-10">{% trans "Checkout Information" %}</h1>
                     <div class="d-flex justify-content-between">
-                        <h6 class="text-body">{% trans "There are" %} <span class="text-brand">{{ totalcartitems }}</span> {% trans "products in your cart" %}</h6>
+                        <h6 class="text-body">{% blocktrans trimmed count counter=totalcartitems %}There is <span class="text-brand">{{ counter }}</span> product in your cart{% plural %}There are <span class="text-brand">{{ counter }}</span> products in your cart{% endblocktrans %}</h6>
                     </div>
                     {% if not request.user.is_authenticated %}
                     <p class="text-muted mb-0 mt-2">{% trans "Already have an account?" %} <a href="{% url 'userauths:sign-in' %}">{% trans "Sign in" %}</a></p>
@@ -41,17 +41,17 @@
                                 <tbody>
                                     {% for product_id, item in cart_data.items %}
                                     <tr class="pt-30">
-                                        <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="#"></td>
+                                        <td class="image product-thumbnail pt-40 pl-30"><img src="{{ item.image }}" alt="{{ item.title }}"></td>
                                         <td class="product-des product-name">
                                             <h6 class="mb-5"><a class="product-name mb-10 text-heading" href="{% url 'core:product-detail' item.pid %}">{{ item.title }}</a></h6>
                                         </td>
-                                        <td class="price" data-title="Price">
+                                        <td class="price" data-title="{% trans 'Unit Price' %}">
                                             <h4 class="text-body">{{ item.price|vnd }} ₫</h4>
                                         </td>
-                                        <td class="text-center detail-info" data-title="Stock">
+                                        <td class="text-center detail-info" data-title="{% trans 'Quantity' %}">
                                             <div class="mr-15"><span>{{ item.qty }}</span></div>
                                         </td>
-                                        <td class="price" data-title="Price">
+                                        <td class="price" data-title="{% trans 'Subtotal' %}">
                                             <h4 class="text-brand">{{ item.price|mul:item.qty|vnd }} ₫</h4>
                                         </td>
                                     </tr>
@@ -61,26 +61,30 @@
                         </div>
 
                         <div class="row mt-4">
-                            <h4 class="mb-30">{% trans "Bio Data" %}</h4>
+                            <h4 class="mb-30">{% trans "Contact Information" %}</h4>
                             <div class="row">
                                 <div class="form-group col-lg-12">
                                     <label>{% trans "Full Name" %}</label>
-                                    <input type="text" required name="full_name" value="{% if request.user.is_authenticated %}{{ request.user.profile.full_name|default:request.user.username|title }}{% endif %}" placeholder="{% trans 'Full Name' %}">
+                                    <input type="text" required name="full_name" value="{{ form.full_name.value|default_if_none:'' }}" placeholder="{% trans 'Full Name' %}">
+                                    {% include "partials/field_errors.html" with field=form.full_name %}
                                 </div>
                                 <div class="form-group col-lg-6">
                                     <label>{% trans "Email" %}</label>
-                                    <input type="email" required name="email" value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}" placeholder="{% trans 'Email' %}">
+                                    <input type="email" required name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="{% trans 'Email' %}">
+                                    {% include "partials/field_errors.html" with field=form.email %}
                                 </div>
                                 <div class="form-group col-lg-6">
                                     <label>{% trans "Mobile" %}</label>
-                                    <input type="text" name="mobile" value="{% if request.user.is_authenticated %}{{ request.user.profile.phone|default:'' }}{% endif %}" placeholder="{% trans 'Mobile' %}">
+                                    <input type="text" name="mobile" value="{{ form.mobile.value|default_if_none:'' }}" placeholder="{% trans 'Mobile' %}">
+                                    {% include "partials/field_errors.html" with field=form.mobile %}
                                 </div>
                             </div>
                             <h4 class="mb-30">{% trans "Shipping Details" %}</h4>
                             <div class="row">
                                 <div class="form-group col-lg-12">
                                     <label>{% trans "Address" %}</label>
-                                    <input type="text" name="address" value="{{ request.user.profile.address|default:'' }}" placeholder="{% trans 'Address' %}">
+                                    <input type="text" required name="address" value="{{ form.address.value|default_if_none:'' }}" placeholder="{% trans 'Address' %}">
+                                    {% include "partials/field_errors.html" with field=form.address %}
                                 </div>
                             </div>
                         </div>

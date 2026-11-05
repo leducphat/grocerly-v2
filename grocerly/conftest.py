@@ -5,10 +5,12 @@ pytest loads this file automatically; tests receive a fixture by naming it as an
 argument, e.g. `def test_x(customer_client, product): ...`.
 """
 
+import re
 from decimal import Decimal
 
 import pytest
 from django.conf import settings
+from django.utils.html import escape
 
 from core.models import Category, Product, Vendor
 
@@ -64,3 +66,25 @@ def product(db):
 def vendor(db):
     """A supplier. `product` above has none, so a test that needs one links them."""
     return Vendor.objects.create(name="HTX Rau Đà Lạt")
+
+
+@pytest.fixture
+def error_under_box():
+    """Return a function that says whether `message` is shown as an error right under
+    the box named `field` of an HTML page (L-46).
+
+    "Right under" means after that box and before the next box or button of the
+    page, so the customer sees the error next to what they typed wrong. "As an error"
+    means inside the red `text-danger` style that the customer's change-password page
+    (userauths/password-change.html) already uses.
+    """
+
+    def _check(page, field, message):
+        after_box = page[page.index(f'name="{field}"'):]
+        # The search starts one character in, so it skips the tag of the box itself.
+        next_box = re.search(r"<(input|select|textarea|button)\b", after_box[1:])
+        below = after_box[: next_box.start() + 1] if next_box else after_box
+        shown_at = below.find(escape(message))
+        return shown_at != -1 and "text-danger" in below[:shown_at]
+
+    return _check
