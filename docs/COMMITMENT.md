@@ -58,8 +58,9 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
 | CN-01 | Đăng ký tài khoản bằng email | UC-01 | Có |
-| CN-02 | Đăng nhập, đăng xuất | UC-02, UC-10 | Có |
+| CN-02 | Đăng nhập | UC-02 | Có |
 | CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Có |
+| CN-31 | Đăng xuất (tách khỏi CN-02 ngày 06/11/2026, D-058) | UC-10 | Có |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
@@ -93,7 +94,8 @@ doanh số thật.*
 | CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
 | CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Có |
 | CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | Có |
-| CN-23 | Xem danh sách đánh giá; cập nhật hồ sơ và đổi mật khẩu nhân viên | *(chưa có UC)* | Có |
+| CN-23 | Xem danh sách đánh giá | *(chưa có UC)* | Có |
+| CN-32 | Cập nhật hồ sơ và đổi mật khẩu nhân viên (tách khỏi CN-23 ngày 06/11/2026, D-058) | *(chưa có UC)* | Có |
 
 ### 2.4 Quản trị viên — Django admin
 
@@ -107,7 +109,11 @@ doanh số thật.*
 | CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
 | CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
 
-**Tổng: 30 chức năng**, ngày 05/11/2026 có 30 `Có`. Lượt rà form ngày 05/11/2026 (P-45)
+**Tổng: 32 chức năng**, mỗi chức năng ứng với đúng một use case. Trước ngày 06/11/2026
+danh sách có 30 chức năng; CN-02 và CN-23 khi đó mỗi mục gộp hai use case, nay tách
+thành CN-31 và CN-32, mã cũ không đánh lại (D-058). Các dòng dưới đây viết trước ngày
+đó: "CN-23" trong đó chỉ cả trang đánh giá lẫn trang hồ sơ nhân viên (L-45, L-50, L-51
+thuộc phần nay là CN-32). Ngày 05/11/2026 có 30/30 `Có`, ngày 06/11/2026 có 32/32 `Có`. Lượt rà form ngày 05/11/2026 (P-45)
 làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, L-53); sửa ở
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
@@ -115,7 +121,7 @@ nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-
 về `Có` sau khi sửa L-43 (P-44).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
-năng CN-03, 07, 23, 29, 30 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
+năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
 sẽ bổ sung UC ở P-23.
 
 ---

@@ -2493,6 +2493,28 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - Lần đo bề rộng trang lúc cân nhắc phương án 1 thấy trang danh sách sản phẩm có thanh cuộn ngang (L-65), ghi vào ISSUES, sửa ở P-47. Số đo thời gian trả lời của trợ lý AI ngày 05/11/2026 (8 câu, chậm nhất 5,6 giây) giữ trong nhật ký AI, không đưa vào SRS.
 - Lần đánh thức host khoảng 50 giây là hạn chế của gói miễn phí, ghi ở SRS §5; workflow health mỗi giờ (D-053) không giữ host thức.
 
+## D-058 · Chức năng cam kết khớp một-một với use case: 32 chức năng, tách CN-02 và CN-23
+
+- **Ngày:** 06/11/2026
+- **Trạng thái:** Đã chốt (sinh viên); trình GVHD cùng bản cam kết, P-03
+
+**Bối cảnh.** Bản cam kết có 30 chức năng, còn báo cáo mục 3.2 đặc tả 32 use case (26 của TLCN cộng 6 use case bổ sung cho chức năng có trong code mà đặc tả cũ thiếu). Hai con số lệch vì CN-02 gộp Đăng nhập và Đăng xuất, CN-23 gộp Xem danh sách đánh giá và Cập nhật hồ sơ nhân viên. Sinh viên đọc báo cáo thấy 32 và hỏi có phát sinh chức năng không; GVHD đọc cũng sẽ hỏi như vậy. TC2.2 chấm tỉ lệ chức năng cam kết hoạt động, nên mẫu số phải rõ.
+
+**Phương án đã cân nhắc**
+1. *Giữ 30 chức năng, viết một câu giải thích* hai chỗ một chức năng ứng với hai use case. Không đổi văn bản nào, nhưng mỗi lần đối chiếu chức năng với use case lại phải nhớ hai ngoại lệ.
+2. *Gộp use case cho còn 30.* Gộp Đăng nhập với Đăng xuất thì lệch với đặc tả TLCN đã chấm, vốn tách hai use case; gộp hai trang của nhân viên thì một use case có hai luồng không liên quan.
+3. *Tách chức năng cho thành 32*, mã cũ giữ nguyên, thêm CN-31 Đăng xuất và CN-32 Cập nhật hồ sơ và đổi mật khẩu nhân viên.
+4. Như 3 nhưng *đánh số lại toàn bộ* theo thứ tự use case. Đẹp hơn trong bảng, nhưng mọi chỗ đã dẫn mã CN trong ISSUES, PLAN, nhật ký AI và comment code đều sai theo.
+
+**Quyết định.** Phương án 3, sinh viên chọn ngày 06/11/2026. Trong báo cáo, danh sách chức năng đánh số theo vị trí và xếp đúng thứ tự use case ở mục 3.2, nên chức năng thứ i ứng với Bảng i; mã CN chỉ dùng trong repo.
+
+**Lý do.** Bản cam kết chưa ký (hạn 22/11/2026), nên đổi mẫu số lúc này không phải sửa văn bản đã chốt. Không thêm hành vi nào: hai chức năng mới là phần đã có sẵn của CN-02 và CN-23.
+
+**Hệ quả.**
+- COMMITMENT §2: 32 chức năng; ghi chú rằng "CN-23" trong các dòng viết trước 06/11/2026 chỉ cả hai trang (L-45, L-50, L-51 nay thuộc CN-32). ISSUES, PLAN §5 và nhật ký AI là ghi chép theo ngày nên giữ nguyên.
+- SRS §6, comment trong `useradmin/forms.py` và hai file test trang nhân viên đổi CN-23 thành CN-32.
+- Đề cương (docx và `DE_CUONG.md`) và báo cáo đổi "30 chức năng" thành "32 chức năng". Đề cương đã nộp ghi 30, nên khi chốt cam kết cần nói với GVHD rằng danh sách được tách cho khớp use case.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

@@ -273,7 +273,7 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-14:** gửi đánh giá xong khách vẫn ở trang sản phẩm và thấy câu báo; đánh giá bị
   từ chối thì câu lỗi hiện ngay trên trang (L-49).
 - **UC-19:** giá bán, giá cũ và số lượng trong kho không được âm (L-53).
-- **Đổi mật khẩu nhân viên (CN-23):** cùng quy tắc với trang của khách: ô che chữ, mật
+- **Đổi mật khẩu nhân viên (CN-32):** cùng quy tắc với trang của khách: ô che chữ, mật
   khẩu mới phải qua bộ kiểm mật khẩu của Django, đổi xong vẫn đăng nhập (L-51).
 - **UC-03, UC-19:** sản phẩm còn sót lại không có danh mục hay nhà cung cấp vẫn bán
   bình thường, thẻ sản phẩm chỉ bỏ link tương ứng. Một dòng dữ liệu thiếu không được
