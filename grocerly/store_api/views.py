@@ -299,10 +299,11 @@ def models_to_try():
 class GeminiChat:
     """The conversation of one customer message with Gemini (D-060).
 
-    send() goes to the model that answered last; if a model fails, the
-    conversation so far moves to the next model in models_to_try() and the
-    same content is sent again. The library adds to a chat's history only when
-    a call succeeds, and our tools only read data, so sending again is safe.
+    Each send() starts from the first model in models_to_try(), which is the
+    model that answered last unless the skip list changed meanwhile. If a model
+    fails, the conversation so far moves to the next model and the same content
+    is sent again. The library adds to a chat's history only when a call
+    succeeds, and our tools only read data, so sending again is safe.
     """
 
     def __init__(self, history):
@@ -321,14 +322,19 @@ class GeminiChat:
                 history = self.chat.history if self.chat else self.history
                 self.chat = models[name].start_chat(history=history)
                 self.model_name = name
+            timeout = min(GEMINI_TIMEOUT, time_left)
             try:
                 return self.chat.send_message(
-                    content,
-                    request_options={"timeout": min(GEMINI_TIMEOUT, time_left), "retry": None},
+                    content, request_options={"timeout": timeout, "retry": None}
                 )
             except MODEL_ERRORS as e:
                 logger.warning("Gemini model %s failed, trying the next one: %s", name, e)
-                cache.set(skip_key(name), True, GEMINI_SKIP_SECONDS)
+                # A model that ran out of time only because this message had
+                # less than GEMINI_TIMEOUT left may be healthy: other messages
+                # should not skip it.
+                cut_short = isinstance(e, google_errors.DeadlineExceeded) and timeout < GEMINI_TIMEOUT
+                if not cut_short:
+                    cache.set(skip_key(name), True, GEMINI_SKIP_SECONDS)
                 error = e
         # Every model failed, or the message ran out of time. The last error goes
         # to the caller, which turns it into the answer the customer reads.

@@ -122,15 +122,42 @@ def test_failed_model_is_tried_again_once_its_skip_time_is_over(client, chats):
     assert response.json() == {"reply": "Đã ổn"}
 
 
+class RecordingCache:
+    """Stands in for Django's cache in views: remembers how long each key is kept."""
+
+    def __init__(self):
+        self.kept_for = {}
+
+    def get(self, key):
+        return key in self.kept_for
+
+    def set(self, key, value, timeout):
+        self.kept_for[key] = timeout
+
+
 def test_failed_model_is_remembered_for_five_minutes(client, chats, monkeypatch):
-    remembered = {}
-    monkeypatch.setattr(views.cache, "set", lambda key, value, timeout: remembered.update({key: timeout}))
+    fake_cache = RecordingCache()
+    monkeypatch.setattr(views, "cache", fake_cache)
     chats[FIRST].send_message.side_effect = ServiceUnavailable("busy")
     chats[SECOND].send_message.side_effect = [text_reply("Chào bạn!")]
 
     ask(client)
 
-    assert remembered == {views.skip_key(FIRST): 300}
+    assert fake_cache.kept_for == {views.skip_key(FIRST): 300}
+
+
+def test_model_cut_short_by_the_message_deadline_is_not_remembered(client, chats, monkeypatch):
+    # 20 s spent on the first model; the second gets only 5 s and runs out. It
+    # may well be healthy, so the next messages must not skip it.
+    fake_cache = RecordingCache()
+    monkeypatch.setattr(views, "cache", fake_cache)
+    fake_clock(monkeypatch, 0, 0, 20, 25)
+    for name in views.GEMINI_MODELS:
+        chats[name].send_message.side_effect = DeadlineExceeded("Deadline Exceeded")
+
+    ask(client)
+
+    assert fake_cache.kept_for == {views.skip_key(FIRST): 300}
 
 
 def test_all_models_are_tried_when_every_one_failed_recently(client, chats):

@@ -767,6 +767,21 @@ def test_deadline_reaches_the_gemini_client_through_the_real_library(monkeypatch
     assert real_model._client.generate_content.call_args.kwargs == {"timeout": 8, "retry": None}
 
 
+def test_failed_call_leaves_the_chat_history_unchanged_in_the_real_library():
+    # D-060 hands chat.history to the next model after a failure and sends the
+    # same content again. That is only safe if the library does not keep the
+    # failed content in the history; a library upgrade that did would show here.
+    real_model = genai.GenerativeModel("gemini-test")
+    real_model._client = MagicMock()
+    real_model._client.generate_content.side_effect = ServiceUnavailable("busy")
+    chat = real_model.start_chat(history=[{"role": "user", "parts": ["Chào"]}])
+
+    with pytest.raises(ServiceUnavailable):
+        chat.send_message("Shop có cà rốt không?")
+
+    assert [c.parts[0].text for c in chat.history] == ["Chào"]
+
+
 @pytest.mark.parametrize(
     "error",
     [
