@@ -65,7 +65,7 @@
                                         </h4>
                                         <div class="entry-meta font-xs color-grey mt-10 pb-10">
                                             <div>
-                                                <span class="hit-count mr-10">{% blocktrans trimmed count counter=c.products.count %}{{ counter }} product{% plural %}{{ counter }} products{% endblocktrans %}</span>
+                                                <span class="hit-count mr-10">{% blocktrans trimmed count counter=c.on_sale_products.count %}{{ counter }} product{% plural %}{{ counter }} products{% endblocktrans %}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -106,7 +106,7 @@
                                 <ul>
                                     {% for c in categories %}
                                     <li>
-                                        <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="" />{{ c.title }}</a><span class="count">{{ c.products.count }}</span>
+                                        <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="" />{{ c.title }}</a><span class="count">{{ c.on_sale_products.count }}</span>
                                     </li>    
                                     {% endfor %}                      
                                 </ul>

@@ -2515,6 +2515,24 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - SRS §6, comment trong `useradmin/forms.py` và hai file test trang nhân viên đổi CN-23 thành CN-32.
 - Đề cương (docx và `DE_CUONG.md`) và báo cáo đổi "30 chức năng" thành "32 chức năng". Đề cương đã nộp ghi 30, nên khi chốt cam kết cần nói với GVHD rằng danh sách được tách cho khớp use case.
 
+## D-059 · Năm chỗ đặc tả use case còn lệch với code: ba chỗ sửa code, hai chỗ sửa đặc tả
+
+- **Ngày:** 06/11/2026
+- **Trạng thái:** Đã chốt (sinh viên)
+
+**Bối cảnh.** Bản thảo báo cáo mục 3.2 có 18 ghi chú tô vàng ở các use case, phần lớn là "kiểm lại" chỗ code khác yêu cầu. Đối chiếu ngày 06/11/2026 thì 13 chỗ đã được các lượt sửa trước giải quyết (L-18, L-19, L-21, L-23, L-25, L-26, L-32, L-33, L-36, L-40, L-41, L-43, L-50 → L-53, L-59), còn năm chỗ chưa có trong ISSUES: L-66 → L-70. Mỗi chỗ có hai cách, sửa code hoặc sửa đặc tả, nên phải chọn.
+
+**Phương án đã cân nhắc và lựa chọn**
+1. *Sản phẩm đã ẩn còn hiện với khách (L-66) và link tới danh mục đã xóa (L-67).* Sửa đặc tả thì phải viết rằng sản phẩm nháp vẫn mở được bằng đường dẫn, trái FR-A-02. Chọn sửa code: mỗi chỗ một điều kiện lọc, dồn vào một hàm `on_sale_products()` của `Category` và `Vendor` thay vì viết lại điều kiện ở sáu template.
+2. *Mã giảm giá (L-68).* (a) Làm đủ như TLCN: hạn dùng, đếm lượt, mã unique; (b) chỉ sửa đặc tả; (c) sửa đặc tả và chặn phần trăm ngoài 1 - 100. Chọn (c): hạn dùng và đếm lượt là chức năng mới (CLAUDE.md §5), còn phần trăm ngoài khoảng làm sai tiền. Không thêm unique: phải đổi cột, và nếu database trên host có mã trùng thì migrate lỗi lúc deploy.
+3. *Quản lý người dùng (L-70).* (a) Đổi sang `UserAdmin` của Django, cần fieldsets riêng vì đăng nhập bằng email; (b) sửa đặc tả theo cách làm thật. Chọn (b): luồng "tự đăng ký rồi được bật quyền" chạy được ngay, không thêm code; ô mật khẩu băm ghi vào hạn chế.
+4. *Sửa đơn trong Django admin (L-69).* (a) Khóa riêng các ô trạng thái, thanh toán, giá; (b) chỉ sửa đặc tả; (c) cho cả trang đơn và dòng đơn chỉ đọc. Chọn khóa, làm theo cách (c): UC-25 vốn chỉ là tra cứu, và hai hàm quyền ngắn hơn, dễ giải thích hơn một danh sách ô chỉ đọc phải giữ cho khớp model.
+
+**Hệ quả.**
+- Code: `core/models.py` (`on_sale_products`, validator của `Coupon.discount`), migration `core/0011` (không đổi cột), `core/views.py` (`product_detail_view`), `core/admin.py`, tám template. Test mới: `core/tests/test_hidden_products.py`, `core/tests/test_coupon_admin.py`, bốn test trong `core/tests/test_order_admin.py`.
+- SRS §6.1 thêm ràng buộc cho UC-03/04/24, UC-21, UC-22, UC-25 và viết lại UC-23; SRS §8 thêm hai hạn chế (PLAN §6 dòng 34).
+- Báo cáo mục 3.2 viết lại các bảng use case theo code hiện tại và gỡ ghi chú tô vàng.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

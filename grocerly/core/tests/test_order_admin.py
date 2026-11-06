@@ -84,3 +84,50 @@ def test_order_page_shows_no_delete_button_and_no_delete_box_on_its_lines(superu
     assert order_line.item in page  # the line is listed in the inline
     assert reverse("admin:core_cartorder_delete", args=[order_line.order.pk]) not in page
     assert "cartorderitem_set-0-DELETE" not in page  # CartOrderItemInline.can_delete
+
+
+# ---------- The Django admin only reads orders (L-69) ----------
+# The staff page moves an order one step at a time, takes the stock once and marks
+# a COD order paid on delivery (D-026, D-032, D-033). Editing the same fields in the
+# Django admin skipped every one of these rules, so the admin pages of orders and
+# order lines are read-only: they still open, but saving changes nothing.
+
+
+def test_django_admin_cannot_change_an_order(superuser_client, order):
+    # A form the old admin accepted: every required box is filled in.
+    url = reverse("admin:core_cartorder_change", args=[order.pk])
+
+    superuser_client.post(url, {
+        "product_status": "delivered", "paid_status": "on", "price": "1.00", "saved": "0",
+        "payment_method": "cod", "full_name": order.full_name, "email": order.email,
+        "cartorderitem_set-TOTAL_FORMS": "0", "cartorderitem_set-INITIAL_FORMS": "0",
+    })
+
+    order.refresh_from_db()
+    assert (order.product_status, order.paid_status, order.price) == ("processing", False, 50000)
+
+
+def test_django_admin_cannot_change_an_order_line(superuser_client, order_line):
+    url = reverse("admin:core_cartorderitem_change", args=[order_line.pk])
+
+    superuser_client.post(url, {
+        "order": order_line.order.pk, "invoice_no": order_line.invoice_no, "item": order_line.item,
+        "image": "x.jpg", "quantity": "1", "price": "1.00", "total": "1.00", "product_status": "delivered",
+    })
+
+    order_line.refresh_from_db()
+    assert (order_line.quantity, order_line.total) == (2, order_line.price * 2)
+
+
+@pytest.mark.parametrize("model", ["cartorder", "cartorderitem"])
+def test_django_admin_cannot_add_an_order_by_hand(superuser_client, model):
+    response = superuser_client.get(reverse(f"admin:core_{model}_add"))
+
+    assert response.status_code == 403
+
+
+def test_order_page_in_django_admin_has_no_save_button(superuser_client, order):
+    page = superuser_client.get(reverse("admin:core_cartorder_change", args=[order.pk])).content.decode()
+
+    assert order.email in page  # the admin still reads the order (UC-25)
+    assert 'name="_save"' not in page

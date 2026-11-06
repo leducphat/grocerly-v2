@@ -153,7 +153,9 @@ def vendor_detail_view(request, v_id):
 
 
 def product_detail_view(request, p_id):
-    product = get_object_or_404(Product, p_id=p_id)
+    # Only a product on sale has a page: a draft or a product the admin turned off
+    # answers 404, as a deleted one does (L-66, UC-04).
+    product = get_object_or_404(Product, p_id=p_id, product_status='published')
     images = product.p_image.all()
     related_products = Product.objects.filter(category=product.category, product_status='published').exclude(p_id=p_id).order_by('-id')[:4]
 

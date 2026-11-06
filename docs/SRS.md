@@ -333,11 +333,26 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
   hàng và giới thiệu chỉ mô tả những gì hệ thống làm thật. Cửa hàng chưa có địa chỉ
   riêng nên chân trang và trang liên hệ ghi địa chỉ của trường và email của sinh viên
   (L-58, D-056).
-- **UC-23:** xóa danh mục đang chứa nhiều sản phẩm → cảnh báo sản phẩm sẽ bị mồ
-  côi (Uncategorized).
+- **UC-03, UC-04, UC-24:** chỉ sản phẩm ở trạng thái `published` có trang chi tiết và có mặt
+  ở các trang của khách. Sản phẩm nháp, đã tắt, chờ duyệt hay bị từ chối thì trang của nó trả
+  404 như sản phẩm đã xóa, không hiện ở tab danh mục của trang chủ, và không được tính vào số
+  sản phẩm in cạnh mỗi danh mục, nhà cung cấp (L-66).
+- **UC-23:** xóa mềm một danh mục không xóa sản phẩm của nó: sản phẩm vẫn bán, thẻ sản phẩm
+  chỉ bỏ link tới danh mục đã xóa, trang của danh mục trả 404. Trang quản trị không cảnh báo
+  riêng khi xóa danh mục còn sản phẩm (L-67, D-041). Câu "cảnh báo sản phẩm bị mồ côi" của
+  TLCN đã bỏ.
+- **UC-21:** mã giảm giá gồm mã, phần trăm giảm và cờ bật/tắt; không có hạn dùng, không đếm
+  lượt dùng, không chặn hai mã trùng chữ. Phần trăm giảm từ 1 tới 100; trang quản trị từ chối
+  số ngoài khoảng này. Mã đã tắt hay đã xóa mềm thì khách nhập vào bị báo không tồn tại; mỗi
+  mã áp một lần cho một đơn (L-68, D-059).
+- **UC-22:** tài khoản nhân viên được tạo bằng cách: người đó tự đăng ký như khách, quản trị
+  viên bật quyền nhân viên (`is_staff`) trong trang quản trị. Khóa tài khoản là bỏ cờ "đang
+  hoạt động". Không có gửi email hàng loạt (L-70, D-059).
 - **UC-25:** Admin không được xóa vĩnh viễn đơn hàng, để phục vụ đối soát kế toán.
   Trong Django admin, cả đơn lẫn dòng đơn đều không có nút xóa hay lệnh xóa hàng
-  loạt, và yêu cầu xóa gửi thẳng bị từ chối (L-40).
+  loạt, và yêu cầu xóa gửi thẳng bị từ chối (L-40). Trang đơn và dòng đơn trong Django admin
+  chỉ đọc: không thêm, không sửa; trạng thái giao hàng và thanh toán chỉ đổi qua trang nhân
+  viên, nơi có các ràng buộc của UC-20 (L-69).
 - **UC-26:** doanh thu, doanh thu theo tháng và số sản phẩm đã bán chỉ tính đơn đã
   thanh toán và không bị hủy. Đơn VNPay đã trả tiền rồi bị hủy vẫn nằm trong danh
   sách đơn nhưng không còn được cộng vào doanh thu (D-033).
@@ -449,6 +464,14 @@ Trích nguyên trạng từ phần Kết luận của TLCN:
 3. Chưa có tương tác thời gian thực (live chat giữa khách hàng và người bán).
 4. Hệ gợi ý sản phẩm dựa trên tiêu chí tĩnh (nổi bật, ngẫu nhiên), chưa học theo
    hành vi người dùng.
+
+Ghi nhận thêm ở KLTN, khi đối chiếu đặc tả với mã nguồn (D-059):
+
+5. Mã giảm giá không có hạn dùng, không giới hạn số lượt dùng và không chặn hai mã
+   trùng chữ (L-68).
+6. Quản lý người dùng dùng trang mặc định của Django admin: ô mật khẩu là chuỗi đã
+   băm, nên quản trị viên không đặt mật khẩu hộ nhân viên; quản trị viên tự bỏ quyền
+   hay tự khóa được chính mình, và xóa hẳn được một tài khoản (L-70).
 
 ---
 

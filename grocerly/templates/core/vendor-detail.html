@@ -75,7 +75,7 @@
                             </div>
                             <div class="product-content-wrap">
                                 <div class="product-category">
-                                    {% if p.category %}
+                                    {% if p.category and not p.category.is_deleted %}
                                     <a href="{% url 'core:category-product-list' p.category.c_id %}">{{p.category.title}}</a>
                                     {% endif %}
                                 </div>
