@@ -194,9 +194,10 @@ Kiểm tra lại được bằng hai lệnh chạy trong `grocerly/`: `ruff chec
 
 Sẽ bổ sung trước khi trình ký. Khung dự kiến:
 
-- **KPI nghiệp vụ** (TC1 Mức 5 cần ≥ 5, định lượng): ví dụ tỉ lệ đặt hàng thành
-  công qua trợ lý AI, số bước từ tìm sản phẩm tới đặt hàng, thời gian phản hồi
-  của trợ lý…
+- **KPI nghiệp vụ** (2-3 KPI định lượng, đủ Mức 3-4 của TC1): ví dụ tỉ lệ trợ lý
+  AI chọn đúng sản phẩm và số lượng trên bộ 20-30 câu mẫu (P-42), tỉ lệ người thử
+  tự đặt xong đơn trong buổi thực nghiệm, thời gian từ lúc tìm sản phẩm tới lúc
+  đặt hàng.
 - **Metric kỹ thuật** theo rubric Mục 5 — độ phủ test, số chặng CI/CD, số lần
   deploy, tỉ lệ build xanh, lỗi lint, secret lộ, người dùng thực nghiệm, SUS.
   Rubric cho phép điều chỉnh ngưỡng tại bước này.
