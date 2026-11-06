@@ -1636,6 +1636,6 @@ msgid ""
 msgstr ""
 
 msgid ""
-"🛑 The AI assistant has used up its free quota (500 messages a day). Please "
-"come back tomorrow!"
+"🛑 The AI assistant has used up its free quota for today. Please come back "
+"tomorrow!"
 msgstr ""

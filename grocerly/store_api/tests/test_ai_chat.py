@@ -44,12 +44,14 @@ def gemini_reply(text="", tool=None, **tool_args):
 
 @pytest.fixture
 def gemini_chat(monkeypatch):
-    """Swap the Gemini model for a mock and return its chat session.
-    A test sets chat.send_message.side_effect to the answers Gemini gives, in order."""
+    """Swap every Gemini model for one mock and return its chat session.
+    A test sets chat.send_message.side_effect to the answers Gemini gives, in order.
+    All models share the mock, so a fallback to the next model (D-060) keeps
+    reading the same scripted answers."""
     chat = MagicMock()
     model = MagicMock()
     model.start_chat.return_value = chat
-    monkeypatch.setattr(views, "model", model)
+    monkeypatch.setattr(views, "models", {name: model for name in views.GEMINI_MODELS})
     monkeypatch.setattr(views, "api_key", "fake-key-for-tests")
     return chat
 
@@ -354,7 +356,7 @@ def test_chat_sends_new_message_to_gemini_only_once(client, gemini_chat):
 
     ask(client, "2", history=history)
 
-    gemini_history = views.model.start_chat.call_args.kwargs["history"]
+    gemini_history = views.models[views.GEMINI_MODELS[0]].start_chat.call_args.kwargs["history"]
     assert gemini_history == [{"role": "model", "parts": ["Bạn muốn mua mấy thùng?"]}]
     gemini_chat.send_message.assert_called_once()
     assert gemini_chat.send_message.call_args.args == ("2",)
@@ -381,7 +383,7 @@ def test_chat_keeps_an_earlier_turn_with_the_same_words(client, gemini_chat):
 
     ask(client, "2", history=history)
 
-    gemini_history = views.model.start_chat.call_args.kwargs["history"]
+    gemini_history = views.models[views.GEMINI_MODELS[0]].start_chat.call_args.kwargs["history"]
     assert gemini_history == [
         {"role": "user", "parts": ["2"]},
         {"role": "model", "parts": ["Bạn muốn mua thêm mấy thùng?"]},
@@ -721,10 +723,10 @@ def test_a_pick_from_an_earlier_message_is_not_questioned(client, product, baby_
     assert body["product"]["pid"] == baby_carrot.p_id
 
 
-# ---------- Gemini slow or overloaded (UC-15, L-37, D-051) ----------
+# ---------- Gemini slow or overloaded (UC-15, L-37, D-051, D-060) ----------
 
 
-def test_every_gemini_call_gives_up_after_20_seconds_without_retrying(client, product, gemini_chat):
+def test_every_gemini_call_gives_up_after_8_seconds_without_retrying(client, product, gemini_chat):
     # L-37: on a 503 the library retried by itself for up to 600 s, so gunicorn
     # (30 s) killed the worker before the "connection trouble" answer. Four calls
     # cover the four places that talk to Gemini: the message itself, then the
@@ -740,10 +742,10 @@ def test_every_gemini_call_gives_up_after_20_seconds_without_retrying(client, pr
 
     calls = gemini_chat.send_message.call_args_list
     assert len(calls) == 4
-    assert [c.kwargs.get("request_options") for c in calls] == [{"timeout": 20, "retry": None}] * 4
+    assert [c.kwargs.get("request_options") for c in calls] == [{"timeout": 8, "retry": None}] * 4
 
 
-def test_deadline_reaches_the_gemini_client_through_the_real_library():
+def test_deadline_reaches_the_gemini_client_through_the_real_library(monkeypatch):
     # L-37: the mocked chat above accepts any argument at all. Here the chat
     # session is the library's own and only the client under it is fake, so a
     # library version that dropped request_options would show up. retry=None is
@@ -757,21 +759,39 @@ def test_deadline_reaches_the_gemini_client_through_the_real_library():
         )]
     )
 
-    reply = views.ask_gemini(real_model.start_chat(), "Xin chào")
+    monkeypatch.setattr(views, "models", {name: real_model for name in views.GEMINI_MODELS})
+
+    reply = views.GeminiChat(history=[]).send("Xin chào")
 
     assert reply.text == "Chào bạn"
-    assert real_model._client.generate_content.call_args.kwargs == {"timeout": 20, "retry": None}
+    assert real_model._client.generate_content.call_args.kwargs == {"timeout": 8, "retry": None}
+
+
+def test_failed_call_leaves_the_chat_history_unchanged_in_the_real_library():
+    # D-060 hands chat.history to the next model after a failure and sends the
+    # same content again. That is only safe if the library does not keep the
+    # failed content in the history; a library upgrade that did would show here.
+    real_model = genai.GenerativeModel("gemini-test")
+    real_model._client = MagicMock()
+    real_model._client.generate_content.side_effect = ServiceUnavailable("busy")
+    chat = real_model.start_chat(history=[{"role": "user", "parts": ["Chào"]}])
+
+    with pytest.raises(ServiceUnavailable):
+        chat.send_message("Shop có cà rốt không?")
+
+    assert [c.parts[0].text for c in chat.history] == ["Chào"]
 
 
 @pytest.mark.parametrize(
     "error",
     [
         ServiceUnavailable("This model is currently experiencing high demand."),
-        DeadlineExceeded("Deadline Exceeded"),  # what the 20 s deadline raises
+        DeadlineExceeded("Deadline Exceeded"),  # what the 8 s deadline raises
     ],
 )
 def test_gemini_overloaded_or_too_slow_answers_connection_trouble(client, gemini_chat, error):
-    # L-37: both errors now reach the answer that was written for them.
+    # L-37: both errors now reach the answer that was written for them. Every
+    # model fails here (they share the mock), so the fallback (D-060) ends there too.
     gemini_chat.send_message.side_effect = error
 
     response = ask(client, "Xin chào")

@@ -1,5 +1,10 @@
+import logging
 import os
+import time
+
 import google.generativeai as genai
+from django.core.cache import cache
+from google.api_core import exceptions as google_errors
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,6 +15,8 @@ from django.utils.translation import gettext_lazy as _
 from core.models import Product, Category
 from core.templatetags.currency_filters import vnd
 from store_api.serializers import ProductSerializer, CategorySerializer
+
+logger = logging.getLogger(__name__)
 
 # The store pages decide what a customer may see with one condition:
 # `product_status='published'` (core/views.py). The assistant and the API used
@@ -223,39 +230,115 @@ def choose_product(choices, qty, hidden_context):
 api_key = os.environ.get("GEMINI_API_KEY", "")
 genai.configure(api_key=api_key)
 
+# The models the assistant tries, in this order (D-060). Overload (503) and the
+# free quota (429) hit one model at a time, so when one fails the next one
+# usually still answers. The two "lite" models come first: in the measurements
+# of 06/11/2026 they were 2-3 times faster and have 500 calls a day, against 20
+# for the bigger "flash" models, which stay as a reserve.
+GEMINI_MODELS = [
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-3.6-flash",
+    "gemini-3.5-flash",
+]
+SYSTEM_INSTRUCTION = (
+    "You are Grocerly Assistant, the AI shopping assistant for Grocerly E-commerce. "
+    "You are polite, helpful, and concise. "
+    "Always use the provided tools to search for products when the user asks about them. "
+    "If quoting a price, mention the VND currency clearly. "
+    "If a user wants to buy something, or add to cart, YOU MUST use the request_add_to_cart tool! "
+    "If they ask to checkout, use the request_checkout tool."
+)
+
 try:
-    # Initialize the model with tools and system instruction
-    model = genai.GenerativeModel(
-        model_name='gemini-3.1-flash-lite',
-        tools=[search_products, get_bestsellers, request_add_to_cart, request_checkout],
-        system_instruction=(
-            "You are Grocerly Assistant, the AI shopping assistant for Grocerly E-commerce. "
-            "You are polite, helpful, and concise. "
-            "Always use the provided tools to search for products when the user asks about them. "
-            "If quoting a price, mention the VND currency clearly. "
-            "If a user wants to buy something, or add to cart, YOU MUST use the request_add_to_cart tool! "
-            "If they ask to checkout, use the request_checkout tool."
+    # Building a model does not call Google; that happens on send_message.
+    models = {
+        name: genai.GenerativeModel(
+            model_name=name,
+            tools=[search_products, get_bestsellers, request_add_to_cart, request_checkout],
+            system_instruction=SYSTEM_INSTRUCTION,
         )
-    )
-    # create a global conversation history placeholder or start chat
-    # To support multiple users effectively, we should let the frontend pass history,
-    # but for this MVP, we will instantiate a new chat per request and pass history.
+        for name in GEMINI_MODELS
+    }
 except Exception as e:
-    model = None
+    models = {}
     print(f"Failed to initialize Gemini Model: {e}")
 
 
-# How long one call to Gemini may take (L-37, D-051). By default the library
-# waits up to 600 s and calls again by itself after a 503 "high demand", but
-# gunicorn kills the request at 30 s, before the `except` below can answer.
-# So each call gets 20 s and no retry; a slow or overloaded Gemini then ends in
-# the "connection trouble" answer, and the customer can simply send again.
-GEMINI_TIMEOUT = 20
+# Time limits (L-37, D-051, D-060). By default the library waits up to 600 s
+# and calls again by itself after a 503, but gunicorn kills the request at 30 s.
+# An overloaded model often does not answer 503 at once: it hangs until the
+# deadline. So one try gets 8 s (a healthy model answers in 1-5 s) and no retry
+# by the library, and the whole customer message gets 25 s whatever the number
+# of models tried, which still leaves time before gunicorn's 30 s.
+GEMINI_TIMEOUT = 8
+GEMINI_DEADLINE = 25
+# A model that just failed is skipped by the next messages for this long, so
+# they do not wait another 8 s on a model that is still hanging.
+GEMINI_SKIP_SECONDS = 5 * 60
+
+# Errors that mean "this model cannot answer right now, try another one":
+# ServerError covers 500, 503 and the 504 a deadline raises; TooManyRequests is
+# the 429 of the quota. Anything else (400 bad request, 403 wrong key, 404 wrong
+# model name) is a mistake on our side that another model would not fix, so it
+# is not hidden behind a fallback.
+MODEL_ERRORS = (google_errors.ServerError, google_errors.TooManyRequests)
 
 
-def ask_gemini(chat, content):
-    """Send one message to Gemini, giving up after GEMINI_TIMEOUT seconds."""
-    return chat.send_message(content, request_options={"timeout": GEMINI_TIMEOUT, "retry": None})
+def skip_key(name):
+    return f"gemini-skip:{name}"
+
+
+def models_to_try():
+    """GEMINI_MODELS in order, minus those that failed in the last few minutes.
+    If every model failed recently, try them all anyway rather than not at all."""
+    fresh = [name for name in GEMINI_MODELS if not cache.get(skip_key(name))]
+    return fresh or list(GEMINI_MODELS)
+
+
+class GeminiChat:
+    """The conversation of one customer message with Gemini (D-060).
+
+    Each send() starts from the first model in models_to_try(), which is the
+    model that answered last unless the skip list changed meanwhile. If a model
+    fails, the conversation so far moves to the next model and the same content
+    is sent again. The library adds to a chat's history only when a call
+    succeeds, and our tools only read data, so sending again is safe.
+    """
+
+    def __init__(self, history):
+        self.started = time.monotonic()
+        self.history = history  # what was said before, in Gemini's format
+        self.chat = None
+        self.model_name = None
+
+    def send(self, content):
+        error = None
+        for name in models_to_try():
+            time_left = GEMINI_DEADLINE - (time.monotonic() - self.started)
+            if time_left <= 0:
+                break
+            if name != self.model_name:
+                history = self.chat.history if self.chat else self.history
+                self.chat = models[name].start_chat(history=history)
+                self.model_name = name
+            timeout = min(GEMINI_TIMEOUT, time_left)
+            try:
+                return self.chat.send_message(
+                    content, request_options={"timeout": timeout, "retry": None}
+                )
+            except MODEL_ERRORS as e:
+                logger.warning("Gemini model %s failed, trying the next one: %s", name, e)
+                # A model that ran out of time only because this message had
+                # less than GEMINI_TIMEOUT left may be healthy: other messages
+                # should not skip it.
+                cut_short = isinstance(e, google_errors.DeadlineExceeded) and timeout < GEMINI_TIMEOUT
+                if not cut_short:
+                    cache.set(skip_key(name), True, GEMINI_SKIP_SECONDS)
+                error = e
+        # Every model failed, or the message ran out of time. The last error goes
+        # to the caller, which turns it into the answer the customer reads.
+        raise error or google_errors.DeadlineExceeded("The chat message ran out of time")
 
 @api_view(['POST'])
 def ai_chat(request):
@@ -271,7 +354,7 @@ def ai_chat(request):
 
 
 def _chat_reply(request):
-    if not model or not api_key:
+    if not models or not api_key:
         return Response({
             "reply": str(_("System Error: Gemini API Key is missing or invalid. Please configure it in .env."))
         }, status=200) # Returns 200 so UI doesn't crash, but shows warning.
@@ -298,10 +381,9 @@ def _chat_reply(request):
             role = 'model' if msg.get('role') == 'assistant' else 'user'
             formatted_history.append({"role": role, "parts": [msg.get('content', '')]})
 
-        # Initialize chat with history (disabling automatic function calling)
-        chat = model.start_chat(history=formatted_history)
-        
-        response = ask_gemini(chat, user_message)
+        # One conversation for this message; it may move to another model (D-060).
+        chat = GeminiChat(formatted_history)
+        response = chat.send(user_message)
         hidden_context = None
         # Products the latest search of this message found. Several of them
         # and Gemini goes straight to the cart: the customer picks (AC-17.3).
@@ -346,7 +428,7 @@ def _chat_reply(request):
                         return Response(choose_product(choices, qty, hidden_context))
                     return Response(confirm_add_cart(p, qty, hidden_context))
 
-                response = ask_gemini(chat, [{
+                response = chat.send([{
                     "function_response": {
                         "name": name,
                         "response": {"error": tool_error}
@@ -359,7 +441,7 @@ def _chat_reply(request):
                 # like it is told about a product out of stock, and asks the
                 # customer to pick something first (L-41).
                 if not request.session.get('cart_data_obj'):
-                    response = ask_gemini(chat, [{
+                    response = chat.send([{
                         "function_response": {
                             "name": name,
                             "response": {"error": "The cart is empty"}
@@ -379,7 +461,7 @@ def _chat_reply(request):
                 found = find_products(args.get('query', ''))
                 results = search_results(found)
                 hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Search Results: {results})"
-                response = ask_gemini(chat, [{
+                response = chat.send([{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
@@ -390,7 +472,7 @@ def _chat_reply(request):
             elif name == "get_bestsellers":
                 results = get_bestsellers()
                 hidden_context = f"(SYSTEM CONTEXT - DO NOT MENTION: Latest Bestsellers: {results})"
-                response = ask_gemini(chat, [{
+                response = chat.send([{
                     "function_response": {
                         "name": name,
                         "response": {"result": results}
@@ -422,7 +504,7 @@ def _chat_reply(request):
         if "429" in error_msg or "Quota" in error_msg or "ResourceExhausted" in error_msg:
             if "PerDay" in error_msg:
                 return Response({
-                    "reply": str(_("🛑 The AI assistant has used up its free quota (500 messages a day). Please come back tomorrow!"))
+                    "reply": str(_("🛑 The AI assistant has used up its free quota for today. Please come back tomorrow!"))
                 }, status=200)
             
             # Try to extract the retry delay from Google's error response
