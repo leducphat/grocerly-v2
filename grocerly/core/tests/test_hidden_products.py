@@ -109,3 +109,14 @@ def test_product_page_has_no_link_to_a_deleted_category(client, product):
 
     assert response.status_code == 200
     assert category_url not in response.content.decode()
+
+
+def test_category_sidebar_of_vendor_page_counts_only_products_on_sale(client, product, vendor):
+    # Review of PR #24: the vendor page sidebar still counted c.products.all.
+    product.vendor = vendor
+    product.save()
+    Product.objects.create(title="Cà rốt nháp", category=product.category, vendor=vendor, price=1, product_status="draft")
+
+    page = client.get(reverse("core:vendor-detail", args=[vendor.v_id])).content.decode()
+
+    assert '<span class="count">1</span>' in page

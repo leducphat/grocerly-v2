@@ -20,7 +20,7 @@
             <article class="itemlist">
                 <div class="row align-items-center">
                     <div class="col-lg-3 col-sm-4 col-8 flex-grow-1 col-name">
-                        <a class="itemside" href="{% url 'core:product-detail' p.p_id %}">
+                        <a class="itemside" href="{% url 'useradmin:dashboard-edit-products' p.p_id %}">
                             <div class="left">
                                 <img src="{{p.image.url}}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 15px;" class="img-sm img-thumbnail" alt="{{ p.title }}" />
                             </div>
