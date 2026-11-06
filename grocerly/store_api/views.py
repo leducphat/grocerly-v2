@@ -290,10 +290,13 @@ def skip_key(name):
 
 
 def models_to_try():
-    """GEMINI_MODELS in order, minus those that failed in the last few minutes.
-    If every model failed recently, try them all anyway rather than not at all."""
-    fresh = [name for name in GEMINI_MODELS if not cache.get(skip_key(name))]
-    return fresh or list(GEMINI_MODELS)
+    """GEMINI_MODELS in order, but the models that failed in the last few
+    minutes go last instead of first. They are not dropped: on the host a
+    message once had only one fresh model left, it hit its quota, and the
+    customer got no answer while a skipped model had already recovered."""
+    failed = [name for name in GEMINI_MODELS if cache.get(skip_key(name))]
+    fresh = [name for name in GEMINI_MODELS if name not in failed]
+    return fresh + failed
 
 
 class GeminiChat:

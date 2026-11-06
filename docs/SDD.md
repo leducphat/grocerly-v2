@@ -176,7 +176,7 @@ công cụ nối nhau trong một tin nhắn (L-30). Mọi lời gọi Gemini, c
 câu trả lời công cụ, đi qua `GeminiChat.send` (D-060). Hàm thử lần lượt các model trong
 `GEMINI_MODELS` (3.5 flash lite, 3.1 flash lite, 3.6 flash, 3.5 flash), mỗi lần tối đa
 8 giây và không để thư viện tự gọi lại. Model báo quá tải (503), hết quota (429), lỗi
-500 hay quá hạn thì được ghi vào cache 5 phút và bỏ qua ở các tin nhắn sau; chat mở lại
+500 hay quá hạn thì được ghi vào cache 5 phút và bị xếp xuống cuối ở các tin nhắn sau; chat mở lại
 trên model kế tiếp với lịch sử của chat cũ, rồi gửi lại đúng phần vừa hỏng, nên vòng
 công cụ đi tiếp bình thường. Lỗi khác (sai tên model, sai key) dừng ngay. Cả tin nhắn
 có mốc 25 giây, xong trước mốc 30 giây của gunicorn; hết mốc hay hết model thì lỗi

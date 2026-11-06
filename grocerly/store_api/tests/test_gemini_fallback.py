@@ -160,6 +160,20 @@ def test_model_cut_short_by_the_message_deadline_is_not_remembered(client, chats
     assert fake_cache.kept_for == {views.skip_key(FIRST): 300}
 
 
+def test_recently_failed_model_is_still_tried_after_the_fresh_ones(client, chats):
+    # Seen on the host: three models skipped, the only fresh one hit its quota,
+    # and the customer got no answer although a skipped model had recovered.
+    for name in (FIRST, SECOND, THIRD):
+        cache.set(views.skip_key(name), True)
+    chats[FOURTH].send_message.side_effect = ResourceExhausted("429 quota")
+    chats[FIRST].send_message.side_effect = [text_reply("Chào bạn!")]
+
+    response = ask(client)
+
+    assert response.json() == {"reply": "Chào bạn!"}
+    chats[FOURTH].send_message.assert_called_once()  # the fresh one went first
+
+
 def test_all_models_are_tried_when_every_one_failed_recently(client, chats):
     for name in views.GEMINI_MODELS:
         cache.set(views.skip_key(name), True)
