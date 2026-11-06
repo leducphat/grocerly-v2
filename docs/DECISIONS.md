@@ -2342,7 +2342,7 @@ JavaScript không chạy thì vẫn an toàn, chỉ mất câu hỏi.
 ## D-051 · Mỗi lời gọi Gemini có thời hạn 20 giây và không tự gọi lại
 
 - **Ngày:** 04/11/2026
-- **Trạng thái:** Đã chốt
+- **Trạng thái:** Đã chốt; thời hạn 20 giây và một model duy nhất được thay bởi D-060
 
 **Bối cảnh.** L-37: `_chat_reply` gọi `chat.send_message` không kèm tùy chọn nào, nên thư viện dùng mặc định của `google-ai-generativelanguage`: chờ một lời gọi tới 600 giây, và khi Gemini báo 503 (quá tải) thì tự gọi lại, cũng trong tối đa 600 giây. Host chạy gunicorn với thời hạn mặc định 30 giây và một worker `sync`. Ngày 04/11/2026 Gemini quá tải, gunicorn giết worker trước khi nhánh `except` kịp trả câu "trục trặc kết nối", khung chat nhận 500 rỗng sau khoảng 31 giây.
 
@@ -2532,6 +2532,43 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 - Code: `core/models.py` (`on_sale_products`, validator của `Coupon.discount`), migration `core/0011` (không đổi cột), `core/views.py` (`product_detail_view`), `core/admin.py`, tám template. Test mới: `core/tests/test_hidden_products.py`, `core/tests/test_coupon_admin.py`, bốn test trong `core/tests/test_order_admin.py`.
 - SRS §6.1 thêm ràng buộc cho UC-03/04/24, UC-21, UC-22, UC-25 và viết lại UC-23; SRS §8 thêm hai hạn chế (PLAN §6 dòng 34).
 - Báo cáo mục 3.2 viết lại các bảng use case theo code hiện tại và gỡ ghi chú tô vàng.
+
+## D-060 · Trợ lý AI thử lần lượt bốn model Gemini, mỗi lần 8 giây, cả tin nhắn tối đa 25 giây
+
+- **Ngày:** 06/11/2026
+- **Trạng thái:** Đã chốt (sinh viên). Thay phần "20 giây, không gọi lại" của D-051
+
+**Bối cảnh.** Sau D-051, khi Gemini quá tải khách nhận câu "trục trặc kết nối" thay vì lỗi 500, nhưng vẫn không được trả lời. D-051 không gọi lại vì gọi lại *cùng một model* lúc nó quá tải thì cũng hỏng. Đổi sang model khác thì khác: quá tải (503) và quota free (RPM, RPD) đều tính riêng cho từng model. Số đo sáng 06/11/2026 bằng key KLTN, mỗi lượt giống một tin nhắn thật (Gemini gọi công cụ tìm sản phẩm rồi trả lời):
+
+| Model | Kết quả | Một lượt |
+|---|---|---|
+| gemini-3.8-flash | hỏng 6/6 lần: 5 lần treo 18 - 20 giây, 1 lần 503 | - |
+| gemini-3.6-flash | 2/2 lần đúng | 4,2 - 4,4 giây |
+| gemini-3.5-flash | 1 lần đúng, 1 lần 429 sau lời gọi thứ ba; câu "hi" mất 5 - 9 giây | 4,4 giây |
+| gemini-3.5-flash-lite | 2/2 lần đúng | 1,7 - 2,3 giây |
+| gemini-3.1-flash-lite (đang dùng) | 2/2 lần đúng | 1,4 - 1,8 giây |
+
+Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo tới hết thời hạn, nên fallback mà mỗi model được 20 giây thì vượt mốc 30 giây của gunicorn. Còn việc đổi model tự nó không tốn gì: tạo chat mới trên model khác kèm lịch sử mất dưới 1 ms, không gọi mạng.
+
+**Phương án đã cân nhắc**
+1. *Model lớn trước:* 3.8 flash → 3.6 flash → 3.5 flash → 3.5 flash lite → 3.1 flash lite. Câu trả lời có thể hay hơn khi model lớn còn chạy, nhưng chậm gấp 2 - 3 lần, và model flash free chỉ có 20 lượt gọi mỗi ngày. Một tin nhắn tốn 2 - 4 lượt, nên mỗi model chỉ đủ 5 - 10 tin, hết trong buổi thực nghiệm.
+2. *Model lite trước, model lớn làm dự phòng:* 3.5 flash lite → 3.1 flash lite → 3.6 flash → 3.5 flash. Hai bản lite có 500 lượt mỗi ngày và gọi công cụ đúng ở mọi lượt đo.
+3. *Thêm gemini-3-flash.* Key KLTN chỉ có bản `-preview`, có thể bị gỡ bất cứ lúc nào, chưa đo, và cũng chỉ 20 lượt mỗi ngày.
+4. *Thêm Groq làm dự phòng cuối.* Sống sót được cả khi Gemini sập hẳn, nhưng Groq dùng định dạng kiểu OpenAI, nên phải viết lớp chuyển đổi lịch sử, khai báo công cụ và câu trả lời cho vòng công cụ. Thêm một thư viện, một key, và một model gọi công cụ và viết tiếng Việt khác Gemini. Chưa có lần nào ghi nhận cả Gemini cùng hỏng: lúc 3.8 treo, hai bản lite vẫn trả lời trong 1 - 2 giây.
+
+**Quyết định.** Phương án 2, bỏ 3.8 flash. Sinh viên chọn ngày 06/11/2026, không làm phương án 3 và 4. Trong `store_api/views.py`:
+- `GEMINI_MODELS` giữ thứ tự bốn model. `ask_gemini` thử từng model, chuyển sang model sau khi gặp 503, 429, 500 hoặc hết thời hạn (các lớp lỗi của `google.api_core.exceptions`). Lỗi khác như 400, 403, 404 (sai tên model, sai key) thì dừng ngay, không để fallback che lỗi cấu hình.
+- Mỗi lần thử tối đa 8 giây (`GEMINI_TIMEOUT`), vì model khỏe trả lời trong 1 - 5 giây. Cả tin nhắn tối đa 25 giây (`GEMINI_DEADLINE`), hết thì dừng dù còn model, nên luôn xong trước mốc 30 giây của gunicorn. Vẫn `retry=None` như D-051.
+- Model vừa hỏng được ghi vào cache của Django trong 5 phút (`GEMINI_SKIP_SECONDS`), các tin nhắn sau bỏ qua nó. Nếu cả bốn đều đang bị ghi thì vẫn thử đủ bốn, để trợ lý không bị khóa 5 phút.
+- Hỏng giữa vòng công cụ thì mở chat trên model kế tiếp bằng lịch sử của chat cũ rồi gửi lại đúng phần vừa hỏng. Thư viện chỉ ghi lịch sử khi lời gọi thành công, và công cụ chỉ đọc dữ liệu, nên gửi lại không làm gì hai lần.
+
+**Lý do.** Đổi model chữa được đúng ca đã thấy (một model quá tải, model khác vẫn chạy) với ít code nhất. Model lite đứng đầu vì nhanh và dư quota, còn model lớn chỉ dùng khi cả hai bản lite cùng hỏng. 8 giây mỗi lần là đủ cho model khỏe nhưng cắt sớm model đang treo; ghi model hỏng vào cache để các tin nhắn sau không phải chờ lại 8 giây đó.
+
+**Hệ quả.**
+- Host chạy một worker nên cache mặc định trong bộ nhớ (LocMemCache) là đủ; thêm worker thì mỗi worker tự nhớ riêng, chỉ tốn thêm vài lần thử, không sai.
+- Câu báo hết quota bỏ con số "500 tin nhắn mỗi ngày", vì quota giờ là tổng của bốn model. Câu này chỉ hiện khi model thử cuối cùng báo 429.
+- Câu trả lời có thể đến từ model khác nhau giữa các tin nhắn; giọng văn có thể khác đôi chút. Log server ghi model nào hỏng.
+- SRS UC-15, SDD §4.2 viết lại theo cách làm này; test ở `store_api/tests/test_gemini_fallback.py`. Muốn đổi thứ tự hay thêm model thì sửa `GEMINI_MODELS` và đo lại.
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

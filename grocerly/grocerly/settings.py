@@ -305,5 +305,8 @@ LOGGING = {
         # the order (L-34). It still passes them up to the root logger, which has
         # no handler here, so each line prints once.
         'core': {'handlers': ['console'], 'level': 'INFO'},
+        # Which Gemini model failed and why, when the assistant moves to the
+        # next one (D-060).
+        'store_api': {'handlers': ['console'], 'level': 'INFO'},
     },
 }

@@ -173,8 +173,14 @@ theo đúng thứ tự kiểm trong code: `99`, `97`, `01`, `04`, `02`, `00`.
 Mỗi tin nhắn là một request `POST /api/v1/chat/` mang theo lịch sử lưu ở
 `sessionStorage`; server không lưu hội thoại. `ai_chat` cho Gemini gọi tối đa ba
 công cụ nối nhau trong một tin nhắn (L-30). Mọi lời gọi Gemini, cả tin nhắn lẫn từng
-câu trả lời công cụ, đi qua `ask_gemini`: thời hạn 20 giây, không tự gọi lại (D-051).
-Quá hạn hay Gemini báo quá tải thì lỗi rơi vào câu báo trục trặc kết nối. Tìm kiếm
+câu trả lời công cụ, đi qua `GeminiChat.send` (D-060). Hàm thử lần lượt các model trong
+`GEMINI_MODELS` (3.5 flash lite, 3.1 flash lite, 3.6 flash, 3.5 flash), mỗi lần tối đa
+8 giây và không để thư viện tự gọi lại. Model báo quá tải (503), hết quota (429), lỗi
+500 hay quá hạn thì được ghi vào cache 5 phút và bỏ qua ở các tin nhắn sau; chat mở lại
+trên model kế tiếp với lịch sử của chat cũ, rồi gửi lại đúng phần vừa hỏng, nên vòng
+công cụ đi tiếp bình thường. Lỗi khác (sai tên model, sai key) dừng ngay. Cả tin nhắn
+có mốc 25 giây, xong trước mốc 30 giây của gunicorn; hết mốc hay hết model thì lỗi
+cuối rơi vào câu báo trục trặc kết nối hoặc câu báo hết quota. Tìm kiếm
 chạy ngay trên server, còn
 `request_add_to_cart` chỉ kiểm sản phẩm, tồn kho và số đã có trong giỏ (`cart_problem`)
 rồi trả một đề nghị, giỏ chưa đổi gì. Đề nghị có hai dạng (D-048):

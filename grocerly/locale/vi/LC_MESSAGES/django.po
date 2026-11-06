@@ -1768,11 +1768,11 @@ msgstr ""
 "không, hay tìm thêm món khác?"
 
 msgid ""
-"🛑 The AI assistant has used up its free quota (500 messages a day). Please "
-"come back tomorrow!"
+"🛑 The AI assistant has used up its free quota for today. Please come back "
+"tomorrow!"
 msgstr ""
-"🛑 Hệ thống AI đã hết lượt sử dụng miễn phí (giới hạn 500 tin nhắn/ngày). Vui "
-"lòng quay lại vào ngày mai!"
+"🛑 Hệ thống AI đã hết lượt sử dụng miễn phí của hôm nay. Vui lòng quay lại "
+"vào ngày mai!"
 
 #. Django's own msgid; its vi catalog lacks it (L-57)
 msgid "This password is too short. It must contain at least %d character."

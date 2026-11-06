@@ -383,9 +383,11 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-15:** chữ cố định của khung chat (lời chào, nút bấm, câu hỏi xác nhận, câu
   báo lỗi) hiện theo ngôn ngữ của trang đang mở, như mọi chữ khác trên trang. Lời AI
   tự sinh không thuộc ràng buộc này (L-15, D-035).
-- **UC-15:** Gemini quá tải hay không trả lời trong 20 giây thì khung chat nhận câu
-  báo trục trặc kết nối chứ không nhận lỗi máy chủ, và khách gửi lại được (L-37,
-  D-051).
+- **UC-15:** một model Gemini quá tải, hết quota hay không trả lời trong 8 giây thì
+  trợ lý chuyển sang model kế tiếp trong danh sách bốn model, khách vẫn nhận câu trả
+  lời. Cả bốn đều hỏng, hoặc tin nhắn đã tốn 25 giây, thì khung chat nhận câu báo
+  trục trặc kết nối (hay câu báo hết quota) chứ không nhận lỗi máy chủ, và khách gửi
+  lại được (L-37, D-051, D-060).
 - **UC-18:** giỏ trống, kể cả giỏ vừa bị xóa hết hàng, thì AI nhắc thêm hàng chứ
   không đưa nút thanh toán (L-41).
 
