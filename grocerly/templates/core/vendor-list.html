@@ -38,7 +38,7 @@
                                     </a>
                                 </div>
                                 <div class="mt-10">
-                                    <span class="font-small total-product">{% blocktrans trimmed count counter=v.products.all.count %}{{ counter }} product{% plural %}{{ counter }} products{% endblocktrans %}</span>
+                                    <span class="font-small total-product">{% blocktrans trimmed count counter=v.on_sale_products.count %}{{ counter }} product{% plural %}{{ counter }} products{% endblocktrans %}</span>
                                 </div>
                             </div>
                             <div class="vendor-content-wrap">

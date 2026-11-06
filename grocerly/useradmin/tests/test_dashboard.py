@@ -79,3 +79,16 @@ def test_shop_page_links_each_product_to_its_edit_page(staff_client, staff, prod
 
     assert reverse("useradmin:dashboard-edit-products", args=[product.p_id]) in page
     assert reverse("core:product-detail", args=[product.p_id]) not in page
+
+
+def test_product_list_links_each_product_to_its_edit_page(staff_client, product):
+    """Review of PR #24: /useradmin/products/ linked every product, drafts included, to
+    the customer product page, which sends staff away and since L-66 answers 404 for a
+    product off sale. Same fix as the store page above."""
+    product.product_status = "draft"
+    product.save()
+
+    page = staff_client.get(reverse("useradmin:dashboard-products")).content.decode()
+
+    assert reverse("useradmin:dashboard-edit-products", args=[product.p_id]) in page
+    assert reverse("core:product-detail", args=[product.p_id]) not in page

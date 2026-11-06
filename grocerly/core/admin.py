@@ -88,6 +88,17 @@ class CartOrderAdmin(admin.ModelAdmin):
         # A cancelled order keeps its row with the status 'cancelled' (D-033).
         return False
 
+    def has_add_permission(self, request):
+        # Orders come from checkout only (UC-09).
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Read-only (UC-25, L-69): the status, the paid flag and the price change only
+        # through the staff page, which moves an order one step at a time and takes
+        # the stock once (D-026, D-032, D-033). The page still opens, Django shows it
+        # without a Save button and refuses a change sent anyway.
+        return False
+
     def customer_type(self, obj):
         return "Registered" if obj.user else "Guest"
 
@@ -113,6 +124,13 @@ class CartOrderItemsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         # An order line is part of the order: deleting it would change an order that
         # must stay as it was paid (L-40, UC-25), same rule as CartOrderAdmin.
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        # Read-only for the same reason as CartOrderAdmin (L-69).
         return False
 
     def order_oid(self, obj):

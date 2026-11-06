@@ -1,5 +1,5 @@
 """
-The staff profile page /useradmin/settings/ (CN-23: the staff updates their own
+The staff profile page /useradmin/settings/ (CN-32: the staff updates their own
 profile). SRS.md has no use case for it yet; UC-11 covers the customer's page.
 """
 

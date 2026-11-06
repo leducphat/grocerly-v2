@@ -7,7 +7,7 @@
             <div class="container">
                 <div class="breadcrumb">
                     <a href="{% url 'core:index' %}" rel="nofollow"><i class="fi-rs-home mr-5"></i>{% trans "Home" %}</a>
-                    {% if p.category %}<span></span> <a href="{% url 'core:category-product-list' p.category.c_id %}">{{ p.category.title }}</a>{% endif %} <span></span> {{ p.title|truncatechars:30 }}
+                    {% if p.category and not p.category.is_deleted %}<span></span> <a href="{% url 'core:category-product-list' p.category.c_id %}">{{ p.category.title }}</a>{% endif %} <span></span> {{ p.title|truncatechars:30 }}
                 </div>
             </div>
         </div>
@@ -332,7 +332,7 @@
                                 <ul>
                                     {% for c in categories %}
                                     <li>
-                                        <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="" />{{ c.title }}</a><span class="count">{{ c.products.count }}</span>
+                                        <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="" />{{ c.title }}</a><span class="count">{{ c.on_sale_products.count }}</span>
                                     </li>
                                     {% endfor %}
                                 </ul>

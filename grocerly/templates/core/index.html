@@ -72,7 +72,7 @@
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
-                                                    {% if p.category %}
+                                                    {% if p.category and not p.category.is_deleted %}
                                                     <a href="{% url 'core:category-product-list' p.category.c_id %}">{{ p.category.title }}</a>
                                                     {% endif %}
                                                 </div>
@@ -107,7 +107,7 @@
                             {% for c in categories %}
                             <div class="tab-pane fade" id="tab-{{ c.c_id }}" role="tabpanel" aria-labelledby="tab-{{ c.c_id }}">
                                 <div class="row product-grid-4">
-                                    {% for p in c.products.all %}
+                                    {% for p in c.on_sale_products %}
                                     <div class="col-lg-1-5 col-md-4 col-12 col-sm-6">
                                         <div class="product-cart-wrap mb-30">
                                             <div class="product-img-action-wrap">
@@ -260,7 +260,7 @@
                         <ul>
                             {% for c in categories %}
                             <li>
-                                <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="{{ c.title }}" />{{ c.title }}</a><span class="count">{{ c.products.count }}</span>
+                                <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{ c.image.url }}" alt="{{ c.title }}" />{{ c.title }}</a><span class="count">{{ c.on_sale_products.count }}</span>
                             </li>
                             {% endfor %}
                         </ul>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator, MinValueValidator
 from shortuuid.django_fields import ShortUUIDField
 from django.utils.html import format_html
 from userauths.models import User
@@ -154,8 +155,10 @@ class Category(SoftDeleteModel):
     def category_image(self):
         return format_html('<img src="{}" width="50" height="50" />', self.image.url)
 
-    def product_count(self):
-        return Product.objects.filter(category=self).count()
+    def on_sale_products(self):
+        # self.products also holds drafts and products the admin turned off; the
+        # customer's pages list and count only the published ones (L-66).
+        return self.products.filter(product_status='published').order_by('-id')
 
 
 class Tag(models.Model):
@@ -190,6 +193,10 @@ class Vendor(SoftDeleteModel):
 
     def vendor_image(self):
         return format_html('<img src="{}" width="50" height="50" />', self.image.url)
+
+    def on_sale_products(self):
+        # Same rule as Category.on_sale_products (L-66).
+        return self.products.filter(product_status='published').order_by('-id')
 
     def soft_delete(self):
         """Soft-delete this vendor and all their products."""
@@ -416,7 +423,9 @@ class Address(models.Model):
 
 class Coupon(SoftDeleteModel):
     code = models.CharField(max_length=1000)
-    discount = models.IntegerField(default=1)
+    # Percent taken off the order at checkout. Outside 1-100 the order price went
+    # negative or did not drop at all; the admin form now refuses it (L-68).
+    discount = models.IntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(100)])
     active = models.BooleanField(default=True)
 
     def __str__(self):

@@ -75,7 +75,7 @@
                             </div>
                             <div class="product-content-wrap">
                                 <div class="product-category">
-                                    {% if p.category %}
+                                    {% if p.category and not p.category.is_deleted %}
                                     <a href="{% url 'core:category-product-list' p.category.c_id %}">{{p.category.title}}</a>
                                     {% endif %}
                                 </div>
@@ -114,7 +114,7 @@
                         <ul>
                             {% for c in categories %}
                             <li>
-                                <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{c.image.url}}" alt="" />{{c.title}}</a><span class="count">{{c.products.all.count}}</span>
+                                <a href="{% url 'core:category-product-list' c.c_id %}"> <img src="{{c.image.url}}" alt="" />{{c.title}}</a><span class="count">{{c.on_sale_products.count}}</span>
                             </li>
                             {% endfor %}
                         </ul>

@@ -1,5 +1,5 @@
 """
-The staff change-password page /useradmin/change_password/ (CN-23). SRS.md has no
+The staff change-password page /useradmin/change_password/ (CN-32). SRS.md has no
 use case for it; the default is the customer's page (CN-12, UC-11), which uses
 Django's PasswordChangeForm (L-51).
 """

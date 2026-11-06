@@ -46,7 +46,7 @@ class AddProductForm(forms.ModelForm):
 
 
 class StaffProfileForm(forms.ModelForm):
-    """The staff settings page (CN-23, L-45, L-50, D-055).
+    """The staff settings page (CN-32, L-45, L-50, D-055).
 
     A ModelForm checks the length of each box against its column, and an empty box
     is saved as empty (None), not as the word "None". The image box left empty keeps
