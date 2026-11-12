@@ -2637,7 +2637,7 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 4. *Như 3, và bỏ mặc định "1 kg" ở model.* Thêm một migration, nhưng sản phẩm tạo ở Django admin hay ở bất cứ đường nào bỏ qua trường này cũng không bị gán một khối lượng bịa ra.
 5. *Như 4, bỏ luôn mặc định câu bảo quản.* Trang chi tiết phải in "chưa có thông tin" khi để trống.
 
-**Quyết định.** Phương án 4, sinh viên chọn ngày 12/11/2026. Mặc định câu bảo quản giữ nguyên vì nó đúng với phần lớn hàng khô, và từ nay nhân viên sửa được cho hàng cần giữ lạnh.
+**Quyết định.** Phương án 4, sinh viên chọn ngày 12/11/2026. Mặc định câu bảo quản giữ nguyên vì nó đúng với phần lớn hàng khô, và từ nay nhân viên sửa được cho hàng cần giữ lạnh. Ô khai báo tường minh trong form không tự lấy mặc định của model, nên ô bảo quản ở trang thêm được điền sẵn câu mặc định; để trống thì sản phẩm lưu chuỗi rỗng và trang chi tiết in "Bảo quản:" không có gì.
 
 **Lý do.** Chỗ hỏng là trang thiếu ô, nên sửa ở template; cái mặc định "1 kg" là thứ biến chỗ hỏng đó thành dữ liệu sai, nên bỏ đi. Không có khối lượng thì trợ lý dựa vào tên hàng, mà tên hàng thường đã ghi kích cỡ.
 

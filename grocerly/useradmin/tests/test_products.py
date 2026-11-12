@@ -220,7 +220,19 @@ def test_edit_page_shows_the_current_weight_and_storage(staff_client, stocked_pr
     assert 'value="Giữ lạnh 0 - 4 °C"' in html
 
 
+def test_add_page_offers_the_default_storage_text(staff_client):
+    """The shop keeps "Bảo quản nơi khô ráo, thoáng mát" as the usual text (D-063).
+    Shown in the box, it stays unless the staff changes it; an empty box would
+    save an empty text and the product page would show nothing after "Storage:"."""
+    default = Product._meta.get_field("storage_instructions").default
+
+    html = staff_client.get(reverse(ADD_URL)).content.decode()
+
+    assert f'value="{default}"' in html
+
+
 def test_add_product_saves_the_weight_ingredients_and_storage_typed(staff_client, category, vendor):
+    """Saving worked before L-71 too, when the values were sent; this keeps it so."""
     form = product_form(category, vendor, weight_volume="hộp 300 g",
                         ingredients="Cà chua bi", storage_instructions="Giữ lạnh 0 - 4 °C")
 
