@@ -1642,3 +1642,9 @@ msgid ""
 "🛑 The AI assistant has used up its free quota for today. Please come back "
 "tomorrow!"
 msgstr ""
+
+msgid "Weight or volume"
+msgstr ""
+
+msgid "Storage instructions"
+msgstr ""

@@ -2593,6 +2593,59 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 - COMMITMENT §2: sáu chức năng trước đây "chưa có UC" (CN-03, 07, 23, 29, 30, 32) nay có mã UC.
 - Test viết từ nay ghi mã AC trong docstring. Test cũ chưa được rà để gắn mã AC, cũng chưa đối chiếu tiêu chí nào còn thiếu test.
 
+## D-062 · Đo độ chính xác của trợ lý AI bằng một script riêng, Gemini thật, danh mục hàng cố định trong SQLite bộ nhớ
+
+- **Ngày:** 12/11/2026
+- **Trạng thái:** Đã chốt; sinh viên duyệt ngày 12/11/2026
+
+**Bối cảnh.** P-42 phần (d): cần một con số cho KPI của bản cam kết (COMMITMENT §5.2), là tỉ lệ trợ lý AI đề nghị đúng sản phẩm và đúng số lượng trên khoảng 20 - 30 câu mẫu. D-048 đã để sẵn dữ liệu cho việc này: câu trả lời của `/api/v1/chat/` ghi `action`, `pid`, `qty` (AC-17.5). Hai ràng buộc có sẵn: không test nào gọi dịch vụ thật (`CLAUDE.md` §8), và không lệnh nào được chạm vào database chưa xác nhận (D-002). Muốn đo Gemini thì buộc phải gọi Gemini thật.
+
+**Phương án đã cân nhắc**
+1. *Gửi câu mẫu tới host `grocerly-v2` qua HTTP.* Đo đúng bản đang chạy, nhưng host chỉ có 7 sản phẩm do nhân viên quản lý, đổi lúc nào không biết, không có cặp sản phẩm gần giống nhau để thử AC-17.3 và không có hàng hết kho; muốn có thì phải tạo dữ liệu thử trên production rồi dọn.
+2. *Viết thành test pytest có marker riêng, giống `e2e`.* Dùng lại fixture, nhưng phá quy tắc "test không gọi dịch vụ thật", và mỗi câu Gemini trả lời khác đi là bộ test đỏ, trong khi mục đích ở đây là đếm tỉ lệ chứ không phải đạt hay trượt.
+3. *Lệnh `manage.py`.* Dễ gọi, nhưng chạy với `grocerly.settings`, tức database trong `.env`.
+4. *Script riêng `grocerly/ai_eval/run_eval.py`, ngoài `testpaths` của pytest.* Script tự ép `grocerly.settings_test`, dừng nếu database không phải SQLite bộ nhớ, dựng danh mục 14 sản phẩm của `cases.py`, rồi gửi từng câu qua Django test client tới đúng view mà khung chat gọi. Khóa Gemini lấy từ biến môi trường, hoặc đọc riêng một dòng `GEMINI_API_KEY` trong `.env`.
+
+**Quyết định.** Phương án 4.
+- 30 câu, tám nhóm: rõ sản phẩm và số lượng (6), số lượng viết bằng chữ (4), tiếng Anh (3), tên hàng chung chung kiểu "thịt bò" (3), số lượng trên 10 (2), nhiều sản phẩm cùng khớp (3), không được thêm gì (6: hết hàng, hàng ẩn, hàng không bán, vượt kho, hai câu chỉ hỏi), hai lượt hội thoại (3).
+- Mỗi câu có một đáp án: thêm sản phẩm nào với số lượng bao nhiêu, cho khách chọn giữa những sản phẩm nào, hoặc không đề nghị gì. Câu nhiều sản phẩm cùng khớp tính là đạt khi máy chủ hiện nút chọn đúng các sản phẩm đó, hoặc khi Gemini liệt kê và hỏi bằng lời mà không đề nghị gì; cả hai cách đều không tự chọn thay khách.
+- Chỉ so dữ liệu, không đọc câu chữ. Ngoài tỉ lệ đúng, script đếm riêng *đề nghị sai*: trượt mà vẫn có nút, tức khách thấy sai sản phẩm hay sai số lượng. Trượt vì Gemini hỏi lại bằng lời thì không có nút nào sai.
+- Trợ lý chạy y như trên host, gồm cả chuyển model của D-060; script chỉ ghi lại model nào trả lời từng câu. Câu nào cả bốn model đều không trả lời thì chờ 60 giây thử lại một lần, vẫn không được thì không tính vào mẫu số.
+- Giữa hai tin nhắn nghỉ 12 giây, vì gói miễn phí cho 15 lượt gọi một phút mỗi model và một tin nhắn tốn 2 - 3 lượt.
+- Mỗi lượt chạy lưu `ai_eval/results/<ngày_giờ>.json`, gồm câu hỏi, đáp án, kết quả, model và câu trả lời, để đối chiếu về sau.
+
+**Lý do.** Danh mục cố định thì lần đo nào cũng trên cùng một đề, và có đủ các ca khó cố ý đặt vào. SQLite bộ nhớ thì không có gì để dọn và không có đường nào chạm production. Đi qua view thật nên mọi phép kiểm của máy chủ (D-048) đều có trong kết quả, đúng thứ khách nhận được. Để script ngoài pytest thì bộ test thường vẫn giữ nguyên quy tắc không gọi dịch vụ thật.
+
+**Hệ quả.**
+- Không chạy trong CI. Kết quả là những lượt chạy tay có ngày giờ, mỗi lượt khoảng 9 phút và 70 - 90 lượt gọi Gemini trên khóa KLTN, chung quota ngày với host.
+- Gemini trả lời không giống nhau giữa các lần, nên KPI ghi theo nhiều lượt, không theo một lượt.
+- Danh mục có `weight_volume` cho từng sản phẩm. Lượt chạy thử đầu tiên quên trường này, mọi sản phẩm mang mặc định "1 kg", và Gemini báo giá dưa hấu "45.000 VND/kg"; lượt đó không được tính.
+- Đáp án do người viết bộ câu đặt ra. Câu B3 "Lấy một chục hộp trứng gà" có đáp án 10 hộp, nhưng sản phẩm là "hộp 10 quả", nên Gemini hiểu thành 1 hộp mười quả; câu được giữ nguyên vì khách nói như thế là chuyện có thật.
+- Đối chiếu trên host ngày 12/11/2026: 12 câu hợp với danh mục của host, chỉ chat, không bấm xác nhận, 12/12 đạt. Con số này để cho thấy host trả lời như local, không thay KPI đo trên danh mục cố định. Lượt đó cũng cho thấy `weight_volume` trên host đều là "1 kg" mặc định, đúng lỗi mà danh mục thử từng mắc (L-71, D-063).
+
+## D-063 · Trang sản phẩm của nhân viên in ô khối lượng, thành phần, bảo quản; khối lượng không còn mặc định "1 kg"
+
+- **Ngày:** 12/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-71: ba trường có trong model và form từ TLCN nhưng trang thêm, sửa sản phẩm không in ô của chúng, nên mọi sản phẩm mang mặc định của model. Trên host cả 7 sản phẩm là "1 kg", và trợ lý AI báo giá dưa hấu theo kg (P-42 phần d). Câu bảo quản mặc định "nơi khô ráo, thoáng mát" hiện cho khách ở cả đùi bò và chân giò heo.
+
+**Phương án đã cân nhắc**
+1. *Chỉ sửa dữ liệu trên host.* Không đụng code, nhưng nhân viên vẫn không có ô để sửa, sản phẩm thêm sau lại "1 kg".
+2. *Thôi gửi `weight_volume` cho Gemini.* Hết báo sai đơn vị, nhưng trợ lý mất thông tin khi dữ liệu đúng.
+3. *In ba ô trên hai trang.* Form đã có sẵn trường, chỉ thiếu phần template. Nhân viên nhập được, để trống thì lưu rỗng.
+4. *Như 3, và bỏ mặc định "1 kg" ở model.* Thêm một migration, nhưng sản phẩm tạo ở Django admin hay ở bất cứ đường nào bỏ qua trường này cũng không bị gán một khối lượng bịa ra.
+5. *Như 4, bỏ luôn mặc định câu bảo quản.* Trang chi tiết phải in "chưa có thông tin" khi để trống.
+
+**Quyết định.** Phương án 4, sinh viên chọn ngày 12/11/2026. Mặc định câu bảo quản giữ nguyên vì nó đúng với phần lớn hàng khô, và từ nay nhân viên sửa được cho hàng cần giữ lạnh.
+
+**Lý do.** Chỗ hỏng là trang thiếu ô, nên sửa ở template; cái mặc định "1 kg" là thứ biến chỗ hỏng đó thành dữ liệu sai, nên bỏ đi. Không có khối lượng thì trợ lý dựa vào tên hàng, mà tên hàng thường đã ghi kích cỡ.
+
+**Hệ quả.**
+- Migration `core/0012` chỉ đổi mặc định trong trạng thái model của Django. Cột vẫn cho phép rỗng và không có `db_default`, nên trên PostgreSQL Django không sinh câu SQL nào (đã đọc `_alter_field` của Django 5.2); trên SQLite của bộ test nó dựng lại bảng như mọi lần đổi cột.
+- Dữ liệu cũ không tự đổi: 7 sản phẩm trên host vẫn "1 kg" tới khi nhân viên sửa qua trang sửa sản phẩm sau deploy.
+- `ingredients` vẫn chưa hiện ở trang nào của khách, chỉ có trong API; thêm vào trang chi tiết là việc khác, chưa làm.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

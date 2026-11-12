@@ -235,7 +235,9 @@ class Product(SoftDeleteModel):
     old_price = models.DecimalField(max_digits=20, decimal_places=2, default=0.00)
 
     specification = models.TextField(null=True, blank=True, default="")
-    weight_volume = models.CharField(max_length=100, null=True, blank=True, default="1 kg")
+    # No default: "1 kg" used to be written on every product, a can or a bunch of
+    # greens alike, and the AI assistant quoted prices per kg from it (L-71, D-063).
+    weight_volume = models.CharField(max_length=100, null=True, blank=True)
     ingredients = models.TextField(null=True, blank=True, default="")
     storage_instructions = models.CharField(max_length=255, null=True, blank=True, default="Bảo quản nơi khô ráo, thoáng mát")
     stock_count = models.IntegerField(default=0, null=True, blank=True)

@@ -164,6 +164,7 @@ grocerly-ecom/
     ├── core/                 # catalog, giỏ hàng, đơn hàng, checkout, VNPay, đánh giá
     ├── userauths/            # User tùy biến (đăng nhập bằng email), Profile, ContactUs
     ├── useradmin/            # dashboard nhân viên cửa hàng (khác Django admin)
+    ├── ai_eval/              # bộ câu thử độ chính xác trợ lý AI, Gemini thật, chạy tay (D-062)
     ├── store_api/            # DRF endpoints + chat AI Gemini  (/api/v1/)
     ├── templates/            # core/, userauths/, useradmin/, partials/
     ├── static/, media/, locale/   # assets, file upload, bản dịch vi+en
@@ -249,6 +250,7 @@ pytest --cov                        # kèm báo cáo độ phủ
 pytest -m e2e --browser-channel chrome   # test trình duyệt (D-042); CI dùng Chromium
 ruff check .                        # lint theo ruff.toml; --fix sửa được phần tự động
 jscpd .                             # tỉ lệ trùng lặp mã Python theo .jscpd.json
+python ai_eval/run_eval.py          # đo trợ lý AI trên 30 câu mẫu, gọi Gemini thật (D-062)
 
 django-admin makemessages -l vi -l en   # trích chuỗi i18n
 django-admin compilemessages            # biên dịch .po -> .mo

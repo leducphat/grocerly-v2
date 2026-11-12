@@ -284,6 +284,9 @@ có mã AC-x.y để test dẫn tới.
 - **UC-14:** gửi đánh giá xong khách vẫn ở trang sản phẩm và thấy câu báo; đánh giá bị
   từ chối thì câu lỗi hiện ngay trên trang (L-49).
 - **UC-19:** giá bán, giá cũ và số lượng trong kho không được âm (L-53).
+- **UC-19:** trang thêm và trang sửa sản phẩm có ô khối lượng hoặc thể tích, thành phần và
+  cách bảo quản. Để trống ô khối lượng thì sản phẩm không có khối lượng, không bị gán "1 kg";
+  trợ lý AI đọc khối lượng từ đây khi báo giá (L-71).
 - **Đổi mật khẩu nhân viên (CN-32):** cùng quy tắc với trang của khách: ô che chữ, mật
   khẩu mới phải qua bộ kiểm mật khẩu của Django, đổi xong vẫn đăng nhập (L-51).
 - **UC-03, UC-19:** sản phẩm còn sót lại không có danh mục hay nhà cung cấp vẫn bán
