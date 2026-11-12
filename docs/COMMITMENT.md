@@ -50,8 +50,8 @@ Cột **Hiện trạng**:
 - `Lệch (L-x)` — có, nhưng hành vi đang khác đặc tả vì lỗi L-x chưa xử lý. Chi
   tiết từng lỗi, kể cả lỗi đã sửa, ở [`ISSUES.md`](ISSUES.md).
 
-Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi viết acceptance criteria
-ở P-23.
+Hành vi chi tiết của từng chức năng là acceptance criteria của use case tương ứng,
+ở [`SRS.md`](SRS.md) §6.2 và §6.3 (P-23, D-061).
 
 ### 2.1 Khách vãng lai và Khách hàng — cửa hàng trực tuyến
 
@@ -59,12 +59,12 @@ Hành vi chi tiết của từng chức năng sẽ được kiểm lại khi vi�
 |---|---|---|---|
 | CN-01 | Đăng ký tài khoản bằng email | UC-01 | Có |
 | CN-02 | Đăng nhập | UC-02 | Có |
-| CN-03 | Quên mật khẩu — đặt lại qua email | *(chưa có UC)* | Có |
+| CN-03 | Quên mật khẩu — đặt lại qua email | UC-27 | Có |
 | CN-31 | Đăng xuất (tách khỏi CN-02 ngày 06/11/2026, D-058) | UC-10 | Có |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
-| CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | *(chưa có UC)* | Có |
+| CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | UC-28 | Có |
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
@@ -94,8 +94,8 @@ doanh số thật.*
 | CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
 | CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Có |
 | CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | Có |
-| CN-23 | Xem danh sách đánh giá | *(chưa có UC)* | Có |
-| CN-32 | Cập nhật hồ sơ và đổi mật khẩu nhân viên (tách khỏi CN-23 ngày 06/11/2026, D-058) | *(chưa có UC)* | Có |
+| CN-23 | Xem danh sách đánh giá | UC-29 | Có |
+| CN-32 | Cập nhật hồ sơ và đổi mật khẩu nhân viên (tách khỏi CN-23 ngày 06/11/2026, D-058) | UC-30 | Có |
 
 ### 2.4 Quản trị viên — Django admin
 
@@ -106,8 +106,8 @@ doanh số thật.*
 | CN-26 | Quản lý danh mục: thêm, sửa, xóa mềm và khôi phục | UC-23 | Có |
 | CN-27 | Quản lý toàn bộ sản phẩm: đổi trạng thái hiển thị, xóa mềm và khôi phục | UC-24 | Có |
 | CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Có |
-| CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | *(chưa có UC)* | Có |
-| CN-30 | Xem hộp thư liên hệ | *(chưa có UC)* | Có |
+| CN-29 | Quản lý nhà cung cấp: thêm, sửa, xóa mềm và khôi phục | UC-31 | Có |
+| CN-30 | Xem hộp thư liên hệ | UC-32 | Có |
 
 **Tổng: 32 chức năng**, mỗi chức năng ứng với đúng một use case. Trước ngày 06/11/2026
 danh sách có 30 chức năng; CN-02 và CN-23 khi đó mỗi mục gộp hai use case, nay tách
@@ -122,7 +122,7 @@ về `Có` sau khi sửa L-43 (P-44).
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
-sẽ bổ sung UC ở P-23.
+báo cáo KLTN mục 3.2 bổ sung sáu use case đó, trong repo mang mã UC-27 → UC-32 (D-061).
 
 ---
 

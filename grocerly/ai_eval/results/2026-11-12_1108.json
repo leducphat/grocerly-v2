@@ -1,0 +1,718 @@
+{
+  "started": "2026-11-12T11:08",
+  "passed": 28,
+  "measured": 30,
+  "rate": 93.3,
+  "wrong_proposals": 1,
+  "cases": [
+    {
+      "id": "A1",
+      "group": "A",
+      "messages": [
+        "Thêm 2 hộp sữa tươi Vinamilk vào giỏ"
+      ],
+      "expect": [
+        "add",
+        "sua_vinamilk",
+        2
+      ],
+      "got": [
+        "add",
+        "sua_vinamilk",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **2x Sữa tươi Vinamilk không đường 1L** vào giỏ hàng không? Đơn giá 36.000 ₫, thành tiền **72.000 ₫**."
+    },
+    {
+      "id": "A2",
+      "group": "A",
+      "messages": [
+        "Cho tôi 1 quả dưa hấu"
+      ],
+      "expect": [
+        "add",
+        "dua_hau",
+        1
+      ],
+      "got": [
+        "add",
+        "dua_hau",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Dưa hấu Long An** vào giỏ hàng không? Đơn giá 45.000 ₫, thành tiền **45.000 ₫**."
+    },
+    {
+      "id": "A3",
+      "group": "A",
+      "messages": [
+        "Mua 3 hộp cà chua bi"
+      ],
+      "expect": [
+        "add",
+        "ca_chua",
+        3
+      ],
+      "got": [
+        "add",
+        "ca_chua",
+        3
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **3x Cà chua bi 300g** vào giỏ hàng không? Đơn giá 22.000 ₫, thành tiền **66.000 ₫**."
+    },
+    {
+      "id": "A4",
+      "group": "A",
+      "messages": [
+        "Thêm gạo ST25 vào giỏ giúp mình"
+      ],
+      "expect": [
+        "add",
+        "gao",
+        1
+      ],
+      "got": [
+        "add",
+        "gao",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Gạo ST25 túi 5kg** vào giỏ hàng không? Đơn giá 185.000 ₫, thành tiền **185.000 ₫**."
+    },
+    {
+      "id": "A5",
+      "group": "A",
+      "messages": [
+        "Lấy 2 chai nước mắm Phú Quốc"
+      ],
+      "expect": [
+        "add",
+        "nuoc_mam",
+        2
+      ],
+      "got": [
+        "add",
+        "nuoc_mam",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **2x Nước mắm Phú Quốc 500ml** vào giỏ hàng không? Đơn giá 65.000 ₫, thành tiền **130.000 ₫**."
+    },
+    {
+      "id": "A6",
+      "group": "A",
+      "messages": [
+        "Bỏ vào giỏ 5 kg chuối"
+      ],
+      "expect": [
+        "add",
+        "chuoi",
+        5
+      ],
+      "got": [
+        "add",
+        "chuoi",
+        5
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **5x Chuối già Nam Mỹ 1kg** vào giỏ hàng không? Đơn giá 28.000 ₫, thành tiền **140.000 ₫**."
+    },
+    {
+      "id": "B1",
+      "group": "B",
+      "messages": [
+        "Cho mình ba hộp trứng gà"
+      ],
+      "expect": [
+        "add",
+        "trung",
+        3
+      ],
+      "got": [
+        "add",
+        "trung",
+        3
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **3x Trứng gà ta hộp 10 quả** vào giỏ hàng không? Đơn giá 42.000 ₫, thành tiền **126.000 ₫**."
+    },
+    {
+      "id": "B2",
+      "group": "B",
+      "messages": [
+        "Thêm hai cái bắp cải"
+      ],
+      "expect": [
+        "add",
+        "bap_cai",
+        2
+      ],
+      "got": [
+        "add",
+        "bap_cai",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **2x Bắp cải trắng 1kg** vào giỏ hàng không? Đơn giá 18.000 ₫, thành tiền **36.000 ₫**."
+    },
+    {
+      "id": "B3",
+      "group": "B",
+      "messages": [
+        "Lấy một chục hộp trứng gà"
+      ],
+      "expect": [
+        "add",
+        "trung",
+        10
+      ],
+      "got": [
+        "add",
+        "trung",
+        1
+      ],
+      "measured": true,
+      "passed": false,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Trứng gà ta hộp 10 quả** vào giỏ hàng không? Đơn giá 42.000 ₫, thành tiền **42.000 ₫**."
+    },
+    {
+      "id": "B4",
+      "group": "B",
+      "messages": [
+        "Thêm một tá hộp sữa Vinamilk"
+      ],
+      "expect": [
+        "add",
+        "sua_vinamilk",
+        12
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": false,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Xin lỗi bạn, hiện tại tôi chỉ tìm thấy sản phẩm \"Sữa tươi Vinamilk không đường 1L\" với giá 36.000 VND/hộp. Bạn có muốn mua 12 hộp loại này không? Nếu có, tôi sẽ thêm vào giỏ hàng giúp bạn."
+    },
+    {
+      "id": "C1",
+      "group": "C",
+      "messages": [
+        "Add 2 watermelons to my cart"
+      ],
+      "expect": [
+        "add",
+        "dua_hau",
+        2
+      ],
+      "got": [
+        "add",
+        "dua_hau",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Would you like to add **2x Dưa hấu Long An** to your cart? Unit price 45.000 ₫, total **90.000 ₫**."
+    },
+    {
+      "id": "C2",
+      "group": "C",
+      "messages": [
+        "Please add 3 boxes of eggs to my cart"
+      ],
+      "expect": [
+        "add",
+        "trung",
+        3
+      ],
+      "got": [
+        "add",
+        "trung",
+        3
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Would you like to add **3x Trứng gà ta hộp 10 quả** to your cart? Unit price 42.000 ₫, total **126.000 ₫**."
+    },
+    {
+      "id": "C3",
+      "group": "C",
+      "messages": [
+        "Add one bag of ST25 rice"
+      ],
+      "expect": [
+        "add",
+        "gao",
+        1
+      ],
+      "got": [
+        "add",
+        "gao",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Would you like to add **1x Gạo ST25 túi 5kg** to your cart? Unit price 185.000 ₫, total **185.000 ₫**."
+    },
+    {
+      "id": "D1",
+      "group": "D",
+      "messages": [
+        "Có bán bò không? Lấy 1 phần nhé"
+      ],
+      "expect": [
+        "add",
+        "dui_bo",
+        1
+      ],
+      "got": [
+        "add",
+        "dui_bo",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Đùi bò Úc 150g** vào giỏ hàng không? Đơn giá 89.000 ₫, thành tiền **89.000 ₫**."
+    },
+    {
+      "id": "D2",
+      "group": "D",
+      "messages": [
+        "Thêm 2 phần thịt bò vào giỏ"
+      ],
+      "expect": [
+        "add",
+        "dui_bo",
+        2
+      ],
+      "got": [
+        "add",
+        "dui_bo",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **2x Đùi bò Úc 150g** vào giỏ hàng không? Đơn giá 89.000 ₫, thành tiền **178.000 ₫**."
+    },
+    {
+      "id": "D3",
+      "group": "D",
+      "messages": [
+        "Mua 1 kg trái chuối"
+      ],
+      "expect": [
+        "add",
+        "chuoi",
+        1
+      ],
+      "got": [
+        "add",
+        "chuoi",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Chuối già Nam Mỹ 1kg** vào giỏ hàng không? Đơn giá 28.000 ₫, thành tiền **28.000 ₫**."
+    },
+    {
+      "id": "E1",
+      "group": "E",
+      "messages": [
+        "Thêm 20 hộp trứng gà"
+      ],
+      "expect": [
+        "add",
+        "trung",
+        20
+      ],
+      "got": [
+        "add",
+        "trung",
+        20
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "20 là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé. Bạn có muốn thêm **20x Trứng gà ta hộp 10 quả** vào giỏ hàng không? Đơn giá 42.000 ₫, thành tiền **840.000 ₫**."
+    },
+    {
+      "id": "E2",
+      "group": "E",
+      "messages": [
+        "Cho tôi 11 hộp cà chua bi"
+      ],
+      "expect": [
+        "add",
+        "ca_chua",
+        11
+      ],
+      "got": [
+        "add",
+        "ca_chua",
+        11
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "11 là số lượng lớn hơn thường lệ, bạn kiểm tra lại giúp mình nhé. Bạn có muốn thêm **11x Cà chua bi 300g** vào giỏ hàng không? Đơn giá 22.000 ₫, thành tiền **242.000 ₫**."
+    },
+    {
+      "id": "F1",
+      "group": "F",
+      "messages": [
+        "Thêm 1 gói cà rốt"
+      ],
+      "expect": [
+        "choose",
+        [
+          "ca_rot",
+          "ca_rot_baby"
+        ]
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Dạ, hiện tại có 2 loại cà rốt:\n1. Cà rốt Đà Lạt 500g: 25.000 VND\n2. Cà rốt baby 300g: 32.000 VND\n\nBạn muốn chọn loại nào để mình thêm vào giỏ hàng giúp bạn ạ?"
+    },
+    {
+      "id": "F2",
+      "group": "F",
+      "messages": [
+        "Mua 2 hộp sữa tươi"
+      ],
+      "expect": [
+        "choose",
+        [
+          "sua_vinamilk",
+          "sua_th"
+        ]
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Dạ, bạn muốn mua loại sữa tươi nào ạ? Hiện tại cửa hàng có:\n1. Sữa tươi Vinamilk không đường 1L (36.000 VND)\n2. Sữa tươi TH true MILK ít đường 1L (38.000 VND)\n\nBạn chọn loại nào để mình thêm 2 hộp vào giỏ hàng giúp bạn nhé?"
+    },
+    {
+      "id": "F3",
+      "group": "F",
+      "messages": [
+        "Add 1 pack of carrots"
+      ],
+      "expect": [
+        "choose",
+        [
+          "ca_rot",
+          "ca_rot_baby"
+        ]
+      ],
+      "got": [
+        "choose",
+        [
+          "ca_rot",
+          "ca_rot_baby"
+        ]
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Several products match. Tap the one you want to add to your cart:"
+    },
+    {
+      "id": "G1",
+      "group": "G",
+      "messages": [
+        "Thêm 1 kg táo Envy"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Xin lỗi, mình chưa làm xong yêu cầu này trong một lượt. Bạn nói lần lượt từng bước giúp mình nhé?"
+    },
+    {
+      "id": "G2",
+      "group": "G",
+      "messages": [
+        "Cho tôi 1 kg bơ sáp"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Dạ, hiện tại cửa hàng không có sản phẩm bơ sáp. Bạn có muốn tham khảo các loại trái cây khác đang có sẵn không ạ?"
+    },
+    {
+      "id": "G3",
+      "group": "G",
+      "messages": [
+        "Thêm 2 quả sầu riêng"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Dạ, hiện tại cửa hàng không tìm thấy sản phẩm sầu riêng ạ. Bạn có muốn chọn loại trái cây nào khác không ạ?"
+    },
+    {
+      "id": "G4",
+      "group": "G",
+      "messages": [
+        "Lấy 10 chai nước mắm Phú Quốc"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Dạ, hiện tại \"Nước mắm Phú Quốc 500ml\" chỉ còn lại 8 chai trong kho thôi ạ. Bạn có muốn lấy 8 chai này luôn không ạ?"
+    },
+    {
+      "id": "G5",
+      "group": "G",
+      "messages": [
+        "Dưa hấu giá bao nhiêu vậy?"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Dưa hấu Long An hiện có giá **45.000 VND** (khoảng 2 kg/quả). Bạn có muốn thêm vào giỏ hàng không ạ?"
+    },
+    {
+      "id": "G6",
+      "group": "G",
+      "messages": [
+        "Shop có những loại sữa tươi nào?"
+      ],
+      "expect": [
+        "none"
+      ],
+      "got": [
+        "none"
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite"
+      ],
+      "reply": "Shop hiện có các loại sữa tươi sau:\n\n1. **Sữa tươi Vinamilk không đường 1L** - Giá: **36.000 VND**\n2. **Sữa tươi TH true MILK ít đường 1L** - Giá: **38.000 VND**\n\nBạn có muốn thêm loại sữa nào vào giỏ hàng không ạ?"
+    },
+    {
+      "id": "H1",
+      "group": "H",
+      "messages": [
+        "Tìm giúp mình cà rốt",
+        "Lấy 2 gói cà rốt baby"
+      ],
+      "expect": [
+        "add",
+        "ca_rot_baby",
+        2
+      ],
+      "got": [
+        "add",
+        "ca_rot_baby",
+        2
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **2x Cà rốt baby 300g** vào giỏ hàng không? Đơn giá 32.000 ₫, thành tiền **64.000 ₫**."
+    },
+    {
+      "id": "H2",
+      "group": "H",
+      "messages": [
+        "Thêm 1 quả dưa hấu",
+        "À không, cho mình 3 quả"
+      ],
+      "expect": [
+        "add",
+        "dua_hau",
+        3
+      ],
+      "got": [
+        "add",
+        "dua_hau",
+        3
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **3x Dưa hấu Long An** vào giỏ hàng không? Đơn giá 45.000 ₫, thành tiền **135.000 ₫**."
+    },
+    {
+      "id": "H3",
+      "group": "H",
+      "messages": [
+        "Có sữa tươi không?",
+        "Lấy 1 hộp TH true MILK"
+      ],
+      "expect": [
+        "add",
+        "sua_th",
+        1
+      ],
+      "got": [
+        "add",
+        "sua_th",
+        1
+      ],
+      "measured": true,
+      "passed": true,
+      "models": [
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-lite"
+      ],
+      "reply": "Bạn có muốn thêm **1x Sữa tươi TH true MILK ít đường 1L** vào giỏ hàng không? Đơn giá 38.000 ₫, thành tiền **38.000 ₫**."
+    }
+  ]
+}

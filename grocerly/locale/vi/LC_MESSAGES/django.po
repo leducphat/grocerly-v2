@@ -1810,3 +1810,9 @@ msgstr "Không được chứa ký tự rỗng (null)."
 #. Django's own msgid; its vi catalog puts a space before the full stop (L-64)
 msgid "Ensure this value is greater than or equal to %(limit_value)s."
 msgstr "Đảm bảo giá trị này lớn hơn hoặc bằng với %(limit_value)s."
+
+msgid "Weight or volume"
+msgstr "Khối lượng hoặc thể tích"
+
+msgid "Storage instructions"
+msgstr "Cách bảo quản"

@@ -101,6 +101,22 @@
                                         {{form.expiry_period}}{% include "partials/field_errors.html" with field=form.expiry_period %}
                                     </div>
 
+                                    {# The form had these three since TLCN but the page showed no box, so every product kept the model default (L-71). #}
+                                    <div class="mb-4">
+                                        <label class="form-label">{% trans "Weight or volume" %}</label>
+                                        {{form.weight_volume}}{% include "partials/field_errors.html" with field=form.weight_volume %}
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">{% trans "Ingredients" %}</label>
+                                        {{form.ingredients}}{% include "partials/field_errors.html" with field=form.ingredients %}
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label class="form-label">{% trans "Storage instructions" %}</label>
+                                        {{form.storage_instructions}}{% include "partials/field_errors.html" with field=form.storage_instructions %}
+                                    </div>
+
                                     <div class="mb-4">
                                         <label class="form-label">{% trans "Keywords (tags)" %}</label>
                                         {{form.tags}}{% include "partials/field_errors.html" with field=form.tags %}

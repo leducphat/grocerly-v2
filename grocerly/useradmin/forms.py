@@ -19,7 +19,10 @@ class AddProductForm(forms.ModelForm):
     image = forms.ImageField(widget=forms.FileInput(attrs={"class":"form-control"}), required=False)
     weight_volume = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("Weight or volume (e.g. 1kg, 500ml)"), "class":"form-control"}), required=False)
     ingredients = forms.CharField(widget=forms.Textarea(attrs={'placeholder': _("Ingredients"), "class":"form-control"}), required=False)
-    storage_instructions = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("e.g. Store in a cool, dry place"), "class":"form-control"}), required=False)
+    # A field declared here does not take the model default, so the add page
+    # starts the box with it; the staff changes it for fresh goods (L-71, D-063).
+    storage_instructions = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("e.g. Store in a cool, dry place"), "class":"form-control"}), required=False,
+                                           initial=Product._meta.get_field("storage_instructions").default)
     # Required on purpose: the product cards link to these two, and an empty link
     # used to take the home page down for every customer (L-27, D-039).
     vendor = forms.ModelChoiceField(queryset=Vendor.objects.all(), widget=forms.Select(attrs={"class":"form-select select-nice"}), error_messages={"required": _("Please choose a vendor.")})

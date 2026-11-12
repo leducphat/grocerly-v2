@@ -190,6 +190,67 @@ def test_product_left_without_category_can_be_repaired_on_the_edit_page(staff_cl
     assert (stocked_product.category, stocked_product.vendor) == (category, vendor)
 
 
+# ---------- Weight, ingredients and storage (UC-19, L-71, D-063) ----------
+# The form had these three fields since TLCN, but the pages never showed their
+# boxes. A box missing from the page is missing from the POST too, and Django
+# then keeps the model default: "1 kg" for every product, which the AI assistant
+# repeated to customers ("33.000 VND/kg" for a whole watermelon).
+
+DETAIL_BOXES = ["weight_volume", "ingredients", "storage_instructions"]
+
+
+@pytest.mark.parametrize("page", ["add", "edit"])
+def test_product_pages_have_boxes_for_weight_ingredients_and_storage(staff_client, stocked_product, page):
+    url = reverse(ADD_URL) if page == "add" else reverse(EDIT_URL, args=[stocked_product.p_id])
+
+    html = staff_client.get(url).content.decode()
+
+    for box in DETAIL_BOXES:
+        assert f'name="{box}"' in html, box
+
+
+def test_edit_page_shows_the_current_weight_and_storage(staff_client, stocked_product):
+    stocked_product.weight_volume = "1 trái, khoảng 3 kg"
+    stocked_product.storage_instructions = "Giữ lạnh 0 - 4 °C"
+    stocked_product.save()
+
+    html = staff_client.get(reverse(EDIT_URL, args=[stocked_product.p_id])).content.decode()
+
+    assert 'value="1 trái, khoảng 3 kg"' in html
+    assert 'value="Giữ lạnh 0 - 4 °C"' in html
+
+
+def test_add_page_offers_the_default_storage_text(staff_client):
+    """The shop keeps "Bảo quản nơi khô ráo, thoáng mát" as the usual text (D-063).
+    Shown in the box, it stays unless the staff changes it; an empty box would
+    save an empty text and the product page would show nothing after "Storage:"."""
+    default = Product._meta.get_field("storage_instructions").default
+
+    html = staff_client.get(reverse(ADD_URL)).content.decode()
+
+    assert f'value="{default}"' in html
+
+
+def test_add_product_saves_the_weight_ingredients_and_storage_typed(staff_client, category, vendor):
+    """Saving worked before L-71 too, when the values were sent; this keeps it so."""
+    form = product_form(category, vendor, weight_volume="hộp 300 g",
+                        ingredients="Cà chua bi", storage_instructions="Giữ lạnh 0 - 4 °C")
+
+    staff_client.post(reverse(ADD_URL), form)
+
+    product = Product.objects.get(title="Cà chua bi")
+    assert (product.weight_volume, product.ingredients, product.storage_instructions) == (
+        "hộp 300 g", "Cà chua bi", "Giữ lạnh 0 - 4 °C")
+
+
+def test_a_product_has_no_weight_until_one_is_given(category):
+    """No made-up "1 kg" when the weight is not given, as when the box is left
+    empty or the product is added in the Django admin."""
+    product = Product.objects.create(title="Bắp cải", category=category, price=Decimal("18000"))
+
+    assert not product.weight_volume
+
+
 # ---------- The product photo goes through Pillow (D-052) ----------
 # Django's ImageField opens every upload with Pillow. No other test sends a real
 # image, so these two pin the move to Pillow 13 (review of PR #21).

@@ -206,6 +206,16 @@ thì mọi nút của câu trả lời ấy tắt. Giỏ chỉ đổi khi khách
 thanh toán, khi giỏ trong session có hàng. Giỏ trống thì Gemini nhận lỗi công cụ
 `The cart is empty` và nhắc khách chọn hàng (L-41).
 
+**Đo độ chính xác (P-42 phần d, D-062).** `grocerly/ai_eval/` không phải test và
+không chạy trong CI. `cases.py` khai báo một danh mục 14 sản phẩm và 30 câu mẫu, mỗi
+câu kèm đáp án: thêm sản phẩm nào, bao nhiêu; cho khách chọn giữa những sản phẩm
+nào; hay không đề nghị gì. `run_eval.py` dựng danh mục trong SQLite bộ nhớ của
+`settings_test`, gửi từng câu tới `/api/v1/chat/` qua Django test client như khung
+chat gửi (mỗi câu một session mới, câu hai lượt giữ lịch sử và `hidden_context`),
+để Gemini thật trả lời, rồi so `action`, `pid`, `qty` với đáp án. Script thay
+`GeminiChat` bằng một lớp con chỉ ghi lại model nào trả lời, còn mọi bước kiểm của
+máy chủ giữ nguyên. Kết quả in ra màn hình và lưu ở `ai_eval/results/<ngày_giờ>.json`.
+
 ---
 
 ## 5. Lịch sử chỉnh sửa
