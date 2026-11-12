@@ -129,3 +129,65 @@ def test_product_list_keeps_the_vendor_link_on_the_deal_card(client, complete_pr
     page = client.get(reverse("core:product-list")).content.decode()
 
     assert page.count(f'<a href="{vendor_url}">') == 2  # the product card and the deal
+
+
+# --- L-61: the discount shows only when there is one -----------------------------------
+
+# Every page that prints a product's price: the cards above, plus the vendor page,
+# the product page (with its related products) and the filter on /products/.
+PRICE_PAGES = [*LISTING_PAGES, "vendor-detail", "product-detail", "filter"]
+DISCOUNT_LABEL = re.compile(r"-\d+%")
+
+
+@pytest.fixture
+def priced_product(complete_product):
+    """`complete_product` and a second product of its category, so the product page
+    has a related product to show. Both get the same old price in each test."""
+    def _with_old_price(old_price):
+        other = type(complete_product).objects.create(
+            title="Cà rốt baby", category=complete_product.category, vendor=complete_product.vendor,
+            price=complete_product.price, old_price=old_price, stock_count=5,
+            in_stock=True, status=True, product_status="published",
+        )
+        complete_product.old_price = old_price
+        complete_product.save()
+        return complete_product, other
+    return _with_old_price
+
+
+def price_page(client, page, product):
+    if page == "vendor-detail":
+        return client.get(reverse("core:vendor-detail", args=[product.vendor.v_id])).content.decode()
+    if page == "product-detail":
+        return client.get(reverse("core:product-detail", args=[product.p_id])).content.decode()
+    if page == "filter":
+        return client.get(reverse("core:filter-product")).json()["data"]
+    url_name, args, params = page
+    return client.get(reverse(url_name, args=args), params).content.decode()
+
+
+@pytest.mark.parametrize("page", PRICE_PAGES, ids=lambda p: p if isinstance(p, str) else p[0])
+@pytest.mark.parametrize("old_price", ["0", "20000"], ids=["no-old-price", "old-price-below-price"])
+def test_product_without_a_discount_shows_no_discount(client, priced_product, page, old_price):
+    """L-61, UC-03: old_price is 0 by default, and a price raised above the old one
+    is no discount either. Before the fix the cards printed "-0%" and a struck-out
+    "0 ₫"; the old price was printed on every card whatever its value."""
+    product, _ = priced_product(old_price)
+
+    html = price_page(client, page, product)
+
+    assert product.title in html
+    assert 'class="old-price' not in html
+    assert not DISCOUNT_LABEL.search(html)
+
+
+@pytest.mark.parametrize("page", PRICE_PAGES, ids=lambda p: p if isinstance(p, str) else p[0])
+def test_product_on_sale_still_shows_its_old_price_and_discount(client, priced_product, page):
+    """The guard of L-61 must not hide a real discount: 25,000 down from 30,000 is 16%."""
+    product, _ = priced_product("30000")
+
+    html = price_page(client, page, product)
+
+    assert 'class="old-price' in html
+    assert "30.000 ₫" in html
+    assert "-16%" in html

@@ -44,7 +44,7 @@
                                     </div>
                                     <div class="col-md-6 col-sm-12 col-xs-12">
                                         <div class="detail-info pr-30 pl-30">
-                                            <span class="stock-status out-stock"> -{{p.get_percentage|floatformat:0}}% </span>
+                                            {% if p.get_percentage > 0 %}<span class="stock-status out-stock"> -{{p.get_percentage|floatformat:0}}% </span>{% endif %}
                                             <h2 class="title-detail">{{ p.title }}</h2>
                                             <div class="product-detail-rating">
                                                 <div class="product-rate-cover text-end">
@@ -55,10 +55,12 @@
                                             <div class="clearfix product-price-cover">
                                                 <div class="product-price primary-color float-left">
                                                     <span class="current-price text-brand"><span class="current-product-price-{{ p.id }}">{{ p.price|vnd }}</span> ₫</span>
+                                                    {% if p.get_percentage > 0 %}
                                                     <span>
                                                         <span class="save-price font-md color3 ml-15">-{{p.get_percentage|floatformat:0}}% {% trans "Off" %}</span>
                                                     <span class="old-price font-md ml-15">{{ p.old_price|vnd }} ₫</span>
                                                     </span>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                             <div class="short-desc mb-30">
@@ -160,7 +162,7 @@
                                                                             {% if r.user.profile.image %}
                                                                             <img src="{{ r.user.profile.image.url }}" style="width: 100px; height: 100px; object-fit: cover;" alt="" />
                                                                             {% else %}
-                                                                            <img src="{% static 'assets/imgs/blog/author-2.png' %}" alt="" />
+                                                                            <img src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" style="width: 100px; height: 100px; object-fit: cover;" alt="" />
                                                                             {% endif %}
                                                                             <a href="#" class="font-heading text-brand">{{ r.user.username|title }}</a>
                                                                         </div>
@@ -278,7 +280,7 @@
                                                         <h2><a href="{% url 'core:product-detail' related.p_id %}" tabindex="0">{{ related.title|truncatechars:20 }}</a></h2>
                                                         <div class="product-price">
                                                             <span>{{ related.price|vnd }} ₫</span>
-                                                            <span class="old-price">{{ related.old_price|vnd }} ₫</span>
+                                                            {% if related.get_percentage > 0 %}<span class="old-price">{{ related.old_price|vnd }} ₫</span>{% endif %}
                                                         </div>
                                                     </div>
                                                 </div>

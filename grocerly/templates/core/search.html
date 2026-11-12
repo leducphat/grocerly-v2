@@ -68,7 +68,7 @@
                                   <div class="product-card-bottom">
                                       <div class="product-price">
                                           <span>{{ p.price|vnd }} ₫</span>
-                                          <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                          {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                       </div>
                                       <div class="add-cart">
                                           <a class="add" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-shopping-cart mr-5"></i>{% trans "Details" %}</a>

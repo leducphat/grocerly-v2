@@ -1465,6 +1465,9 @@ msgstr ""
 msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
 msgstr ""
 
+msgid "Write your review"
+msgstr ""
+
 msgid "Wrong email or password."
 msgstr ""
 

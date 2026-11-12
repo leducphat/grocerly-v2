@@ -9,7 +9,6 @@ wider than the screen. Counting tags in the source finds this without a browser.
 import re
 from pathlib import Path
 
-import pytest
 from django.conf import settings
 
 TEMPLATES = Path(settings.BASE_DIR) / "templates"
@@ -30,7 +29,6 @@ def test_div_balance_ignores_commented_out_markup():
     assert div_balance(source) == 0
 
 
-@pytest.mark.xfail(reason="L-65: the product grid <div> in core/product-list.html is never closed")
 def test_every_template_closes_the_divs_it_opens():
     unbalanced = [
         f"{template.relative_to(TEMPLATES)}: {div_balance(template.read_text(encoding='utf-8')):+d}"

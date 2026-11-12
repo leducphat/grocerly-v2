@@ -8,7 +8,6 @@ templates and stylesheets, no server needed.
 import re
 from pathlib import Path
 
-import pytest
 from django.conf import settings
 
 STATIC = Path(settings.BASE_DIR) / "static"
@@ -23,7 +22,6 @@ def templates():
     return sorted(TEMPLATES.rglob("*.html"))
 
 
-@pytest.mark.xfail(reason="L-63: three {% static %} references point at no file")
 def test_every_static_tag_names_an_existing_file():
     """`{% static 'x.js?v=1.1' %}` turns "?" into "%3F", so the query string becomes
     part of the file name; a sample image the theme never shipped 404s the same way."""
@@ -37,7 +35,6 @@ def test_every_static_tag_names_an_existing_file():
     assert missing == []
 
 
-@pytest.mark.xfail(reason="L-63: the staff favicon is loaded by a relative path")
 def test_templates_load_no_asset_by_relative_path():
     """A relative path is joined to the page URL: on /vi/useradmin/orders/ the
     browser asks for /vi/useradmin/orders/assets2/..., which is no file."""
@@ -50,7 +47,6 @@ def test_templates_load_no_asset_by_relative_path():
     assert relative == []
 
 
-@pytest.mark.xfail(reason="L-63: the theme's main.css names images that are not in static")
 def test_every_file_named_in_the_theme_stylesheets_exists():
     """The theme's own stylesheets only; the fallback font formats of vendor
     libraries are left out."""

@@ -38,7 +38,7 @@
             <div class="product-card-bottom">
                 <div class="product-price">
                     <span class="current-product-price-{{ p.id }}">{{ p.price|vnd }}</span><span> ₫</span>
-                    <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                    {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                 </div>
                 <div class="add-cart">
                     <input type="hidden" value="1" class="product-quantity-{{ p.id }}">
