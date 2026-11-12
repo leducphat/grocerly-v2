@@ -2570,6 +2570,29 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 - Câu trả lời có thể đến từ model khác nhau giữa các tin nhắn; giọng văn có thể khác đôi chút. Log server ghi model nào hỏng.
 - SRS UC-15, SDD §4.2 viết lại theo cách làm này; test ở `store_api/tests/test_gemini_fallback.py`. Muốn đổi thứ tự hay thêm model thì sửa `GEMINI_MODELS` và đo lại.
 
+## D-061 · Sáu use case mới mang mã UC-27 → UC-32; acceptance criteria chép từ báo cáo vào SRS
+
+- **Ngày:** 12/11/2026
+- **Trạng thái:** Đã chốt (sinh viên)
+
+**Bối cảnh.** Báo cáo KLTN mục 3.2 có 32 bảng use case, bảng nào cũng có dòng Acceptance Criteria (86 tiêu chí), viết xong trong các lượt sửa báo cáo ngày 05 - 06/11/2026 (D-058, D-059). Repo không theo kịp: SRS §6 vẫn liệt kê 26 use case và ghi "chưa có acceptance criteria trừ UC-17", PLAN ghi P-23 chưa bắt đầu. Báo cáo không ghi mã UC, còn test, ISSUES và COMMITMENT dẫn tới use case bằng mã UC-xx, nên sáu use case mới cần mã, và phải chọn tiêu chí nằm ở đâu.
+
+**Phương án đã cân nhắc**
+1. *Đánh số lại UC-01 → UC-32 theo thứ tự trong báo cáo.* Khớp báo cáo hơn, nhưng mọi chỗ đã dẫn UC-xx trong test, ISSUES, PLAN và nhật ký AI đều sai theo, giống lý do D-058 không đánh lại mã CN.
+2. *Giữ UC-01 → UC-26, sáu use case mới nhận UC-27 → UC-32* theo thứ tự xuất hiện trong báo cáo.
+3. *Chỉ để tiêu chí trong báo cáo*, SRS trỏ sang. Không có hai bản phải giữ khớp, nhưng báo cáo nằm ngoài repo: test không dẫn được tới mã tiêu chí, và người đọc repo không thấy SRS phải đúng theo điều gì.
+4. *Chép nguyên văn tiêu chí vào SRS*, mỗi tiêu chí mang mã AC-x.y (x là số UC, y là thứ tự trong bảng).
+
+**Quyết định.** Phương án 2 và 4. UC-27 Khôi phục mật khẩu, UC-28 Xem nhà cung cấp, UC-29 Xem danh sách đánh giá, UC-30 Cập nhật hồ sơ nhân viên, UC-31 Quản lý nhà cung cấp, UC-32 Xem hộp thư liên hệ. UC-17 giữ AC-17.1 → AC-17.5 của P-42 (D-048); bốn tiêu chí của báo cáo cho UC-17 nhận AC-17.6 → AC-17.9.
+
+**Lý do.** Mã cũ đã được dẫn ở nhiều nơi, không đáng đổi chỉ để thứ tự đẹp. Chép vào SRS thì SRS vẫn là đặc tả của sản phẩm như `CLAUDE.md` §3 quy định, test có mã để dẫn tới; cái giá là hai bản phải sửa cùng lúc.
+
+**Hệ quả.**
+- SRS §6 có 32 use case, §6.3 mới chứa tiêu chí của 31 use case, §6.2 thêm AC-17.6 → AC-17.9. Sửa tiêu chí ở bên nào thì sửa bên kia trong cùng lượt.
+- Bảng use case "Nhờ AI thêm vào giỏ" trong báo cáo chưa có năm tiêu chí AC-17.1 → AC-17.5 của P-42; sinh viên duyệt thêm vào ngày 12/11/2026, cùng bước 3 của luồng chính (câu xác nhận có đơn giá, thành tiền) và hai luồng thay thế (số lượng lớn, nhiều sản phẩm cùng khớp). Cùng lượt, AC-15.1 "mỗi tin nhắn tới Gemini đúng một lần" viết lại thành "chỉ nằm một lần trong lịch sử hội thoại gửi Gemini", vì từ D-060 tin nhắn được gửi lại cho model kế tiếp khi một model hỏng.
+- COMMITMENT §2: sáu chức năng trước đây "chưa có UC" (CN-03, 07, 23, 29, 30, 32) nay có mã UC.
+- Test viết từ nay ghi mã AC trong docstring. Test cũ chưa được rà để gắn mã AC, cũng chưa đối chiếu tiêu chí nào còn thiếu test.
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 

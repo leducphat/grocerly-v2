@@ -10,7 +10,7 @@
 |---|---|
 | Trạng thái | **Tài liệu sống** — mở cho chỉnh sửa |
 | Nguồn gốc | Chuyển thể từ báo cáo TLCN `CLC_CNPM_1_LEDUCPHAT.pdf` |
-| Cập nhật | 05/11/2026 |
+| Cập nhật | 12/11/2026 |
 
 > **Phạm vi của tài liệu này.** Đây là *spec of record* của sản phẩm — mô tả hệ
 > thống **phải đúng như hiện trạng mã nguồn**, không phải như báo cáo cũ đã viết.
@@ -183,8 +183,13 @@ về các chỗ chưa an toàn khi tăng worker).
 
 ## 6. Danh sách Use Case
 
-26 use case đã đặc tả trong TLCN (mỗi UC có Short Description, Actors,
-Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
+32 use case: 26 use case đặc tả trong TLCN (UC-01 → UC-26) và 6 use case thêm ở
+KLTN (UC-27 → UC-32) cho các chức năng đã có trong mã nguồn mà đặc tả TLCN chưa có
+(D-058, D-061). Bảng đặc tả đầy đủ của từng use case (Short Description, Actors,
+Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow, Acceptance
+Criteria) nằm ở báo cáo KLTN mục 3.2. Báo cáo không ghi mã UC, mà xếp use case theo
+thứ tự chức năng cam kết. Acceptance criteria chép lại ở §6.2 và §6.3, mỗi tiêu chí
+có mã AC-x.y để test dẫn tới.
 
 | Mã | Use Case | Tác nhân |
 |---|---|---|
@@ -192,28 +197,34 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 | UC-02 | Đăng nhập | A2, A3, A4 |
 | UC-03 | Xem danh sách sản phẩm | A1, A2 |
 | UC-04 | Xem chi tiết sản phẩm | A1, A2 |
-| UC-05 | Tìm kiếm & Lọc | A1, A2 |
-| UC-06 | Quản lý Giỏ hàng (CRUD) | A1, A2 |
-| UC-07 | Đổi Ngôn ngữ | A1, A2 |
-| UC-08 | Gửi Liên hệ | A1, A2 |
-| UC-09 | Thanh toán & Đặt hàng | A2 |
+| UC-05 | Tìm kiếm và lọc sản phẩm | A1, A2 |
+| UC-06 | Quản lý giỏ hàng | A1, A2 |
+| UC-07 | Đổi ngôn ngữ | A1, A2 |
+| UC-08 | Gửi liên hệ | A1, A2 |
+| UC-09 | Thanh toán và đặt hàng | A2 |
 | UC-10 | Đăng xuất | A2, A3, A4 |
-| UC-11 | Cập nhật Hồ sơ (xem/sửa/đổi mật khẩu) | A2 |
-| UC-12 | Quản lý Yêu thích | A2 |
-| UC-13 | Lịch sử Đơn mua | A2 |
-| UC-14 | Đánh giá Sản phẩm | A2 |
-| UC-15 | Tương tác Trợ lý AI | A1, A2 |
-| UC-16 | Nhờ AI Tìm sản phẩm | A1, A2 |
-| UC-17 | Nhờ AI Thêm vào Giỏ | A1, A2 |
-| UC-18 | Nhờ AI Hướng dẫn thanh toán | A1, A2 |
-| UC-19 | Quản lý Sản phẩm | A3, A4 |
-| UC-20 | Quản lý Đơn hàng | A3, A4 |
-| UC-21 | Quản lý Mã giảm giá | A4 |
-| UC-22 | Quản lý Người dùng | A4 |
-| UC-23 | Quản lý Danh mục | A4 |
-| UC-24 | Quản lý Toàn bộ sản phẩm (duyệt/gỡ) | A4 |
-| UC-25 | Quản lý Toàn bộ Đơn hàng | A4 |
+| UC-11 | Cập nhật hồ sơ cá nhân (xem, sửa, đổi mật khẩu) | A2 |
+| UC-12 | Quản lý danh sách yêu thích | A2 |
+| UC-13 | Xem lịch sử đơn hàng | A2 |
+| UC-14 | Đánh giá sản phẩm | A2 |
+| UC-15 | Tương tác với trợ lý AI | A1, A2 |
+| UC-16 | Nhờ AI tìm sản phẩm | A1, A2 |
+| UC-17 | Nhờ AI thêm vào giỏ | A1, A2 |
+| UC-18 | Nhờ AI dẫn tới thanh toán | A1, A2 |
+| UC-19 | Quản lý sản phẩm | A3, A4 |
+| UC-20 | Quản lý đơn hàng | A3, A4 |
+| UC-21 | Quản lý mã giảm giá | A4 |
+| UC-22 | Quản lý người dùng | A4 |
+| UC-23 | Quản lý danh mục | A4 |
+| UC-24 | Quản lý toàn bộ sản phẩm (đổi trạng thái hiển thị, xóa mềm) | A4 |
+| UC-25 | Quản lý toàn bộ đơn hàng | A4 |
 | UC-26 | Xem báo cáo thống kê | A3, A4 |
+| UC-27 | Khôi phục mật khẩu | A2 |
+| UC-28 | Xem nhà cung cấp | A1, A2 |
+| UC-29 | Xem danh sách đánh giá | A3, A4 |
+| UC-30 | Cập nhật hồ sơ nhân viên | A3 |
+| UC-31 | Quản lý nhà cung cấp | A4 |
+| UC-32 | Xem hộp thư liên hệ | A4 |
 
 ### 6.1 Ràng buộc nghiệp vụ đáng chú ý
 
@@ -391,11 +402,10 @@ Pre-/Post-Conditions, Main Flow, Alternate Flow, Exception Flow).
 - **UC-18:** giỏ trống, kể cả giỏ vừa bị xóa hết hàng, thì AI nhắc thêm hàng chứ
   không đưa nút thanh toán (L-41).
 
-> **Nợ đặc tả:** các UC trên chưa có *acceptance criteria* dạng kiểm chứng được,
-> trừ UC-17 (§6.2). Rubric yêu cầu 100% use case có AC để đạt Mức 5 ở TC2.1. Xem
-> [`PLAN.md`](PLAN.md).
+Các ràng buộc trên là ghi chép theo từng lần sửa lỗi. Tiêu chí kiểm chứng được
+của từng use case ở §6.2 (UC-17) và §6.3 (31 use case còn lại).
 
-### 6.2 Acceptance criteria của UC-17 Nhờ AI Thêm vào Giỏ
+### 6.2 Acceptance criteria của UC-17 Nhờ AI thêm vào giỏ
 
 GVHD yêu cầu có cơ chế kiểm soát việc AI đặt hàng: đúng sản phẩm, số lượng hợp lý,
 khách thấy rõ mình sắp trả bao nhiêu (nhận xét báo cáo Tuần 7, P-42). Các ràng buộc ở
@@ -427,6 +437,194 @@ Gemini, nên test tự động kiểm được bằng Gemini giả lập (D-048)
   `price`, `total` và cờ `large_qty`. Bộ kịch bản đánh giá AI (P-42 phần d) so các
   trường này với đáp án.
 
+Bốn tiêu chí dưới đây đúng từ trước P-42 (L-13 → L-17). Bảng use case của báo cáo
+KLTN mục 3.2 có cả chín tiêu chí, viết bằng lời không kèm mã.
+
+- **AC-17.6** Không có lời gọi hàm nào từ Gemini tự làm thay đổi giỏ hàng. Giỏ chỉ đổi sau khi khách bấm xác nhận.
+- **AC-17.7** Trợ lý chỉ đề nghị số lượng từ 1 tới tồn kho hiện tại.
+- **AC-17.8** Câu báo sau khi xác nhận nói đúng số lượng giỏ đang giữ, không lặp lại số đã đề nghị.
+- **AC-17.9** Nút xác nhận hoạt động đúng với mọi tên sản phẩm, kể cả tên có dấu nháy.
+
+### 6.3 Acceptance criteria của các use case còn lại
+
+Chép nguyên văn từ dòng Acceptance Criteria trong bảng use case của báo cáo KLTN mục
+3.2 (12/11/2026). Mã AC-x.y: x là số UC, y là thứ tự tiêu chí trong bảng. Sửa tiêu
+chí ở bên nào thì sửa bên kia trong cùng lượt (D-061).
+
+**UC-01 Đăng ký**
+
+- **AC-1.1** Đăng ký với dữ liệu hợp lệ tạo đúng một tài khoản và một hồ sơ, người dùng ở trạng thái đăng nhập ngay sau đó.
+- **AC-1.2** Đăng ký với email đã tồn tại không tạo thêm tài khoản nào.
+- **AC-1.3** Mật khẩu được lưu ở dạng băm, không bao giờ ở dạng gốc.
+
+**UC-02 Đăng nhập**
+
+- **AC-2.1** Email và mật khẩu đúng thì đăng nhập được và được chuyển đúng trang theo vai trò.
+- **AC-2.2** Mật khẩu sai thì không có phiên làm việc nào được tạo.
+- **AC-2.3** Tài khoản bị khóa không đăng nhập được dù mật khẩu đúng.
+- **AC-2.4** Email chưa đăng ký và mật khẩu sai nhận cùng một câu báo, nên người ngoài không dò được email nào đã đăng ký.
+
+**UC-03 Xem danh sách sản phẩm**
+
+- **AC-3.1** Sản phẩm ở trạng thái khác "đang bán", hoặc đã bị xóa mềm, không xuất hiện ở bất kỳ danh sách nào của khách.
+- **AC-3.2** Một sản phẩm thiếu danh mục hay nhà cung cấp vẫn hiện bình thường, chỉ không có liên kết tương ứng. Trang không bị lỗi máy chủ vì một dòng dữ liệu thiếu.
+- **AC-3.3** Số sản phẩm in cạnh mỗi danh mục và nhà cung cấp chỉ đếm sản phẩm đang bán.
+
+**UC-04 Xem chi tiết sản phẩm**
+
+- **AC-4.1** Mở trang của sản phẩm đã xóa hoặc không ở trạng thái đang bán trả 404, không trả lỗi máy chủ.
+- **AC-4.2** Điểm trung bình và tỉ lệ các mức sao tính từ đúng các đánh giá của sản phẩm đó.
+
+**UC-05 Tìm kiếm và lọc sản phẩm**
+
+- **AC-5.1** Kết quả tìm kiếm và kết quả lọc chỉ chứa sản phẩm đang bán.
+- **AC-5.2** Lọc theo nhiều danh mục trả về hợp các danh mục đó. Kết hợp danh mục với khoảng giá trả về giao của hai điều kiện.
+
+**UC-06 Quản lý giỏ hàng**
+
+- **AC-6.1** Tổng tiền của giỏ bằng tổng (giá trong cơ sở dữ liệu nhân số lượng) của các dòng, dù trình duyệt gửi lên bất kỳ giá nào.
+- **AC-6.2** Không dòng giỏ nào có số lượng lớn hơn tồn kho sau khi máy chủ xử lý.
+- **AC-6.3** Sản phẩm hết hàng không nằm lại trong giỏ.
+- **AC-6.4** Thêm một sản phẩm đã có trong giỏ thì số lượng được cộng thêm, không bị ghi đè.
+- **AC-6.5** Giỏ chỉ đổi bằng yêu cầu POST có mã CSRF. Một đường link hay biểu mẫu đặt ở trang web khác không đổi được giỏ của khách.
+
+**UC-07 Đổi ngôn ngữ**
+
+- **AC-7.1** Sau khi chọn tiếng Anh, các trang kế tiếp đều ở /en/ cho tới khi người dùng đổi lại.
+- **AC-7.2** Chữ cố định của khung chat (lời chào, nút xác nhận, câu báo lỗi) theo đúng ngôn ngữ của trang. Lời do AI tự sinh không thuộc tiêu chí này.
+
+**UC-08 Gửi liên hệ**
+
+- **AC-8.1** Một lần gửi hợp lệ tạo đúng một tin nhắn trong hộp thư liên hệ.
+- **AC-8.2** Gửi thiếu ô bắt buộc không tạo tin nhắn nào.
+- **AC-8.3** Bấm Gửi hai lần liền chỉ tạo một tin nhắn.
+
+**UC-09 Thanh toán và đặt hàng**
+
+- **AC-9.1** Giá đơn được máy chủ tính từ giá trong cơ sở dữ liệu. Sửa giá trong yêu cầu gửi lên không làm đổi giá đơn.
+- **AC-9.2** Đơn VNPay chỉ thành "đã thanh toán" khi chữ ký hợp lệ, mã kết quả là thành công, và số tiền bằng đúng giá đơn.
+- **AC-9.3** Các bước thanh toán của khách chỉ ghi phương thức thanh toán, không đổi trạng thái giao hàng của đơn.
+- **AC-9.4** Đặt hàng lần sau khi đơn trước đã bị hủy thì tạo đơn mới, không ghi vào đơn đã hủy.
+
+**UC-10 Đăng xuất**
+
+- **AC-10.1** Sau khi đăng xuất, mở một trang cần đăng nhập thì bị chuyển về trang Đăng nhập.
+
+**UC-11 Cập nhật hồ sơ cá nhân**
+
+- **AC-11.1** Sau khi đổi mật khẩu, mật khẩu cũ không còn đăng nhập được.
+- **AC-11.2** Khách chỉ sửa được hồ sơ của chính mình.
+
+**UC-12 Quản lý danh sách yêu thích**
+
+- **AC-12.1** Sản phẩm đã bị xóa không hiện trong danh sách yêu thích và không được tính vào số đếm.
+- **AC-12.2** Danh sách yêu thích chỉ đổi bằng yêu cầu POST có mã CSRF.
+
+**UC-13 Xem lịch sử đơn hàng**
+
+- **AC-13.1** Khách chỉ thấy đơn của chính mình. Mở chi tiết đơn của người khác, hoặc mã đơn không tồn tại, thì trang trả 404.
+- **AC-13.2** Biểu đồ số đơn theo tháng ở trang tài khoản chỉ đếm đơn của chính khách.
+
+**UC-14 Đánh giá sản phẩm**
+
+- **AC-14.1** Chỉ khách có đơn chứa sản phẩm ở trạng thái đang giao hoặc đã giao mới tạo được đánh giá.
+- **AC-14.2** Mỗi khách có tối đa một đánh giá cho một sản phẩm.
+- **AC-14.3** Khách chỉ tạo đánh giá. Sửa và xóa đánh giá là việc kiểm duyệt của quản trị viên.
+
+**UC-15 Tương tác với trợ lý AI**
+
+- **AC-15.1** Mỗi tin nhắn của khách chỉ nằm một lần trong lịch sử hội thoại gửi Gemini.
+- **AC-15.2** Chữ cố định của khung chat theo ngôn ngữ của trang đang mở.
+- **AC-15.3** Mọi nội dung hiện trong khung chat (lời AI, tên sản phẩm, chữ khách gõ) đều được hiển thị như chữ thường. Một tên sản phẩm chứa thẻ HTML không thể chạy mã trên trình duyệt của khách.
+
+**UC-16 Nhờ AI tìm sản phẩm**
+
+- **AC-16.1** Trợ lý không bao giờ đưa ra sản phẩm đã bị gỡ bán, đã bị xóa, hoặc đã hết hàng.
+- **AC-16.2** API công khai /api/v1/products/ dùng đúng điều kiện lọc như trang cửa hàng.
+
+**UC-18 Nhờ AI dẫn tới thanh toán**
+
+- **AC-18.1** Trợ lý không tự tạo đơn hay tự thanh toán. Mọi bước sau đó do khách thao tác trên các trang thanh toán thường.
+- **AC-18.2** Giỏ trống thì khung chat không hiện nút đi tới thanh toán.
+
+**UC-19 Quản lý sản phẩm**
+
+- **AC-19.1** Thao tác xóa chỉ được nhận từ biểu mẫu POST của trang quản lý. Mở một đường link không xóa được gì.
+- **AC-19.2** Sản phẩm đã xóa không còn hiện ở bất kỳ trang nào của khách, nhưng vẫn khôi phục được trong trang quản trị.
+- **AC-19.3** Sản phẩm mới tạo không có danh mục hay nhà cung cấp thì không lưu được.
+- **AC-19.4** Khách hàng và người chưa đăng nhập không vào được trang quản lý sản phẩm.
+- **AC-19.5** Bấm Tạo hai lần liền chỉ tạo một sản phẩm.
+- **AC-19.6** Ô sửa tồn kho ngay trên dòng gửi kèm mã CSRF. Yêu cầu không có mã bị từ chối.
+
+**UC-20 Quản lý đơn hàng**
+
+- **AC-20.1** Không có thao tác xóa đơn hàng.
+- **AC-20.2** Tồn kho bị trừ đúng một lần cho mỗi đơn, lúc đơn sang đang giao.
+- **AC-20.3** Đơn đã giao không hủy được.
+- **AC-20.4** Khách không tự hủy đơn trên web.
+- **AC-20.5** Kho trừ theo đúng sản phẩm của từng dòng đơn, kể cả khi sản phẩm đã đổi tên sau khi khách đặt.
+
+**UC-21 Quản lý mã giảm giá**
+
+- **AC-21.1** Mã đã tắt hoặc đã xóa mềm thì khách nhập vào sẽ bị báo không tồn tại.
+- **AC-21.2** Mỗi mã chỉ áp một lần cho một đơn.
+- **AC-21.3** Không lưu được mã có phần trăm giảm ngoài khoảng 1 - 100, nên không đơn nào bị giảm tới giá âm.
+
+**UC-22 Quản lý người dùng**
+
+- **AC-22.1** Tài khoản bị bỏ đánh dấu hoạt động không đăng nhập được.
+- **AC-22.2** Tài khoản được bật quyền nhân viên thì sau khi đăng nhập vào được trang quản lý cửa hàng.
+
+**UC-23 Quản lý danh mục**
+
+- **AC-23.1** Danh mục đã xóa không hiện ở cửa hàng nhưng vẫn khôi phục được.
+- **AC-23.2** Xóa một danh mục không làm sập trang của bất kỳ sản phẩm nào.
+- **AC-23.3** Sau khi xóa một danh mục, không trang nào của khách còn link tới danh mục đó.
+
+**UC-24 Quản lý toàn bộ sản phẩm**
+
+- **AC-24.1** Sản phẩm chuyển khỏi trạng thái đang bán thì biến mất khỏi cửa hàng, kết quả tìm kiếm, trợ lý AI và API, và trang chi tiết của nó trả 404.
+- **AC-24.2** Không có màn hình nào xóa hẳn sản phẩm. Mọi thao tác xóa đều là xóa mềm.
+- **AC-24.3** Khôi phục một nhà cung cấp đã xóa thì các sản phẩm bị xóa cùng lúc với nhà cung cấp đó cũng trở lại.
+
+**UC-25 Quản lý toàn bộ đơn hàng**
+
+- **AC-25.1** Đơn hàng không bị xóa vĩnh viễn, để phục vụ đối soát kế toán. Trang quản trị không có nút xóa đơn hay dòng đơn, và yêu cầu xóa gửi thẳng bị từ chối.
+- **AC-25.2** Quản trị viên không thêm đơn bằng tay, không sửa được trạng thái giao hàng, trạng thái thanh toán hay giá của đơn trong trang quản trị.
+
+**UC-26 Xem báo cáo thống kê**
+
+- **AC-26.1** Doanh thu, doanh thu theo tháng và số sản phẩm đã bán chỉ tính đơn đã thanh toán và không bị hủy.
+- **AC-26.2** Đơn VNPay đã trả tiền rồi bị hủy vẫn nằm trong danh sách đơn nhưng không được cộng vào doanh thu.
+- **AC-26.3** Khách hàng và người chưa đăng nhập không mở được bảng điều khiển.
+
+**UC-27 Khôi phục mật khẩu**
+
+- **AC-27.1** Liên kết đặt lại chỉ dùng được một lần. Sau khi đổi mật khẩu, mở lại liên kết cũ thì bị báo không hợp lệ.
+- **AC-27.2** Sau khi đặt lại, mật khẩu cũ không còn đăng nhập được, mật khẩu mới thì được.
+
+**UC-28 Xem nhà cung cấp**
+
+- **AC-28.1** Nhà cung cấp đã xóa không có trong danh sách. Mở đường dẫn cũ của họ trả 404.
+
+**UC-29 Xem danh sách đánh giá**
+
+- **AC-29.1** Trang chỉ đọc. Nhân viên không sửa hay xóa được đánh giá ở đây; việc kiểm duyệt thuộc quản trị viên, làm trong trang quản trị.
+
+**UC-30 Cập nhật hồ sơ nhân viên**
+
+- **AC-30.1** Sau khi đổi, mật khẩu cũ không còn đăng nhập được.
+- **AC-30.2** Đổi mật khẩu xong, nhân viên vẫn ở trong trang quản lý, không bị đăng xuất.
+
+**UC-31 Quản lý nhà cung cấp**
+
+- **AC-31.1** Xóa rồi khôi phục một nhà cung cấp đưa đúng các sản phẩm bị ẩn theo nó trở lại.
+- **AC-31.2** Bấm xóa lần nữa trên một nhà cung cấp đã xóa không làm hỏng khả năng khôi phục.
+- **AC-31.3** Chọn nhiều nhà cung cấp rồi xóa hàng loạt cũng ẩn hàng của từng nhà cung cấp, như xóa từng cái.
+
+**UC-32 Xem hộp thư liên hệ**
+
+- **AC-32.1** Mọi tin nhắn gửi thành công ở trang Liên hệ đều có trong hộp thư.
 ---
 
 ## 7. Kiểm thử
@@ -448,10 +646,12 @@ Phương pháp: kiểm thử hộp đen (Black-box), dựa trên yêu cầu ch�
 >
 > Test tự động chỉ kiểm **hành vi** (đăng nhập được hay không, có tạo tài khoản hay
 > không), không kiểm câu chữ thông báo, vì cột *Kết quả mong đợi* của TC_02 và TC_04
-> không khớp mã nguồn: sai mật khẩu thì code báo `User does not exist. Please try
-> again.` (tiếng Anh, không qua `gettext`); trùng email thì là thông báo mặc định của
-> Django cho trường `email` duy nhất. Câu chữ thông báo chốt khi viết acceptance
-> criteria (P-23). Danh sách test và độ phủ: [`PLAN.md`](PLAN.md) P-12, P-13.
+> không khớp mã nguồn: lúc viết test, sai mật khẩu thì code báo `User does not
+> exist. Please try again.` (tiếng Anh, không qua `gettext`); trùng email thì là
+> thông báo mặc định của Django cho trường `email` duy nhất. Từ L-52 (05/11/2026),
+> email chưa đăng ký và mật khẩu sai cùng nhận câu "Email hoặc mật khẩu không
+> đúng."; acceptance criteria của UC-02 (AC-2.4, §6.3) chốt điều đó là *cùng một
+> câu*, không chốt câu chữ. Danh sách test và độ phủ: [`PLAN.md`](PLAN.md) P-12, P-13.
 
 ---
 
