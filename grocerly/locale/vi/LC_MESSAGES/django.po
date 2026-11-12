@@ -1559,6 +1559,9 @@ msgstr "Yêu thích"
 msgid "Would you like to add **%(qty)sx %(title)s** to your cart?"
 msgstr "Bạn có muốn thêm **%(qty)sx %(title)s** vào giỏ hàng không?"
 
+msgid "Write your review"
+msgstr "Viết đánh giá của bạn"
+
 msgid "Wrong email or password."
 msgstr "Email hoặc mật khẩu không đúng."
 
@@ -1803,3 +1806,7 @@ msgstr ""
 #. Django's own msgid; its vi catalog lacks it (L-57)
 msgid "Null characters are not allowed."
 msgstr "Không được chứa ký tự rỗng (null)."
+
+#. Django's own msgid; its vi catalog puts a space before the full stop (L-64)
+msgid "Ensure this value is greater than or equal to %(limit_value)s."
+msgstr "Đảm bảo giá trị này lớn hơn hoặc bằng với %(limit_value)s."

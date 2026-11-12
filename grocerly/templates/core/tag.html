@@ -40,9 +40,11 @@
                                         <a aria-label="{% trans 'Quick view' %}" class="action-btn small hover-up" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
                                         <a aria-label="{% trans 'Add to wishlist' %}" class="action-btn small hover-up add-to-wishlist" href="#" data-product-id="{{ p.id }}"><i class="fi-rs-heart{% if p.id in wishlist_product_ids %} text-danger{% endif %}"></i></a>
                                     </div>
+                                    {% if p.get_percentage > 0 %}
                                     <div class="product-badges product-badges-position product-badges-mrg">
                                         <span class="hot">-{{ p.get_percentage|floatformat:0 }}%</span>
                                     </div>
+                                    {% endif %}
                                 </div>
                                 <div class="product-content-wrap">
                                     <div class="product-category">
@@ -63,7 +65,7 @@
                                     <div class="product-card-bottom">
                                         <div class="product-price">
                                             <span>{{ p.price|vnd }} ₫</span>
-                                            <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                            {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                         </div>
                                     </div>
                                 </div>

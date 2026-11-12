@@ -225,7 +225,6 @@ def test_field_errors_from_django_are_in_vietnamese(check, value):
     assert VIETNAMESE.search(error.value.messages[0])
 
 
-@pytest.mark.xfail(reason="L-64: Django's vi catalog puts a space before the full stop")
 def test_minimum_value_error_has_no_space_before_the_full_stop():
     """L-64: a negative price on the staff product form. Django's vi catalog writes
     "lớn hơn hoặc bằng với 0 ." with a space before the full stop."""
@@ -235,7 +234,6 @@ def test_minimum_value_error_has_no_space_before_the_full_stop():
     assert " ." not in error.value.messages[0]
 
 
-@pytest.mark.xfail(reason="L-62: the review box placeholder is not marked for translation")
 def test_review_box_placeholder_is_in_the_language_of_the_page():
     """L-62, UC-14: the review form sits in a tab hidden on load and shows only to a
     customer who received the product, so the page comparison below never reads it.

@@ -90,7 +90,7 @@
                                 <p class="mt-15 mb-15">{{ p.description|default:_("No description yet.") }}</p>
                                 <div class="product-price">
                                     <span class="current-product-price-{{ p.id }}">{{ p.price|vnd }}</span><span> ₫</span>
-                                    <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                    {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                 </div>
                                 <div class="mt-30 d-flex align-items-center">
                                     <input type="hidden" value="1" class="product-quantity-{{ p.id }}">

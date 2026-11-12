@@ -66,9 +66,11 @@
                                                     </a>
                                                     <a aria-label="{% trans 'Quick view' %}" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
                                                 </div>
+                                                {% if p.get_percentage > 0 %}
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                     <span class="hot">-{{ p.get_percentage }}%</span>
                                                 </div>
+                                                {% endif %}
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
@@ -89,7 +91,7 @@
                                                 <div class="product-card-bottom">
                                                     <div class="product-price">
                                                         <span class="current-product-price-{{ p.id }}">{{ p.price|vnd }}</span><span> ₫</span>
-                                                        <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                                        {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                                     </div>
                                                     <div class="add-cart">
                                                         <input type="hidden" value="1" class="product-quantity-{{ p.id }}">
@@ -127,9 +129,11 @@
                                                     </a>
                                                     <a aria-label="{% trans 'Quick view' %}" class="action-btn" href="{% url 'core:product-detail' p.p_id %}"><i class="fi-rs-eye"></i></a>
                                                 </div>
+                                                {% if p.get_percentage > 0 %}
                                                 <div class="product-badges product-badges-position product-badges-mrg">
                                                     <span class="hot">-{{ p.get_percentage }}%</span>
                                                 </div>
+                                                {% endif %}
                                             </div>
                                             <div class="product-content-wrap">
                                                 <div class="product-category">
@@ -148,7 +152,7 @@
                                                 <div class="product-card-bottom">
                                                     <div class="product-price">
                                                         <span class="current-product-price-{{ p.id }}">{{ p.price|vnd }}</span><span> ₫</span>
-                                                        <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                                        {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                                     </div>
                                                     <div class="add-cart">
                                                         <input type="hidden" value="1" class="product-quantity-{{ p.id }}">
@@ -201,7 +205,7 @@
                                             <div class="product-card-bottom">
                                                 <div class="product-price">
                                                     <span>{{ p.price|vnd }} ₫</span>
-                                                    <span class="old-price">{{ p.old_price|vnd }} ₫</span>
+                                                    {% if p.get_percentage > 0 %}<span class="old-price">{{ p.old_price|vnd }} ₫</span>{% endif %}
                                                 </div>
                                                 <div class="add-cart">
                                                     <input type="hidden" value="1" class="product-quantity-{{ p.id }}">

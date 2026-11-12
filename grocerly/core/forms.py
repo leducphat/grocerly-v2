@@ -1,10 +1,11 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from core.models import CartOrder, ProductReview
 from userauths.models import ContactUs
 
 
 class ProductReviewForm(forms.ModelForm):
-    review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': 'Write your review'}))
+    review = forms.CharField(widget=forms.Textarea(attrs={'placeholder': _('Write your review')}))
 
     class Meta:
         model = ProductReview
