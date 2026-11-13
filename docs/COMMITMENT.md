@@ -1,8 +1,8 @@
 # BẢN CAM KẾT SẢN PHẨM — Grocerly (KLTN)
 
 > **⚠️ BẢN NHÁP — chưa ký.** Soạn ngày 10/09/2026 để trao đổi với GVHD. Phần
-> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) mới có mục
-> chất lượng mã nguồn (§5.1, soạn ngày 24/09/2026).
+> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) có mục chất
+> lượng mã nguồn (§5.1, soạn ngày 24/09/2026) và KPI nghiệp vụ (§5.2, 12/11/2026).
 
 | | |
 |---|---|
@@ -65,7 +65,7 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
 | CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | UC-28 | Có |
-| CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
+| CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Lệch (L-72) |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
 | CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | Có |
@@ -118,7 +118,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44).
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
@@ -190,14 +190,37 @@ không cam kết ngưỡng.
 
 Kiểm tra lại được bằng hai lệnh chạy trong `grocerly/`: `ruff check .` và `jscpd .`.
 
-### 5.2 Các phần còn lại
+### 5.2 KPI nghiệp vụ (TC1)
+
+Ba KPI, nhắm Mức 3-4 của TC1. Cả ba đo cái khách nhận được khi mua hàng, không đo
+mã nguồn. KPI đầu đã có số đo; hai KPI sau đo trong buổi thực nghiệm người dùng
+(P-25, dự kiến Tuần 11), nên hiện chỉ có ngưỡng. Ngưỡng ở đây là đề xuất, chốt khi
+trình GVHD.
+
+| KPI | Cách đo | Ngưỡng | Số đo 12/11/2026 |
+|---|---|---|---|
+| Trợ lý AI đề nghị đúng sản phẩm và số lượng | 30 câu mẫu trên một danh mục 14 sản phẩm cố định, Gemini thật, `python ai_eval/run_eval.py` (D-062); tính trên mọi lượt chạy trong kỳ | ≥ 85% câu đúng, và ≤ 2/30 câu có đề nghị sai | 28/30 (93,3%) ở cả hai lượt, 1/30 đề nghị sai |
+| Người thử tự đặt xong đơn | Mỗi người thử làm một tác vụ mua hàng có trợ lý AI, không được ai chỉ; đơn tạo ra trong database là xong | ≥ 60% số người thử | Chưa đo |
+| Thời gian từ lúc tìm sản phẩm tới lúc đặt hàng | Bấm giờ trong cùng tác vụ trên, từ khi mở trang tới khi thấy trang đặt hàng thành công; lấy trung vị | ≤ 5 phút | Chưa đo |
+
+Vài điều về KPI đầu. "Đề nghị sai" là khi khách thấy nút xác nhận với sai sản phẩm
+hay sai số lượng; đó là lỗi đáng ngại, nên có ngưỡng riêng. Câu trượt vì Gemini hỏi
+lại bằng lời thì khách không thấy gì sai. Ngưỡng 85% thấp hơn số đo vì Gemini trả lời
+mỗi lần một khác, và số đo đi qua cả việc chuyển sang model dự phòng khi model đầu
+quá tải (D-060), y như trên host. Ngoài bộ cố định, 12 câu hợp với danh mục thật của
+host cũng được thử ngày 12/11/2026, chỉ chat, không bấm xác nhận: 12/12.
+
+KPI thứ hai lấy ngưỡng theo Mức 3 của TC2.7 (tác vụ thành công ≥ 60%), vì buổi thực
+nghiệm có khoảng 3-5 người, mỗi người lệch một là 20-33%. Ngưỡng 5 phút của KPI thứ
+ba là ước lượng, chưa có ai bấm giờ cả tác vụ: số đo gần nhất chỉ là mỗi tin nhắn
+với trợ lý trên host mất 1 - 15 giây (lượt đối chiếu 12/11/2026), phần lớn thời gian
+còn lại là người lần đầu dùng trang tự tìm đường. Số đo lệch
+xa ngưỡng thì ghi vào hạn chế, không đổi ngưỡng sau khi đã đo.
+
+### 5.3 Các phần còn lại
 
 Sẽ bổ sung trước khi trình ký. Khung dự kiến:
 
-- **KPI nghiệp vụ** (2-3 KPI định lượng, đủ Mức 3-4 của TC1): ví dụ tỉ lệ trợ lý
-  AI chọn đúng sản phẩm và số lượng trên bộ 20-30 câu mẫu (P-42), tỉ lệ người thử
-  tự đặt xong đơn trong buổi thực nghiệm, thời gian từ lúc tìm sản phẩm tới lúc
-  đặt hàng.
 - **Metric kỹ thuật** theo rubric Mục 5 — độ phủ test, số chặng CI/CD, số lần
   deploy, tỉ lệ build xanh, lỗi lint, secret lộ, người dùng thực nghiệm, SUS.
   Rubric cho phép điều chỉnh ngưỡng tại bước này.

@@ -18,13 +18,13 @@ Hiện trạng của nó trong [`COMMITMENT.md`](COMMITMENT.md) §2 đổi thàn
 Sửa xong thì ghi cách sửa vào cột cuối, gỡ `xfail` trong cùng commit, và trả cột
 Hiện trạng về `Có`.
 
-**Hiện trạng 12/11/2026:** 71 mục, đã xử lý 70. Sáu mục chốt bằng cách sửa đặc tả
+**Hiện trạng 13/11/2026:** 72 mục, đã xử lý 70. Sáu mục chốt bằng cách sửa đặc tả
 (L-1, L-2, L-4, L-33, L-68, L-70; riêng L-68 có sửa code ở phần tiền), 64 mục bằng cách sửa code, trong đó có cả sáu lỗi nặng. Chín lỗi
 form của P-45 (L-45, L-46, L-48 → L-54) và bảy lỗi của P-46 (L-47, L-55 → L-60) sửa ngày
 05/11/2026, deploy qua PR #23 và thử trên host cùng ngày bằng tài khoản demo; riêng trang
 đặt mật khẩu mới của L-46 chưa thử trên host vì cần link thật trong thư. Năm lỗi nhỏ L-61 → L-65
-(P-47) sửa ngày 12/11/2026, deploy qua PR #27 và thử trên host cùng ngày: hết thanh cuộn ngang, hết 404 file tĩnh, nút thanh bên của trang nhân viên chạy. Còn mở một: L-24 (đọc rồi ghi không khóa,
-chưa xảy ra vì host chạy một worker).
+(P-47) sửa ngày 12/11/2026, deploy qua PR #27 và thử trên host cùng ngày: hết thanh cuộn ngang, hết 404 file tĩnh, nút thanh bên của trang nhân viên chạy. Còn mở hai: L-24 (đọc rồi ghi không khóa,
+chưa xảy ra vì host chạy một worker) và L-72 (giỏ hàng nhận sản phẩm đã gỡ bán, thấy 13/11/2026).
 ---
 
 ## 1. Danh sách
@@ -106,6 +106,7 @@ bảo vệ.
 | **L-69** | UC-25: quản trị viên tra cứu đơn để đối soát; UC-20: đơn chỉ đi tới từng bước, tồn kho trừ một lần (D-026, D-032, D-033) | `CartOrderAdmin` và `CartOrderItemsAdmin` cho sửa mọi ô: quản trị viên lùi được đơn đã giao về đang xử lý, tự ghi đơn VNPay là đã thanh toán, sửa giá đơn, số lượng và thành tiền của dòng đơn, hay thêm đơn bằng tay, không qua ràng buộc nào của trang nhân viên. L-40 mới chặn xóa | ✅ **Đã sửa 06/11/2026, thử đạt trên host** (D-059). Hai lớp admin trả `False` ở `has_add_permission` và `has_change_permission`: trang vẫn mở, Django in ở dạng chỉ đọc, không có nút Lưu, và bỏ qua thay đổi gửi thẳng. Đổi trạng thái chỉ qua trang nhân viên. Bốn test mới trong `core/tests/test_order_admin.py`; hai test gửi form phải điền đủ ô bắt buộc (`saved`, `image`) thì mới đỏ trên code cũ (`AI_USAGE_LOG.md` lỗi #68). Thử trên host ngày 06/11/2026 (PR #24) với tài khoản quản trị: trang đơn và dòng đơn mở được, chỉ còn nút Đóng; trang thêm đơn và thêm dòng đơn trả 403; yêu cầu sửa đơn gửi thẳng trả 403, đơn giữ nguyên trạng thái, cờ đã thanh toán và giá |
 | **L-70** | UC-22 (TLCN): quản trị viên tạo tài khoản nhân viên, gửi email hàng loạt, không tự khóa được tài khoản của chính mình | `userauths/admin.py` đăng ký `User` bằng `ModelAdmin` thường, không phải `UserAdmin` của Django: ô mật khẩu là chuỗi đã băm, gõ mật khẩu thường vào đó thì tài khoản không đăng nhập được, nên quản trị viên không đặt được mật khẩu cho nhân viên mới. Không có gửi email hàng loạt. Quản trị viên tự bỏ quyền hay tự khóa được chính mình, và xóa hẳn được người dùng (đơn và đánh giá giữ lại vì khóa ngoại `SET_NULL`) | ✅ **Đã chốt 06/11/2026 - sửa đặc tả** (D-059). Đặc tả viết theo cách làm thật: người được nhận làm nhân viên tự đăng ký như khách, quản trị viên bật quyền nhân viên; bỏ gửi email hàng loạt và "không tự khóa được". Ô mật khẩu băm, tự khóa và xóa hẳn tài khoản ghi vào hạn chế (SRS §8). Không đổi code |
 | **L-71** | UC-19: nhân viên nhập thông tin sản phẩm; trang chi tiết in cách bảo quản, trợ lý AI đọc khối lượng *(mặc định: thông tin đúng với sản phẩm)* | Commit TLCN `d14713c` (16/04/2026) thêm `weight_volume`, `ingredients`, `storage_instructions` vào model và `AddProductForm`, nhưng trang thêm và trang sửa sản phẩm không in ô của ba trường. Ô không có trên trang thì không có trong POST, và Django giữ mặc định của model: mọi sản phẩm là "1 kg" và "Bảo quản nơi khô ráo, thoáng mát", nhân viên không sửa được. Trên host cả 7 sản phẩm như vậy, kể cả "Rau mồng tơi 400gr" và lon Coca; trợ lý AI báo dưa hấu "33.000 VND/kg", trang chi tiết bảo đùi bò và chân giò để nơi khô ráo. Thấy ngày 12/11/2026 khi đo trợ lý trên host (P-42 phần d) | ✅ **Đã sửa 12/11/2026, thử đạt trên host** (D-063, PR #28; xem P-49 ở PLAN). Hai template in ba ô, nhãn mới có bản dịch. `weight_volume` bỏ mặc định "1 kg" (migration `core/0012`, trên PostgreSQL không sinh câu SQL nào); mặc định của câu bảo quản giữ nguyên: ô bảo quản ở trang thêm điền sẵn câu đó, nhân viên sửa được cho hàng tươi. Sáu test mới trong `useradmin/tests/test_products.py`, bốn ca đỏ trên code cũ. Sau deploy, khối lượng của 7 sản phẩm và câu bảo quản của đùi bò, chân giò, rau mồng tơi được ghi lại qua trang sửa sản phẩm; trợ lý thôi báo giá theo kg |
+| **L-72** | UC-06: sản phẩm bị gỡ bán khi đang nằm trong giỏ thì dòng đó bị bỏ khỏi giỏ ở lần khách mở giỏ kế tiếp (SRS §6.1); điều kiện trước của UC-06 là sản phẩm đang bán | `add_to_cart` tìm sản phẩm bằng `Product.objects.filter(id=...)` và `_refresh_cart` đọc lại các dòng giỏ cũng vậy: manager mặc định chỉ ẩn sản phẩm đã xóa mềm, không lọc `product_status`. Sản phẩm nháp, đã tắt, chờ duyệt hay bị từ chối vẫn thêm được vào giỏ nếu gửi đúng `id`, dòng đã có trong giỏ thì ở lại khi sản phẩm bị tắt, và `save_checkout_info` cũng dựa vào `_refresh_cart` nên đơn hàng tạo được với sản phẩm đó. L-66 chỉ sửa các trang hiển thị. Thấy ngày 13/11/2026 khi đọc code giỏ hàng để vẽ lược đồ tuần tự (P-24) | Mở. Năm ca `xfail` trong `core/tests/test_cart.py`: thêm vào giỏ sản phẩm ở bốn trạng thái ẩn phải trả 404, và dòng giỏ của sản phẩm bị tắt sau khi thêm phải bị bỏ khi mở trang giỏ |
 
 ---
 
@@ -302,3 +303,6 @@ xuất hiện ở bất kỳ danh sách nào" mà chưa đối chiếu với tem
 L-71 lộ ra ngày 12/11/2026, khi đo trợ lý AI trên host (P-42 phần d). Trợ lý báo giá dưa hấu theo kg,
 đúng như lượt chạy thử ở local đã làm khi danh mục thử quên ghi khối lượng. Lúc đầu AI đoán form điền sẵn
 "1 kg" mà nhân viên không sửa; đọc template mới thấy trang không có ô nào để sửa (`AI_USAGE_LOG.md` lỗi #79).
+
+L-72 lộ ra ngày 13/11/2026, khi đọc `add_to_cart` và `_refresh_cart` để vẽ lược đồ tuần tự cho giỏ hàng (P-24).
+Lược đồ vẽ theo code hiện tại, nên sửa xong lỗi thì bốn lược đồ giỏ hàng trong báo cáo (mục 3.3.9) phải đổi nhãn truy vấn theo.

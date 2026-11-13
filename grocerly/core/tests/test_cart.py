@@ -247,3 +247,32 @@ def test_page_scripts_send_the_csrf_token_of_the_page(client):
     response = client.get("/vi/")
 
     assert f"'X-CSRFToken': '{response.context['csrf_token']}'" in response.content.decode()
+
+
+# L-72: a product the admin took off sale (any status but 'published') is not for sale,
+# so it cannot be added, and a line already in the cart is dropped (UC-06, SRS §6.1).
+OFF_SALE_STATUSES = ["draft", "disabled", "in_review", "rejected"]
+
+
+@pytest.mark.xfail(reason="L-72: add_to_cart only skips soft-deleted products, not ones off sale")
+@pytest.mark.parametrize("status", OFF_SALE_STATUSES)
+def test_add_to_cart_rejects_product_off_sale(client, product, add_to_cart, status):
+    product.product_status = status
+    product.save()
+
+    response = add_to_cart(client, product)
+
+    assert response.status_code == 404
+    assert cart_lines(client) == {}
+
+
+@pytest.mark.xfail(reason="L-72: _refresh_cart only drops soft-deleted products, not ones off sale")
+def test_cart_drops_line_of_product_turned_off_after_adding(client, product, add_to_cart):
+    add_to_cart(client, product)
+
+    product.product_status = "disabled"
+    product.save()
+    response = client.get(reverse("core:cart"))
+
+    assert cart_lines(client) == {}
+    assert response.url == reverse("core:index")  # nothing left to show
