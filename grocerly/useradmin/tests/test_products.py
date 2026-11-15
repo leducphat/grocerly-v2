@@ -497,3 +497,18 @@ def test_edit_product_rejects_a_negative_number(staff_client, stocked_product, c
 
     stocked_product.refresh_from_db()
     assert getattr(stocked_product, field) == before
+
+
+@pytest.mark.xfail(reason="L-75: the stock box on the product list saves a negative number", strict=True)
+def test_stock_box_on_the_list_rejects_a_negative_number(staff_client, stocked_product):
+    # UC-19, SRS §6.1: stock is never negative (L-53). The add and edit forms refuse
+    # it; the box on each row of /useradmin/products/ goes through update_stock.
+    before = stocked_product.stock_count
+
+    response = staff_client.post(
+        reverse("useradmin:update_stock"), {"pid": stocked_product.p_id, "stock_count": "-3"}
+    )
+
+    stocked_product.refresh_from_db()
+    assert response.json()["bool"] is False
+    assert stocked_product.stock_count == before
