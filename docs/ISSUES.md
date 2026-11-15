@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Nguồn gốc | Tách từ [`COMMITMENT.md`](COMMITMENT.md) §3 ngày 03/11/2026 (D-046); bảng và ghi chú chuyển nguyên văn |
-| Cập nhật | 12/11/2026 |
+| Cập nhật | 15/11/2026 |
 
 Mỗi mục mang một mã L-x, đánh theo thứ tự phát hiện và không dùng lại. Sổ gồm cả
 chỗ đặc tả TLCN nói khác mã nguồn (L-1, L-2, L-4) lẫn lỗi tìm thấy khi viết test,
@@ -18,13 +18,13 @@ Hiện trạng của nó trong [`COMMITMENT.md`](COMMITMENT.md) §2 đổi thàn
 Sửa xong thì ghi cách sửa vào cột cuối, gỡ `xfail` trong cùng commit, và trả cột
 Hiện trạng về `Có`.
 
-**Hiện trạng 13/11/2026:** 72 mục, đã xử lý 70. Sáu mục chốt bằng cách sửa đặc tả
-(L-1, L-2, L-4, L-33, L-68, L-70; riêng L-68 có sửa code ở phần tiền), 64 mục bằng cách sửa code, trong đó có cả sáu lỗi nặng. Chín lỗi
+**Hiện trạng 15/11/2026:** 74 mục, đã xử lý 71. Sáu mục chốt bằng cách sửa đặc tả
+(L-1, L-2, L-4, L-33, L-68, L-70; riêng L-68 có sửa code ở phần tiền), 64 mục bằng cách sửa code, trong đó có cả sáu lỗi nặng; L-73 là sự cố của host, chỉ ghi nhận. Chín lỗi
 form của P-45 (L-45, L-46, L-48 → L-54) và bảy lỗi của P-46 (L-47, L-55 → L-60) sửa ngày
 05/11/2026, deploy qua PR #23 và thử trên host cùng ngày bằng tài khoản demo; riêng trang
 đặt mật khẩu mới của L-46 chưa thử trên host vì cần link thật trong thư. Năm lỗi nhỏ L-61 → L-65
-(P-47) sửa ngày 12/11/2026, deploy qua PR #27 và thử trên host cùng ngày: hết thanh cuộn ngang, hết 404 file tĩnh, nút thanh bên của trang nhân viên chạy. Còn mở hai: L-24 (đọc rồi ghi không khóa,
-chưa xảy ra vì host chạy một worker) và L-72 (giỏ hàng nhận sản phẩm đã gỡ bán, thấy 13/11/2026).
+(P-47) sửa ngày 12/11/2026, deploy qua PR #27 và thử trên host cùng ngày: hết thanh cuộn ngang, hết 404 file tĩnh, nút thanh bên của trang nhân viên chạy. Còn mở ba: L-24 (đọc rồi ghi không khóa,
+chưa xảy ra vì host chạy một worker), L-72 (giỏ hàng nhận sản phẩm đã gỡ bán, thấy 13/11/2026) và L-74 (trợ lý AI mời thanh toán khi giỏ chỉ còn hàng vừa hết, thấy 14/11/2026).
 ---
 
 ## 1. Danh sách
@@ -107,6 +107,8 @@ bảo vệ.
 | **L-70** | UC-22 (TLCN): quản trị viên tạo tài khoản nhân viên, gửi email hàng loạt, không tự khóa được tài khoản của chính mình | `userauths/admin.py` đăng ký `User` bằng `ModelAdmin` thường, không phải `UserAdmin` của Django: ô mật khẩu là chuỗi đã băm, gõ mật khẩu thường vào đó thì tài khoản không đăng nhập được, nên quản trị viên không đặt được mật khẩu cho nhân viên mới. Không có gửi email hàng loạt. Quản trị viên tự bỏ quyền hay tự khóa được chính mình, và xóa hẳn được người dùng (đơn và đánh giá giữ lại vì khóa ngoại `SET_NULL`) | ✅ **Đã chốt 06/11/2026 - sửa đặc tả** (D-059). Đặc tả viết theo cách làm thật: người được nhận làm nhân viên tự đăng ký như khách, quản trị viên bật quyền nhân viên; bỏ gửi email hàng loạt và "không tự khóa được". Ô mật khẩu băm, tự khóa và xóa hẳn tài khoản ghi vào hạn chế (SRS §8). Không đổi code |
 | **L-71** | UC-19: nhân viên nhập thông tin sản phẩm; trang chi tiết in cách bảo quản, trợ lý AI đọc khối lượng *(mặc định: thông tin đúng với sản phẩm)* | Commit TLCN `d14713c` (16/04/2026) thêm `weight_volume`, `ingredients`, `storage_instructions` vào model và `AddProductForm`, nhưng trang thêm và trang sửa sản phẩm không in ô của ba trường. Ô không có trên trang thì không có trong POST, và Django giữ mặc định của model: mọi sản phẩm là "1 kg" và "Bảo quản nơi khô ráo, thoáng mát", nhân viên không sửa được. Trên host cả 7 sản phẩm như vậy, kể cả "Rau mồng tơi 400gr" và lon Coca; trợ lý AI báo dưa hấu "33.000 VND/kg", trang chi tiết bảo đùi bò và chân giò để nơi khô ráo. Thấy ngày 12/11/2026 khi đo trợ lý trên host (P-42 phần d) | ✅ **Đã sửa 12/11/2026, thử đạt trên host** (D-063, PR #28; xem P-49 ở PLAN). Hai template in ba ô, nhãn mới có bản dịch. `weight_volume` bỏ mặc định "1 kg" (migration `core/0012`, trên PostgreSQL không sinh câu SQL nào); mặc định của câu bảo quản giữ nguyên: ô bảo quản ở trang thêm điền sẵn câu đó, nhân viên sửa được cho hàng tươi. Sáu test mới trong `useradmin/tests/test_products.py`, bốn ca đỏ trên code cũ. Sau deploy, khối lượng của 7 sản phẩm và câu bảo quản của đùi bò, chân giò, rau mồng tơi được ghi lại qua trang sửa sản phẩm; trợ lý thôi báo giá theo kg |
 | **L-72** | UC-06: sản phẩm bị gỡ bán khi đang nằm trong giỏ thì dòng đó bị bỏ khỏi giỏ ở lần khách mở giỏ kế tiếp (SRS §6.1); điều kiện trước của UC-06 là sản phẩm đang bán | `add_to_cart` tìm sản phẩm bằng `Product.objects.filter(id=...)` và `_refresh_cart` đọc lại các dòng giỏ cũng vậy: manager mặc định chỉ ẩn sản phẩm đã xóa mềm, không lọc `product_status`. Sản phẩm nháp, đã tắt, chờ duyệt hay bị từ chối vẫn thêm được vào giỏ nếu gửi đúng `id`, dòng đã có trong giỏ thì ở lại khi sản phẩm bị tắt, và `save_checkout_info` cũng dựa vào `_refresh_cart` nên đơn hàng tạo được với sản phẩm đó. L-66 chỉ sửa các trang hiển thị. Thấy ngày 13/11/2026 khi đọc code giỏ hàng để vẽ lược đồ tuần tự (P-24) | Mở. Năm ca `xfail` trong `core/tests/test_cart.py`: thêm vào giỏ sản phẩm ở bốn trạng thái ẩn phải trả 404, và dòng giỏ của sản phẩm bị tắt sau khi thêm phải bị bỏ khi mở trang giỏ |
+| **L-73** | Site truy cập được *(mặc định)*; health check theo lịch (D-053) báo khi host không trả lời | Ngày 08/11/2026 cả ba lần chạy theo lịch của `health.yml` đều đỏ: 02:32, 10:29 và 17:06 UTC, tức 09:32, 17:29 ngày 08/11 và 00:06 ngày 09/11 giờ Việt Nam, nên GitHub báo lỗi vào ngày 09/11. Lần nào cũng sáu lượt gọi, lượt nào cũng `curl: (28) Operation timed out after 90002 milliseconds with 0 bytes received` (HTTP 000): Render không trả cả trang báo đang khởi động. Log Render: instance ngủ lúc 23:03 UTC ngày 07/11 sau lần kiểm xanh lúc 22:48, rồi tới 21:13 UTC ngày 08/11 mới có dòng tiếp theo, là gunicorn khởi động khi lần kiểm kế tiếp gọi tới, và lần đó xanh. Trong khoảng ấy không có dòng log nào, danh sách sự kiện của service trống (không deploy, không restart, không `server_failed`), trang trạng thái của Render không ghi sự cố nào ngày 07 - 09/11 | ✅ **Đã chốt 13/11/2026 - không sửa code.** Request không tới được Django: gunicorn không được khởi động lần nào, nên đây là lỗi đánh thức instance ở phía Render, gói free, không có thông báo công khai. Lỗi ở code thì log phải có gunicorn khởi động rồi chết hay trả 500. Health check làm đúng việc: bắt được một lần site thật sự không truy cập được, và thư báo lỗi của GitHub tới hộp thư sinh viên. Thời điểm sập chỉ khoanh được trong khoảng 22:48 UTC ngày 07/11 tới 21:12 UTC ngày 08/11, vì GitHub không chạy lịch mỗi giờ như cron ghi (xem ghi chú §2) |
+| **L-74** | UC-18: giỏ trống, kể cả giỏ vừa bị bỏ hết các dòng hết hàng, thì trợ lý nhắc chọn hàng trước, không đưa nút thanh toán (SRS §6.1, AC-18.2) | Nhánh `request_checkout` của `ai_chat` chỉ xem trong phiên còn `cart_data_obj` hay không, không gọi `_refresh_cart` như trang giỏ hàng và trang thông tin giao hàng. Dòng giỏ của sản phẩm đã hết hàng hay đã bị xóa chỉ bị bỏ khi một trang nào đó tính lại giỏ, nên nếu sản phẩm duy nhất trong giỏ vừa hết hàng mà khách nhờ trợ lý thanh toán trước khi mở lại trang giỏ, khung chat vẫn hiện nút Tiến hành thanh toán. Bấm nút thì trang giỏ tính lại, thấy trống và đưa về trang chủ, nên không tạo được đơn sai; lỗi là trợ lý mời thanh toán một giỏ không còn gì để mua. L-41 chỉ sửa ca giỏ đã rỗng trong phiên. Thấy ngày 14/11/2026 khi đọc code để vẽ lược đồ tuần tự Nhờ AI dẫn tới thanh toán (P-24) | Mở. Hai ca `xfail` trong `store_api/tests/test_ai_chat.py`: sản phẩm duy nhất trong giỏ hết hàng, hoặc bị xóa mềm, sau khi đã thêm vào giỏ; trợ lý phải báo Gemini giỏ trống và không trả `confirm_checkout`. Thử gọi `_refresh_cart` trước khi xem giỏ thì cả hai ca xanh (chưa giữ lại cách sửa) |
 
 ---
 
@@ -306,3 +308,12 @@ L-71 lộ ra ngày 12/11/2026, khi đo trợ lý AI trên host (P-42 phần d). 
 
 L-72 lộ ra ngày 13/11/2026, khi đọc `add_to_cart` và `_refresh_cart` để vẽ lược đồ tuần tự cho giỏ hàng (P-24).
 Lược đồ vẽ theo code hiện tại, nên sửa xong lỗi thì bốn lược đồ giỏ hàng trong báo cáo (mục 3.3.9) phải đổi nhãn truy vấn theo.
+
+L-73 lộ ra ngày 13/11/2026, khi sinh viên nhận thư GitHub báo health check đỏ ngày 09/11 và nhờ tìm lý do. Đếm lại lịch sử
+chạy lúc đó mới thấy dòng cron `17 * * * *` không được GitHub chạy mỗi giờ: từ lần chạy theo lịch đầu tiên (20:50 UTC ngày
+04/11) tới 09:38 UTC ngày 13/11 chỉ có 32 lần, hai lần liền nhau cách từ 3,7 tới 10,8 giờ, trung vị 7,1 giờ. GitHub nói rõ
+lịch có thể bị trễ hoặc bỏ qua khi tải cao, nên giả định "chậm nhất khoảng một giờ sau mới có thư" trong D-053 không đúng.
+Trong 32 lần có 29 lần xanh và 3 lần đỏ, cả ba thuộc L-73.
+
+L-74 lộ ra ngày 14/11/2026, khi đọc nhánh `request_checkout` để vẽ lược đồ tuần tự cho use case Nhờ AI dẫn tới thanh toán (P-24).
+Lược đồ vẽ theo code hiện tại, nên sửa xong lỗi thì lược đồ đó (mục 3.3.20 của báo cáo) phải thêm bước tính lại giỏ trước khung `alt`.

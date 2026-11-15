@@ -2405,7 +2405,7 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 **Hệ quả.**
 - GitHub chỉ chạy lịch từ nhánh mặc định, nên việc kiểm bắt đầu sau khi file vào `main`. Thư báo lỗi gửi cho người sửa dòng cron gần nhất. Repo public không có hoạt động 60 ngày thì GitHub tự tắt lịch.
 - View health không đọc database, nên Neon hỏng thì vẫn trả 200. Lần kiểm này chỉ cho biết server trên Render còn chạy và chạy commit nào; lỗi 500 vẫn xem ở log Render.
-- Host hỏng thì chậm nhất khoảng một giờ sau mới có thư.
+- Host hỏng thì chậm nhất khoảng một giờ sau mới có thư. *Sửa 13/11/2026:* giả định này sai. GitHub không chạy lịch mỗi giờ: 32 lần chạy theo lịch từ 04/11 tới 13/11/2026 cách nhau 3,7 tới 10,8 giờ, trung vị 7,1 giờ (`ISSUES.md` L-73). Thư báo có thể tới sau nửa ngày, và lịch sử chạy không dùng để tính thời gian hoạt động theo giờ được.
 - Mỗi lần chạy đánh thức host, nên người vào trang ngay sau đó không phải chờ khởi động.
 
 ## D-054 · Lỗi của form in dưới từng ô bằng một template con dùng chung

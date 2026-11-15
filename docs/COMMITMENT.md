@@ -81,7 +81,7 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-16 | Hỏi đáp, tư vấn bằng ngôn ngữ tự nhiên | UC-15 | Có |
 | CN-17 | AI tìm sản phẩm còn hàng theo nhu cầu | UC-16 | Có |
 | CN-18 | AI đề xuất thêm vào giỏ — chỉ thêm khi người dùng xác nhận | UC-17 | Có |
-| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Có |
+| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Lệch (L-74) |
 
 *Công cụ `get_bestsellers` (gợi ý sản phẩm "nổi bật") vẫn còn trong mã nguồn nhưng
 **không thuộc cam kết**: nó chỉ lấy sản phẩm gắn cờ `featured` thủ công, không tính
@@ -118,7 +118,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`.
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
