@@ -1355,6 +1355,14 @@ template được ghi thẳng vào bản cam kết (§5.1) để GVHD thấy tr�
   `invoice.html`, hóa đơn in được: tính năng mới, ngoài phạm vi, còn xem chi tiết đơn
   (CN-14) đã chạy bằng `order-detail.html`. SV quyết xóa cả 13 file ngày 24/09/2026;
   cần lại thì lấy từ `b4a1600`. Sau khi xóa: 49 template, 7.704 dòng, trùng 26,6%.
+- **16/11/2026, đổi cách ghi:** bản cam kết trình ký không ghi số đo template nữa,
+  chỉ ghi phạm vi (Python, không tính migration, test và template). Lý do: template
+  không phải metric nên con số không cần trong văn bản ký; câu cũ "phần lớn là HTML
+  chép từ bộ giao diện mẫu" cũng sai. Đo lại cùng ngày: 49 file, 5.705 dòng theo
+  cách đếm của jscpd, 95 khối, trùng 19,7%. Phần trùng lớn nhất là giữa các trang của
+  chính đồ án: form thêm và sửa sản phẩm (198 dòng), thẻ sản phẩm lặp ở trang chủ, tìm
+  kiếm, tag và danh sách tải bằng AJAX, giỏ hàng lặp ở trang thanh toán, khung bốn
+  trang nội dung. Số này và nguyên nhân đưa vào mục hạn chế của báo cáo.
 - Wheel Linux của jscpd 5.2.1 cần glibc từ 2.34; `ubuntu-latest` hiện là Ubuntu
   24.04 với glibc 2.39.
 
