@@ -91,7 +91,10 @@ def test_cart_page_with_empty_cart_redirects_home(client):
 
 
 def test_cart_page_total_is_sum_of_quantity_times_price(client, product, add_to_cart):
-    milk = Product.objects.create(title="Sữa tươi", price=Decimal("32000.00"), stock_count=5)
+    # On sale: a product left in the default 'in_review' cannot go into the cart (L-72).
+    milk = Product.objects.create(
+        title="Sữa tươi", price=Decimal("32000.00"), stock_count=5, product_status="published"
+    )
     add_to_cart(client, product, qty=2)  # 2 x 25,000
     add_to_cart(client, milk, qty=1)  # 1 x 32,000
 
@@ -254,7 +257,6 @@ def test_page_scripts_send_the_csrf_token_of_the_page(client):
 OFF_SALE_STATUSES = ["draft", "disabled", "in_review", "rejected"]
 
 
-@pytest.mark.xfail(reason="L-72: add_to_cart only skips soft-deleted products, not ones off sale")
 @pytest.mark.parametrize("status", OFF_SALE_STATUSES)
 def test_add_to_cart_rejects_product_off_sale(client, product, add_to_cart, status):
     product.product_status = status
@@ -266,7 +268,6 @@ def test_add_to_cart_rejects_product_off_sale(client, product, add_to_cart, stat
     assert cart_lines(client) == {}
 
 
-@pytest.mark.xfail(reason="L-72: _refresh_cart only drops soft-deleted products, not ones off sale")
 def test_cart_drops_line_of_product_turned_off_after_adding(client, product, add_to_cart):
     add_to_cart(client, product)
 

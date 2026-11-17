@@ -67,7 +67,7 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
 | CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
 | CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | UC-28 | Có |
-| CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Lệch (L-72) |
+| CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
 | CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | Có |
@@ -83,7 +83,7 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-16 | Hỏi đáp, tư vấn bằng ngôn ngữ tự nhiên | UC-15 | Có |
 | CN-17 | AI tìm sản phẩm còn hàng theo nhu cầu | UC-16 | Có |
 | CN-18 | AI đề xuất thêm vào giỏ — chỉ thêm khi người dùng xác nhận | UC-17 | Có |
-| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Lệch (L-74) |
+| CN-19 | AI dẫn người dùng tới trang thanh toán | UC-18 | Có |
 
 *Công cụ `get_bestsellers` (gợi ý sản phẩm "nổi bật") vẫn còn trong mã nguồn nhưng
 **không thuộc cam kết**: nó chỉ lấy sản phẩm gắn cờ `featured` thủ công, không tính
@@ -93,8 +93,8 @@ doanh số thật.*
 
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
-| CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Lệch (L-76) |
-| CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Lệch (L-75) |
+| CN-20 | Dashboard: doanh thu, doanh thu theo tháng, số đơn, khách hàng mới; doanh thu không tính đơn đã hủy | UC-26 | Có |
+| CN-21 | Quản lý sản phẩm: thêm, sửa, xóa mềm, cập nhật tồn kho, quản lý ảnh | UC-19 | Có |
 | CN-22 | Quản lý đơn hàng: xem, đổi trạng thái giao hàng, hủy đơn khi khách báo; không có thao tác xóa đơn | UC-20 | Có |
 | CN-23 | Xem danh sách đánh giá | UC-29 | Có |
 | CN-32 | Cập nhật hồ sơ và đổi mật khẩu nhân viên (tách khỏi CN-23 ngày 06/11/2026, D-058) | UC-30 | Có |
@@ -120,7 +120,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`.
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi ở local (chưa deploy), bốn chức năng về `Có`, lại 32/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
@@ -276,7 +276,8 @@ Approve. PR #1 → #7 merge trước khi có CI và quy trình này.
 chặn hẳn một luồng chính (đăng nhập, mua hàng, thanh toán, quản lý đơn) hoặc làm
 sập trang; Critical là lỗi làm sai tiền, lộ dữ liệu hay cho người không có quyền
 làm thao tác ghi. Năm lỗi đang mở đều không thuộc hai mức này: L-24 chỉ xảy ra khi
-host chạy nhiều worker, L-72, L-74, L-75, L-76 là chi tiết lệch đặc tả.
+host chạy nhiều worker, L-72, L-74, L-75, L-76 là chi tiết lệch đặc tả. Cả năm sửa ngày 17/11/2026,
+nên tới ngày đó không còn lỗi mở nào.
 
 **Ý kiến bên liên quan** (D-013). Không làm đợt khảo sát riêng. Mỗi buổi thực
 nghiệm dành khoảng 5 phút đầu hỏi người thử về thói quen mua thực phẩm, rồi mới làm

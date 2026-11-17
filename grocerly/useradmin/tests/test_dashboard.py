@@ -103,7 +103,6 @@ def a_year_ago(order):
     )
 
 
-@pytest.mark.xfail(reason="L-76: this month's revenue also counts the same month of last year", strict=True)
 def test_monthly_revenue_leaves_out_the_same_month_of_last_year(staff_client, customer):
     # UC-26: the dashboard shows the revenue of the current month.
     paid_order(customer, "75000.00")
@@ -114,7 +113,6 @@ def test_monthly_revenue_leaves_out_the_same_month_of_last_year(staff_client, cu
     assert response.context["monthly_revenue"]["price"] == Decimal("75000.00")
 
 
-@pytest.mark.xfail(reason="L-76: the revenue chart adds up the same month of different years", strict=True)
 def test_revenue_chart_does_not_add_up_the_same_month_of_two_years(staff_client, customer):
     # UC-26: one point of the revenue-by-month chart is one month, not the sum of
     # that month over every year.
@@ -124,3 +122,17 @@ def test_revenue_chart_does_not_add_up_the_same_month_of_two_years(staff_client,
     response = staff_client.get(reverse("useradmin:dashboard"))
 
     assert 125000.0 not in response.context["rev_total"]
+
+
+def test_revenue_chart_names_each_month_with_its_year(staff_client, customer):
+    # L-76: with two years on the chart, "Tháng 11" alone would appear twice.
+    paid_order(customer, "75000.00")
+    a_year_ago(paid_order(customer, "50000.00"))
+    this_year = timezone.localdate().year
+
+    response = staff_client.get(reverse("useradmin:dashboard"))
+
+    labels = response.context["rev_month"]
+    assert len(labels) == 2
+    assert str(this_year - 1) in labels[0]
+    assert str(this_year) in labels[1]

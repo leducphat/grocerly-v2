@@ -10,6 +10,8 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse
 from django.conf import settings
 from django.core import serializers
+from django.contrib.auth import get_user_model
+from django.db import transaction
 from taggit.models import Tag
 
 from decimal import Decimal
@@ -29,6 +31,7 @@ from userauths.models import Profile
 
 import re
 import logging
+from importlib import import_module
 
 # Goes to the Render log through LOGGING in settings.py (D-038).
 logger = logging.getLogger(__name__)
@@ -227,8 +230,12 @@ def has_received_product(user, product):
 
 
 @login_required
+@transaction.atomic
 def ajax_add_review(request, p_id):
-    product = get_object_or_404(Product, pk=p_id)
+    # select_for_update locks the product row until this request ends. Two reviews
+    # sent at the same moment then run one after the other, so the second one sees
+    # the first in the exists() check below instead of both passing it (L-24).
+    product = get_object_or_404(Product.objects.select_for_update(), pk=p_id)
     user = request.user
 
     # UC-14: chỉ khách đã nhận sản phẩm mới đánh giá được, và mỗi người một lần.
@@ -336,8 +343,9 @@ def _refresh_cart(request):
     page only has a lower bound, and an upper bound there would not help either:
     it would travel in a request the customer can edit.
 
-    A line whose product no longer exists, has been soft deleted, or has nothing
-    left in stock is dropped.
+    A line whose product no longer exists, has been soft deleted, has been taken
+    off sale, or has nothing left in stock is dropped. Off sale means any status
+    but 'published', the condition every store page uses to show a product (L-72).
     """
     cart_data = request.session.get('cart_data_obj')
     if not cart_data:
@@ -346,7 +354,8 @@ def _refresh_cart(request):
     products_in_cart = {
         str(product.id): product
         for product in Product.objects.filter(
-            id__in=[safe_int(p_id, 0) for p_id in cart_data]
+            id__in=[safe_int(p_id, 0) for p_id in cart_data],
+            product_status='published',
         )
     }
 
@@ -389,7 +398,12 @@ def _refresh_cart(request):
 # link planted on another site could change them for a signed-in customer (L-19).
 @require_POST
 def add_to_cart(request):
-    product = Product.objects.filter(id=safe_int(request.POST.get('id'), 0)).first()
+    # Only a product on sale can go into the cart. The default manager hides soft
+    # deleted products, not drafts or disabled ones, so the status is checked
+    # here too; otherwise sending the id of a hidden product added it (L-72).
+    product = Product.objects.filter(
+        id=safe_int(request.POST.get('id'), 0), product_status='published'
+    ).first()
     if product is None:
         return JsonResponse({'error': _("Product not found.")}, status=404)
 
@@ -543,12 +557,34 @@ def _get_pending_order_from_session(request):
     return None
 
 
+def _wait_for_other_checkouts(request):
+    """Make two checkouts of one customer run one after the other (L-24).
+
+    Called inside a transaction. A double click on "Continue To Payment" sends the
+    form twice; on a server with several workers both requests run at once, both
+    find no pending order in their copy of the session, and the customer ends up
+    with two orders. Locking the customer's row makes the second request wait here
+    until the first one has committed.
+
+    The wait alone is not enough: the second request read its session before
+    waiting, so it still has no `pending_order_oid`. It reads that key again from
+    the session store, where the first request saved it before committing.
+    """
+    get_user_model().objects.select_for_update().get(pk=request.user.pk)
+
+    stored_session = import_module(settings.SESSION_ENGINE).SessionStore(request.session.session_key)
+    stored_oid = stored_session.get('pending_order_oid')
+    if stored_oid:
+        request.session['pending_order_oid'] = stored_oid
+
+
 def _get_checkout_order_or_none(request, oid):
     if request.user.is_authenticated:
         return CartOrder.objects.filter(oid=oid, user=request.user).first()
     return None
 
 @login_required
+@transaction.atomic
 def save_checkout_info(request):
     if request.method == "POST":
         # The order total comes from the database, not from the prices the
@@ -571,6 +607,7 @@ def save_checkout_info(request):
             state = form.cleaned_data["state"]
             country = form.cleaned_data["country"]
 
+            _wait_for_other_checkouts(request)
             order = _get_pending_order_from_session(request)
 
             if order:
@@ -616,6 +653,11 @@ def save_checkout_info(request):
                 )
 
             request.session['pending_order_oid'] = str(order.oid)
+            # Django would save the session after the view returns, which is after
+            # the transaction has committed and a checkout waiting in
+            # _wait_for_other_checkouts has already read it. Saved here, the oid
+            # is committed together with the order (L-24).
+            request.session.save()
 
             return redirect("core:checkout", order.oid)
 

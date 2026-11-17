@@ -301,7 +301,6 @@ def test_ai_checkout_after_the_last_item_was_removed_does_not_offer_checkout(cli
     assert "action" not in response.json()
 
 
-@pytest.mark.xfail(reason="L-74: request_checkout checks the session cart without refreshing it")
 @pytest.mark.parametrize("gone", ["sold_out", "deleted"])
 def test_ai_checkout_when_the_only_item_is_gone_does_not_offer_checkout(client, product, gemini_chat, gone):
     # UC-18, AC-18.2, L-74: the only line of the cart sold out (or was deleted by
