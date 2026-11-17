@@ -2674,6 +2674,8 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 - Với đặt hàng, khóa thôi chưa đủ: request sau đã đọc session trước khi chờ, nên chưa thấy `pending_order_oid` mà request trước vừa ghi. Hàm `_wait_for_other_checkouts` đọc lại khóa đó từ kho session sau khi có khóa, và `save_checkout_info` lưu session ngay trong transaction, thay vì để middleware lưu sau khi transaction đã commit.
 - SQLite của bộ test bỏ qua `select_for_update` và không chạy được hai request song song, nên không có test nào bắt được tranh chấp thật. Có một test cho bước đọc lại session; các test cũ của ba view vẫn xanh, cho thấy hành vi khi chạy nối tiếp không đổi.
 - Khóa chỉ giữ trong một request, vài mili giây. Đánh giá của nhiều khách cho cùng một sản phẩm phải xếp hàng, chấp nhận được với lượng truy cập của đồ án.
+- Review PR #29 chỉ ra khóa dòng đơn không bảo vệ tồn kho khi hai đơn *khác nhau* có chung một sản phẩm cùng được giao: cả hai đọc số cũ rồi ghi đè nhau. `change_order_status` vì vậy trừ kho bằng một câu `UPDATE` có `F("stock_count")` và `Greatest(..., 0)`, database tự tính từ số đang có.
+- Giới hạn còn lại, không sửa: middleware của Django vẫn lưu session thêm một lần sau khi view trả về, ngoài transaction. Một request khác của cùng khách chạy đúng lúc đó (tab khác vừa xóa giỏ) có thể bị lần lưu này ghi đè. Đây là cách session của Django vốn chạy với mọi view; muốn tránh hẳn thì phải giữ đơn đang chờ trong database thay cho session, việc đó lớn hơn phạm vi lỗi này.
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

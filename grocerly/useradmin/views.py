@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db import transaction
-from django.db.models import Sum
-from django.db.models.functions import TruncMonth
+from django.db.models import F, Sum
+from django.db.models.functions import Greatest, TruncMonth
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -235,15 +235,18 @@ def change_order_status(request, oid):
         # còn bán được, nên nhân viên tự chỉnh tồn kho ở trang sản phẩm (D-033).
         # Khóa ngoại đọc được cả sản phẩm đã xóa mềm: hàng đã rời kho thì vẫn phải
         # trừ. Dòng không có khóa ngoại thì bỏ qua, không đoán theo tên (L-25, D-045).
+        # Trừ bằng một câu UPDATE để database tự tính từ số đang có (F), không đọc
+        # lên rồi ghi lại: hai đơn khác nhau có chung một sản phẩm giao cùng lúc thì
+        # mỗi đơn trừ phần của mình, không đơn nào ghi đè đơn kia (review PR #29, L-24).
+        # Greatest giữ tồn kho không xuống dưới 0 như trước.
         if status == 'shipped':
             order_items = CartOrderItem.objects.filter(order=order).select_related("product")
             for item in order_items:
                 product = item.product
                 if product and product.stock_count is not None:
-                    product.stock_count -= item.quantity
-                    if product.stock_count < 0:
-                        product.stock_count = 0
-                    product.save()
+                    Product.all_objects.filter(pk=product.pk).update(
+                        stock_count=Greatest(F("stock_count") - item.quantity, 0)
+                    )
                     
         # Nếu chuyển sang trạng thái delivered và là đơn hàng COD, đánh dấu đã thanh toán
         if status == 'delivered' and order.payment_method == 'cod':
