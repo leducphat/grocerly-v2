@@ -15,7 +15,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
-from core.models import CartOrderItem, Product
+from core.models import CartOrder, CartOrderItem, Product
 
 pytestmark = pytest.mark.django_db
 
@@ -60,6 +60,35 @@ def test_delivered_order_cannot_be_moved_back_to_processing(
 
     order_with_item.refresh_from_db()
     assert order_with_item.product_status == "delivered"
+
+
+def test_shipping_more_than_the_stock_leaves_zero_not_a_negative_number(
+    staff_client, order_with_item, product
+):
+    # UC-20, boundary: the order holds 3, the shop has only 2 left.
+    Product.objects.filter(pk=product.pk).update(stock_count=2)
+
+    change_status(staff_client, order_with_item, "shipped")
+
+    product.refresh_from_db()
+    assert product.stock_count == 0
+
+
+def test_two_orders_of_one_product_each_deduct_their_own_quantity(
+    staff_client, order_with_item, product
+):
+    # Review of PR #29 (L-24): stock is deducted by an UPDATE computed in the
+    # database, so each order takes its quantity off what is left at that moment.
+    # The race itself needs two requests at once, which SQLite cannot run.
+    second = CartOrder.objects.create(user=order_with_item.user, payment_method="cod")
+    CartOrderItem.objects.create(order=second, product=product, item=product.title,
+                                 quantity=2, price=product.price, total=product.price * 2)
+
+    change_status(staff_client, order_with_item, "shipped")
+    change_status(staff_client, second, "shipped")
+
+    product.refresh_from_db()
+    assert product.stock_count == 10 - 3 - 2
 
 
 def test_delivered_order_sent_to_shipped_again_does_not_deduct_stock_twice(

@@ -176,8 +176,8 @@ Hai điều không cam kết, có ghi lý do ở D-057. Thứ nhất, NFR-02 kh�
 sau khi host ngủ: gói miễn phí của Render tắt máy khi không có request trong 15 phút,
 và request đánh thức nó mất khoảng 50 giây (đo được 48,7 giây ngày 05/11/2026). Thứ
 hai, không có ngưỡng số người dùng đồng thời: host chạy một worker xử lý lần lượt
-từng request, nên số này phụ thuộc gói host chứ không phụ thuộc mã nguồn (xem L-24
-về các chỗ chưa an toàn khi tăng worker).
+từng request, nên số này phụ thuộc gói host chứ không phụ thuộc mã nguồn. Ba chỗ
+đọc rồi ghi từng không an toàn khi tăng worker (L-24) đã khóa bản ghi từ 17/11/2026 (D-064).
 
 ---
 

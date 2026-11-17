@@ -497,3 +497,28 @@ def test_edit_product_rejects_a_negative_number(staff_client, stocked_product, c
 
     stocked_product.refresh_from_db()
     assert getattr(stocked_product, field) == before
+
+
+def test_stock_box_on_the_list_rejects_a_negative_number(staff_client, stocked_product):
+    # UC-19, SRS §6.1: stock is never negative (L-53). The add and edit forms refuse
+    # it; the box on each row of /useradmin/products/ goes through update_stock.
+    before = stocked_product.stock_count
+
+    response = staff_client.post(
+        reverse("useradmin:update_stock"), {"pid": stocked_product.p_id, "stock_count": "-3"}
+    )
+
+    stocked_product.refresh_from_db()
+    assert response.json()["bool"] is False
+    assert stocked_product.stock_count == before
+
+
+def test_stock_box_on_the_list_accepts_zero(staff_client, stocked_product):
+    # L-75, the boundary: 0 is not negative, it is how the staff marks a sold out product.
+    response = staff_client.post(
+        reverse("useradmin:update_stock"), {"pid": stocked_product.p_id, "stock_count": "0"}
+    )
+
+    stocked_product.refresh_from_db()
+    assert response.json()["bool"] is True
+    assert stocked_product.stock_count == 0

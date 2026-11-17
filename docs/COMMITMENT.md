@@ -1,8 +1,10 @@
 # BẢN CAM KẾT SẢN PHẨM — Grocerly (KLTN)
 
 > **⚠️ BẢN NHÁP — chưa ký.** Soạn ngày 10/09/2026 để trao đổi với GVHD. Phần
-> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) mới có mục
-> chất lượng mã nguồn (§5.1, soạn ngày 24/09/2026).
+> chức năng (§2) đã đối chiếu với mã nguồn; phần metric và KPI (§5) có mục chất
+> lượng mã nguồn (§5.1, soạn ngày 24/09/2026), KPI nghiệp vụ (§5.2, 12/11/2026) và
+> các metric còn lại (§5.3, 16/11/2026). Bản trình ký là file Word soạn từ file này,
+> viết lại cho GVHD đọc, không dùng mã tra cứu của repo.
 
 | | |
 |---|---|
@@ -118,7 +120,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44).
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi ở local (chưa deploy), bốn chức năng về `Có`, lại 32/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
@@ -147,7 +149,7 @@ Không làm trong KLTN, đưa vào mục *"Các hướng phát triển mở rộ
 
 ---
 
-## 5. Metric và KPI — *đang soạn*
+## 5. Metric và KPI
 
 ### 5.1 Chất lượng mã nguồn (TC2.4)
 
@@ -155,11 +157,11 @@ Ba con số của TC2.4 đều đo bằng công cụ chạy trong CI ở mỗi l
 có số đo cho từng commit chứ không chỉ một lần cuối kỳ. Ngưỡng đề xuất giữ đúng Mức
 5 của rubric, vì số đo hiện tại đã đạt.
 
-| Metric | Công cụ và cách đo | Ngưỡng | Số đo 24/09/2026 | Số đo 02/11/2026 |
-|---|---|---|---|---|
-| Lỗi lint | Ruff, bộ luật ghi trong `grocerly/ruff.toml` | 0 | 0 (30 trước khi sửa) | 0 |
-| Issue Blocker/Critical | Ruff, quy đổi theo danh sách dưới đây | 0 | 0 (5 trước khi sửa) | 0 |
-| Tỉ lệ dòng trùng lặp | jscpd, trên mã Python của ứng dụng | ≤ 3% | 1,09% | 0,71% |
+| Metric | Công cụ và cách đo | Ngưỡng | Số đo 24/09/2026 | Số đo 02/11/2026 | Số đo 16/11/2026 |
+|---|---|---|---|---|---|
+| Lỗi lint | Ruff, bộ luật ghi trong `grocerly/ruff.toml` | 0 | 0 (30 trước khi sửa) | 0 | 0 |
+| Issue Blocker/Critical | Ruff, quy đổi theo danh sách dưới đây | 0 | 0 (5 trước khi sửa) | 0 | 0 |
+| Tỉ lệ dòng trùng lặp | jscpd, trên mã Python của ứng dụng | ≤ 3% | 1,09% | 0,71% | 0,63% |
 
 **Quy đổi Blocker/Critical.** Ruff không chia mức nghiêm trọng, mọi vi phạm đều là
 một lỗi như nhau. Rubric cũng không định nghĩa hai mức này, nên đồ án quy đổi theo
@@ -180,30 +182,108 @@ Năm issue trước khi sửa gồm bốn chỗ in ảnh trong trang quản tr�
 
 **Phạm vi đo trùng lặp.** Tính mã Python của ứng dụng, không tính migration vì do
 Django sinh ra, và không tính test vì test lặp lại cấu trúc chuẩn bị - thực hiện -
-kiểm tra một cách có chủ ý. Template HTML không tính vào con số trên, vì các công cụ
-rubric nêu tên đều đo mã của ngôn ngữ lập trình, còn template ở đây phần lớn là HTML
-chép từ bộ giao diện mẫu dùng từ thời TLCN. Để không che con số đó đi, số đo của
-template ghi luôn ở đây: 49 file, 7.704 dòng, trùng 26,6%. Con số này đo sau khi xóa
-13 trang mẫu của bộ giao diện, khoảng 22.400 dòng, mà không trang nào của cửa hàng
-dùng tới; tính cả chúng thì là 78,6%. Phần trùng trong template ghi là hạn chế,
-không cam kết ngưỡng.
+kiểm tra một cách có chủ ý. Template HTML cũng không tính, vì các công cụ rubric nêu
+tên đều đo mã của ngôn ngữ lập trình. Bản trình ký chỉ nêu phạm vi này, không ghi số
+đo của template: số đó và nguyên nhân trùng ghi ở mục hạn chế của báo cáo, không cam
+kết ngưỡng (D-031, cập nhật 16/11/2026).
 
 Kiểm tra lại được bằng hai lệnh chạy trong `grocerly/`: `ruff check .` và `jscpd .`.
 
-### 5.2 Các phần còn lại
+### 5.2 KPI nghiệp vụ (TC1)
 
-Sẽ bổ sung trước khi trình ký. Khung dự kiến:
+Ba KPI, nhắm Mức 3-4 của TC1. Cả ba đo cái khách nhận được khi mua hàng, không đo
+mã nguồn. KPI đầu đã có số đo; hai KPI sau đo trong buổi thực nghiệm người dùng
+(P-25, dự kiến Tuần 11), nên hiện chỉ có ngưỡng. Ngưỡng ở đây là đề xuất, chốt khi
+trình GVHD.
 
-- **KPI nghiệp vụ** (2-3 KPI định lượng, đủ Mức 3-4 của TC1): ví dụ tỉ lệ trợ lý
-  AI chọn đúng sản phẩm và số lượng trên bộ 20-30 câu mẫu (P-42), tỉ lệ người thử
-  tự đặt xong đơn trong buổi thực nghiệm, thời gian từ lúc tìm sản phẩm tới lúc
-  đặt hàng.
-- **Metric kỹ thuật** theo rubric Mục 5 — độ phủ test, số chặng CI/CD, số lần
-  deploy, tỉ lệ build xanh, lỗi lint, secret lộ, người dùng thực nghiệm, SUS.
-  Rubric cho phép điều chỉnh ngưỡng tại bước này.
-- **Cách hiểu "Pull Request có review" cho đồ án một người** (D-016, giữ nguyên
-  cách hiểu của D-012).
-- **Cách lấy ý kiến bên liên quan** gộp vào thực nghiệm người dùng (D-013).
+| KPI | Cách đo | Ngưỡng | Số đo 12/11/2026 |
+|---|---|---|---|
+| Trợ lý AI đề nghị đúng sản phẩm và số lượng | 30 câu mẫu trên một danh mục 14 sản phẩm cố định, Gemini thật, `python ai_eval/run_eval.py` (D-062); tính trên mọi lượt chạy trong kỳ | ≥ 85% câu đúng, và ≤ 2/30 câu có đề nghị sai | 28/30 (93,3%) ở cả hai lượt, 1/30 đề nghị sai |
+| Người thử tự đặt xong đơn | Mỗi người thử làm một tác vụ mua hàng có trợ lý AI, không được ai chỉ; đơn tạo ra trong database là xong | ≥ 60% số người thử | Chưa đo |
+| Thời gian từ lúc tìm sản phẩm tới lúc đặt hàng | Bấm giờ trong cùng tác vụ trên, từ khi mở trang tới khi thấy trang đặt hàng thành công; lấy trung vị | ≤ 5 phút | Chưa đo |
+
+Vài điều về KPI đầu. "Đề nghị sai" là khi khách thấy nút xác nhận với sai sản phẩm
+hay sai số lượng; đó là lỗi đáng ngại, nên có ngưỡng riêng. Câu trượt vì Gemini hỏi
+lại bằng lời thì khách không thấy gì sai. Ngưỡng 85% thấp hơn số đo vì Gemini trả lời
+mỗi lần một khác, và số đo đi qua cả việc chuyển sang model dự phòng khi model đầu
+quá tải (D-060), y như trên host. Ngoài bộ cố định, 12 câu hợp với danh mục thật của
+host cũng được thử ngày 12/11/2026, chỉ chat, không bấm xác nhận: 12/12.
+
+KPI thứ hai lấy ngưỡng theo Mức 3 của TC2.7 (tác vụ thành công ≥ 60%), vì buổi thực
+nghiệm có khoảng 3-5 người, mỗi người lệch một là 20-33%. Ngưỡng 5 phút của KPI thứ
+ba là ước lượng, chưa có ai bấm giờ cả tác vụ: số đo gần nhất chỉ là mỗi tin nhắn
+với trợ lý trên host mất 1 - 15 giây (lượt đối chiếu 12/11/2026), phần lớn thời gian
+còn lại là người lần đầu dùng trang tự tìm đường. Số đo lệch
+xa ngưỡng thì ghi vào hạn chế, không đổi ngưỡng sau khi đã đo.
+
+### 5.3 Các metric còn lại
+
+Ngưỡng ở bảng dưới lấy theo Mức 4 của bảng tham chiếu trong rubric Mục 5. Riêng
+thực nghiệm người dùng và số bên liên quan lấy Mức 3, vì buổi thực nghiệm chỉ có
+khoảng 3-5 người (D-017) và phần phỏng vấn gộp vào buổi đó (D-013). Ngưỡng là mức
+chắc chắn giữ được tới ngày bảo vệ, nên nhiều số đo hôm nay đã vượt xa ngưỡng mà
+ngưỡng không nâng theo. Ba metric ở §5.1 giữ Mức 5 vì CI chặn ngay khi vượt: còn
+một lỗi lint hay trùng lặp quá 3% là không merge được.
+
+Số đo 16/11/2026: bộ test chạy ở máy làm việc, CI và deploy đếm bằng `gh` trên
+GitHub cùng ngày.
+
+| Nhóm | Metric | Cách đo | Ngưỡng | Số đo 16/11/2026 |
+|---|---|---|---|---|
+| TC2.1 | Use case có acceptance criteria | `SRS.md` §6.2, §6.3 | ≥ 80% | 32/32 (100%), 91 tiêu chí |
+| TC2.1 | Loại sơ đồ thiết kế, khớp mã nguồn | Báo cáo KLTN chương 3; hội đồng đối chiếu 5 điểm | ≥ 3 loại, khớp ≥ 80% | 4 loại: lớp, tuần tự (cho cả 32 use case), kiến trúc tổng thể, triển khai. Use case và trạng thái đơn hàng có vẽ nhưng không tính |
+| TC2.1 | Yêu cầu phi chức năng có ràng buộc định lượng | `SRS.md` §5 | ≥ 3 | 3, cả ba đạt khi đo trên host ngày 05/11/2026 |
+| TC2.2 | Chức năng cam kết hoạt động | 32 chức năng ở §2, chạy trên host | ≥ 85% (≥ 28/32) | 32/32 chạy được; 28/32 khớp đặc tả, 4 lệch ở chi tiết (cột Hiện trạng) |
+| TC2.2 | Lỗi chặn khi demo | Ghi nhận của hội đồng | ≤ 1 | Chưa demo |
+| TC2.2 | Môi trường sản phẩm | URL công khai | Staging công khai | `grocerly-v2.onrender.com`, chạy từ 15/10/2026 |
+| TC2.3 | AI Usage Log | `AI_USAGE_LOG.md` | Đủ các mục, đối chiếu được với commit | Có từ phiên đầu tiên (10/09/2026), mỗi dòng ghi commit chứa nó |
+| TC2.3 | Lỗi của AI tự phát hiện và sửa | `AI_USAGE_LOG.md` §2 | ≥ 3, có phân tích nguyên nhân | 89 |
+| TC2.4 | Tuần có commit | Lịch sử Git | ≥ 75% (≥ 12/15 tuần) | 9/9 tuần đã qua (Tuần 1 → Tuần 9), cộng tuần chuẩn bị |
+| TC2.4 | Thay đổi đi qua Pull Request có review | Lịch sử PR trên GitHub, theo cách hiểu ở dưới bảng | ≥ 60% | 18/28 PR (64%); tính từ PR #8, lúc bắt đầu review, là 18/21 |
+| TC2.4 | Secret lộ trong repository | gitleaks trên toàn bộ lịch sử, mỗi lần CI chạy | 0 | 0 |
+| TC2.5 | Độ phủ dòng lệnh của mô-đun cốt lõi | `pytest --cov` trên bốn app `core`, `userauths`, `useradmin`, `store_api`, không tính migration và test (như NFR-04) | ≥ 70% | 93%; bốn file `views.py`: 89%, 97%, 93%, 95% |
+| TC2.5 | Số tầng kiểm thử | Mã test | ≥ 2 | 3: unit và tích hợp (pytest-django), API (gọi endpoint `/api/v1/` qua test client, Gemini giả lập), trình duyệt thật (Playwright) |
+| TC2.5 | Tỉ lệ test case tự động | Bộ test | ≥ 50% | 100%: năm kịch bản thủ công của TLCN đều đã thành test tự động |
+| TC2.5 | Test pass ở lần chạy CI cuối | Log CI | ≥ 95% | 100% ở lần chạy 15/11/2026 trên `develop`. Bộ test thường: 501 passed, 10 `xfail` là lỗi đã biết còn mở; 29 test trình duyệt chạy ở bước riêng |
+| TC2.5 | Defect Critical/Blocker còn tồn | `ISSUES.md` | ≤ 1 | 0 (5 lỗi mở, không lỗi nào thuộc hai mức này, định nghĩa ở dưới bảng) |
+| TC2.6 | Số chặng của pipeline | `.github/workflows/ci.yml` | ≥ 4 | 6: build (`check`, `makemigrations --check`), lint và phân tích tĩnh, test kèm độ phủ, quét secret, quét thư viện có lỗ hổng, deploy. Không đóng gói Docker |
+| TC2.6 | Tỉ lệ build xanh | Lịch sử run của `ci.yml` | ≥ 80% | 113/116 (97%) |
+| TC2.6 | Số lần deploy tự động | GitHub Deployments, môi trường `production` | ≥ 5 | 18 |
+| TC2.6 | Thời gian từ merge tới khi host chạy commit mới | Log CI, health trả SHA | ≤ 30 phút | Khoảng 4 phút |
+| TC2.6 | Giám sát sau deploy | Cấu hình | Health check | Health check, log lỗi ra Render, `health.yml` gọi mỗi giờ và gửi thư khi đỏ |
+| TC2.7 | Người dùng thật thuộc nhóm đối tượng | Danh sách ẩn danh, biên bản | ≥ 3, nhắm 5 | Chưa làm, dự kiến Tuần 11 |
+| TC2.7 | Tỉ lệ hoàn thành tác vụ | Biên bản thực nghiệm | ≥ 60% | Chưa làm; trùng KPI thứ hai ở §5.2 |
+| TC2.7 | Điểm SUS | Phiếu SUS 10 câu | ≥ 55 | Chưa làm |
+| TC2.7 | Vòng cải tiến có đo lại | Báo cáo thực nghiệm | Không cam kết | Lỗi người thử gặp thì ghi vào `ISSUES.md` và sửa nếu kịp |
+| TC1 | Bên liên quan được phỏng vấn | Biên bản phần phỏng vấn của buổi thực nghiệm | ≥ 1, nhắm 3 | Chưa làm |
+| TC1 | Giải pháp hiện có được so sánh | `SRS.md` §1.1, báo cáo mục 1.1 | ≥ 2 | 3: Bách Hóa Xanh, Co.op Online, Shopee |
+| TC1 | KPI nghiệp vụ định lượng | §5.2 | ≥ 3 | 3 |
+| Quy trình | Báo cáo tiến độ | Portal | ≥ 1 lần/tuần | Mọi tuần từ tuần chuẩn bị tới Tuần 9 |
+
+Trong bảng có hai ngưỡng cao hơn Mức 4, cả hai để khớp NFR đã ghi từ 05/11/2026:
+secret lộ giữ 0 như NFR-03, độ phủ giữ 70% như NFR-04 thay vì 50%. Ba tiêu chí
+TC3, TC4, TC5 chấm ở buổi bảo vệ theo ngưỡng chung của rubric, không điều chỉnh ở
+đây.
+
+**Pull Request có review, cho đồ án một người** (D-016, giữ cách hiểu của D-012).
+Mọi thay đổi vào `main` đi qua PR từ `develop`. Một PR tính là có review khi có đủ
+ba thứ: CI xanh trên PR; một lượt review do một agent AI riêng đọc diff, đăng thành
+review hay comment trên PR; và câu trả lời của sinh viên cho từng điểm, sửa ngay
+trong PR nếu cần. GitHub không cho tác giả tự bấm Approve, nên không tính lượt
+Approve. PR #1 → #7 merge trước khi có CI và quy trình này.
+
+**Defect Critical/Blocker.** Quy đổi theo cùng tinh thần với §5.1: Blocker là lỗi
+chặn hẳn một luồng chính (đăng nhập, mua hàng, thanh toán, quản lý đơn) hoặc làm
+sập trang; Critical là lỗi làm sai tiền, lộ dữ liệu hay cho người không có quyền
+làm thao tác ghi. Năm lỗi đang mở đều không thuộc hai mức này: L-24 chỉ xảy ra khi
+host chạy nhiều worker, L-72, L-74, L-75, L-76 là chi tiết lệch đặc tả. Cả năm sửa ngày 17/11/2026,
+nên tới ngày đó không còn lỗi mở nào.
+
+**Ý kiến bên liên quan** (D-013). Không làm đợt khảo sát riêng. Mỗi buổi thực
+nghiệm dành khoảng 5 phút đầu hỏi người thử về thói quen mua thực phẩm, rồi mới làm
+tác vụ và chấm SUS; biên bản ghi tách hai phần. Vì vậy số bên liên quan bằng số
+người thử, và dữ liệu nhu cầu tới sau ngày chốt KPI: phần phỏng vấn dùng để kiểm
+chứng lại ba KPI ở §5.2, không dùng để chọn KPI.
 
 ---
 

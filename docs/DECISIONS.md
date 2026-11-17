@@ -1355,6 +1355,14 @@ template được ghi thẳng vào bản cam kết (§5.1) để GVHD thấy tr�
   `invoice.html`, hóa đơn in được: tính năng mới, ngoài phạm vi, còn xem chi tiết đơn
   (CN-14) đã chạy bằng `order-detail.html`. SV quyết xóa cả 13 file ngày 24/09/2026;
   cần lại thì lấy từ `b4a1600`. Sau khi xóa: 49 template, 7.704 dòng, trùng 26,6%.
+- **16/11/2026, đổi cách ghi:** bản cam kết trình ký không ghi số đo template nữa,
+  chỉ ghi phạm vi (Python, không tính migration, test và template). Lý do: template
+  không phải metric nên con số không cần trong văn bản ký; câu cũ "phần lớn là HTML
+  chép từ bộ giao diện mẫu" cũng sai. Đo lại cùng ngày: 49 file, 5.705 dòng theo
+  cách đếm của jscpd, 95 khối, trùng 19,7%. Phần trùng lớn nhất là giữa các trang của
+  chính đồ án: form thêm và sửa sản phẩm (198 dòng), thẻ sản phẩm lặp ở trang chủ, tìm
+  kiếm, tag và danh sách tải bằng AJAX, giỏ hàng lặp ở trang thanh toán, khung bốn
+  trang nội dung. Số này và nguyên nhân đưa vào mục hạn chế của báo cáo.
 - Wheel Linux của jscpd 5.2.1 cần glibc từ 2.34; `ubuntu-latest` hiện là Ubuntu
   24.04 với glibc 2.39.
 
@@ -2405,7 +2413,7 @@ Với lỗ hổng chỉ sửa ở bản major mới của Pillow: (a) nâng Pill
 **Hệ quả.**
 - GitHub chỉ chạy lịch từ nhánh mặc định, nên việc kiểm bắt đầu sau khi file vào `main`. Thư báo lỗi gửi cho người sửa dòng cron gần nhất. Repo public không có hoạt động 60 ngày thì GitHub tự tắt lịch.
 - View health không đọc database, nên Neon hỏng thì vẫn trả 200. Lần kiểm này chỉ cho biết server trên Render còn chạy và chạy commit nào; lỗi 500 vẫn xem ở log Render.
-- Host hỏng thì chậm nhất khoảng một giờ sau mới có thư.
+- Host hỏng thì chậm nhất khoảng một giờ sau mới có thư. *Sửa 13/11/2026:* giả định này sai. GitHub không chạy lịch mỗi giờ: 32 lần chạy theo lịch từ 04/11 tới 13/11/2026 cách nhau 3,7 tới 10,8 giờ, trung vị 7,1 giờ (`ISSUES.md` L-73). Thư báo có thể tới sau nửa ngày, và lịch sử chạy không dùng để tính thời gian hoạt động theo giờ được.
 - Mỗi lần chạy đánh thức host, nên người vào trang ngay sau đó không phải chờ khởi động.
 
 ## D-054 · Lỗi của form in dưới từng ô bằng một template con dùng chung
@@ -2645,6 +2653,29 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 - Migration `core/0012` chỉ đổi mặc định trong trạng thái model của Django. Cột vẫn cho phép rỗng và không có `db_default`, nên trên PostgreSQL Django không sinh câu SQL nào (đã đọc `_alter_field` của Django 5.2); trên SQLite của bộ test nó dựng lại bảng như mọi lần đổi cột.
 - Dữ liệu cũ không tự đổi: 7 sản phẩm trên host vẫn "1 kg" tới khi nhân viên sửa qua trang sửa sản phẩm sau deploy.
 - `ingredients` vẫn chưa hiện ở trang nào của khách, chỉ có trong API; thêm vào trang chi tiết là việc khác, chưa làm.
+
+## D-064 · Ba chỗ đọc rồi ghi của L-24 khóa bản ghi bằng `select_for_update`, không thêm ràng buộc unique
+
+- **Ngày:** 17/11/2026
+- **Trạng thái:** Đã chốt
+
+**Bối cảnh.** L-24: `ajax_add_review`, `change_order_status` và `save_checkout_info` đều kiểm một điều kiện rồi mới ghi. Host chạy một worker nên hai request luôn chạy nối tiếp và lỗi chưa xảy ra, nhưng tăng worker là hai lần bấm cùng lúc lọt qua bước kiểm: hai đánh giá, kho trừ hai lần, hai đơn. Sửa bây giờ vì sổ lỗi chỉ còn năm mục mở và đây là mục duy nhất phụ thuộc cấu hình host.
+
+**Phương án đã cân nhắc**
+1. *Giữ một worker, ghi thành hạn chế.* Không đụng code, nhưng mọi lần nâng gói host phải nhớ điều này.
+2. *Ràng buộc unique `(user, product)` cho `ProductReview`, như đề xuất ban đầu trong ISSUES.* Database tự từ chối bản ghi trùng, nhưng cần migration, và dữ liệu chép từ TLCN có thể đã có đánh giá trùng (máy chủ chỉ chặn mỗi người một đánh giá từ commit `2d0bf9c` ngày 23/09/2026), khi đó migration hỏng lúc deploy hoặc phải xóa bớt dữ liệu thật. Ràng buộc này cũng không giúp gì cho hai chỗ còn lại.
+3. *`transaction.atomic` và `select_for_update` ở cả ba chỗ.* Request sau chờ request trước xong rồi mới đọc, nên thấy kết quả của request trước. Không đổi schema.
+
+**Quyết định.** Phương án 3. Đánh giá khóa dòng sản phẩm, đổi trạng thái đơn khóa dòng đơn. Đặt hàng khóa dòng của khách, vì lúc đó đơn có thể chưa tồn tại để khóa.
+
+**Lý do.** Một cách làm cho cả ba chỗ, giải thích được bằng một câu: request sau phải đợi. Không có migration nên không có rủi ro cho dữ liệu trên host.
+
+**Hệ quả.**
+- Với đặt hàng, khóa thôi chưa đủ: request sau đã đọc session trước khi chờ, nên chưa thấy `pending_order_oid` mà request trước vừa ghi. Hàm `_wait_for_other_checkouts` đọc lại khóa đó từ kho session sau khi có khóa, và `save_checkout_info` lưu session ngay trong transaction, thay vì để middleware lưu sau khi transaction đã commit.
+- SQLite của bộ test bỏ qua `select_for_update` và không chạy được hai request song song, nên không có test nào bắt được tranh chấp thật. Có một test cho bước đọc lại session; các test cũ của ba view vẫn xanh, cho thấy hành vi khi chạy nối tiếp không đổi.
+- Khóa chỉ giữ trong một request, vài mili giây. Đánh giá của nhiều khách cho cùng một sản phẩm phải xếp hàng, chấp nhận được với lượng truy cập của đồ án.
+- Review PR #29 chỉ ra khóa dòng đơn không bảo vệ tồn kho khi hai đơn *khác nhau* có chung một sản phẩm cùng được giao: cả hai đọc số cũ rồi ghi đè nhau. `change_order_status` vì vậy trừ kho bằng một câu `UPDATE` có `F("stock_count")` và `Greatest(..., 0)`, database tự tính từ số đang có.
+- Giới hạn còn lại, không sửa: middleware của Django vẫn lưu session thêm một lần sau khi view trả về, ngoài transaction. Một request khác của cùng khách chạy đúng lúc đó (tab khác vừa xóa giỏ) có thể bị lần lưu này ghi đè. Đây là cách session của Django vốn chạy với mọi view; muốn tránh hẳn thì phải giữ đơn đang chờ trong database thay cho session, việc đó lớn hơn phạm vi lỗi này.
 
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:

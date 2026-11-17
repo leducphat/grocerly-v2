@@ -4,12 +4,15 @@ and orders of other customers. VNPay is tested in test_payment.py.
 """
 
 from decimal import Decimal
+from importlib import import_module
 
 import pytest
+from django.conf import settings
 from django.urls import reverse
 from django.utils.html import escape
 
 from core.models import CartOrder, CartOrderItem, Coupon, Product
+from core.views import _wait_for_other_checkouts
 
 pytestmark = pytest.mark.django_db
 
@@ -73,6 +76,25 @@ def test_submitting_checkout_twice_keeps_one_order(customer_client, product, add
 
     assert CartOrder.objects.count() == 1
     assert CartOrderItem.objects.count() == 1
+
+
+def test_checkout_that_waited_reads_the_order_saved_by_the_one_before_it(rf, customer, order):
+    # L-24. Two submits at the same moment cannot be run in parallel on the test
+    # database (SQLite in memory), so this checks the step that makes the second
+    # one reuse the first one's order: after the wait, the request's own copy of
+    # the session, read before the wait, is brought up to date from the store.
+    session_store = import_module(settings.SESSION_ENGINE).SessionStore
+    request = rf.post(reverse("core:save_checkout_info"))
+    request.user = customer
+    request.session = session_store()
+    request.session.create()  # this request's copy: no checkout in progress yet
+    stored = session_store(request.session.session_key)
+    stored["pending_order_oid"] = order.oid  # saved by the request that went first
+    stored.save()
+
+    _wait_for_other_checkouts(request)
+
+    assert request.session["pending_order_oid"] == order.oid
 
 
 def test_order_total_uses_product_price_not_price_sent_by_browser(

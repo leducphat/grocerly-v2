@@ -301,6 +301,29 @@ def test_ai_checkout_after_the_last_item_was_removed_does_not_offer_checkout(cli
     assert "action" not in response.json()
 
 
+@pytest.mark.parametrize("gone", ["sold_out", "deleted"])
+def test_ai_checkout_when_the_only_item_is_gone_does_not_offer_checkout(client, product, gemini_chat, gone):
+    # UC-18, AC-18.2, L-74: the only line of the cart sold out (or was deleted by
+    # the staff) after the customer added it, and no page has refreshed the cart
+    # since. The cart holds nothing that can be bought, so it counts as empty.
+    client.post(reverse("core:add-to-cart"), {"id": product.id, "qty": 1})
+    if gone == "sold_out":
+        product.stock_count = 0
+        product.save()
+    else:
+        product.delete()  # soft delete, as the staff pages do
+    gemini_chat.send_message.side_effect = [
+        gemini_reply(tool="request_checkout"),
+        gemini_reply("Giỏ của bạn đang trống, bạn muốn mua gì nào?"),
+    ]
+
+    response = ask(client, "Thanh toán giúp mình")
+
+    assert "action" not in response.json()
+    second_message = gemini_chat.send_message.call_args_list[1].args[0]
+    assert second_message[0]["function_response"]["response"] == {"error": "The cart is empty"}
+
+
 def test_chat_over_gemini_quota_asks_user_to_retry_later(client, gemini_chat):
     gemini_chat.send_message.side_effect = Exception("429 Quota exceeded. Please retry in 12.5s")
 

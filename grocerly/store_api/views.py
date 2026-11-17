@@ -13,6 +13,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from core.models import Product, Category
+from core.views import _refresh_cart
 from core.templatetags.currency_filters import vnd
 from store_api.serializers import ProductSerializer, CategorySerializer
 
@@ -443,6 +444,10 @@ def _chat_reply(request):
                 # An empty cart has nothing to pay for (UC-18). Gemini is told,
                 # like it is told about a product out of stock, and asks the
                 # customer to pick something first (L-41).
+                # The cart is refreshed first, as the cart page does: a line whose
+                # product sold out or was removed since it was added is dropped,
+                # so a cart left with only such lines counts as empty (L-74).
+                _refresh_cart(request)
                 if not request.session.get('cart_data_obj'):
                     response = chat.send([{
                         "function_response": {

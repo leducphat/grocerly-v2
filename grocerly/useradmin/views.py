@@ -1,10 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db import transaction
+from django.db.models import F, Sum
+from django.db.models.functions import Greatest, TruncMonth
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from django.utils.dates import MONTHS
+from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 
 from core.models import CartOrder, CartOrderItem, Product, Category, ProductReview, ProductImage, STATUS_CHOICES
@@ -12,7 +15,6 @@ from userauths.models import Profile, User
 from useradmin.forms import AddProductForm, StaffPasswordChangeForm, StaffProfileForm
 from useradmin.decorators import admin_required
 
-import datetime
 
 def revenue_orders():
     """Đơn được tính vào doanh thu: đã thanh toán và không bị hủy (UC-26, D-033).
@@ -31,21 +33,25 @@ def dashboard(request):
     new_customers = User.objects.all().order_by("-id")[:6]
     latest_orders = CartOrder.objects.all()
 
-    this_month = datetime.datetime.now().month
-    monthly_revenue = revenue_orders().filter(order_date__month=this_month).aggregate(price=Sum("price"))
+    # A month is a month of one year. Filtering or grouping on the month number
+    # alone added November of last year to this November (L-76).
+    today = timezone.localdate()
+    monthly_revenue = revenue_orders().filter(
+        order_date__year=today.year, order_date__month=today.month
+    ).aggregate(price=Sum("price"))
 
-    from django.db.models.functions import ExtractMonth
-
+    # TruncMonth cuts each date down to the first day of its month, so one point
+    # of the chart is one month of one year.
     revenue_data = revenue_orders().annotate(
-        month=ExtractMonth("order_date")
+        month=TruncMonth("order_date")
     ).values("month").annotate(total_revenue=Sum("price")).values("month", "total_revenue").order_by("month")
-    
+
     rev_month = []
     rev_total = []
     for i in revenue_data:
         if i["month"]:
-            # Django's month names, in the language of the page (vi: "Tháng 11").
-            rev_month.append(str(MONTHS[i["month"]]))
+            # The month in the language of the page, with its year (vi: "Tháng 11 2026").
+            rev_month.append(date_format(i["month"], "YEAR_MONTH_FORMAT"))
             rev_total.append(float(i["total_revenue"]))
 
     context = {
@@ -79,7 +85,14 @@ def update_stock(request):
         stock_count = request.POST.get("stock_count")
         try:
             product = Product.objects.get(p_id=pid)
-            product.stock_count = int(stock_count)
+            stock_count = int(stock_count)
+            # Stock is never negative (SRS §6.1, L-53). The add and edit forms check
+            # this; this box on the product list did not, and min="0" on the page
+            # does not stop a request sent by hand (L-75). The page shows its
+            # "could not update" message when bool is false.
+            if stock_count < 0:
+                return JsonResponse({"bool": False})
+            product.stock_count = stock_count
             product.save()
             return JsonResponse({"bool": True, "stock_count": product.stock_count})
         except Exception as e:
@@ -188,9 +201,13 @@ NEXT_STATUS = {
 }
 
 @admin_required
+@transaction.atomic
 def change_order_status(request, oid):
     # Mã đơn không có (link cũ, gõ sai) thì trả 404, không để .get() ném lỗi 500 (L-39).
-    order = get_object_or_404(CartOrder, oid=oid)
+    # select_for_update khóa dòng của đơn tới khi request này xong. Hai lần bấm
+    # "giao hàng" cùng lúc thì lần sau phải chờ, đọc lại thấy đơn đã 'shipped' và
+    # bị từ chối ở bước kiểm NEXT_STATUS, nên kho chỉ bị trừ một lần (L-24).
+    order = get_object_or_404(CartOrder.objects.select_for_update(), oid=oid)
     if request.method == "POST":
         status = request.POST.get("status")
 
@@ -218,15 +235,18 @@ def change_order_status(request, oid):
         # còn bán được, nên nhân viên tự chỉnh tồn kho ở trang sản phẩm (D-033).
         # Khóa ngoại đọc được cả sản phẩm đã xóa mềm: hàng đã rời kho thì vẫn phải
         # trừ. Dòng không có khóa ngoại thì bỏ qua, không đoán theo tên (L-25, D-045).
+        # Trừ bằng một câu UPDATE để database tự tính từ số đang có (F), không đọc
+        # lên rồi ghi lại: hai đơn khác nhau có chung một sản phẩm giao cùng lúc thì
+        # mỗi đơn trừ phần của mình, không đơn nào ghi đè đơn kia (review PR #29, L-24).
+        # Greatest giữ tồn kho không xuống dưới 0 như trước.
         if status == 'shipped':
             order_items = CartOrderItem.objects.filter(order=order).select_related("product")
             for item in order_items:
                 product = item.product
                 if product and product.stock_count is not None:
-                    product.stock_count -= item.quantity
-                    if product.stock_count < 0:
-                        product.stock_count = 0
-                    product.save()
+                    Product.all_objects.filter(pk=product.pk).update(
+                        stock_count=Greatest(F("stock_count") - item.quantity, 0)
+                    )
                     
         # Nếu chuyển sang trạng thái delivered và là đơn hàng COD, đánh dấu đã thanh toán
         if status == 'delivered' and order.payment_method == 'cod':
