@@ -120,7 +120,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi ở local (chưa deploy), bốn chức năng về `Có`, lại 32/32 `Có`.
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi, deploy qua PR #29 cùng ngày, bốn chức năng về `Có`, lại 32/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
@@ -233,7 +233,7 @@ GitHub cùng ngày.
 | TC2.1 | Use case có acceptance criteria | `SRS.md` §6.2, §6.3 | ≥ 80% | 32/32 (100%), 91 tiêu chí |
 | TC2.1 | Loại sơ đồ thiết kế, khớp mã nguồn | Báo cáo KLTN chương 3; hội đồng đối chiếu 5 điểm | ≥ 3 loại, khớp ≥ 80% | 4 loại: lớp, tuần tự (cho cả 32 use case), kiến trúc tổng thể, triển khai. Use case và trạng thái đơn hàng có vẽ nhưng không tính |
 | TC2.1 | Yêu cầu phi chức năng có ràng buộc định lượng | `SRS.md` §5 | ≥ 3 | 3, cả ba đạt khi đo trên host ngày 05/11/2026 |
-| TC2.2 | Chức năng cam kết hoạt động | 32 chức năng ở §2, chạy trên host | ≥ 85% (≥ 28/32) | 32/32 chạy được; 28/32 khớp đặc tả, 4 lệch ở chi tiết (cột Hiện trạng) |
+| TC2.2 | Chức năng cam kết hoạt động | 32 chức năng ở §2, chạy trên host | ≥ 85% (≥ 28/32) | 32/32 chạy được; 28/32 khớp đặc tả, 4 lệch ở chi tiết (cột Hiện trạng). Ngày 17/11/2026 sửa xong bốn chỗ lệch (PR #29): 32/32 khớp |
 | TC2.2 | Lỗi chặn khi demo | Ghi nhận của hội đồng | ≤ 1 | Chưa demo |
 | TC2.2 | Môi trường sản phẩm | URL công khai | Staging công khai | `grocerly-v2.onrender.com`, chạy từ 15/10/2026 |
 | TC2.3 | AI Usage Log | `AI_USAGE_LOG.md` | Đủ các mục, đối chiếu được với commit | Có từ phiên đầu tiên (10/09/2026), mỗi dòng ghi commit chứa nó |
