@@ -65,14 +65,14 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-31 | Đăng xuất (tách khỏi CN-02 ngày 06/11/2026, D-058) | UC-10 | Có |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
-| CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
+| CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Lệch (L-77) |
 | CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | UC-28 | Có |
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
 | CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | Có |
 | CN-12 | Cập nhật hồ sơ cá nhân, đổi mật khẩu | UC-11 | Có |
-| CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Có |
+| CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Lệch (L-78) |
 | CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn | UC-13 | Có |
 | CN-15 | Đánh giá và chấm điểm sản phẩm (1–5 sao) | UC-14 | Có |
 
@@ -104,7 +104,7 @@ doanh số thật.*
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
 | CN-24 | Quản lý mã giảm giá: tạo, sửa, bật/tắt, xóa mềm và khôi phục | UC-21 | Có |
-| CN-25 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản | UC-22 | Có |
+| CN-25 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản | UC-22 | Lệch (L-80) |
 | CN-26 | Quản lý danh mục: thêm, sửa, xóa mềm và khôi phục | UC-23 | Có |
 | CN-27 | Quản lý toàn bộ sản phẩm: đổi trạng thái hiển thị, xóa mềm và khôi phục | UC-24 | Có |
 | CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Có |
@@ -120,7 +120,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi, deploy qua PR #29 cùng ngày, bốn chức năng về `Có`, lại 32/32 `Có`.
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi, deploy qua PR #29 cùng ngày, bốn chức năng về `Có`, lại 32/32 `Có`. Ngày 18/11/2026 chạy thử cả 32 use case trên host thấy bốn lỗi mới: CN-06 thành `Lệch (L-77)` (trang tìm kiếm trả 500 khi URL thiếu `q`), CN-13 thành `Lệch (L-78)` (xóa khỏi danh sách yêu thích mà trang không vẽ lại), CN-25 thành `Lệch (L-80)` (bật quyền nhân viên bắt gõ `bio`); còn 29/32 `Có`. L-79 (cập nhật giỏ nhận số lượng 0) không làm CN-08 lệch, vì đặc tả không có điều nào về số lượng tối thiểu và ô trên trang đã chặn.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;

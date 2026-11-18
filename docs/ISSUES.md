@@ -5,7 +5,7 @@
 | | |
 |---|---|
 | Nguồn gốc | Tách từ [`COMMITMENT.md`](COMMITMENT.md) §3 ngày 03/11/2026 (D-046); bảng và ghi chú chuyển nguyên văn |
-| Cập nhật | 17/11/2026 |
+| Cập nhật | 18/11/2026 |
 
 Mỗi mục mang một mã L-x, đánh theo thứ tự phát hiện và không dùng lại. Sổ gồm cả
 chỗ đặc tả TLCN nói khác mã nguồn (L-1, L-2, L-4) lẫn lỗi tìm thấy khi viết test,
@@ -17,6 +17,12 @@ Thấy lỗi mới thì thêm một dòng cuối bảng §1, kèm test `xfail` m
 Hiện trạng của nó trong [`COMMITMENT.md`](COMMITMENT.md) §2 đổi thành `Lệch (L-x)`.
 Sửa xong thì ghi cách sửa vào cột cuối, gỡ `xfail` trong cùng commit, và trả cột
 Hiện trạng về `Có`.
+
+**Hiện trạng 18/11/2026:** 80 mục, đã xử lý 76, còn mở bốn: L-77 (trang tìm kiếm trả 500 khi
+URL thiếu `q`, lỗi nặng vì làm sập trang), L-78 (xóa khỏi danh sách yêu thích mà trang không vẽ
+lại), L-79 (cập nhật giỏ nhận số lượng 0, số âm thành số dương) và L-80 (bật quyền nhân viên
+bắt gõ `bio`). Cả bốn thấy khi chạy thử mọi use case trên host ngày 18/11/2026, mỗi lỗi có một
+test `xfail`.
 
 **Hiện trạng 17/11/2026:** 76 mục, đã xử lý cả 76. Năm mục cuối (L-24, L-72, L-74, L-75,
 L-76) sửa ngày 17/11/2026, deploy qua PR #29 cùng ngày; đoạn dưới đây là hiện trạng ngày 15/11/2026, giữ để
@@ -115,6 +121,10 @@ bảo vệ.
 | **L-74** | UC-18: giỏ trống, kể cả giỏ vừa bị bỏ hết các dòng hết hàng, thì trợ lý nhắc chọn hàng trước, không đưa nút thanh toán (SRS §6.1, AC-18.2) | Nhánh `request_checkout` của `ai_chat` chỉ xem trong phiên còn `cart_data_obj` hay không, không gọi `_refresh_cart` như trang giỏ hàng và trang thông tin giao hàng. Dòng giỏ của sản phẩm đã hết hàng hay đã bị xóa chỉ bị bỏ khi một trang nào đó tính lại giỏ, nên nếu sản phẩm duy nhất trong giỏ vừa hết hàng mà khách nhờ trợ lý thanh toán trước khi mở lại trang giỏ, khung chat vẫn hiện nút Tiến hành thanh toán. Bấm nút thì trang giỏ tính lại, thấy trống và đưa về trang chủ, nên không tạo được đơn sai; lỗi là trợ lý mời thanh toán một giỏ không còn gì để mua. L-41 chỉ sửa ca giỏ đã rỗng trong phiên. Thấy ngày 14/11/2026 khi đọc code để vẽ lược đồ tuần tự Nhờ AI dẫn tới thanh toán (P-24) | ✅ **Đã sửa 17/11/2026, deploy qua PR #29 cùng ngày.** Nhánh `request_checkout` gọi `_refresh_cart` (nhập từ `core.views`) trước khi xem giỏ có trống không, đúng cách đã thử lúc ghi lỗi. Dòng của sản phẩm hết hàng bị bỏ kèm thông báo, hiện ở trang khách mở kế tiếp. Gỡ `xfail` của hai ca |
 | **L-75** | UC-19: giá bán, giá cũ và số lượng trong kho không được âm (SRS §6.1, L-53); nhân viên cập nhật tồn kho ngay trên dòng ở danh sách sản phẩm | `update_stock` (`useradmin/views.py`) đổi ô `stock_count` bằng `int()` rồi `save()` thẳng; cột `stock_count` là `IntegerField` không có giới hạn dưới, và `save()` không chạy kiểm tra của model. Gửi -3 thì lưu -3 và trả `bool: true`. Ô nhập trên trang có `min="0"` nhưng script đọc giá trị rồi gửi đi, không xét `min`. L-53 chỉ sửa biểu mẫu thêm, sửa sản phẩm. Tồn kho âm làm sản phẩm hiện hết hàng; lúc giao hàng trừ kho thì hàm đổi trạng thái đơn kéo về 0, nhưng ô này không qua bước đó. Thấy ngày 15/11/2026 khi đọc code để vẽ lược đồ tuần tự Xem sản phẩm và cập nhật tồn kho (P-24) | ✅ **Đã sửa 17/11/2026, deploy qua PR #29 cùng ngày.** `update_stock` trả `bool: false` và không lưu khi số nhỏ hơn 0; trang hiện sẵn thông báo "không cập nhật được tồn kho" khi nhận `false`, nên không cần chuỗi dịch mới. Gỡ `xfail`, thêm ca biên: 0 vẫn lưu được |
 | **L-76** | UC-26: bảng điều khiển hiện doanh thu tháng hiện tại và biểu đồ doanh thu theo tháng | `dashboard` lọc doanh thu tháng này bằng `order_date__month=this_month` và gom biểu đồ bằng `ExtractMonth`, cả hai chỉ xét số tháng, không xét năm. Đơn tháng 11 năm trước được cộng vào doanh thu tháng 11 năm nay, và biểu đồ gộp cùng một tháng của mọi năm vào một cột. Hiện chưa sai trên host vì dữ liệu KLTN chỉ có từ tháng 10/2026; sẽ sai từ tháng 10/2027. Có từ TLCN. Thấy ngày 15/11/2026 khi đọc code để vẽ lược đồ tuần tự Xem báo cáo thống kê (P-24) | ✅ **Đã sửa 17/11/2026, deploy qua PR #29 cùng ngày.** Doanh thu tháng này lọc cả `order_date__year` lẫn `order_date__month` theo ngày giờ Việt Nam (`timezone.localdate()`); biểu đồ gom bằng `TruncMonth` thay cho `ExtractMonth`, nhãn in kèm năm theo định dạng của ngôn ngữ trang ("Tháng 11 2026"). Gỡ `xfail` của hai ca, thêm một test cho nhãn có năm. Trang tổng quan của khách (`customer_dashboard`) gom số đơn theo tháng bằng `ExtractMonth` y như vậy, chưa sửa |
+| **L-77** 🔴 | UC-05: khách tìm sản phẩm theo tên *(mặc định: trang không sập)* | `search_view` đọc `q` bằng `request.GET.get("q")` rồi lọc `title__icontains=query`. URL không có `q` thì `query` là `None`, Django báo `ValueError: Cannot use None as a query value` và trang trả 500. Ba ô tìm kiếm trên site luôn gửi `q`, kể cả rỗng (`?q=` trả 200), nên chỉ gặp khi gõ thẳng `/vi/search/` hay theo một link thiếu tham số. Có từ TLCN. Thấy ngày 18/11/2026 khi chạy thử mọi use case trên host | ⏳ **Đề xuất - sửa code:** đọc `q` với mặc định chuỗi rỗng (`request.GET.get("q", "")`). Test `xfail`: `core/tests/test_search.py::test_search_without_query_parameter_answers_200` |
+| **L-78** | UC-12: khách xóa sản phẩm khỏi danh sách yêu thích | `remove_wishlist` xóa dòng rồi trả JSON `{data, w, total_wishlist_items}`, không có khóa `bool`. Script của `templates/core/wishlist.html` chỉ vẽ lại danh sách và bộ đếm khi `response.bool === true`, nên sau khi bấm thùng rác, dòng sản phẩm và số "1" vẫn nằm trên trang cho tới khi tải lại, dù dòng trong database đã mất. Biến `context` trong view có `"bool": True` nhưng chỉ dùng để render HTML, không được trả về. Thấy ngày 18/11/2026 khi chạy thử trên host, lặp lại được hai lần | ⏳ **Đề xuất - sửa code:** thêm `"bool": True` vào JSON trả về. Test `xfail`: `core/tests/test_wishlist.py::test_remove_from_wishlist_answer_tells_the_page_to_redraw` |
+| **L-79** | UC-06: khách cập nhật số lượng của một dòng giỏ *(mặc định: số lượng từ 1 trở lên)* | `update_cart` ghi thẳng `safe_int(qty)` vào giỏ. Gửi 0 thì dòng giỏ có số lượng 0, tổng tiền 0 ₫, trang thông tin giao hàng vẫn mở với dòng đó. `safe_float` bỏ mọi ký tự không phải số, kể cả dấu trừ, nên gửi -3 thì thành 3. Ô số lượng trên trang giỏ đã chặn số nhỏ hơn 1, nên chỉ gặp khi gửi POST bằng tay. SRS chỉ đặt giới hạn trên (không vượt tồn kho), nên chức năng không tính là lệch đặc tả. Thấy ngày 18/11/2026 khi chạy thử trên host | ⏳ **Đề xuất - sửa code:** số lượng nhỏ hơn 1 thì bỏ qua và giữ số cũ. Test `xfail`: `core/tests/test_cart.py::test_update_cart_refuses_quantity_below_one` (0 và -3) |
+| **L-80** | UC-22: người được nhận làm nhân viên tự đăng ký như khách, quản trị viên bật quyền nhân viên trong trang quản trị (SRS §6.1, L-70) | `User.bio` là `CharField(max_length=500)` không có `blank=True`, và `userauths/admin.py` đăng ký `User` bằng `ModelAdmin` thường, nên form sửa có ô `bio` bắt buộc. Trang đăng ký không hỏi `bio`, nên với mọi khách tự đăng ký, tick quyền nhân viên rồi Lưu đều bị báo "Trường này là bắt buộc." ở ô `bio`; quản trị viên phải gõ đại một câu vào đó mới lưu được. Mọi lần lưu khác trên form này, như khóa tài khoản, cũng vướng như vậy. Thấy ngày 18/11/2026 khi chạy thử phần quản trị trên host | ⏳ **Đề xuất - sửa code:** thêm `blank=True` cho `bio` (migration chỉ đổi validation, không đổi cột). Test `xfail`: `userauths/tests/test_user_admin.py::test_admin_user_form_does_not_require_a_bio` |
 
 ---
 
@@ -333,3 +343,9 @@ nên chỉ việc sửa cho xanh. Gỡ `xfail` của L-72 làm đỏ một test 
 mà quên đặt trạng thái, nên sản phẩm nằm ở `in_review` và chỉ vào được giỏ nhờ chính lỗi này. L-24 không có ca `xfail` vì bộ
 test không dựng được hai request song song; cách sửa và lý do không thêm ràng buộc unique ở D-064. Sửa xong thì các lược đồ
 tuần tự nêu ở ba đoạn trên (3.3.9, 3.3.20, 3.3.21, 3.3.22b của báo cáo) cần cập nhật theo.
+
+L-77 → L-80 lộ ra ngày 18/11/2026, khi chạy thử cả 32 use case trên host bằng Playwright, ca thuận lợi kèm vài ca thường gặp,
+trên dữ liệu thử tạo riêng rồi xóa sạch sau lượt chạy. Các lượt trước đọc code hay rà từng form, nên không ai mở `/vi/search/`
+mà thiếu `q`, cũng không ai bấm thùng rác ở trang yêu thích rồi nhìn xem trang có đổi không: server xóa đúng, chỉ trang là
+đứng yên. L-80 là chỗ L-70 bỏ sót: lúc chốt L-70, đặc tả viết lại theo cách làm thật (khách tự đăng ký, quản trị viên bật
+quyền nhân viên) mà chưa ai thử bật quyền cho đúng một tài khoản tự đăng ký, vốn có `bio` rỗng.
