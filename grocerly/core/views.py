@@ -284,7 +284,7 @@ def ajax_add_review(request, p_id):
 def search_view(request):
     # A link or a typed URL without q must not reach the filter as None (L-77).
     query = request.GET.get("q", "")
-    products =Product.objects.filter(title__icontains=query, product_status='published').order_by('-date')
+    products = Product.objects.filter(title__icontains=query, product_status='published').order_by('-date')
 
     context = {
         'products': products,
