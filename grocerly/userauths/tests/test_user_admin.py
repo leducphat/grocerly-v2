@@ -26,7 +26,6 @@ def admin_user_form(django_user_model, password):
     return admin.site._registry[get_user_model()].get_form(request)
 
 
-@pytest.mark.xfail(reason="L-80: User.bio has no blank=True, so the admin form requires it")
 def test_admin_user_form_does_not_require_a_bio(admin_user_form, customer):
     assert customer.bio == ""  # sign-up leaves it empty
 

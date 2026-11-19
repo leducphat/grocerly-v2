@@ -6,7 +6,9 @@ from django.db.models.signals import post_save
 class User(AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=100)
-    bio = models.CharField(max_length=500)
+    # Sign-up never asks for a bio; without blank=True the admin form refused to
+    # save a customer made staff until the admin typed one (L-80).
+    bio = models.CharField(max_length=500, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

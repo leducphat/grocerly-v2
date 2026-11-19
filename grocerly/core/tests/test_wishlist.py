@@ -26,7 +26,6 @@ def test_remove_from_wishlist_deletes_the_line(customer_client, wishlist_line):
     assert not Wishlist.objects.filter(id=wishlist_line.id).exists()
 
 
-@pytest.mark.xfail(reason="L-78: remove_wishlist answers without bool, so the page is not redrawn")
 def test_remove_from_wishlist_answer_tells_the_page_to_redraw(customer_client, wishlist_line):
     response = customer_client.post(reverse("core:remove-from-wishlist"), {"id": wishlist_line.id})
 

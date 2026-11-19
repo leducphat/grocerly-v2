@@ -18,7 +18,6 @@ def test_search_with_empty_query_answers_200(client, product):
     assert response.status_code == 200
 
 
-@pytest.mark.xfail(reason="L-77: search_view filters title__icontains=None when q is missing")
 def test_search_without_query_parameter_answers_200(client, product):
     response = client.get(reverse("core:search"))
 

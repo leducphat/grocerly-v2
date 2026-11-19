@@ -66,7 +66,6 @@ def test_update_cart_changes_quantity(client, product, add_to_cart):
     assert cart_lines(client)[str(product.id)]["qty"] == 4
 
 
-@pytest.mark.xfail(reason="L-79: update_cart keeps 0, and safe_int turns -3 into 3")
 @pytest.mark.parametrize("qty", ["0", "-3"])
 def test_update_cart_refuses_quantity_below_one(client, product, add_to_cart, qty):
     """The quantity box of the cart page stops numbers below 1; a POST sent by hand

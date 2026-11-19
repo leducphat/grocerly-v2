@@ -282,8 +282,9 @@ def ajax_add_review(request, p_id):
 # ======================== Search ========================
 
 def search_view(request):
-    query = request.GET.get("q")
-    products = Product.objects.filter(title__icontains=query, product_status='published').order_by('-date')
+    # A link or a typed URL without q must not reach the filter as None (L-77).
+    query = request.GET.get("q", "")
+    products =Product.objects.filter(title__icontains=query, product_status='published').order_by('-date')
 
     context = {
         'products': products,
@@ -513,12 +514,17 @@ def delete_item_from_cart(request):
 @require_POST
 def update_cart(request):
     product_id = str(request.POST['id'])
-    product_qty = request.POST['qty']
+    # int() and not safe_int(): safe_int drops the minus sign, so "-3" became 3.
+    # A quantity below 1 is ignored and the line keeps its old quantity (L-79).
+    try:
+        product_qty = int(request.POST['qty'])
+    except (TypeError, ValueError):
+        product_qty = 0
 
-    if 'cart_data_obj' in request.session:
+    if product_qty >= 1 and 'cart_data_obj' in request.session:
         if product_id in request.session['cart_data_obj']:
             cart_data = request.session['cart_data_obj']
-            cart_data[product_id]['qty'] = safe_int(product_qty)
+            cart_data[product_id]['qty'] = product_qty
             request.session['cart_data_obj'] = cart_data
 
     cart_total_amount = _refresh_cart(request)
@@ -1054,7 +1060,8 @@ def remove_wishlist(request):
     }
     wishlist_json = serializers.serialize('json', wishlist)
     t = render_to_string('core/async/wishlist-list.html', context, request=request)
-    return JsonResponse({'data': t, 'w': wishlist_json, 'total_wishlist_items': total_wishlist})
+    # The wishlist page redraws the list only when bool is true (L-78).
+    return JsonResponse({'bool': True, 'data': t, 'w': wishlist_json, 'total_wishlist_items': total_wishlist})
 
 # ======================== Static Pages & Contact ========================
 

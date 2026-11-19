@@ -65,14 +65,14 @@ Hành vi chi tiết của từng chức năng là acceptance criteria của use 
 | CN-31 | Đăng xuất (tách khỏi CN-02 ngày 06/11/2026, D-058) | UC-10 | Có |
 | CN-04 | Xem trang chủ, danh sách sản phẩm, sản phẩm theo danh mục và theo thẻ | UC-03 | Có |
 | CN-05 | Xem chi tiết sản phẩm: giá, mô tả, ảnh, đánh giá, sản phẩm liên quan | UC-04 | Có |
-| CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Lệch (L-77) |
+| CN-06 | Tìm sản phẩm theo tên; lọc theo danh mục, nhà cung cấp, khoảng giá | UC-05 | Có |
 | CN-07 | Xem danh sách và trang chi tiết nhà cung cấp | UC-28 | Có |
 | CN-08 | Giỏ hàng: thêm, cập nhật số lượng, xóa; không cho vượt tồn kho | UC-06 | Có |
 | CN-09 | Đổi ngôn ngữ vi ↔ en | UC-07 | Có |
 | CN-10 | Gửi liên hệ tới ban quản trị | UC-08 | Có |
 | CN-11 | Thanh toán: nhập thông tin giao hàng, áp mã giảm giá, chọn COD hoặc VNPay | UC-09 | Có |
 | CN-12 | Cập nhật hồ sơ cá nhân, đổi mật khẩu | UC-11 | Có |
-| CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Lệch (L-78) |
+| CN-13 | Danh sách yêu thích: thêm, xem, xóa | UC-12 | Có |
 | CN-14 | Xem lịch sử đơn mua và chi tiết từng đơn | UC-13 | Có |
 | CN-15 | Đánh giá và chấm điểm sản phẩm (1–5 sao) | UC-14 | Có |
 
@@ -104,7 +104,7 @@ doanh số thật.*
 | Mã | Chức năng | UC | Hiện trạng |
 |---|---|---|---|
 | CN-24 | Quản lý mã giảm giá: tạo, sửa, bật/tắt, xóa mềm và khôi phục | UC-21 | Có |
-| CN-25 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản | UC-22 | Lệch (L-80) |
+| CN-25 | Quản lý người dùng: tra cứu, phân quyền, khóa tài khoản | UC-22 | Có |
 | CN-26 | Quản lý danh mục: thêm, sửa, xóa mềm và khôi phục | UC-23 | Có |
 | CN-27 | Quản lý toàn bộ sản phẩm: đổi trạng thái hiển thị, xóa mềm và khôi phục | UC-24 | Có |
 | CN-28 | Tra cứu toàn bộ đơn hàng, lọc theo trạng thái thanh toán và giao hàng | UC-25 | Có |
@@ -120,7 +120,7 @@ làm CN-10, CN-11, CN-15, CN-21, CN-23 thành `Lệch` (L-45, L-49, L-50, L-51, 
 local cùng ngày, cả năm về `Có`, chưa thử trên host. Lỗi còn mở không làm chức năng nào lệch
 đặc tả: L-24 chưa xảy ra khi host chạy một worker; L-47, L-55 → L-58 là chữ lẫn ngôn ngữ và
 nội dung mẫu của theme (P-46). CN-19 và CN-28 về `Có` sau khi sửa L-41 và L-40 (P-43); CN-03
-về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi, deploy qua PR #29 cùng ngày, bốn chức năng về `Có`, lại 32/32 `Có`. Ngày 18/11/2026 chạy thử cả 32 use case trên host thấy bốn lỗi mới: CN-06 thành `Lệch (L-77)` (trang tìm kiếm trả 500 khi URL thiếu `q`), CN-13 thành `Lệch (L-78)` (xóa khỏi danh sách yêu thích mà trang không vẽ lại), CN-25 thành `Lệch (L-80)` (bật quyền nhân viên bắt gõ `bio`); còn 29/32 `Có`. L-79 (cập nhật giỏ nhận số lượng 0) không làm CN-08 lệch, vì đặc tả không có điều nào về số lượng tối thiểu và ô trên trang đã chặn.
+về `Có` sau khi sửa L-43 (P-44). Ngày 13/11/2026 CN-08 thành `Lệch (L-72)`: giỏ hàng vẫn nhận và giữ sản phẩm đã gỡ bán, thấy khi vẽ lược đồ tuần tự; còn 31/32 `Có`. Ngày 15/11/2026 CN-19 thành `Lệch (L-74)`: trợ lý vẫn mời thanh toán khi giỏ chỉ còn hàng vừa hết, cũng thấy khi vẽ lược đồ tuần tự; còn 30/32 `Có`. Cùng ngày, vẽ lược đồ phần nhân viên làm CN-21 thành `Lệch (L-75)` (ô tồn kho trên dòng nhận số âm) và CN-20 thành `Lệch (L-76)` (doanh thu theo tháng không xét năm); còn 28/32 `Có`. Ngày 17/11/2026 sửa cả bốn lỗi, deploy qua PR #29 cùng ngày, bốn chức năng về `Có`, lại 32/32 `Có`. Ngày 18/11/2026 chạy thử cả 32 use case trên host thấy bốn lỗi mới: CN-06 thành `Lệch (L-77)` (trang tìm kiếm trả 500 khi URL thiếu `q`), CN-13 thành `Lệch (L-78)` (xóa khỏi danh sách yêu thích mà trang không vẽ lại), CN-25 thành `Lệch (L-80)` (bật quyền nhân viên bắt gõ `bio`); còn 29/32 `Có`. L-79 (cập nhật giỏ nhận số lượng 0) không làm CN-08 lệch, vì đặc tả không có điều nào về số lượng tối thiểu và ô trên trang đã chặn. Ngày 19/11/2026 sửa cả bốn lỗi (P-51), SRS §6.1 thêm ràng buộc số lượng tối thiểu của dòng giỏ; CN-06, CN-13, CN-25 về `Có`, lại 32/32 `Có`.
 CN-14 trước đây có thêm "đặt địa chỉ mặc định"; chức năng đó không có giao diện
 nên đã bỏ khỏi cam kết (L-33, D-047). Các chức
 năng CN-03, 07, 23, 29, 30, 32 có trong mã nguồn nhưng đặc tả TLCN chưa có use case;
@@ -233,7 +233,7 @@ GitHub cùng ngày.
 | TC2.1 | Use case có acceptance criteria | `SRS.md` §6.2, §6.3 | ≥ 80% | 32/32 (100%), 91 tiêu chí |
 | TC2.1 | Loại sơ đồ thiết kế, khớp mã nguồn | Báo cáo KLTN chương 3; hội đồng đối chiếu 5 điểm | ≥ 3 loại, khớp ≥ 80% | 4 loại: lớp, tuần tự (cho cả 32 use case), kiến trúc tổng thể, triển khai. Use case và trạng thái đơn hàng có vẽ nhưng không tính |
 | TC2.1 | Yêu cầu phi chức năng có ràng buộc định lượng | `SRS.md` §5 | ≥ 3 | 3, cả ba đạt khi đo trên host ngày 05/11/2026 |
-| TC2.2 | Chức năng cam kết hoạt động | 32 chức năng ở §2, chạy trên host | ≥ 85% (≥ 28/32) | 32/32 chạy được; 28/32 khớp đặc tả, 4 lệch ở chi tiết (cột Hiện trạng). Ngày 17/11/2026 sửa xong bốn chỗ lệch (PR #29): 32/32 khớp |
+| TC2.2 | Chức năng cam kết hoạt động | 32 chức năng ở §2, chạy trên host | ≥ 85% (≥ 28/32) | 32/32 chạy được; 28/32 khớp đặc tả, 4 lệch ở chi tiết (cột Hiện trạng). Ngày 17/11/2026 sửa xong bốn chỗ lệch (PR #29): 32/32 khớp. Ngày 18/11/2026 chạy thử cả 32 use case trên host thấy ba chỗ lệch mới (L-77, L-78, L-80), sửa ngày 19/11/2026: 32/32 khớp |
 | TC2.2 | Lỗi chặn khi demo | Ghi nhận của hội đồng | ≤ 1 | Chưa demo |
 | TC2.2 | Môi trường sản phẩm | URL công khai | Staging công khai | `grocerly-v2.onrender.com`, chạy từ 15/10/2026 |
 | TC2.3 | AI Usage Log | `AI_USAGE_LOG.md` | Đủ các mục, đối chiếu được với commit | Có từ phiên đầu tiên (10/09/2026), mỗi dòng ghi commit chứa nó |
@@ -245,7 +245,7 @@ GitHub cùng ngày.
 | TC2.5 | Số tầng kiểm thử | Mã test | ≥ 2 | 3: unit và tích hợp (pytest-django), API (gọi endpoint `/api/v1/` qua test client, Gemini giả lập), trình duyệt thật (Playwright) |
 | TC2.5 | Tỉ lệ test case tự động | Bộ test | ≥ 50% | 100%: năm kịch bản thủ công của TLCN đều đã thành test tự động |
 | TC2.5 | Test pass ở lần chạy CI cuối | Log CI | ≥ 95% | 100% ở lần chạy 15/11/2026 trên `develop`. Bộ test thường: 501 passed, 10 `xfail` là lỗi đã biết còn mở; 29 test trình duyệt chạy ở bước riêng |
-| TC2.5 | Defect Critical/Blocker còn tồn | `ISSUES.md` | ≤ 1 | 0 (5 lỗi mở, không lỗi nào thuộc hai mức này, định nghĩa ở dưới bảng) |
+| TC2.5 | Defect Critical/Blocker còn tồn | `ISSUES.md` | ≤ 1 | 0 (định nghĩa ở dưới bảng). Ngày 18/11/2026 có một lỗi Blocker mới (L-77, trang tìm kiếm sập), sửa ngày 19/11/2026 |
 | TC2.6 | Số chặng của pipeline | `.github/workflows/ci.yml` | ≥ 4 | 6: build (`check`, `makemigrations --check`), lint và phân tích tĩnh, test kèm độ phủ, quét secret, quét thư viện có lỗ hổng, deploy. Không đóng gói Docker |
 | TC2.6 | Tỉ lệ build xanh | Lịch sử run của `ci.yml` | ≥ 80% | 113/116 (97%) |
 | TC2.6 | Số lần deploy tự động | GitHub Deployments, môi trường `production` | ≥ 5 | 18 |
@@ -277,7 +277,9 @@ chặn hẳn một luồng chính (đăng nhập, mua hàng, thanh toán, quản
 sập trang; Critical là lỗi làm sai tiền, lộ dữ liệu hay cho người không có quyền
 làm thao tác ghi. Năm lỗi đang mở đều không thuộc hai mức này: L-24 chỉ xảy ra khi
 host chạy nhiều worker, L-72, L-74, L-75, L-76 là chi tiết lệch đặc tả. Cả năm sửa ngày 17/11/2026,
-nên tới ngày đó không còn lỗi mở nào.
+nên tới ngày đó không còn lỗi mở nào. Lượt chạy thử mọi use case trên host ngày
+18/11/2026 thấy thêm bốn lỗi: L-77 làm sập trang tìm kiếm khi URL thiếu `q`, nên tính
+là Blocker; L-78, L-79, L-80 là chi tiết. Cả bốn sửa ngày 19/11/2026, lại không còn lỗi mở.
 
 **Ý kiến bên liên quan** (D-013). Không làm đợt khảo sát riêng. Mỗi buổi thực
 nghiệm dành khoảng 5 phút đầu hỏi người thử về thói quen mua thực phẩm, rồi mới làm
