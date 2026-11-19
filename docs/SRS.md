@@ -231,6 +231,8 @@ có mã AC-x.y để test dẫn tới.
 - **UC-06, UC-09:** số lượng của một dòng giỏ không vượt quá tồn kho. Máy chủ
   kiểm tra mỗi lần khách thêm vào giỏ, sửa số lượng và lúc tạo đơn; vượt thì hạ
   xuống đúng bằng tồn kho và báo cho khách biết đã hạ (D-024).
+- **UC-06:** số lượng của một dòng giỏ từ 1 trở lên. Sửa số lượng thành 0, số âm hay
+  chữ thì máy chủ bỏ qua và dòng giữ số cũ; muốn bỏ hàng khỏi giỏ thì dùng nút xóa (L-79).
 - **UC-06:** thêm một sản phẩm đã có trong giỏ thì số lượng được cộng vào số đang có,
   vẫn trong giới hạn tồn kho ở trên; đặt lại số lượng là việc của trang giỏ hàng. Nút
   thêm bị khóa trong lúc chờ máy chủ trả lời, nên bấm đúp chỉ tính một lần (L-18, D-044).
