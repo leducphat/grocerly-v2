@@ -1,7 +1,8 @@
 """
 The customer's profile page (UC-11, CN-12): /user/profile/update/ shows the
 profile of the signed-in customer and saves the changes to that profile only.
-Changing the password is Django's own PasswordChangeView and is not tested here.
+Changing the password is Django's own PasswordChangeView; the last test only checks
+what AC-11.1 asks of it.
 """
 
 import pytest
@@ -83,3 +84,25 @@ def test_rejected_profile_shows_the_error_under_its_box(customer_client, custome
     assert Profile.objects.get(user=customer).full_name != too_long
     message = response.context["form"].errors["full_name"][0]
     assert error_under_box(response.content.decode(), "full_name", message)
+
+
+# ---------- changing the password (AC-11.1) ----------
+
+
+def sign_in(client, email, password):
+    client.post(reverse("userauths:sign-in"), {"email": email, "password": password})
+    return "_auth_user_id" in client.session
+
+
+def test_old_password_no_longer_signs_in_after_the_customer_changes_it(customer_client, customer, password):
+    new_password = "Grocerly#2026-moi"
+
+    response = customer_client.post(
+        reverse("userauths:password_change"),
+        {"old_password": password, "new_password1": new_password, "new_password2": new_password},
+    )
+    customer_client.logout()
+
+    assert response.url == reverse("userauths:password_change_done")
+    assert not sign_in(customer_client, customer.email, password)
+    assert sign_in(customer_client, customer.email, new_password)

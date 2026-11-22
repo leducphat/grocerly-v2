@@ -1,5 +1,6 @@
 """
-Product review tests (UC-14, CN-15): who may rate a product and how often.
+Product review tests (UC-14, CN-15): who may rate a product and how often, what
+the product page makes of the ratings, and who may change a review.
 
 SRS.md §6.1 grants the review to the customer who has bought the product; the
 view used to accept a review from anyone (L-3 in docs/ISSUES.md).
@@ -8,6 +9,7 @@ view used to accept a review from anyone (L-3 in docs/ISSUES.md).
 import pytest
 from django.urls import reverse
 
+from core import urls as core_urls
 from core.models import CartOrderItem, Product, ProductReview
 
 pytestmark = pytest.mark.django_db
@@ -165,3 +167,54 @@ def test_order_line_without_a_product_gives_no_right_to_review(
     response = post_review(customer_client, product)
 
     assert response.status_code == 403
+
+
+# ---------- the rating on the product page (AC-4.2) ----------
+
+
+def test_product_page_rating_counts_only_the_reviews_of_that_product(client, product, customer):
+    other = Product.objects.create(
+        title="Bắp cải", category=product.category, price=product.price,
+        stock_count=5, product_status="published",
+    )
+    for rating in (5, 3):
+        ProductReview.objects.create(product=product, user=customer, review="Ngon", rating=rating)
+    for rating in (1, 1):
+        ProductReview.objects.create(product=other, user=customer, review="Dập", rating=rating)
+
+    response = client.get(reverse("core:product-detail", args=[product.p_id]))
+
+    assert response.context["average_rating"]["rating"] == 4
+    shares = [response.context[f"rating_{stars}"] for stars in (5, 4, 3, 2, 1)]
+    assert shares == [50, 0, 50, 0, 0]
+
+
+# ---------- the customer only adds; changing a review is moderation (AC-14.3) ----------
+
+
+def test_shop_has_no_route_for_the_customer_to_edit_or_delete_a_review():
+    """The one review route of the shop is the one that adds a review."""
+    review_routes = {route.name for route in core_urls.urlpatterns if "review" in (route.name or "")}
+
+    assert review_routes == {"ajax-add-review"}
+
+
+def test_customer_cannot_open_their_own_review_in_django_admin(customer_client, customer, product):
+    review = ProductReview.objects.create(product=product, user=customer, review="Ngon", rating=5)
+
+    response = customer_client.get(reverse("admin:core_productreview_change", args=[review.pk]))
+
+    assert response.status_code == 302
+    assert reverse("admin:login") in response.url
+
+
+def test_administrator_can_delete_a_review_in_django_admin(client, django_user_model, password, customer, product):
+    admin = django_user_model.objects.create_superuser(
+        email="quantri@example.com", username="quantri", password=password
+    )
+    review = ProductReview.objects.create(product=product, user=customer, review="Spam", rating=1)
+    client.force_login(admin)
+
+    client.post(reverse("admin:core_productreview_delete", args=[review.pk]), {"post": "yes"})
+
+    assert not ProductReview.objects.filter(pk=review.pk).exists()

@@ -1,6 +1,6 @@
 """
-What the page scripts send, in a real browser (UC-06, UC-08, UC-12, UC-17, UC-19;
-L-18, L-19, L-21, L-23, L-26, D-043, D-044).
+What the page scripts send, in a real browser (UC-06, UC-08, UC-12, UC-15, UC-17,
+UC-19; L-16, L-17, L-18, L-19, L-21, L-23, L-26, D-043, D-044).
 
 The pytest tests check what the server answers to a request written by hand. These
 check what only a browser shows: that the requests of the page really carry the CSRF
@@ -303,6 +303,46 @@ def test_chat_choice_adds_only_the_product_clicked(sign_in, customer, product, l
     assert len(posts) == 1
     assert cart_quantity(page, live_server, other) == 2
     assert cart_quantity(page, live_server, product) is None
+
+
+def chat_says(page, text):
+    """Wait until the chat window shows `text` (quotes and all, so it goes as an argument)."""
+    page.wait_for_function("t => document.querySelector('#chat-messages').innerText.includes(t)", arg=text)
+
+
+def test_chat_confirm_button_works_for_a_name_with_quotes(sign_in, customer, product, live_server):
+    # SRS AC-17.9, L-17: the button used to paste the name into an onclick string,
+    # so a name holding a quote broke the click.
+    Product.objects.filter(pk=product.pk).update(title="""Nước mắm "Nam Ngư" của bà's""")
+    product.refresh_from_db()
+    page = sign_in(customer).new_page()
+    page.goto(live_server.url + reverse("core:index"))
+
+    with page.expect_response(lambda r: "add-to-cart" in r.url):
+        chat_proposes(page, product, 1).click()
+    chat_says(page, f"1x {product.title}")
+
+    assert cart_quantity(page, live_server, product) == 1
+
+
+def test_chat_shows_html_in_a_product_name_as_plain_text(sign_in, customer, product, live_server):
+    # SRS AC-15.3, L-16: the chat printed every text with innerHTML, so a product
+    # name holding a tag ran script in the customer's browser.
+    attack = '<img src=x onerror="window.chatXss = 1">'
+    Product.objects.filter(pk=product.pk).update(title=f"Cà rốt {attack}")
+    product.refresh_from_db()
+    page = sign_in(customer).new_page()
+    page.goto(live_server.url + reverse("core:index"))
+
+    with page.expect_response(lambda r: "add-to-cart" in r.url):
+        chat_proposes(page, product, 1).click()  # the name in the reply and in the cart's answer
+    page.fill("#chat-input", attack)  # and what the customer types
+    page.keyboard.press("Enter")
+    chat_says(page, attack)
+    page.wait_for_timeout(300)  # an <img src=x> would have failed to load by now
+
+    assert page.locator("#chat-messages img").count() == 0
+    assert page.evaluate("window.chatXss") is None
 
 
 def test_double_click_on_create_product_makes_one_product(sign_in, staff, product, live_server, monkeypatch):

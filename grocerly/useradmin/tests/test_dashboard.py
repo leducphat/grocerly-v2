@@ -1,6 +1,6 @@
 """
 Statistics tests (UC-26, CN-20): which orders the staff dashboard and the shop
-page count as revenue.
+page count as revenue, and who may open the dashboard.
 
 SRS.md §6.1: revenue counts the orders that are paid and not cancelled. A VNPay
 order that was paid and then cancelled keeps `paid_status=True`, because the
@@ -136,3 +136,20 @@ def test_revenue_chart_names_each_month_with_its_year(staff_client, customer):
     assert len(labels) == 2
     assert str(this_year - 1) in labels[0]
     assert str(this_year) in labels[1]
+
+
+# ---------- who may open the dashboard (AC-26.3) ----------
+
+
+def test_customer_cannot_open_the_dashboard(customer_client):
+    response = customer_client.get(reverse("useradmin:dashboard"))
+
+    assert response.status_code == 302
+    assert response.url == reverse("userauths:sign-in")
+
+
+def test_anonymous_visitor_cannot_open_the_dashboard(client):
+    response = client.get(reverse("useradmin:dashboard"))
+
+    assert response.status_code == 302
+    assert response.url == reverse("userauths:sign-in")
