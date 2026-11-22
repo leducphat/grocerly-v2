@@ -11,11 +11,13 @@ foreign key with a plain manager and not with `objects`. That is why the pages t
 start from a wishlist line or a product card are tested here too (D-041).
 """
 
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
 from django.test import Client
 from django.urls import reverse
+from django.utils import timezone
 
 from core.models import Coupon, Product, ProductImage, ProductReview, Vendor, Wishlist
 
@@ -134,6 +136,12 @@ def test_restoring_vendor_deleted_twice_still_brings_back_its_products(vendor_pr
 
 def test_restoring_vendor_leaves_products_deleted_before_it(vendor_product, vendor):
     vendor_product.delete()
+    # Put the product's delete a minute earlier, as it is in real use. Two deletes
+    # in a row can get the same deleted_at: on Windows the clock only moves every
+    # 15.6 ms, and restore() would then take the product for one of the vendor's.
+    Product.all_objects.filter(pk=vendor_product.pk).update(
+        deleted_at=timezone.now() - timedelta(minutes=1)
+    )
     vendor.delete()
 
     Vendor.all_objects.get(pk=vendor.pk).restore()

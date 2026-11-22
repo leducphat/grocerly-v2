@@ -212,7 +212,10 @@ class Vendor(SoftDeleteModel):
         """Restore this vendor and all their products that were deleted at the same time."""
         deleted_at = self.deleted_at
         super().restore()
-        # Restore products that were soft-deleted at the same time as this vendor
+        # Restore products that were soft-deleted at the same time as this vendor.
+        # Known limit: a product deleted on its own within the same clock tick as
+        # the vendor (microseconds on the Linux host, ~15.6 ms on Windows) has the
+        # same deleted_at and comes back too.
         if deleted_at:
             Product.all_objects.filter(vendor=self, deleted_at=deleted_at).update(
                 is_deleted=False, deleted_at=None
