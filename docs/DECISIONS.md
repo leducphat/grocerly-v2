@@ -2677,6 +2677,29 @@ Hai điều rút ra. Model quá tải thường không trả 503 ngay mà treo t
 - Review PR #29 chỉ ra khóa dòng đơn không bảo vệ tồn kho khi hai đơn *khác nhau* có chung một sản phẩm cùng được giao: cả hai đọc số cũ rồi ghi đè nhau. `change_order_status` vì vậy trừ kho bằng một câu `UPDATE` có `F("stock_count")` và `Greatest(..., 0)`, database tự tính từ số đang có.
 - Giới hạn còn lại, không sửa: middleware của Django vẫn lưu session thêm một lần sau khi view trả về, ngoài transaction. Một request khác của cùng khách chạy đúng lúc đó (tab khác vừa xóa giỏ) có thể bị lần lưu này ghi đè. Đây là cách session của Django vốn chạy với mọi view; muốn tránh hẳn thì phải giữ đơn đang chờ trong database thay cho session, việc đó lớn hơn phạm vi lỗi này.
 
+## D-065 · Thực nghiệm gặp trực tiếp trên host, tài khoản đăng nhập sẵn, trả tiền khi nhận hàng, không có vòng đo lại
+
+- **Ngày:** 22/11/2026
+- **Trạng thái:** Đã chốt phần hình thức, phương thức trả tiền và việc bỏ vòng đo lại (sinh viên chọn 22/11/2026); phần tài khoản đăng nhập sẵn, cách bấm giờ và quy tắc tính thất bại là Đề xuất, chờ sinh viên duyệt
+
+**Bối cảnh.** P-25 phải chạy ở Tuần 11 và đo hai KPI còn trống của bản cam kết (người thử tự đặt xong đơn, thời gian tìm tới đặt hàng) cùng các chỉ số của TC2.7. Bản cam kết đã định nghĩa KPI nhưng chưa nói buổi thử diễn ra thế nào. Thiết kế đầy đủ ở `EXPERIMENT.md`.
+
+**Phương án đã cân nhắc**
+1. *Hình thức:* gặp trực tiếp, hoặc gọi video chia sẻ màn hình. Gọi video dễ hẹn hơn, nhưng mạng và việc chia sẻ màn hình làm nhiễu số đo thời gian, và khó thấy người thử lúng túng ở đâu.
+2. *Trả tiền:* VNPay sandbox với thẻ thử, hoặc trả tiền khi nhận hàng. VNPay thêm một trang ngoài hệ thống và một bộ số thẻ phải đưa cho người thử; thời gian ở đó không phải thời gian dùng Grocerly.
+3. *Đăng nhập:* người thử tự đăng ký, hoặc dùng tài khoản tạo sẵn đã đăng nhập. Tự đăng ký giống khách mới hơn, nhưng KPI đo luồng mua hàng có trợ lý, không đo đăng ký; gõ email, mật khẩu làm lệch số đo thời gian.
+4. *Vòng cải tiến có đo lại:* làm ở Tuần 12, hoặc bỏ. Đó là điều kiện Mức 5 của TC2.7, ngoài mức nhắm; bản cam kết đã ghi là không cam kết.
+
+**Quyết định.** Gặp trực tiếp trên laptop của sinh viên, thử trên host; trả tiền khi nhận hàng; tài khoản tạo sẵn, trang chủ đã đăng nhập khi bắt đầu; không có vòng đo lại, lỗi phát hiện sửa ở Tuần 12. Thời gian KPI tính từ lúc đọc xong tác vụ ở trang chủ tới lúc trang đặt hàng thành công hiện ra. Tác vụ thất bại khi quá giờ, người thử bỏ cuộc hoặc người điều phối phải chỉ cách làm; trợ lý lỗi do quota cũng tính thất bại và ghi nguyên nhân.
+
+**Lý do.** Mỗi lựa chọn bỏ bớt một thứ không thuộc điều cần đo, để con số phản ánh đúng việc tìm hàng và đặt hàng nhờ trợ lý. Quy tắc thất bại viết trước buổi đầu để không bị chỉnh theo kết quả.
+
+**Hệ quả.**
+- KPI thời gian không gồm đăng ký, đăng nhập và thanh toán online; báo cáo phải nói rõ điều này.
+- Đơn thử nằm trong database của host. Sau buổi, nhân viên chuyển sang Đã hủy; đơn hủy từ Đang xử lý không đụng tồn kho (D-032, D-033) và không vào doanh thu, nhưng số đơn trên trang thống kê của tuần đó có các đơn này.
+- Trợ lý dùng Gemini gói miễn phí, chung quota với host. Trước mỗi buổi thử một câu; hai buổi cùng ngày cách nhau ít nhất một giờ.
+- Đề cương và báo cáo đã sửa ngày 22/11/2026 cho khớp việc bỏ vòng đo lại (mục 5.3 thành "Các lỗi phát hiện và chỉnh sửa").
+
 <!--
 Mẫu cho quyết định mới — sao chép xuống dưới cùng:
 
