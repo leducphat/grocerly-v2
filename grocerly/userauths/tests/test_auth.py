@@ -6,6 +6,7 @@ Automates the manual cases TC_01-TC_04 of docs/SRS.md section 7.
 """
 
 import pytest
+from django.contrib.auth.hashers import check_password, identify_hasher
 from django.urls import reverse
 
 from userauths.models import Profile, User
@@ -71,6 +72,18 @@ def test_new_account_gets_a_profile(django_user_model, password):
     assert Profile.objects.filter(user=user).exists()
 
 
+def test_sign_up_stores_the_password_hashed_not_as_typed(client, password):
+    """AC-1.3. settings_test.py hashes with MD5 so the suite runs fast; the site keeps
+    Django's PBKDF2 (NFR-03). Either way the column holds a hash, never the password."""
+    client.post(reverse("userauths:sign-up"), sign_up_data("moi@example.com", password))
+
+    stored = User.objects.get(email="moi@example.com").password
+
+    assert password not in stored
+    assert identify_hasher(stored)  # raises ValueError when it is not a known hash
+    assert check_password(password, stored)
+
+
 # ---------- UC-02: sign in ----------
 
 
@@ -93,6 +106,18 @@ def test_sign_in_with_wrong_password_does_not_sign_in(client, customer):
 
 def test_sign_in_with_unknown_email_does_not_sign_in(client, password):
     response = client.post(reverse("userauths:sign-in"), {"email": "khongco@example.com", "password": password})
+
+    assert response.status_code == 200
+    assert not is_signed_in(client)
+
+
+def test_deactivated_account_cannot_sign_in_with_the_right_password(client, customer, password):
+    """AC-2.3, AC-22.1: the administrator locks an account by unticking "active"
+    in the Django admin; Django's ModelBackend then refuses it."""
+    customer.is_active = False
+    customer.save()
+
+    response = client.post(reverse("userauths:sign-in"), {"email": customer.email, "password": password})
 
     assert response.status_code == 200
     assert not is_signed_in(client)

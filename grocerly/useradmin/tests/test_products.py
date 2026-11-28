@@ -522,3 +522,30 @@ def test_stock_box_on_the_list_accepts_zero(staff_client, stocked_product):
     stocked_product.refresh_from_db()
     assert response.json()["bool"] is True
     assert stocked_product.stock_count == 0
+
+
+# ---------- the reviews page only lists (AC-29.1) ----------
+
+
+def test_staff_reviews_page_has_nothing_to_change_a_review_with(staff_client, stocked_product, customer):
+    ProductReview.objects.create(product=stocked_product, user=customer, review="Ngọt", rating=5)
+
+    html = staff_client.get(reverse("useradmin:reviews")).content.decode()
+
+    assert "Ngọt" in html
+    assert "<form" not in html
+
+
+def test_staff_cannot_change_or_delete_a_review_in_django_admin(staff_client, stocked_product, customer):
+    """Moderation is the administrator's. A staff account holds no permission in the
+    Django admin, so the change and delete pages of a review answer 403."""
+    review = ProductReview.objects.create(product=stocked_product, user=customer, review="Ngọt", rating=5)
+
+    edit = staff_client.post(
+        reverse("admin:core_productreview_change", args=[review.pk]),
+        {"product": stocked_product.pk, "user": customer.pk, "review": "Đã sửa", "rating": 1},
+    )
+    delete = staff_client.post(reverse("admin:core_productreview_delete", args=[review.pk]), {"post": "yes"})
+
+    assert (edit.status_code, delete.status_code) == (403, 403)
+    assert ProductReview.objects.get(pk=review.pk).review == "Ngọt"
