@@ -85,6 +85,17 @@ def test_product_without_vendor_does_not_break_category_page(client, product):
     assert product.title in response.content.decode()
 
 
+def test_vendor_header_has_a_background_colour_when_the_cover_image_fails(client, vendor):
+    """AC-28.2, L-81: the header text is white and sits on the cover image. The default
+    cover `vendors.jpg` does not exist on the KLTN Cloudinary, so without a colour behind
+    the image the name, address and phone were white on white."""
+    response = client.get(reverse("core:vendor-detail", args=[vendor.v_id]))
+
+    header = re.search(r'<div class="archive-header-3[^"]*"[^>]*>', response.content.decode())
+    assert header is not None
+    assert "background-color" in header.group(0)
+
+
 def test_product_without_category_does_not_break_vendor_page(client, product, vendor):
     product.category = None
     product.vendor = vendor

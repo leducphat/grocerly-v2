@@ -611,6 +611,7 @@ chí ở bên nào thì sửa bên kia trong cùng lượt (D-061).
 **UC-28 Xem nhà cung cấp**
 
 - **AC-28.1** Nhà cung cấp đã xóa không có trong danh sách. Mở đường dẫn cũ của họ trả 404.
+- **AC-28.2** Tên, mô tả, địa chỉ và điện thoại ở đầu trang nhà cung cấp vẫn đọc được khi ảnh bìa không tải được, kể cả nhà cung cấp chưa có ảnh bìa riêng (L-81).
 
 **UC-29 Xem danh sách đánh giá**
 
